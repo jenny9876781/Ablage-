@@ -1,22 +1,25 @@
 """Erzeugt 04_Webkatalog_MOCKUP.html - Klickbares Muster fuer den Katalog auf kikripp.de."""
-import sys, os, json, base64, html
+import sys, os, json, base64, html, io
+from PIL import Image
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from lib import lade_artikel, foto, BASIS, USt_SATZ
+from lib import lade_artikel, foto, BASIS, USt_SATZ, AUSGABE
 
-def b64(p):
-    with open(p, "rb") as f:
-        return "data:image/jpeg;base64," + base64.b64encode(f.read()).decode()
+def b64(p, breite=520):
+    with Image.open(p) as im:
+        im.thumbnail((breite, breite))
+        buf = io.BytesIO(); im.save(buf, "JPEG", quality=72, optimize=True)
+    return "data:image/jpeg;base64," + base64.b64encode(buf.getvalue()).decode()
 
 daten = []
 for a in lade_artikel():
-    rest = (a["Menge"] or 0) - (a["Verkauft_Menge"] or 0)
-    p = foto(a["ArtNr"])
+    rest = a["Menge"]
+    p = foto(a["Foto"])
     daten.append({
         "nr": a["ArtNr"], "titel": a["Bezeichnung"], "beschr": a["Beschreibung"],
         "kat": a["Kategorie"], "raum": a["Raum"], "zustand": a["Zustand"],
         "menge": rest, "einheit": a["Einheit"], "preis": a["Preis_netto"],
         "basis": a["Preisbasis"], "versand": a["Versand"],
-        "status": "verkauft" if rest <= 0 or a["Status"] == "verkauft" else a["Status"],
+        "status": "verfügbar" if rest > 0 else "verkauft",
         "bild": b64(p) if p else "",
     })
 kategorien = sorted({d["kat"] for d in daten})
@@ -24,7 +27,7 @@ raeume = sorted({d["raum"] for d in daten})
 
 DOK = """<!doctype html><html lang="de"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Artikelkatalog – Kinderkrippe Musterstadt</title>
+<title>Artikelkatalog – kikripp</title>
 <style>
 :root{--navy:#1f3864;--blau:#2e5a9c;--rand:#dfe3ea;--grau:#6b7280;--bg:#f5f7fa;}
 *{box-sizing:border-box}
@@ -214,7 +217,7 @@ opt = lambda vs: "".join(f'<option>{html.escape(v)}</option>' for v in vs)
 DOK = (DOK.replace("__KAT__", opt(kategorien)).replace("__RAUM__", opt(raeume))
           .replace("__DATEN__", json.dumps(daten, ensure_ascii=False))
           .replace("__UST__", str(USt_SATZ)))
-pfad = os.path.join(BASIS, "ausgabe", "04_Webkatalog_MOCKUP.html")
+pfad = os.path.join(AUSGABE, "04_Webkatalog_MOCKUP.html")
 with open(pfad, "w", encoding="utf-8") as f:
     f.write(DOK)
 print("geschrieben:", pfad, os.path.getsize(pfad) // 1024, "KB")

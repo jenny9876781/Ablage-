@@ -1,7 +1,7 @@
-"""Erzeugt 01_Artikelstamm_BEISPIEL.xlsx  (Artikelstamm + Verkaufsuebersicht + Legende)."""
+"""Erzeugt 01_Artikelstamm_kikripp.xlsx – die Arbeitsdatei für OneDrive."""
 import sys, os
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from lib import lade_artikel, BASIS, USt_SATZ
+from lib import lade_artikel, AUSGABE, USt_SATZ
 
 from openpyxl import Workbook
 from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
@@ -10,66 +10,123 @@ from openpyxl.worksheet.datavalidation import DataValidation
 from openpyxl.formatting.rule import CellIsRule
 
 FONT = "Arial"
-DUNKEL = "1F3864"; MITTEL = "2E5A9C"; HELL = "D9E2F3"; GELB = "FFF2CC"; GRAU = "F2F2F2"
+DUNKEL, MITTEL, HELL, GELB = "1F3864", "2E5A9C", "D9E2F3", "FFF2CC"
 EUR = '#,##0.00 "€"'
+duenn = Side(style="thin", color="BFBFBF")
+RAHMEN = Border(left=duenn, right=duenn, top=duenn, bottom=duenn)
 
-# (Ueberschrift, Breite, Gruppe, Typ)
+# (Überschrift, Breite, Gruppe, Typ)  Typ: text|int|eur|formel
 SPALTEN = [
-    ("ArtNr",                  10, "Stammdaten",    "text"),
-    ("Bezeichnung",            34, "Stammdaten",    "text"),
-    ("Beschreibung",           52, "Stammdaten",    "text"),
-    ("Kategorie",              18, "Stammdaten",    "text"),
-    ("Raum",                   18, "Stammdaten",    "text"),
-    ("Menge",                   8, "Stammdaten",    "int"),
-    ("Verkauft_Menge",         12, "Stammdaten",    "int"),
-    ("Restmenge",              11, "Stammdaten",    "formel"),
-    ("Einheit",                10, "Stammdaten",    "text"),
-    ("Zustand",                14, "Stammdaten",    "text"),
-    ("Anschaffungsjahr",       11, "Buchhaltung",   "text"),
-    ("Anlagennr",              12, "Buchhaltung",   "text"),
-    ("Anschaffungswert_netto", 17, "Buchhaltung",   "eur"),
-    ("Preis_netto",            14, "Preis",         "eur"),
-    ("Preisbasis",             11, "Preis",         "text"),
-    ("Versand",                16, "Vermarktung",   "text"),
-    ("Foto",                   14, "Vermarktung",   "text"),
-    ("Status",                 12, "Vermarktung",   "text"),
-    ("Kanal",                  14, "Vermarktung",   "text"),
-    ("Reserviert_für",         22, "Vermarktung",   "text"),
-    ("Verkaufspreis_netto",    17, "Verkauf",       "eur"),
-    ("Umsatz_netto",           14, "Verkauf",       "formel"),
-    ("Verkaufsdatum",          14, "Verkauf",       "text"),
-    ("Käufer",                 24, "Verkauf",       "text"),
-    ("Rechnungsnr",            14, "Kaufmännisch",  "text"),
-    ("Zahlung",                11, "Kaufmännisch",  "text"),
-    ("Zahlart",                13, "Kaufmännisch",  "text"),
-    ("Abholtermin",            13, "Kaufmännisch",  "text"),
-    ("Bemerkung",              36, "Kaufmännisch",  "text"),
+    ("ArtNr",                  9,  "Stammdaten",   "text"),
+    ("Bezeichnung",            34, "Stammdaten",   "text"),
+    ("Beschreibung",           54, "Stammdaten",   "text"),
+    ("Kategorie",              18, "Stammdaten",   "text"),
+    ("Raum",                   20, "Stammdaten",   "text"),
+    ("Wertklasse",             10, "Stammdaten",   "text"),
+    ("Menge",                   8, "Stammdaten",   "int"),
+    ("Verkauft_Menge",         13, "Stammdaten",   "int"),
+    ("Restmenge",              10, "Stammdaten",   "formel"),
+    ("Einheit",                10, "Stammdaten",   "text"),
+    ("Zustand",                14, "Stammdaten",   "text"),
+    ("Maße",                   22, "Stammdaten",   "text"),
+    ("Anlagennr",              12, "Buchhaltung",  "text"),
+    ("Anschaffungswert_netto", 17, "Buchhaltung",  "eur"),
+    ("Preis_netto",            13, "Preis",        "eur"),
+    ("Preisbasis",             11, "Preis",        "text"),
+    ("Positionswert_netto",    17, "Preis",        "formel"),
+    ("Versand",                16, "Vermarktung",  "text"),
+    ("Foto",                   9,  "Vermarktung",  "text"),
+    ("Status",                 12, "Vermarktung",  "text"),
+    ("Kanal",                  14, "Vermarktung",  "text"),
+    ("Reserviert_für",         22, "Vermarktung",  "text"),
+    ("Verkaufspreis_netto",    17, "Verkauf",      "eur"),
+    ("Umsatz_netto",           14, "Verkauf",      "formel"),
+    ("Verkaufsdatum",          14, "Verkauf",      "text"),
+    ("Käufer",                 24, "Verkauf",      "text"),
+    ("Rechnungsnr",            14, "Kaufmännisch", "text"),
+    ("Zahlung",                11, "Kaufmännisch", "text"),
+    ("Zahlart",                13, "Kaufmännisch", "text"),
+    ("Abholtermin",            13, "Kaufmännisch", "text"),
+    ("Mengenhinweis",          40, "Notizen",      "text"),
+    ("Bemerkung",              32, "Notizen",      "text"),
 ]
 GRUPPENFARBE = {"Stammdaten": "1F3864", "Buchhaltung": "7F6000", "Preis": "833C00",
-                "Vermarktung": "375623", "Verkauf": "633A82", "Kaufmännisch": "0E5A6B"}
+                "Vermarktung": "375623", "Verkauf": "633A82", "Kaufmännisch": "0E5A6B",
+                "Notizen": "595959"}
 IDX = {s[0]: i + 1 for i, s in enumerate(SPALTEN)}
-def L(name): return get_column_letter(IDX[name])
+def L(n): return get_column_letter(IDX[n])
+
+PFLEGE = {"Menge", "Verkauft_Menge", "Maße", "Anlagennr", "Anschaffungswert_netto", "Preis_netto",
+          "Preisbasis", "Status", "Kanal", "Reserviert_für", "Verkaufspreis_netto",
+          "Verkaufsdatum", "Käufer", "Rechnungsnr", "Zahlung", "Zahlart", "Abholtermin", "Bemerkung"}
 
 AUSWAHL = {
-    "Einheit":    '"Stück,Karton,Set,Palette,Konvolut,lfd. Meter"',
+    "Wertklasse": '"A,B,C"',
+    "Einheit":    '"Stück,Karton,Set,Palette,Konvolut"',
     "Zustand":    '"neuwertig,gut,gebraucht,stark gebraucht,defekt"',
     "Preisbasis": '"Fix,VHB"',
     "Versand":    '"nur Abholung,Versand möglich,Spedition"',
     "Status":     '"verfügbar,reserviert,verkauft,gespendet,entsorgt"',
-    "Kanal":      '"Klinik,Kleinanzeigen,eBay,Direkt,Händler,intern"',
+    "Kanal":      '"Klinik,Kleinanzeigen,eBay,Direkt,Händler,Verkaufstag"',
     "Zahlung":    '"offen,bezahlt,teilbezahlt"',
     "Zahlart":    '"Überweisung,bar,PayPal"',
 }
 
 daten = lade_artikel()
-Z0 = 3                      # erste Datenzeile
-Z1 = Z0 + len(daten) - 1    # letzte Datenzeile
+Z0, Z1 = 3, 2 + len(daten)
 
 wb = Workbook()
-ws = wb.active
-ws.title = "Artikelstamm"
 
-# --- Zeile 1: Gruppenbaender -------------------------------------------------
+# =============================================================================
+# Blatt 1: Anleitung
+# =============================================================================
+an = wb.active
+an.title = "Anleitung"
+an.column_dimensions["A"].width = 30
+an.column_dimensions["B"].width = 104
+an["A1"] = "Artikelverwaltung Auflösung kikripp – Kurzanleitung"
+an["A1"].font = Font(name=FONT, size=16, bold=True, color=DUNKEL)
+an["A2"] = "Diese Datei liegt in OneDrive und ist die einzige Quelle der Wahrheit. Bitte immer direkt hier arbeiten – nicht herunterladen, bearbeiten und wieder hochladen."
+an["A2"].font = Font(name=FONT, size=10, italic=True, color="7F6000")
+an.merge_cells("A2:B2")
+an.row_dimensions[2].height = 28
+an["A2"].alignment = Alignment(wrap_text=True, vertical="center")
+
+TEXTE = [
+    ("Die vier Blätter", ""),
+    ("  Artikelstamm", "Alle Artikel. Hier wird gepflegt. Gelb hinterlegte Spalten sind die Felder zum Ausfüllen, alles andere rechnet sich selbst oder bleibt stehen."),
+    ("  Verkaufsübersicht", "Reines Auswertungsblatt. Umsatz, offene Rechnungen, Restbestand – rechnet automatisch. Hier nichts eintragen."),
+    ("  Rechnungen (DATEV)", "Abtippliste: je Zeile eine Rechnung, in der Reihenfolge der DATEV-Erfassungsmaske. Ausdrucken und abarbeiten."),
+    ("  Kasse", "Barverkäufe je Tag für das Kassenbuch. Pflicht bei einer GmbH (GoBD)."),
+    ("", ""),
+    ("Die wichtigsten Regeln", ""),
+    ("  Ein Artikel verkauft", "Status auf „verkauft“, Verkaufspreis, Verkaufte Menge, Käufer und Datum eintragen. Der Rest rechnet sich."),
+    ("  Reservierung", "Status auf „reserviert“, Name und Abholtermin eintragen. Ohne Abholtermin keine Reservierung – sonst blockiert die Ware."),
+    ("  Restmenge", "Rechnet sich aus Menge minus verkaufter Menge. Nicht überschreiben."),
+    ("  Preise", "Immer netto pro Einheit. Firmen bekommen Nettopreise, Privatpersonen müssen den Bruttopreis sehen (Preisangabenverordnung)."),
+    ("  Wertklasse", "A = Wertträger, einzeln vermarkten · B = Einzelposition im Katalog · C = Kleinteil, geht in den Verkaufstag."),
+    ("  Barzahlung", "Immer zusätzlich im Blatt „Kasse“ erfassen. Die Rechnung mit dem Vermerk „bar erhalten“ allein genügt bei einer GmbH nicht."),
+    ("  Anlagennummer", "Wenn bekannt eintragen – der Steuerberater braucht sie für den Anlagenabgang."),
+    ("", ""),
+    ("Hinweise zu den Preisen", "Alle Preise in dieser Datei sind Schätzwerte auf Basis der Fotos. Maße, Marken und Stückzahlen fehlen teilweise – die gelb markierten Spalten „Maße“ und „Preis_netto“ sind zur Überarbeitung gedacht."),
+    ("Designmöbel", "Vitra Alcove und USM Haller sind als solche vermerkt. Für beide gibt es einen eigenen Gebrauchtmarkt mit Fachhändlern – dort sind höhere Preise erzielbar als im Sammelangebot."),
+    ("Kunst", "Die Acrylbilder sind Eigenarbeiten einer Privatperson, die Schwarzwald-Trachtenmotive sind Kaufware. Beides ist in der Beschreibung vermerkt."),
+]
+r = 4
+for a, b in TEXTE:
+    ca = an.cell(row=r, column=1, value=a)
+    ca.font = Font(name=FONT, size=10, bold=not a.startswith("  ") and bool(a), color=DUNKEL if not a.startswith("  ") else "000000")
+    ca.alignment = Alignment(vertical="top")
+    cb = an.cell(row=r, column=2, value=b)
+    cb.font = Font(name=FONT, size=10)
+    cb.alignment = Alignment(vertical="top", wrap_text=True)
+    an.row_dimensions[r].height = 30 if b else 12
+    r += 1
+
+# =============================================================================
+# Blatt 2: Artikelstamm
+# =============================================================================
+ws = wb.create_sheet("Artikelstamm")
 start = 1
 for i in range(len(SPALTEN) + 1):
     gruppe = SPALTEN[i][2] if i < len(SPALTEN) else None
@@ -81,105 +138,94 @@ for i in range(len(SPALTEN) + 1):
         c.fill = PatternFill("solid", fgColor=GRUPPENFARBE[g])
         c.alignment = Alignment(horizontal="center", vertical="center")
         start = i + 1
-
-# --- Zeile 2: Spaltenkoepfe --------------------------------------------------
-duenn = Side(style="thin", color="BFBFBF")
 for i, (name, breite, _g, _t) in enumerate(SPALTEN, start=1):
     c = ws.cell(row=2, column=i, value=name)
-    c.font = Font(name=FONT, size=10, bold=True, color="FFFFFF")
-    c.fill = PatternFill("solid", fgColor=MITTEL)
+    c.font = Font(name=FONT, size=10, bold=True, color=("7F6000" if name in PFLEGE else "FFFFFF"))
+    c.fill = PatternFill("solid", fgColor=(GELB if name in PFLEGE else MITTEL))
     c.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
-    c.border = Border(left=duenn, right=duenn, top=duenn, bottom=duenn)
+    c.border = RAHMEN
     ws.column_dimensions[get_column_letter(i)].width = breite
 ws.row_dimensions[1].height = 16
-ws.row_dimensions[2].height = 30
+ws.row_dimensions[2].height = 32
 
-# --- Daten -------------------------------------------------------------------
-for r, art in enumerate(daten, start=Z0):
+for j, art in enumerate(daten):
+    r = Z0 + j
     for name, _b, _g, typ in SPALTEN:
-        col = IDX[name]
         if name == "Restmenge":
             wert = f'={L("Menge")}{r}-IF({L("Verkauft_Menge")}{r}="",0,{L("Verkauft_Menge")}{r})'
+        elif name == "Positionswert_netto":
+            wert = f'={L("Restmenge")}{r}*{L("Preis_netto")}{r}'
         elif name == "Umsatz_netto":
             wert = (f'=IF({L("Verkauft_Menge")}{r}="","",'
                     f'{L("Verkauft_Menge")}{r}*{L("Verkaufspreis_netto")}{r})')
-        elif name == "Foto":
-            wert = art.get("Foto") or ""
+        elif name == "Status":
+            wert = "verfügbar"
+        elif name == "Kanal":
+            wert = "Klinik"
         else:
-            wert = art.get(name)
-            if wert == "":
-                wert = None
-        c = ws.cell(row=r, column=col, value=wert)
+            wert = art.get(name) or None
+        c = ws.cell(row=r, column=IDX[name], value=wert)
         c.font = Font(name=FONT, size=10)
-        c.alignment = Alignment(vertical="top", wrap_text=(name in ("Beschreibung", "Bemerkung")))
-        c.border = Border(left=duenn, right=duenn, top=duenn, bottom=duenn)
-        if typ == "eur" or name == "Umsatz_netto":
+        c.border = RAHMEN
+        c.alignment = Alignment(vertical="top",
+                                wrap_text=name in ("Beschreibung", "Bemerkung", "Mengenhinweis"))
+        if typ == "eur" or name in ("Positionswert_netto", "Umsatz_netto"):
             c.number_format = EUR
-        if typ in ("int",) or name == "Restmenge":
+        if typ == "int" or name == "Restmenge":
             c.number_format = "0"
-        if name in ("Preis_netto", "Verkaufspreis_netto", "Verkauft_Menge", "Status",
-                    "Kanal", "Reserviert_für", "Rechnungsnr", "Zahlung", "Abholtermin"):
-            c.fill = PatternFill("solid", fgColor=GELB)   # Pflegefelder
+        if name in PFLEGE:
+            c.fill = PatternFill("solid", fgColor=GELB)
     ws.row_dimensions[r].height = 30
 
-# --- Komfort -----------------------------------------------------------------
 ws.freeze_panes = "C3"
 ws.auto_filter.ref = f"A2:{get_column_letter(len(SPALTEN))}{Z1}"
 for name, formel in AUSWAHL.items():
     dv = DataValidation(type="list", formula1=formel, allow_blank=True, showDropDown=False)
     ws.add_data_validation(dv)
-    dv.add(f"{L(name)}{Z0}:{L(name)}{Z0+500}")
-
+    dv.add(f"{L(name)}{Z0}:{L(name)}{Z0+800}")
 s = f"{L('Status')}{Z0}:{L('Status')}{Z1}"
-ws.conditional_formatting.add(s, CellIsRule(operator="equal", formula=['"verfügbar"'],
-    fill=PatternFill("solid", bgColor="E2EFDA")))
-ws.conditional_formatting.add(s, CellIsRule(operator="equal", formula=['"reserviert"'],
-    fill=PatternFill("solid", bgColor="FFF2CC")))
-ws.conditional_formatting.add(s, CellIsRule(operator="equal", formula=['"verkauft"'],
-    fill=PatternFill("solid", bgColor="D9D9D9")))
+for wert, farbe in (("verfügbar", "E2EFDA"), ("reserviert", "FFF2CC"), ("verkauft", "D9D9D9")):
+    ws.conditional_formatting.add(s, CellIsRule(operator="equal", formula=[f'"{wert}"'],
+                                                fill=PatternFill("solid", bgColor=farbe)))
+wk = f"{L('Wertklasse')}{Z0}:{L('Wertklasse')}{Z1}"
+ws.conditional_formatting.add(wk, CellIsRule(operator="equal", formula=['"A"'],
+    fill=PatternFill("solid", bgColor="F8CBAD"), font=Font(name=FONT, size=10, bold=True)))
 
 # =============================================================================
-# Blatt 2: Verkaufsuebersicht
+# Blatt 3: Verkaufsübersicht
 # =============================================================================
 vu = wb.create_sheet("Verkaufsübersicht")
 A = lambda n: f"Artikelstamm!${L(n)}${Z0}:${L(n)}${Z1}"
+vu.column_dimensions["A"].width = 44
+for col in "BCDE":
+    vu.column_dimensions[col].width = 18
 
-def titel(row, text, size=14):
+def titel(row, text, size=12):
     c = vu.cell(row=row, column=1, value=text)
     c.font = Font(name=FONT, size=size, bold=True, color=DUNKEL)
 
 def kpi(row, label, formel, fmt=None, fett=False):
-    a = vu.cell(row=row, column=1, value=label)
-    a.font = Font(name=FONT, size=10, bold=fett)
-    b = vu.cell(row=row, column=2, value=formel)
-    b.font = Font(name=FONT, size=10, bold=fett)
+    a = vu.cell(row=row, column=1, value=label); a.font = Font(name=FONT, size=10, bold=fett)
+    b = vu.cell(row=row, column=2, value=formel); b.font = Font(name=FONT, size=10, bold=fett)
     b.alignment = Alignment(horizontal="right")
-    if fmt:
-        b.number_format = fmt
-    if fett:
-        b.fill = PatternFill("solid", fgColor=HELL)
+    if fmt: b.number_format = fmt
+    if fett: b.fill = PatternFill("solid", fgColor=HELL)
     return row + 1
 
-vu.column_dimensions["A"].width = 42
-vu.column_dimensions["B"].width = 18
-for col in "CDE":
-    vu.column_dimensions[col].width = 18
-
-titel(1, "Verkaufsübersicht – alle Werte rechnen automatisch aus dem Artikelstamm", 13)
-vu["A2"] = "Es muss nichts von Hand gepflegt werden. Wer im Artikelstamm einen Verkauf einträgt, sieht ihn sofort hier."
+titel(1, "Verkaufsübersicht – rechnet automatisch aus dem Artikelstamm", 13)
+vu["A2"] = "Hier wird nichts eingetragen. Wer im Artikelstamm einen Verkauf erfasst, sieht ihn sofort hier."
 vu["A2"].font = Font(name=FONT, size=9, italic=True, color="808080")
 
-titel(4, "Bestand", 11)
+titel(4, "Bestand")
 r = 5
 r = kpi(r, "Artikelpositionen gesamt", f'=COUNTA({A("ArtNr")})', "0")
 r = kpi(r, "davon verfügbar", f'=COUNTIF({A("Status")},"verfügbar")', "0")
 r = kpi(r, "davon reserviert", f'=COUNTIF({A("Status")},"reserviert")', "0")
 r = kpi(r, "davon verkauft", f'=COUNTIF({A("Status")},"verkauft")', "0")
 r = kpi(r, "Einheiten noch im Bestand", f'=SUM({A("Restmenge")})', "0")
-r = kpi(r, "Restbestand zu Wunschpreisen (netto)",
-        f'=SUMPRODUCT({A("Restmenge")},{A("Preis_netto")})', EUR, fett=True)
+r = kpi(r, "Restbestand zu Wunschpreisen (netto)", f'=SUM({A("Positionswert_netto")})', EUR, fett=True)
 
-titel(12, "Erlöse", 11)
+titel(12, "Erlöse")
 r = 13
 r = kpi(r, "Verkaufte Einheiten", f'=SUM({A("Verkauft_Menge")})', "0")
 r = kpi(r, "Umsatz netto", f'=SUMPRODUCT({A("Verkauft_Menge")},{A("Verkaufspreis_netto")})', EUR)
@@ -189,7 +235,7 @@ r = kpi(r, "davon bereits bezahlt (netto)",
         f'=SUMPRODUCT(({A("Zahlung")}="bezahlt")*{A("Verkauft_Menge")}*{A("Verkaufspreis_netto")})', EUR)
 r = kpi(r, "noch offen (netto)", "=B14-B17", EUR)
 
-titel(20, "To-do", 11)
+titel(20, "To-do")
 r = 21
 r = kpi(r, "Rechnungen noch zu schreiben",
         f'=COUNTIFS({A("Status")},"verkauft",{A("Rechnungsnr")},"")', "0", fett=True)
@@ -198,87 +244,127 @@ r = kpi(r, "Rechnungen offen (unbezahlt)",
 r = kpi(r, "Reservierungen ohne Abholtermin",
         f'=COUNTIFS({A("Status")},"reserviert",{A("Abholtermin")},"")', "0")
 r = kpi(r, "Artikel ohne Preis", f'=COUNTIFS({A("Preis_netto")},"")', "0")
-r = kpi(r, "Artikel ohne Foto", f'=COUNTIFS({A("Foto")},"")', "0")
+r = kpi(r, "Artikel ohne Maßangabe", f'=COUNTIFS({A("Maße")},"")', "0")
 
-# Auswertung je Kategorie
-kategorien = sorted({a["Kategorie"] for a in daten})
-start_k = 28
-titel(start_k - 1, "Nach Kategorie", 11)
-for j, h in enumerate(["Kategorie", "Positionen", "Umsatz netto", "Restwert netto"]):
-    c = vu.cell(row=start_k, column=1 + j, value=h)
-    c.font = Font(name=FONT, size=10, bold=True, color="FFFFFF")
-    c.fill = PatternFill("solid", fgColor=MITTEL)
-for i, k in enumerate(kategorien):
-    row = start_k + 1 + i
-    vu.cell(row=row, column=1, value=k).font = Font(name=FONT, size=10)
-    vu.cell(row=row, column=2, value=f'=COUNTIF({A("Kategorie")},$A{row})').number_format = "0"
-    c = vu.cell(row=row, column=3, value=f'=SUMPRODUCT(({A("Kategorie")}=$A{row})*'
-                                        f'{A("Verkauft_Menge")}*{A("Verkaufspreis_netto")})')
-    c.number_format = EUR
-    c = vu.cell(row=row, column=4, value=f'=SUMPRODUCT(({A("Kategorie")}=$A{row})*'
-                                        f'{A("Restmenge")}*{A("Preis_netto")})')
-    c.number_format = EUR
-    for col in range(1, 5):
-        vu.cell(row=row, column=col).font = Font(name=FONT, size=10)
-sum_k = start_k + 1 + len(kategorien)
-vu.cell(row=sum_k, column=1, value="Summe").font = Font(name=FONT, size=10, bold=True)
-for col, letter in ((2, "B"), (3, "C"), (4, "D")):
-    c = vu.cell(row=sum_k, column=col,
-                value=f"=SUM({letter}{start_k+1}:{letter}{sum_k-1})")
-    c.font = Font(name=FONT, size=10, bold=True)
-    c.fill = PatternFill("solid", fgColor=HELL)
-    c.number_format = "0" if col == 2 else EUR
+def block(startzeile, ueberschrift, spalte, werte, mit_rest=True):
+    titel(startzeile - 1, ueberschrift)
+    kopf = [ueberschrift.replace("Nach ", ""), "Positionen", "Umsatz netto"] + (["Restwert netto"] if mit_rest else [])
+    for j, h in enumerate(kopf):
+        c = vu.cell(row=startzeile, column=1 + j, value=h)
+        c.font = Font(name=FONT, size=10, bold=True, color="FFFFFF")
+        c.fill = PatternFill("solid", fgColor=MITTEL)
+    for i, k in enumerate(werte):
+        row = startzeile + 1 + i
+        vu.cell(row=row, column=1, value=k).font = Font(name=FONT, size=10)
+        c = vu.cell(row=row, column=2, value=f'=COUNTIF({A(spalte)},$A{row})'); c.number_format = "0"
+        c.font = Font(name=FONT, size=10)
+        c = vu.cell(row=row, column=3, value=f'=SUMPRODUCT(({A(spalte)}=$A{row})*'
+                                            f'{A("Verkauft_Menge")}*{A("Verkaufspreis_netto")})')
+        c.number_format = EUR; c.font = Font(name=FONT, size=10)
+        if mit_rest:
+            c = vu.cell(row=row, column=4, value=f'=SUMIF({A(spalte)},$A{row},{A("Positionswert_netto")})')
+            c.number_format = EUR; c.font = Font(name=FONT, size=10)
+    ende = startzeile + 1 + len(werte)
+    vu.cell(row=ende, column=1, value="Summe").font = Font(name=FONT, size=10, bold=True)
+    for col in range(2, 5 if mit_rest else 4):
+        letter = get_column_letter(col)
+        c = vu.cell(row=ende, column=col, value=f"=SUM({letter}{startzeile+1}:{letter}{ende-1})")
+        c.font = Font(name=FONT, size=10, bold=True)
+        c.fill = PatternFill("solid", fgColor=HELL)
+        c.number_format = "0" if col == 2 else EUR
+    return ende + 3
 
-# Auswertung je Kanal
-kanaele = sorted({a["Kanal"] for a in daten if a["Kanal"]})
-start_c = sum_k + 3
-titel(start_c - 1, "Nach Verkaufskanal", 11)
-for j, h in enumerate(["Kanal", "Positionen", "Umsatz netto"]):
-    c = vu.cell(row=start_c, column=1 + j, value=h)
-    c.font = Font(name=FONT, size=10, bold=True, color="FFFFFF")
-    c.fill = PatternFill("solid", fgColor=MITTEL)
-for i, k in enumerate(kanaele):
-    row = start_c + 1 + i
-    vu.cell(row=row, column=1, value=k).font = Font(name=FONT, size=10)
-    vu.cell(row=row, column=2, value=f'=COUNTIF({A("Kanal")},$A{row})').number_format = "0"
-    c = vu.cell(row=row, column=3, value=f'=SUMPRODUCT(({A("Kanal")}=$A{row})*'
-                                        f'{A("Verkauft_Menge")}*{A("Verkaufspreis_netto")})')
-    c.number_format = EUR
-    for col in range(1, 4):
-        vu.cell(row=row, column=col).font = Font(name=FONT, size=10)
+nz = block(29, "Nach Wertklasse", "Wertklasse", ["A", "B", "C"])
+nz = block(nz, "Nach Kategorie", "Kategorie", sorted({a["Kategorie"] for a in daten}))
+nz = block(nz, "Nach Raum", "Raum", sorted({a["Raum"] for a in daten}))
+block(nz, "Nach Verkaufskanal", "Kanal",
+      ["Klinik", "Kleinanzeigen", "eBay", "Direkt", "Händler", "Verkaufstag"], mit_rest=False)
 
 # =============================================================================
-# Blatt 3: Legende
+# Blatt 4: Rechnungen (DATEV)
 # =============================================================================
-lg = wb.create_sheet("Legende")
-lg.column_dimensions["A"].width = 26
-lg.column_dimensions["B"].width = 96
-lg["A1"] = "Legende / Ausfüllhilfe"
-lg["A1"].font = Font(name=FONT, size=14, bold=True, color=DUNKEL)
-hinweise = [
-    ("Gelbe Felder", "Das sind die Felder, die im Tagesgeschäft gepflegt werden. Alles andere bleibt meist unverändert."),
-    ("ArtNr", "Eindeutige Nummer. Kommt auch als Etikett an den Artikel im Haus – so passen Liste und Realität zusammen."),
-    ("Menge", "Ursprünglich vorhandene Stückzahl. Bleibt stehen, auch wenn verkauft wird."),
-    ("Verkauft_Menge / Restmenge", "Restmenge rechnet sich selbst aus (Menge minus verkaufte Menge). Nicht überschreiben."),
-    ("Einheit", "Stück, Karton, Set, Palette, Konvolut. Für 'ein Karton Acrylfarben' also Einheit = Karton."),
-    ("Anlagennr", "Verweis auf Anlagenverzeichnis bzw. GWG-Liste – damit der Steuerberater den Abgang zuordnen kann."),
-    ("Preis_netto", "Verkaufspreis OHNE Umsatzsteuer, pro Einheit. Gegenüber Firmen wird netto angeboten, gegenüber Privatleuten brutto ausgewiesen."),
-    ("Preisbasis", "Fix = Festpreis, VHB = Verhandlungsbasis."),
-    ("Status", "verfügbar / reserviert / verkauft / gespendet / entsorgt. Steuert, was im Online-Katalog angezeigt wird."),
-    ("Kanal", "Wo der Artikel angeboten wird: Klinik, Kleinanzeigen, eBay, Direkt, Händler."),
-    ("Umsatz_netto", "Rechnet sich selbst aus (verkaufte Menge × Verkaufspreis). Nicht überschreiben."),
-    ("Zahlung", "offen / bezahlt / teilbezahlt. Bar bezahlte Beträge zusätzlich ins Kassenbuch eintragen (GoBD)."),
-    ("Verkaufsübersicht", "Reines Auswertungsblatt. Rechnet automatisch, dort wird nichts eingetragen."),
-    ("Wichtig", "Diese Datei ist die einzige Quelle der Wahrheit. Aus ihr entstehen Klinik-Angebot, Online-Katalog, "
-                "eBay-/Kleinanzeigen-Inserate und die Zahlen für die Buchhaltung."),
-]
-for i, (a, b) in enumerate(hinweise, start=3):
-    ca = lg.cell(row=i, column=1, value=a); ca.font = Font(name=FONT, size=10, bold=True)
-    ca.alignment = Alignment(vertical="top")
-    cb = lg.cell(row=i, column=2, value=b); cb.font = Font(name=FONT, size=10)
-    cb.alignment = Alignment(vertical="top", wrap_text=True)
-    lg.row_dimensions[i].height = 28
+re_ = wb.create_sheet("Rechnungen (DATEV)")
+RE_SP = [("lfd.", 6), ("Käufer / Firma", 30), ("Anschrift", 38), ("Artikel (ArtNr)", 26),
+         ("Leistungsdatum", 14), ("Netto", 13), ("USt 19 %", 13), ("Brutto", 13),
+         ("Zahlart", 13), ("DATEV-Rechnungsnr", 18), ("geschrieben am", 14), ("bezahlt am", 13)]
+re_["A1"] = "Rechnungen – Abtippliste für DATEV Auftragswesen"
+re_["A1"].font = Font(name=FONT, size=14, bold=True, color=DUNKEL)
+re_.merge_cells("A2:L2")
+re_["A2"] = ("Die Spalten stehen in der Reihenfolge der DATEV-Erfassungsmaske. Ausdrucken, abarbeiten, "
+             "die DATEV-Rechnungsnummer hier und im Artikelstamm eintragen. USt und Brutto rechnen sich selbst. "
+             "Die Rechnung selbst wird ausschließlich in DATEV erstellt – es gibt bewusst kein zweites Rechnungsdokument.")
+re_["A2"].font = Font(name=FONT, size=9, italic=True, color="7F6000")
+re_["A2"].fill = PatternFill("solid", fgColor=GELB)
+re_["A2"].alignment = Alignment(wrap_text=True, vertical="center")
+re_.row_dimensions[2].height = 34
+for i, (h, w) in enumerate(RE_SP, start=1):
+    c = re_.cell(row=4, column=i, value=h)
+    c.font = Font(name=FONT, size=10, bold=True, color="FFFFFF")
+    c.fill = PatternFill("solid", fgColor=MITTEL)
+    c.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
+    c.border = RAHMEN
+    re_.column_dimensions[get_column_letter(i)].width = w
+re_.row_dimensions[4].height = 30
+for r in range(5, 45):
+    re_.cell(row=r, column=1, value=r - 4).font = Font(name=FONT, size=10)
+    re_.cell(row=r, column=7, value=f"=IF(F{r}=\"\",\"\",F{r}*{USt_SATZ})").number_format = EUR
+    re_.cell(row=r, column=8, value=f"=IF(F{r}=\"\",\"\",F{r}+G{r})").number_format = EUR
+    re_.cell(row=r, column=6).number_format = EUR
+    for col in range(1, len(RE_SP) + 1):
+        cc = re_.cell(row=r, column=col)
+        cc.border = RAHMEN
+        cc.font = Font(name=FONT, size=10)
+        if col in (2, 3, 4, 5, 6, 9, 10, 11, 12):
+            cc.fill = PatternFill("solid", fgColor=GELB)
+re_.cell(row=45, column=5, value="Summe").font = Font(name=FONT, size=11, bold=True)
+for col in (6, 7, 8):
+    letter = get_column_letter(col)
+    c = re_.cell(row=45, column=col, value=f"=SUM({letter}5:{letter}44)")
+    c.font = Font(name=FONT, size=11, bold=True); c.number_format = EUR
+    c.fill = PatternFill("solid", fgColor=HELL); c.border = RAHMEN
+re_.freeze_panes = "A5"
+re_.page_setup.orientation = "landscape"
+re_.sheet_properties.pageSetUpPr.fitToPage = True
+re_.page_setup.fitToWidth = 1
 
-pfad = os.path.join(BASIS, "ausgabe", "01_Artikelstamm_BEISPIEL.xlsx")
+# =============================================================================
+# Blatt 5: Kasse
+# =============================================================================
+ka = wb.create_sheet("Kasse")
+KA_SP = [("Datum", 13), ("Beleg-Nr", 12), ("Vorgang / Käufer", 42), ("Einnahme brutto", 16),
+         ("davon USt 19 %", 16), ("netto", 14), ("Ausgabe brutto", 15), ("Kassenbestand", 16)]
+ka["A1"] = "Kassenbuch Barverkäufe"
+ka["A1"].font = Font(name=FONT, size=14, bold=True, color=DUNKEL)
+ka.merge_cells("A2:H2")
+ka["A2"] = ("Pflicht bei einer GmbH (GoBD): jede Bareinnahme am selben Tag erfassen. Am Verkaufstag reicht eine "
+            "Sammelzeile mit der Tageseinnahme, dazu ein Zählprotokoll aufbewahren. Bitte einmal mit dem "
+            "Steuerberater abstimmen, in welcher Form er die Daten haben will.")
+ka["A2"].font = Font(name=FONT, size=9, italic=True, color="7F6000")
+ka["A2"].fill = PatternFill("solid", fgColor=GELB)
+ka["A2"].alignment = Alignment(wrap_text=True, vertical="center")
+ka.row_dimensions[2].height = 32
+for i, (h, w) in enumerate(KA_SP, start=1):
+    c = ka.cell(row=4, column=i, value=h)
+    c.font = Font(name=FONT, size=10, bold=True, color="FFFFFF")
+    c.fill = PatternFill("solid", fgColor=MITTEL)
+    c.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
+    c.border = RAHMEN
+    ka.column_dimensions[get_column_letter(i)].width = w
+ka.cell(row=5, column=3, value="Anfangsbestand Kasse")
+ka.cell(row=5, column=8, value=0).number_format = EUR
+for r in range(6, 56):
+    ka.cell(row=r, column=5, value=f'=IF(D{r}="","",D{r}-D{r}/{1+USt_SATZ})').number_format = EUR
+    ka.cell(row=r, column=6, value=f'=IF(D{r}="","",D{r}/{1+USt_SATZ})').number_format = EUR
+    ka.cell(row=r, column=8, value=f'=H{r-1}+IF(D{r}="",0,D{r})-IF(G{r}="",0,G{r})').number_format = EUR
+    ka.cell(row=r, column=4).number_format = EUR
+    ka.cell(row=r, column=7).number_format = EUR
+    for col in range(1, 9):
+        cc = ka.cell(row=r, column=col); cc.border = RAHMEN; cc.font = Font(name=FONT, size=10)
+        if col in (1, 2, 3, 4, 7):
+            cc.fill = PatternFill("solid", fgColor=GELB)
+ka.freeze_panes = "A5"
+
+pfad = os.path.join(AUSGABE, "01_Artikelstamm_kikripp.xlsx")
+os.makedirs(AUSGABE, exist_ok=True)
 wb.save(pfad)
-print("geschrieben:", pfad)
+print("geschrieben:", pfad, "-", len(daten), "Positionen,", len(wb.sheetnames), "Blätter")

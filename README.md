@@ -28,7 +28,8 @@ Maße fehlen durchgängig – die Spalte `Maße` ist dafür vorbereitet.
 
 | Ordner | Inhalt |
 |---|---|
-| `daten/` | Artikelstammdaten (CSV, semikolongetrennt, Excel-kompatibel) |
+| `daten/` | `artikel_kikripp.csv` (Artikelstamm) und `design.csv` (Farben, Firmendaten, Konditionen) |
+| `assets/` | Bollenhut-Signet als SVG und PNG, Kopflogo |
 | `fotos/` | Artikelfotos `F-001.jpg` … `F-112.jpg`, sortiert nach Aufnahmezeit |
 | `scripts/` | Generatoren – erzeugen aus den Daten die Ausgabedateien |
 | `ausgabe/` | Die fertigen Dateien |
@@ -42,15 +43,41 @@ Maße fehlen durchgängig – die Spalte `Maße` ist dafür vorbereitet.
 | `03_Katalog_Klinik.pdf` | Bildkatalog nach Räumen, 23 Seiten, mit Positionsübersicht und Verkaufsbedingungen |
 | `04_Webkatalog_MOCKUP.html` | Muster für den passwortgeschützten Katalog auf kikripp.de |
 
-## Neu erzeugen
+## Design
+
+Farben, Firmendaten und Konditionen stehen ausschließlich in `daten/design.csv` und im Blatt
+„Design" der Arbeitsmappe. Wer dort etwas ändert und neu erzeugt, ändert es überall.
+
+| Rolle | Wert | Einsatz |
+|---|---|---|
+| Bollenhut-Rot | `#C8102E` | nur als Akzent: Preise, Paketangebot, Eingabefelder, Signet |
+| Schwarz | `#1A1A1A` | Kopfbalken, Struktur, Text |
+| Papier | `#F7F5F2` | ruhige Flächen |
+| Feld Klinik / intern | `#E4E4E4` / `#F2F2F2` | Ausfüllfelder |
+
+Die Statusfarben im Artikelstamm sind bewusst neutral gehalten (Grautöne), damit Rot
+eindeutig der Marke gehört und nicht „verkauft" bedeutet.
+
+## Ablauf beim Überarbeiten
 
 ```bash
-python3 scripts/prepare_fotos.py            # HEIC-Uploads -> fotos/F-xxx.jpg
+# 1. Artikelstamm in OneDrive überarbeiten (Preise, Maße, Mengen, Blatt „Design“)
+# 2. Datei zurückspielen und einlesen – legt vorher eine Sicherung an:
+python3 scripts/rueckeinlesen.py [pfad/zur/Artikelstamm.xlsx]
+
+# 3. Alles neu erzeugen:
+python3 scripts/prepare_fotos.py            # nur wenn neue Fotos dazugekommen sind
+python3 scripts/make_signet.py              # nur wenn sich die Markenfarbe geändert hat
 python3 scripts/build_artikelstamm_xlsx.py
 python3 scripts/build_angebot_xlsx.py
 python3 scripts/build_katalog_pdf.py
 python3 scripts/build_webkatalog_mockup.py
 ```
+
+`rueckeinlesen.py` übernimmt Bezeichnung, Beschreibung, Kategorie, Raum, Menge, Einheit,
+Zustand, Maße, Wertklasse, Preis, Preisbasis, Versand und Bemerkungen sowie alle Werte des
+Design-Blattes. Gelöschte Zeilen werden **nicht** entfernt, sondern auf `Aktiv = entfällt`
+gesetzt; selbst ergänzte Zeilen werden übernommen (dann ohne Foto).
 
 Voraussetzungen: `python3`, `openpyxl`, `Pillow`, `pillow-heif`, Chromium (für die PDF-Ausgabe).
 

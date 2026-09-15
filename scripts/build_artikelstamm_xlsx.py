@@ -1,7 +1,10 @@
 """Erzeugt 01_Artikelstamm_kikripp.xlsx – die Arbeitsdatei für OneDrive."""
 import sys, os
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from lib import lade_artikel, AUSGABE, USt_SATZ
+from lib import (lade_artikel, AUSGABE, ASSETS, USt_SATZ, ROT, SCHWARZ, PAPIER, GRAU, LINIE,
+                 FELD_KLINIK, FELD_INTERN, ZEILE, FONT, FIRMA, ABSENDER)
+from openpyxl.drawing.image import Image as XLImage
+from PIL import Image as PILImage
 
 from openpyxl import Workbook
 from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
@@ -9,10 +12,9 @@ from openpyxl.utils import get_column_letter
 from openpyxl.worksheet.datavalidation import DataValidation
 from openpyxl.formatting.rule import CellIsRule
 
-FONT = "Arial"
-DUNKEL, MITTEL, HELL, GELB = "1F3864", "2E5A9C", "D9E2F3", "FFF2CC"
+DUNKEL, MITTEL, HELL, GELB = SCHWARZ, "404040", PAPIER, FELD_INTERN
 EUR = '#,##0.00 "€"'
-duenn = Side(style="thin", color="BFBFBF")
+duenn = Side(style="thin", color=LINIE)
 RAHMEN = Border(left=duenn, right=duenn, top=duenn, bottom=duenn)
 
 # (Überschrift, Breite, Gruppe, Typ)  Typ: text|int|eur|formel
@@ -29,6 +31,7 @@ SPALTEN = [
     ("Einheit",                10, "Stammdaten",   "text"),
     ("Zustand",                14, "Stammdaten",   "text"),
     ("Maße",                   22, "Stammdaten",   "text"),
+    ("Aktiv",                  9,  "Stammdaten",   "text"),
     ("Anlagennr",              12, "Buchhaltung",  "text"),
     ("Anschaffungswert_netto", 17, "Buchhaltung",  "eur"),
     ("Preis_netto",            13, "Preis",        "eur"),
@@ -50,18 +53,19 @@ SPALTEN = [
     ("Mengenhinweis",          40, "Notizen",      "text"),
     ("Bemerkung",              32, "Notizen",      "text"),
 ]
-GRUPPENFARBE = {"Stammdaten": "1F3864", "Buchhaltung": "7F6000", "Preis": "833C00",
-                "Vermarktung": "375623", "Verkauf": "633A82", "Kaufmännisch": "0E5A6B",
-                "Notizen": "595959"}
+GRUPPENFARBE = {"Stammdaten": SCHWARZ, "Buchhaltung": "595959", "Preis": ROT,
+                "Vermarktung": "404040", "Verkauf": ROT, "Kaufmännisch": "595959",
+                "Notizen": "8C8C8C"}
 IDX = {s[0]: i + 1 for i, s in enumerate(SPALTEN)}
 def L(n): return get_column_letter(IDX[n])
 
-PFLEGE = {"Menge", "Verkauft_Menge", "Maße", "Anlagennr", "Anschaffungswert_netto", "Preis_netto",
+PFLEGE = {"Menge", "Verkauft_Menge", "Maße", "Aktiv", "Anlagennr", "Anschaffungswert_netto", "Preis_netto",
           "Preisbasis", "Status", "Kanal", "Reserviert_für", "Verkaufspreis_netto",
           "Verkaufsdatum", "Käufer", "Rechnungsnr", "Zahlung", "Zahlart", "Abholtermin", "Bemerkung"}
 
 AUSWAHL = {
     "Wertklasse": '"A,B,C"',
+    "Aktiv":      '"ja,entfällt"',
     "Einheit":    '"Stück,Karton,Set,Palette,Konvolut"',
     "Zustand":    '"neuwertig,gut,gebraucht,stark gebraucht,defekt"',
     "Preisbasis": '"Fix,VHB"',
@@ -84,17 +88,29 @@ an = wb.active
 an.title = "Anleitung"
 an.column_dimensions["A"].width = 30
 an.column_dimensions["B"].width = 104
-an["A1"] = "Artikelverwaltung Auflösung kikripp – Kurzanleitung"
-an["A1"].font = Font(name=FONT, size=16, bold=True, color=DUNKEL)
+an.merge_cells("A1:B1")
+for col in (1, 2):
+    an.cell(row=1, column=col).fill = PatternFill("solid", fgColor=SCHWARZ)
+an["A1"] = "        Artikelverwaltung Betriebsauflösung – Kurzanleitung"
+an["A1"].font = Font(name=FONT, size=15, bold=True, color="FFFFFF")
+an["A1"].alignment = Alignment(vertical="center")
+an.row_dimensions[1].height = 42
+_logo = os.path.join(ASSETS, "kopflogo.png")
+if os.path.exists(_logo):
+    with PILImage.open(_logo) as _im:
+        _h = 46; _im = _im.resize((int(_im.width * _h / _im.height), _h))
+        _im.save("/tmp/_kopflogo_stamm.png")
+    an.add_image(XLImage("/tmp/_kopflogo_stamm.png"), "A1")
 an["A2"] = "Diese Datei liegt in OneDrive und ist die einzige Quelle der Wahrheit. Bitte immer direkt hier arbeiten – nicht herunterladen, bearbeiten und wieder hochladen."
-an["A2"].font = Font(name=FONT, size=10, italic=True, color="7F6000")
+an["A2"].font = Font(name=FONT, size=10, italic=True, color=SCHWARZ)
+an["A2"].fill = PatternFill("solid", fgColor=PAPIER)
 an.merge_cells("A2:B2")
 an.row_dimensions[2].height = 28
 an["A2"].alignment = Alignment(wrap_text=True, vertical="center")
 
 TEXTE = [
     ("Die vier Blätter", ""),
-    ("  Artikelstamm", "Alle Artikel. Hier wird gepflegt. Gelb hinterlegte Spalten sind die Felder zum Ausfüllen, alles andere rechnet sich selbst oder bleibt stehen."),
+    ("  Artikelstamm", "Alle Artikel. Hier wird gepflegt. Grau hinterlegte Spalten sind die Felder zum Ausfüllen, alles andere rechnet sich selbst oder bleibt stehen."),
     ("  Verkaufsübersicht", "Reines Auswertungsblatt. Umsatz, offene Rechnungen, Restbestand – rechnet automatisch. Hier nichts eintragen."),
     ("  Rechnungen (DATEV)", "Abtippliste: je Zeile eine Rechnung, in der Reihenfolge der DATEV-Erfassungsmaske. Ausdrucken und abarbeiten."),
     ("  Kasse", "Barverkäufe je Tag für das Kassenbuch. Pflicht bei einer GmbH (GoBD)."),
@@ -140,8 +156,8 @@ for i in range(len(SPALTEN) + 1):
         start = i + 1
 for i, (name, breite, _g, _t) in enumerate(SPALTEN, start=1):
     c = ws.cell(row=2, column=i, value=name)
-    c.font = Font(name=FONT, size=10, bold=True, color=("7F6000" if name in PFLEGE else "FFFFFF"))
-    c.fill = PatternFill("solid", fgColor=(GELB if name in PFLEGE else MITTEL))
+    c.font = Font(name=FONT, size=10, bold=True, color="FFFFFF")
+    c.fill = PatternFill("solid", fgColor=("7A7A7A" if name in PFLEGE else SCHWARZ))
     c.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
     c.border = RAHMEN
     ws.column_dimensions[get_column_letter(i)].width = breite
@@ -174,7 +190,7 @@ for j, art in enumerate(daten):
         if typ == "int" or name == "Restmenge":
             c.number_format = "0"
         if name in PFLEGE:
-            c.fill = PatternFill("solid", fgColor=GELB)
+            c.fill = PatternFill("solid", fgColor=FELD_INTERN)
     ws.row_dimensions[r].height = 30
 
 ws.freeze_panes = "C3"
@@ -184,12 +200,12 @@ for name, formel in AUSWAHL.items():
     ws.add_data_validation(dv)
     dv.add(f"{L(name)}{Z0}:{L(name)}{Z0+800}")
 s = f"{L('Status')}{Z0}:{L('Status')}{Z1}"
-for wert, farbe in (("verfügbar", "E2EFDA"), ("reserviert", "FFF2CC"), ("verkauft", "D9D9D9")):
+for wert, farbe in (("reserviert", "E4E4E4"), ("verkauft", "C9C9C9")):
     ws.conditional_formatting.add(s, CellIsRule(operator="equal", formula=[f'"{wert}"'],
                                                 fill=PatternFill("solid", bgColor=farbe)))
 wk = f"{L('Wertklasse')}{Z0}:{L('Wertklasse')}{Z1}"
 ws.conditional_formatting.add(wk, CellIsRule(operator="equal", formula=['"A"'],
-    fill=PatternFill("solid", bgColor="F8CBAD"), font=Font(name=FONT, size=10, bold=True)))
+    font=Font(name=FONT, size=10, bold=True, color=ROT)))
 
 # =============================================================================
 # Blatt 3: Verkaufsübersicht
@@ -293,8 +309,9 @@ re_.merge_cells("A2:L2")
 re_["A2"] = ("Die Spalten stehen in der Reihenfolge der DATEV-Erfassungsmaske. Ausdrucken, abarbeiten, "
              "die DATEV-Rechnungsnummer hier und im Artikelstamm eintragen. USt und Brutto rechnen sich selbst. "
              "Die Rechnung selbst wird ausschließlich in DATEV erstellt – es gibt bewusst kein zweites Rechnungsdokument.")
-re_["A2"].font = Font(name=FONT, size=9, italic=True, color="7F6000")
-re_["A2"].fill = PatternFill("solid", fgColor=GELB)
+re_["A2"].font = Font(name=FONT, size=9, italic=True, color=SCHWARZ)
+re_["A2"].fill = PatternFill("solid", fgColor=PAPIER)
+re_["A2"].border = Border(left=Side(style="thick", color=ROT))
 re_["A2"].alignment = Alignment(wrap_text=True, vertical="center")
 re_.row_dimensions[2].height = 34
 for i, (h, w) in enumerate(RE_SP, start=1):
@@ -315,7 +332,7 @@ for r in range(5, 45):
         cc.border = RAHMEN
         cc.font = Font(name=FONT, size=10)
         if col in (2, 3, 4, 5, 6, 9, 10, 11, 12):
-            cc.fill = PatternFill("solid", fgColor=GELB)
+            cc.fill = PatternFill("solid", fgColor=FELD_INTERN)
 re_.cell(row=45, column=5, value="Summe").font = Font(name=FONT, size=11, bold=True)
 for col in (6, 7, 8):
     letter = get_column_letter(col)
@@ -339,8 +356,9 @@ ka.merge_cells("A2:H2")
 ka["A2"] = ("Pflicht bei einer GmbH (GoBD): jede Bareinnahme am selben Tag erfassen. Am Verkaufstag reicht eine "
             "Sammelzeile mit der Tageseinnahme, dazu ein Zählprotokoll aufbewahren. Bitte einmal mit dem "
             "Steuerberater abstimmen, in welcher Form er die Daten haben will.")
-ka["A2"].font = Font(name=FONT, size=9, italic=True, color="7F6000")
-ka["A2"].fill = PatternFill("solid", fgColor=GELB)
+ka["A2"].font = Font(name=FONT, size=9, italic=True, color=SCHWARZ)
+ka["A2"].fill = PatternFill("solid", fgColor=PAPIER)
+ka["A2"].border = Border(left=Side(style="thick", color=ROT))
 ka["A2"].alignment = Alignment(wrap_text=True, vertical="center")
 ka.row_dimensions[2].height = 32
 for i, (h, w) in enumerate(KA_SP, start=1):
@@ -361,8 +379,55 @@ for r in range(6, 56):
     for col in range(1, 9):
         cc = ka.cell(row=r, column=col); cc.border = RAHMEN; cc.font = Font(name=FONT, size=10)
         if col in (1, 2, 3, 4, 7):
-            cc.fill = PatternFill("solid", fgColor=GELB)
+            cc.fill = PatternFill("solid", fgColor=FELD_INTERN)
 ka.freeze_panes = "A5"
+
+# =============================================================================
+# Blatt 6: Design – hier werden Farben, Firmendaten und Konditionen gepflegt
+# =============================================================================
+import csv as _csv
+dg = wb.create_sheet("Design")
+dg.column_dimensions["A"].width = 26
+dg.column_dimensions["B"].width = 34
+dg.column_dimensions["C"].width = 62
+dg.merge_cells("A1:C1")
+for col in (1, 2, 3):
+    dg.cell(row=1, column=col).fill = PatternFill("solid", fgColor=SCHWARZ)
+dg["A1"] = "Design und Stammdaten"
+dg["A1"].font = Font(name=FONT, size=14, bold=True, color="FFFFFF")
+dg["A1"].alignment = Alignment(vertical="center", indent=1)
+dg.row_dimensions[1].height = 30
+dg.merge_cells("A2:C2")
+dg["A2"] = ("Hier ändern – nicht in den anderen Blättern. Farben als HEX ohne Raute (z. B. C8102E). "
+            "Die Werte werden beim Rückeinlesen übernommen und gelten dann für Angebot, Katalog und Webkatalog.")
+dg["A2"].font = Font(name=FONT, size=9, italic=True, color=SCHWARZ)
+dg["A2"].fill = PatternFill("solid", fgColor=PAPIER)
+dg["A2"].border = Border(left=Side(style="thick", color=ROT))
+dg["A2"].alignment = Alignment(wrap_text=True, vertical="center")
+dg.row_dimensions[2].height = 30
+for j, h in enumerate(["Schlüssel", "Wert", "Hinweis"]):
+    c = dg.cell(row=4, column=1 + j, value=h)
+    c.font = Font(name=FONT, size=10, bold=True, color="FFFFFF")
+    c.fill = PatternFill("solid", fgColor=("595959" if j == 1 else MITTEL))
+    c.border = RAHMEN
+    c.alignment = Alignment(horizontal="center", vertical="center")
+with open(os.path.join(os.path.dirname(AUSGABE), "daten", "design.csv"), encoding="utf-8") as _f:
+    for i, row in enumerate(_csv.DictReader(_f, delimiter=";"), start=5):
+        dg.cell(row=i, column=1, value=row["Schluessel"]).font = Font(name=FONT, size=10, bold=True)
+        cw = dg.cell(row=i, column=2, value=row["Wert"])
+        cw.font = Font(name=FONT, size=10)
+        cw.fill = PatternFill("solid", fgColor=FELD_INTERN)
+        ch = dg.cell(row=i, column=3, value=row.get("Hinweis") or "")
+        ch.font = Font(name=FONT, size=9, color=GRAU)
+        for col in (1, 2, 3):
+            dg.cell(row=i, column=col).border = RAHMEN
+        if row["Schluessel"].startswith("Farbe_") or row["Schluessel"].startswith("Feld_") \
+           or row["Schluessel"] == "Zeile_Wechsel":
+            try:
+                dg.cell(row=i, column=3).fill = PatternFill("solid", fgColor=row["Wert"])
+            except Exception:
+                pass
+dg.freeze_panes = "A5"
 
 pfad = os.path.join(AUSGABE, "01_Artikelstamm_kikripp.xlsx")
 os.makedirs(AUSGABE, exist_ok=True)

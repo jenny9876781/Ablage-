@@ -1,0 +1,24 @@
+Schluessel;Wert;Hinweis
+Firma;Kikripp GmbH;Vollständige Firmierung, erscheint in Kopf und Fuß aller Dokumente
+Strasse;Hermann-Schwer-Str. 1;
+PLZ_Ort;78048 Villingen-Schwenningen;
+Ansprechpartner;Jenny Preisigke;
+Telefon;07725 5179702;Schreibweise bitte prüfen
+Email;jenny@kikripp.de;
+Empfaenger_Firma;Mediclin Königsfeld;Empfänger des Angebots
+Empfaenger_Person;Frau Jessica Rose;
+Angebot_Nr;ANG-2026-0001;
+Angebot_Datum;15.09.2026;
+Angebot_Gueltig_bis;15.10.2026;
+USt_Satz_Prozent;19;
+Paketrabatt_Prozent;20;Nachlass beim Paketangebot
+Farbe_Rot;C8102E;Bollenhut-Rot - nur als Akzent verwenden
+Farbe_Schwarz;1A1A1A;Kopfzeilen und Struktur
+Farbe_Papier;F7F5F2;warme Fläche
+Farbe_Grau;6B7280;Sekundärtext
+Farbe_Linie;DCDCDC;feine Linien und Rahmen
+Feld_Klinik;E4E4E4;Ausfüllfelder für die Klinik (mittleres Grau)
+Feld_Intern;F2F2F2;interne Ausfüllfelder (helles Grau)
+Zeile_Wechsel;FAFAFA;Zeilenwechsel in Tabellen
+Schrift_Excel;Arial;
+Schrift_Web;Poppins;Google-Font für den Webkatalog, mit Systemschrift als Rückfall

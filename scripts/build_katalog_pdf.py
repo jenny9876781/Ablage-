@@ -1,8 +1,9 @@
 """Erzeugt 03_Katalog_Klinik.pdf – Bildkatalog nach Räumen, mit Positionsliste und Paketangebot."""
 import sys, os, base64, subprocess, html, io
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from lib import (lade_artikel, foto, AUSGABE, USt_SATZ, PAKETRABATT, eur, FIRMA, STRASSE, ORT,
-                 ANSPRECHPARTNER, TELEFON, EMAIL, EMPFAENGER, ANGEBOT_NR, DATUM, GUELTIG)
+from lib import (lade_artikel, foto, AUSGABE, USt_SATZ, PAKETRABATT, eur, FIRMA, STRASSE,
+                 PLZ_ORT as ORT, ANSPRECH as ANSPRECHPARTNER, TELEFON, EMAIL, EMPFAENGER,
+                 ANGEBOT_NR, DATUM, GUELTIG)
 from PIL import Image
 
 CHROME = "/opt/pw-browsers/chromium-1194/chrome-linux/chrome"

@@ -1,8 +1,10 @@
-"""Erzeugt 02_Angebot_Klinik.xlsx – Auswahlliste mit Fotos, Einzelpositionen und Paketangebot."""
+"""Erzeugt 02_Angebot_Klinik.xlsx – Auswahlliste im kikripp-Design."""
 import sys, os
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from lib import (lade_artikel, foto, AUSGABE, USt_SATZ, PAKETRABATT, FIRMA, STRASSE, ORT,
-                 ANSPRECHPARTNER, TELEFON, EMAIL, EMPFAENGER, ANGEBOT_NR, DATUM, GUELTIG)
+from lib import (lade_artikel, foto, AUSGABE, ASSETS, USt_SATZ, PAKETRABATT, FIRMA, STRASSE,
+                 PLZ_ORT, ANSPRECH, TELEFON, EMAIL, EMPF_FIRMA, EMPF_PERSON, ANGEBOT_NR,
+                 DATUM, GUELTIG, ROT, SCHWARZ, PAPIER, GRAU, LINIE, FELD_KLINIK, FELD_INTERN,
+                 ZEILE, FONT, ABSENDER)
 
 from openpyxl import Workbook
 from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
@@ -10,11 +12,10 @@ from openpyxl.drawing.image import Image as XLImage
 from openpyxl.utils import get_column_letter
 from PIL import Image as PILImage
 
-FONT = "Arial"
-DUNKEL, MITTEL, HELL, GELB, ORANGE = "1F3864", "2E5A9C", "D9E2F3", "FFF2CC", "F8CBAD"
 EUR = '#,##0.00 "€"'
-duenn = Side(style="thin", color="BFBFBF")
-RAHMEN = Border(left=duenn, right=duenn, top=duenn, bottom=duenn)
+d_linie = Side(style="thin", color=LINIE)
+RAHMEN = Border(left=d_linie, right=d_linie, top=d_linie, bottom=d_linie)
+ROT_KANTE = Border(left=Side(style="thick", color=ROT), right=d_linie, top=d_linie, bottom=d_linie)
 TMP = "/tmp/angebot_thumbs"
 os.makedirs(TMP, exist_ok=True)
 
@@ -24,55 +25,64 @@ SPALTEN = [("Pos", 5), ("ArtNr", 9), ("Foto", 20), ("Artikel", 46), ("Maße", 18
            ("Ihre Bemerkung / Frage", 26), ("Summe netto", 14)]
 IDX = {s[0]: i + 1 for i, s in enumerate(SPALTEN)}
 def L(n): return get_column_letter(IDX[n])
-PFLEGE_KLINIK = {"Ihre Wunschmenge", "Ihre Bemerkung / Frage"}
-PFLEGE_INTERN = {"Maße"}
+KLINIK_FELD = {"Ihre Wunschmenge", "Ihre Bemerkung / Frage"}
+INTERN_FELD = {"Maße"}
+N = len(SPALTEN)
 
 artikel = lade_artikel()
 wb = Workbook(); ws = wb.active; ws.title = "Angebot"
 for name, breite in SPALTEN:
     ws.column_dimensions[L(name)].width = breite
 
-# ---- Kopf -------------------------------------------------------------------
-ws.merge_cells(start_row=1, start_column=1, end_row=1, end_column=len(SPALTEN))
-c = ws.cell(row=1, column=1, value=f"{FIRMA} – Angebot aus Betriebsauflösung")
+# ---- Kopfbalken schwarz mit Logo --------------------------------------------
+ws.merge_cells(start_row=1, start_column=1, end_row=1, end_column=2)
+ws.merge_cells(start_row=1, start_column=3, end_row=1, end_column=N)
+for col in range(1, N + 1):
+    ws.cell(row=1, column=col).fill = PatternFill("solid", fgColor=SCHWARZ)
+c = ws.cell(row=1, column=3, value="Angebot aus der Betriebsauflösung")
 c.font = Font(name=FONT, size=16, bold=True, color="FFFFFF")
-c.fill = PatternFill("solid", fgColor=DUNKEL)
 c.alignment = Alignment(horizontal="left", vertical="center", indent=1)
-ws.row_dimensions[1].height = 30
+ws.row_dimensions[1].height = 42
+logo = os.path.join(ASSETS, "kopflogo.png")
+if os.path.exists(logo):
+    with PILImage.open(logo) as im:
+        h = 48; im = im.resize((int(im.width * h / im.height), h))
+        im.save("/tmp/_kopflogo_xl.png")
+    ws.add_image(XLImage("/tmp/_kopflogo_xl.png"), "A1")
 
-kopf = [("Angebot-Nr.", ANGEBOT_NR, "Datum", DATUM),
-        ("Empfänger", EMPFAENGER, "Angebot gültig bis", GUELTIG),
-        ("Ansprechpartnerin", f"{ANSPRECHPARTNER} · {TELEFON} · {EMAIL}", "Alle Preise",
-         f"netto zzgl. {int(USt_SATZ*100)} % USt")]
-for i, (a, b, cc, d) in enumerate(kopf, start=2):
-    ws.cell(row=i, column=1, value=a).font = Font(name=FONT, size=10, bold=True)
-    ws.merge_cells(start_row=i, start_column=2, end_row=i, end_column=7)
-    ws.cell(row=i, column=2, value=b).font = Font(name=FONT, size=10)
-    ws.cell(row=i, column=9, value=cc).font = Font(name=FONT, size=10, bold=True)
-    ws.merge_cells(start_row=i, start_column=11, end_row=i, end_column=len(SPALTEN))
-    ws.cell(row=i, column=11, value=d).font = Font(name=FONT, size=10)
+# ---- Kopfdaten --------------------------------------------------------------
+kopf = [("Empfänger", f"{EMPF_FIRMA} · {EMPF_PERSON}", "Angebot-Nr.", ANGEBOT_NR),
+        ("Ansprechpartnerin", f"{ANSPRECH} · {TELEFON} · {EMAIL}", "Datum", DATUM),
+        ("Alle Preise", f"netto zzgl. {int(USt_SATZ*100)} % USt", "Gültig bis", GUELTIG)]
+for i, (a, b, cc, dd) in enumerate(kopf, start=2):
+    ca = ws.cell(row=i, column=1, value=a)
+    ca.font = Font(name=FONT, size=10, bold=True, color=GRAU)
+    ws.merge_cells(start_row=i, start_column=3, end_row=i, end_column=9)
+    ws.cell(row=i, column=3, value=b).font = Font(name=FONT, size=10, color=SCHWARZ)
+    ws.cell(row=i, column=10, value=cc).font = Font(name=FONT, size=10, bold=True, color=GRAU)
+    ws.merge_cells(start_row=i, start_column=12, end_row=i, end_column=N)
+    ws.cell(row=i, column=12, value=dd).font = Font(name=FONT, size=10, bold=True, color=SCHWARZ)
+    ws.row_dimensions[i].height = 17
 
-ws.merge_cells(start_row=5, start_column=1, end_row=5, end_column=len(SPALTEN))
+# ---- Hinweisbox -------------------------------------------------------------
+ws.merge_cells(start_row=5, start_column=1, end_row=5, end_column=N)
 c = ws.cell(row=5, column=1, value=
-    "So geht's: Bitte tragen Sie in den gelben Spalten ein, welche Artikel Sie in welcher Menge übernehmen "
-    "möchten, und schicken die Datei zurück. Die Summen rechnen sich automatisch. Wenn Sie den gesamten "
-    "Bestand übernehmen möchten, finden Sie am Ende der Liste ein Paketangebot. Abholung nach "
-    "Terminvereinbarung, Zahlung per Rechnung.")
-c.font = Font(name=FONT, size=10, italic=True, color="7F6000")
-c.fill = PatternFill("solid", fgColor=GELB)
+    "So geht's:  Bitte tragen Sie in den beiden grau hinterlegten Spalten rechts ein, welche Artikel Sie in "
+    "welcher Menge übernehmen möchten, und schicken die Datei zurück. Die Summen rechnen sich automatisch. "
+    "Wenn Sie den gesamten Bestand übernehmen möchten, finden Sie am Ende der Liste ein Paketangebot. "
+    "Rot markierte Artikelnummern sind Marken- und Designstücke. Abholung nach Terminvereinbarung, Zahlung per Rechnung.")
+c.font = Font(name=FONT, size=10, color=SCHWARZ)
+c.fill = PatternFill("solid", fgColor=PAPIER)
 c.alignment = Alignment(vertical="center", wrap_text=True, indent=1)
-ws.row_dimensions[5].height = 32
+c.border = Border(left=Side(style="thick", color=ROT))
+ws.row_dimensions[5].height = 34
 
 # ---- Tabellenkopf -----------------------------------------------------------
 KOPF = 7
 for name, _b in SPALTEN:
     c = ws.cell(row=KOPF, column=IDX[name], value=name)
-    if name in PFLEGE_KLINIK:
-        c.font = Font(name=FONT, size=10, bold=True, color="7F6000")
-        c.fill = PatternFill("solid", fgColor=GELB)
-    else:
-        c.font = Font(name=FONT, size=10, bold=True, color="FFFFFF")
-        c.fill = PatternFill("solid", fgColor=MITTEL)
+    c.fill = PatternFill("solid", fgColor=(ROT if name in KLINIK_FELD else SCHWARZ))
+    c.font = Font(name=FONT, size=10, bold=True, color="FFFFFF")
     c.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
     c.border = RAHMEN
 ws.row_dimensions[KOPF].height = 32
@@ -81,6 +91,8 @@ ws.row_dimensions[KOPF].height = 32
 Z0 = KOPF + 1
 for i, a in enumerate(artikel):
     r = Z0 + i
+    ist_a = a["Wertklasse"] == "A"
+    wechsel = ZEILE if i % 2 else "FFFFFF"
     werte = {
         "Pos": i + 1, "ArtNr": a["ArtNr"], "Foto": None,
         "Artikel": f'{a["Bezeichnung"]}\n{a["Beschreibung"]}',
@@ -93,83 +105,85 @@ for i, a in enumerate(artikel):
     }
     for name, _b in SPALTEN:
         c = ws.cell(row=r, column=IDX[name], value=werte[name])
-        c.font = Font(name=FONT, size=10)
+        c.font = Font(name=FONT, size=10, color=SCHWARZ)
         c.border = RAHMEN
+        c.fill = PatternFill("solid", fgColor=wechsel)
         c.alignment = Alignment(vertical="center",
                                 wrap_text=name in ("Artikel", "Lieferung", "Raum", "Maße"),
                                 horizontal="center" if name in ("Pos", "ArtNr", "Verfügbar", "Einheit",
                                 "Preis", "Zustand", "Ihre Wunschmenge") else "left")
         if name in ("Einzelpreis netto", "Summe netto"):
             c.number_format = EUR
-        if name in PFLEGE_KLINIK:
-            c.fill = PatternFill("solid", fgColor=GELB)
-        if name in PFLEGE_INTERN:
-            c.fill = PatternFill("solid", fgColor=HELL)
-        if a["Wertklasse"] == "A" and name == "ArtNr":
-            c.fill = PatternFill("solid", fgColor=ORANGE)
+        if name == "Einzelpreis netto":
+            c.font = Font(name=FONT, size=10, bold=True, color=SCHWARZ)
+        if name in KLINIK_FELD:
+            c.fill = PatternFill("solid", fgColor=FELD_KLINIK)
+        if name in INTERN_FELD:
+            c.fill = PatternFill("solid", fgColor=FELD_INTERN)
+        if name == "Pos":
+            c.font = Font(name=FONT, size=9, color=GRAU)
+        if name == "ArtNr" and ist_a:
+            c.fill = PatternFill("solid", fgColor=ROT)
+            c.font = Font(name=FONT, size=10, bold=True, color="FFFFFF")
+        if name == "Ihre Wunschmenge":
+            c.border = ROT_KANTE
     ws.row_dimensions[r].height = 78
     p = foto(a["Foto"])
     if p:
         thumb = os.path.join(TMP, f'{a["ArtNr"]}.png')
         with PILImage.open(p) as im:
-            im.thumbnail((132, 99))
-            im.save(thumb)
+            im.thumbnail((132, 99)); im.save(thumb)
         ws.add_image(XLImage(thumb), f'{L("Foto")}{r}')
 
 Z1 = Z0 + len(artikel) - 1
-SN = L("Summe netto")
-EP = L("Einzelpreis netto")
-VF = L("Verfügbar")
+SN, EP, VF = L("Summe netto"), L("Einzelpreis netto"), L("Verfügbar")
+
+def bandzeile(r, text, farbe):
+    ws.merge_cells(start_row=r, start_column=1, end_row=r, end_column=N)
+    for col in range(1, N + 1):
+        ws.cell(row=r, column=col).fill = PatternFill("solid", fgColor=farbe)
+    c = ws.cell(row=r, column=1, value=text)
+    c.font = Font(name=FONT, size=11, bold=True, color="FFFFFF")
+    c.alignment = Alignment(vertical="center", indent=1)
+    ws.row_dimensions[r].height = 24
 
 def summenzeile(r, label, formel, fett=False, farbe=None, gross=False):
     ws.merge_cells(start_row=r, start_column=1, end_row=r, end_column=IDX["Ihre Bemerkung / Frage"])
     c = ws.cell(row=r, column=1, value=label)
-    c.font = Font(name=FONT, size=12 if gross else 11, bold=True, color=DUNKEL)
+    c.font = Font(name=FONT, size=12 if gross else 11, bold=True, color=SCHWARZ)
     c.alignment = Alignment(horizontal="right", vertical="center")
     c2 = ws.cell(row=r, column=IDX["Summe netto"], value=formel)
-    c2.font = Font(name=FONT, size=12 if gross else 11, bold=fett, color=DUNKEL)
+    c2.font = Font(name=FONT, size=12 if gross else 11, bold=fett,
+                   color=("FFFFFF" if farbe == ROT else SCHWARZ))
     c2.number_format = EUR
     c2.border = RAHMEN
     if farbe:
-        c.fill = PatternFill("solid", fgColor=farbe)
+        c.fill = PatternFill("solid", fgColor=PAPIER)
         c2.fill = PatternFill("solid", fgColor=farbe)
-    ws.row_dimensions[r].height = 22 if not gross else 26
+    ws.row_dimensions[r].height = 26 if gross else 22
 
-# ---- Block A: Ihre Auswahl --------------------------------------------------
 rA = Z1 + 2
-ws.merge_cells(start_row=rA, start_column=1, end_row=rA, end_column=len(SPALTEN))
-c = ws.cell(row=rA, column=1, value="A · IHRE AUSWAHL (Einzelpositionen)")
-c.font = Font(name=FONT, size=11, bold=True, color="FFFFFF")
-c.fill = PatternFill("solid", fgColor=MITTEL)
-c.alignment = Alignment(vertical="center", indent=1)
+bandzeile(rA, "A · IHRE AUSWAHL  (Einzelpositionen)", SCHWARZ)
 summenzeile(rA + 1, "Zwischensumme netto", f"=SUM({SN}{Z0}:{SN}{Z1})")
 summenzeile(rA + 2, f"zzgl. {int(USt_SATZ*100)} % Umsatzsteuer", f"={SN}{rA+1}*{USt_SATZ}")
-summenzeile(rA + 3, "Gesamtsumme brutto", f"={SN}{rA+1}+{SN}{rA+2}", fett=True, farbe=HELL, gross=True)
+summenzeile(rA + 3, "Gesamtsumme brutto", f"={SN}{rA+1}+{SN}{rA+2}", fett=True, farbe=ROT, gross=True)
 
-# ---- Block B: Paketangebot --------------------------------------------------
 rB = rA + 5
-ws.merge_cells(start_row=rB, start_column=1, end_row=rB, end_column=len(SPALTEN))
-c = ws.cell(row=rB, column=1, value="B · PAKETANGEBOT (Übernahme des gesamten Bestands)")
-c.font = Font(name=FONT, size=11, bold=True, color="FFFFFF")
-c.fill = PatternFill("solid", fgColor="833C00")
-c.alignment = Alignment(vertical="center", indent=1)
+bandzeile(rB, "B · PAKETANGEBOT  (Übernahme des gesamten Bestands)", ROT)
 summenzeile(rB + 1, "Gesamtwert aller Positionen zu Einzelpreisen (netto)",
             f"=SUMPRODUCT({VF}{Z0}:{VF}{Z1},{EP}{Z0}:{EP}{Z1})")
-summenzeile(rB + 2, f"abzüglich Paketnachlass {int(PAKETRABATT*100)} %",
-            f"=-{SN}{rB+1}*{PAKETRABATT}")
-summenzeile(rB + 3, "Paketpreis netto", f"={SN}{rB+1}+{SN}{rB+2}", fett=True, farbe=GELB)
+summenzeile(rB + 2, f"abzüglich Paketnachlass {int(PAKETRABATT*100)} %", f"=-{SN}{rB+1}*{PAKETRABATT}")
+summenzeile(rB + 3, "Paketpreis netto", f"={SN}{rB+1}+{SN}{rB+2}", fett=True, farbe=PAPIER)
 summenzeile(rB + 4, f"zzgl. {int(USt_SATZ*100)} % Umsatzsteuer", f"={SN}{rB+3}*{USt_SATZ}")
-summenzeile(rB + 5, "Paketpreis brutto", f"={SN}{rB+3}+{SN}{rB+4}", fett=True, farbe=HELL, gross=True)
-ws.merge_cells(start_row=rB + 6, start_column=1, end_row=rB + 6, end_column=len(SPALTEN))
-c = ws.cell(row=rB + 6, column=1, value=
-    "Das Paketangebot gilt für die Übernahme sämtlicher oben gelisteter Positionen in einem Zug, "
-    "inklusive Abholung innerhalb von zwei Wochen nach Zuschlag.")
-c.font = Font(name=FONT, size=9, italic=True, color="808080")
+summenzeile(rB + 5, "Paketpreis brutto", f"={SN}{rB+3}+{SN}{rB+4}", fett=True, farbe=ROT, gross=True)
+ws.merge_cells(start_row=rB + 6, start_column=1, end_row=rB + 6, end_column=N)
+c = ws.cell(row=rB + 6, column=1, value="Das Paketangebot gilt für die Übernahme sämtlicher oben "
+            "gelisteter Positionen in einem Zug, inklusive Abholung innerhalb von zwei Wochen nach Zuschlag.")
+c.font = Font(name=FONT, size=9, italic=True, color=GRAU)
 c.alignment = Alignment(vertical="center", indent=1)
 
-# ---- Fuß --------------------------------------------------------------------
 rF = rB + 8
-ws.merge_cells(start_row=rF, start_column=1, end_row=rF + 3, end_column=len(SPALTEN))
+ws.merge_cells(start_row=rF, start_column=1, end_row=rF + 3, end_column=N)
 c = ws.cell(row=rF, column=1, value=
     "Verkaufsbedingungen: Der Verkauf erfolgt aus einer Betriebsauflösung unter Ausschluss jeglicher "
     "Gewährleistung; es handelt sich durchweg um gebrauchte Gegenstände, die in dem Zustand verkauft werden, "
@@ -177,16 +191,16 @@ c = ws.cell(row=rF, column=1, value=
     "mit unserer schriftlichen Bestätigung verbindlich. Abholung nach Terminvereinbarung; Demontage, Verladung "
     "und Transport erfolgen durch den Käufer auf eigene Kosten und Gefahr. Elektrogeräte werden ohne "
     "Prüfnachweis nach DGUV V3 übergeben. Die Rechnung wird nach Abholung gestellt, zahlbar innerhalb von "
-    "14 Tagen ohne Abzug. Das Eigentum geht erst mit vollständiger Bezahlung über.\n\n"
-    f"{FIRMA} · {STRASSE} · {ORT} · {ANSPRECHPARTNER} · {TELEFON} · {EMAIL}")
-c.font = Font(name=FONT, size=9, color="808080")
+    "14 Tagen ohne Abzug. Das Eigentum geht erst mit vollständiger Bezahlung über.\n\n" + ABSENDER)
+c.font = Font(name=FONT, size=9, color=GRAU)
 c.alignment = Alignment(vertical="top", wrap_text=True)
 
 ws.freeze_panes = f"A{Z0}"
-ws.auto_filter.ref = f"A{KOPF}:{get_column_letter(len(SPALTEN))}{Z1}"
+ws.auto_filter.ref = f"A{KOPF}:{get_column_letter(N)}{Z1}"
 ws.page_setup.orientation = "landscape"
 ws.sheet_properties.pageSetUpPr.fitToPage = True
 ws.page_setup.fitToWidth = 1
+ws.sheet_view.showGridLines = False
 
 pfad = os.path.join(AUSGABE, "02_Angebot_Klinik.xlsx")
 wb.save(pfad)

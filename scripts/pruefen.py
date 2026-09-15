@@ -98,8 +98,7 @@ else:
 
 print("\n== 4. Ausgabedateien ==")
 for name, mindest in (("01_Artikelstamm_kikripp.xlsx", 20), ("02_Angebot_Klinik.xlsx", 500),
-                      ("03_Katalog_Klinik.pdf", 500), ("04_Webkatalog_MOCKUP.html", 500),
-                      ("05_Arbeitsanweisung.pdf", 50)):
+                      ("03_Katalog_Klinik.pdf", 500), ("04_Webkatalog_MOCKUP.html", 500)):
     pf = os.path.join(AUSGABE, name)
     if not os.path.exists(pf): F(f"{name} fehlt")
     elif os.path.getsize(pf) // 1024 < mindest: F(f"{name} ist auffällig klein")

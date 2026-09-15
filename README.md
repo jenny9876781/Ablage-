@@ -43,7 +43,6 @@ Maße fehlen durchgängig – die Spalte `Maße` ist dafür vorbereitet.
 | `02_Angebot_Klinik.xlsx` | Auswahlliste für die Klinik: Fotos, Einzelpositionen mit Wunschmengen-Spalten, Paketangebot |
 | `03_Katalog_Klinik.pdf` | Bildkatalog nach Räumen, 23 Seiten, mit Positionsübersicht und Verkaufsbedingungen |
 | `04_Webkatalog_MOCKUP.html` | Muster für den passwortgeschützten Katalog auf kikripp.de |
-| `05_Arbeitsanweisung.pdf` | Arbeitsanweisung zum Ausdrucken und Aushändigen |
 
 ## Design
 
@@ -91,10 +90,8 @@ Voraussetzungen: `python3`, `openpyxl`, `Pillow`, `pillow-heif`, Chromium (für 
 
 ## Arbeitsanweisung
 
-`ARBEITSANWEISUNG.md` (und als PDF `ausgabe/05_Arbeitsanweisung.pdf`) beschreibt den Ablauf für
-Mitarbeitende: Etikettierung, Fotografieren, Übergabe an Claude, Preisfreigabe, Verkauf,
-Rechnungen, Kassenbuch und Verkaufstag — samt Checklisten und der Abgrenzung, was Mensch und
-was Claude macht.
+`ARBEITSANWEISUNG.md` — eine Seite Fließtext: Etikettieren, Fotografieren, Übergabe an Claude,
+Preisfreigabe, Verkauf eintragen, Rechnungen und Kasse.
 
 ## Offene Punkte
 

@@ -120,7 +120,6 @@ python3 scripts/build_artikelstamm_xlsx.py
 python3 scripts/build_angebot_xlsx.py
 python3 scripts/build_katalog_pdf.py
 python3 scripts/build_webkatalog_mockup.py
-python3 scripts/build_arbeitsanweisung_pdf.py   # nur wenn ARBEITSANWEISUNG.md geändert wurde
 ```
 
 ### Pflichtprüfung vor der Übergabe

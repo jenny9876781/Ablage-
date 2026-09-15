@@ -348,7 +348,12 @@ const IV   = "{base64.b64encode(iv).decode()}";
 const DATEN = "{nutzlast}";
 {ersetze(SKRIPT)}
 
-const roh = s => Uint8Array.from(atob(s), c => c.charCodeAt(0));
+function roh(s) {{                     // kein fetch('data:...') - das faellt unter connect-src
+  const bin = atob(s);
+  const u = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) u[i] = bin.charCodeAt(i);
+  return u;
+}}
 
 async function oeffnen(pw){{
   const km = await crypto.subtle.importKey('raw', new TextEncoder().encode(pw),
@@ -356,16 +361,19 @@ async function oeffnen(pw){{
   const key = await crypto.subtle.deriveKey(
     {{name:'PBKDF2', salt: roh(SALZ), iterations: 210000, hash:'SHA-256'}},
     km, {{name:'AES-GCM', length:256}}, false, ['decrypt']);
-  const nutz = await (await fetch('data:application/octet-stream;base64,' + DATEN)).arrayBuffer();
-  const klar = await crypto.subtle.decrypt({{name:'AES-GCM', iv: roh(IV)}}, key, nutz);
+  const klar = await crypto.subtle.decrypt({{name:'AES-GCM', iv: roh(IV)}}, key, roh(DATEN));
   return JSON.parse(new TextDecoder().decode(klar));
 }}
 
 document.getElementById('sperrform').addEventListener('submit', async e => {{
   e.preventDefault();
   const btn = document.getElementById('btn-auf'), fehler = document.getElementById('fehler');
-  const pw = document.getElementById('pw').value;
+  const pw = document.getElementById('pw').value.trim();   // gegen Leerzeichen aus der Zwischenablage
   if(!pw){{ fehler.textContent = 'Bitte Passwort eingeben.'; return; }}
+  if(!(window.crypto && window.crypto.subtle)){{
+    fehler.textContent = 'Dieser Katalog muss über den Link geöffnet werden, nicht als gespeicherte Datei.';
+    return;
+  }}
   btn.disabled = true; btn.textContent = 'Wird geöffnet …'; fehler.textContent = '';
   try {{
     ARTIKEL = await oeffnen(pw);
@@ -373,7 +381,11 @@ document.getElementById('sperrform').addEventListener('submit', async e => {{
     document.getElementById('inhalt').hidden = false;
     start();
   }} catch (err) {{
-    fehler.textContent = 'Passwort falsch. Bitte noch einmal versuchen.';
+    const falsch = err && err.name === 'OperationError';
+    fehler.textContent = falsch
+      ? 'Passwort falsch. Bitte noch einmal versuchen.'
+      : 'Der Katalog lässt sich hier nicht öffnen (' + ((err && err.name) || 'Fehler') + ').';
+    console.error('Entschlüsselung fehlgeschlagen:', err);
     btn.disabled = false; btn.textContent = 'Katalog öffnen';
     document.getElementById('pw').select();
   }}

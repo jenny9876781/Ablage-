@@ -42,7 +42,8 @@ Maße fehlen durchgängig – die Spalte `Maße` ist dafür vorbereitet.
 | `01_Artikelstamm_kikripp.xlsx` | Arbeitsdatei für OneDrive. Blätter: Anleitung · Artikelstamm · Verkaufsübersicht · Rechnungen (DATEV) · Kasse |
 | `02_Angebot_Klinik.xlsx` | Auswahlliste für die Klinik: Fotos, Einzelpositionen mit Wunschmengen-Spalten, Paketangebot |
 | `03_Katalog_Klinik.pdf` | Bildkatalog nach Räumen, 23 Seiten, mit Positionsübersicht und Verkaufsbedingungen |
-| `04_Webkatalog_MOCKUP.html` | Muster für den passwortgeschützten Katalog auf kikripp.de |
+| `04_Webkatalog_MOCKUP.html` | Muster des Katalogs, offline lauffähig, ohne Verschlüsselung |
+| `06_Webkatalog_geschuetzt.html` | dieselbe Seite mit AES-verschlüsselten Daten – als Artifact veröffentlicht |
 
 ## Design
 
@@ -72,7 +73,7 @@ python3 scripts/make_signet.py              # nur wenn sich die Markenfarbe geä
 python3 scripts/build_artikelstamm_xlsx.py
 python3 scripts/build_angebot_xlsx.py
 python3 scripts/build_katalog_pdf.py
-python3 scripts/build_webkatalog_mockup.py
+python3 scripts/build_webkatalog.py --geschuetzt 'sale4kids_2026'
 
 # 4. Vor der Übergabe prüfen – meldet Fehler und rechnet die Summen nach:
 python3 scripts/pruefen.py

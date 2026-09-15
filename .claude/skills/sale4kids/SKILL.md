@@ -119,7 +119,7 @@ python3 scripts/make_signet.py                # nur wenn sich Farbe_Rot geänder
 python3 scripts/build_artikelstamm_xlsx.py
 python3 scripts/build_angebot_xlsx.py
 python3 scripts/build_katalog_pdf.py
-python3 scripts/build_webkatalog_mockup.py
+python3 scripts/build_webkatalog.py            # + --geschuetzt PASSWORT für die Fassung zum Veröffentlichen
 ```
 
 ### Pflichtprüfung vor der Übergabe
@@ -185,7 +185,22 @@ Alle Werte stehen in `daten/design.csv` und im Blatt „Design" der Arbeitsmappe
 
 ---
 
-## 7. Offene Punkte (Stand 15.09.2026)
+## 7. Veröffentlichte Fassung
+
+`scripts/build_webkatalog.py --geschuetzt PASSWORT` erzeugt zusätzlich
+`ausgabe/06_Webkatalog_geschuetzt.html`. Darin sind die Artikeldaten samt Bildern mit
+AES-256-GCM verschlüsselt, der Schlüssel wird im Browser aus dem Passwort abgeleitet
+(PBKDF2-SHA256, 210.000 Runden) — ohne Passwort stehen die Daten nicht in der Seite.
+
+Diese Fassung wird als Artifact veröffentlicht. **Sie funktioniert nur über HTTPS**, nicht als
+heruntergeladene Datei: `crypto.subtle` gibt es im Browser nur im sicheren Kontext. Für den
+Offline-Versand ist `04_Webkatalog_MOCKUP.html` gedacht (unverschlüsselt, dafür überall lauffähig).
+
+Nach inhaltlichen Änderungen die geschützte Fassung neu erzeugen und **dieselbe URL**
+aktualisieren (gleicher Dateipfad in derselben Unterhaltung, sonst `url` mitgeben).
+Aktuelle Adresse: https://claude.ai/artifact/HdDGxJMQAWQ96Sy6z6Po4d
+
+## 8. Offene Punkte (Stand 15.09.2026)
 
 - **Logo:** liegt nur als Bildschirmbild vor. Der Schriftzug „KIKRIPP" ist derzeit gesetzter Text,
   das Signet ist nachgebaut. Sobald eine Logodatei kommt: `assets/kopflogo.png` ersetzen und

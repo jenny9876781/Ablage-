@@ -16,8 +16,12 @@ STANDARD = os.path.join(AUSGABE, "01_Artikelstamm_kikripp.xlsx")
 
 # Spalten, die aus der Arbeitsmappe zurückwandern (Excel-Spalte -> CSV-Spalte)
 UEBERNEHMEN = ["Bezeichnung", "Beschreibung", "Kategorie", "Raum", "Menge", "Einheit",
-               "Zustand", "Maße", "Wertklasse", "Aktiv", "Preis_netto", "Preisbasis",
-               "Versand", "Mengenhinweis", "Bemerkung"]
+               "Zustand", "Maße", "Wertklasse", "Aktiv", "Anlagennr", "Anschaffungswert_netto",
+               "Preis_netto", "Preisbasis", "Versand", "Foto", "Status", "Kanal",
+               "Reserviert_für", "Verkauft_Menge", "Verkaufspreis_netto", "Verkaufsdatum",
+               "Käufer", "Rechnungsnr", "Zahlung", "Zahlart", "Abholtermin",
+               "Mengenhinweis", "Bemerkung"]
+GELDFELDER = {"Preis_netto", "Anschaffungswert_netto", "Verkaufspreis_netto"}
 
 
 def zahl_aus(v):
@@ -41,6 +45,10 @@ def einlesen(xlsx):
         raise SystemExit(f"Blatt „Artikelstamm“ fehlt in {xlsx}")
     ws = wb["Artikelstamm"]
     kopf = {c.value: c.column for c in ws[2] if c.value}
+    if "ArtNr" not in kopf:
+        raise SystemExit("In Zeile 2 des Blattes „Artikelstamm“ steht keine Spalte „ArtNr“. "
+                         "Wurde eine Zeile eingefügt oder gelöscht? Bitte die Kopfzeile wieder "
+                         "auf Zeile 2 bringen.")
     fehlend = [s for s in UEBERNEHMEN if s not in kopf]
     if fehlend:
         print("  Hinweis: diese Spalten fehlen in der Mappe und bleiben unverändert:", ", ".join(fehlend))
@@ -53,8 +61,11 @@ def einlesen(xlsx):
         for sp in UEBERNEHMEN:
             if sp in kopf:
                 v = ws.cell(row=r, column=kopf[sp]).value
-                satz[sp] = zahl_aus(v) if sp == "Preis_netto" else ("" if v is None else str(v).strip())
-        neu[str(artnr).strip()] = satz
+                satz[sp] = zahl_aus(v) if sp in GELDFELDER else ("" if v is None else str(v).strip())
+        nr = str(artnr).strip()
+        if nr in neu:
+            print(f"  ACHTUNG: Artikelnummer {nr} kommt mehrfach vor – es gilt die letzte Zeile.")
+        neu[nr] = satz
 
     with open(CSV_PFAD, encoding="utf-8") as f:
         alt = list(csv.DictReader(f, delimiter=";"))

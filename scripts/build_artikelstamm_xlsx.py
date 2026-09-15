@@ -76,7 +76,7 @@ AUSWAHL = {
     "Zahlart":    '"Überweisung,bar,PayPal"',
 }
 
-daten = lade_artikel()
+daten = lade_artikel(nur_aktive=False)   # entfallene Zeilen bleiben sichtbar
 Z0, Z1 = 3, 2 + len(daten)
 
 wb = Workbook()
@@ -174,10 +174,6 @@ for j, art in enumerate(daten):
         elif name == "Umsatz_netto":
             wert = (f'=IF({L("Verkauft_Menge")}{r}="","",'
                     f'{L("Verkauft_Menge")}{r}*{L("Verkaufspreis_netto")}{r})')
-        elif name == "Status":
-            wert = "verfügbar"
-        elif name == "Kanal":
-            wert = "Klinik"
         else:
             wert = art.get(name) or None
         c = ws.cell(row=r, column=IDX[name], value=wert)
@@ -206,6 +202,10 @@ for wert, farbe in (("reserviert", "E4E4E4"), ("verkauft", "C9C9C9")):
 wk = f"{L('Wertklasse')}{Z0}:{L('Wertklasse')}{Z1}"
 ws.conditional_formatting.add(wk, CellIsRule(operator="equal", formula=['"A"'],
     font=Font(name=FONT, size=10, bold=True, color=ROT)))
+ak = f"{L('Aktiv')}{Z0}:{L('Aktiv')}{Z1}"
+ws.conditional_formatting.add(ak, CellIsRule(operator="equal", formula=['"entfällt"'],
+    fill=PatternFill("solid", bgColor="C9C9C9"),
+    font=Font(name=FONT, size=10, italic=True, color="7A7A7A")))
 
 # =============================================================================
 # Blatt 3: Verkaufsübersicht

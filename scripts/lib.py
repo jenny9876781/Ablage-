@@ -21,8 +21,11 @@ def lade_artikel(nur_aktive=True):
         d = {k: (v or "").strip() for k, v in r.items()}
         if nur_aktive and d.get("Aktiv", "ja").lower() == "entfällt":
             continue
-        d["Preis_netto"] = zahl(d.get("Preis_netto"))
+        # Geld- und Mengenfelder müssen Zahlen sein, sonst rechnen die Excel-Formeln nicht
+        for feld in ("Preis_netto", "Anschaffungswert_netto", "Verkaufspreis_netto"):
+            d[feld] = zahl(d.get(feld))
         d["Menge"] = int(d["Menge"]) if d.get("Menge", "").isdigit() else 0
+        d["Verkauft_Menge"] = int(d["Verkauft_Menge"]) if d.get("Verkauft_Menge", "").isdigit() else None
         d["Positionswert"] = (d["Preis_netto"] or 0) * d["Menge"]
         out.append(d)
     return out

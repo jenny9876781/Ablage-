@@ -30,6 +30,7 @@ Maße fehlen durchgängig – die Spalte `Maße` ist dafür vorbereitet.
 |---|---|
 | `daten/` | `artikel_kikripp.csv` (Artikelstamm) und `design.csv` (Farben, Firmendaten, Konditionen) |
 | `assets/` | Bollenhut-Signet als SVG und PNG, Kopflogo |
+| `.claude/skills/sale4kids/` | Skill: Stichwort „sale4kids“ löst den ganzen Ablauf aus |
 | `fotos/` | Artikelfotos `F-001.jpg` … `F-112.jpg`, sortiert nach Aufnahmezeit |
 | `scripts/` | Generatoren – erzeugen aus den Daten die Ausgabedateien |
 | `ausgabe/` | Die fertigen Dateien |
@@ -42,6 +43,7 @@ Maße fehlen durchgängig – die Spalte `Maße` ist dafür vorbereitet.
 | `02_Angebot_Klinik.xlsx` | Auswahlliste für die Klinik: Fotos, Einzelpositionen mit Wunschmengen-Spalten, Paketangebot |
 | `03_Katalog_Klinik.pdf` | Bildkatalog nach Räumen, 23 Seiten, mit Positionsübersicht und Verkaufsbedingungen |
 | `04_Webkatalog_MOCKUP.html` | Muster für den passwortgeschützten Katalog auf kikripp.de |
+| `05_Arbeitsanweisung.pdf` | Arbeitsanweisung zum Ausdrucken und Aushändigen |
 
 ## Design
 
@@ -72,7 +74,13 @@ python3 scripts/build_artikelstamm_xlsx.py
 python3 scripts/build_angebot_xlsx.py
 python3 scripts/build_katalog_pdf.py
 python3 scripts/build_webkatalog_mockup.py
+
+# 4. Vor der Übergabe prüfen – meldet Fehler und rechnet die Summen nach:
+python3 scripts/pruefen.py
 ```
+
+Kürzer geht es über den Skill: **„sale4kids"** in Claude Code eingeben. Der Skill kennt den
+ganzen Ablauf, die Konventionen und die Prüfschritte.
 
 `rueckeinlesen.py` übernimmt Bezeichnung, Beschreibung, Kategorie, Raum, Menge, Einheit,
 Zustand, Maße, Wertklasse, Preis, Preisbasis, Versand und Bemerkungen sowie alle Werte des
@@ -80,6 +88,13 @@ Design-Blattes. Gelöschte Zeilen werden **nicht** entfernt, sondern auf `Aktiv 
 gesetzt; selbst ergänzte Zeilen werden übernommen (dann ohne Foto).
 
 Voraussetzungen: `python3`, `openpyxl`, `Pillow`, `pillow-heif`, Chromium (für die PDF-Ausgabe).
+
+## Arbeitsanweisung
+
+`ARBEITSANWEISUNG.md` (und als PDF `ausgabe/05_Arbeitsanweisung.pdf`) beschreibt den Ablauf für
+Mitarbeitende: Etikettierung, Fotografieren, Übergabe an Claude, Preisfreigabe, Verkauf,
+Rechnungen, Kassenbuch und Verkaufstag — samt Checklisten und der Abgrenzung, was Mensch und
+was Claude macht.
 
 ## Offene Punkte
 

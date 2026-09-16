@@ -102,7 +102,8 @@ python3 scripts/build_artikelstamm_xlsx.py
 Am Plugin gearbeitet? Dann vorher:
 
 ```bash
-php wordpress/tests/test-logik.php     # 43 Prüfungen, muss 0 Fehler melden
+php wordpress/tests/test-logik.php     # 51 Prüfungen, muss 0 Fehler melden
+php wordpress/tests/test-kette.php     # Datenbasis -> Import -> Katalog
 cd wordpress && ./paketieren.sh        # erzeugt ausgabe/kikripp-katalog.zip
 ```
 
@@ -124,12 +125,14 @@ Passwortschutz, Reservierung mit Mailbenachrichtigung an `jennyp@kikripp.de`, ge
 Reserviert-Status für alle Besucher, Teilmengen („5 von 10 verfügbar"), sieben Tage Frist,
 Stornieren und Bezahltsetzen in der Verwaltung.
 
-Einrichtung Schritt für Schritt: **`WEBSHOP_EINRICHTEN.md`**.
+## Anleitungen
 
-## Arbeitsanweisung
-
-`ARBEITSANWEISUNG.md` — eine Seite Fließtext: Etikettieren, Fotografieren, Übergabe an Claude,
-Preisfreigabe, Verkauf eintragen, Rechnungen und Kasse.
+| Datei | Inhalt |
+|---|---|
+| `WEBSHOP_EINRICHTEN.md` | Plugin installieren, Fotos hochladen, Artikel importieren, Seite anlegen, testen |
+| `ARTIKEL_VERWALTEN.md` | Artikel streichen, Preise und Mengen ändern, Verkäufe zurückholen, was in WordPress und was in der Excel gemacht wird |
+| `FOTOGRAFIEREN.md` | Etikettieren, Aufnahmen, Datenschutz, was auf den Zettel gehört |
+| `ARBEITSANWEISUNG.md` | eine Seite Fließtext über den ganzen Ablauf |
 
 ## Offene Punkte
 

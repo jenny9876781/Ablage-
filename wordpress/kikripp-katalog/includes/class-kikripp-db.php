@@ -254,6 +254,25 @@ class Kikripp_DB {
         return $liste;
     }
 
+    /**
+     * Nimmt alle Artikel aus dem Katalog, die in der Importdatei nicht mehr vorkommen.
+     * Gelöscht wird nichts – an den Zeilen können Reservierungen und Verkäufe hängen.
+     * Gibt die Artikelnummern zurück, die dabei stillgelegt wurden.
+     */
+    public static function fehlende_stilllegen(array $gesehen) {
+        global $wpdb;
+        if (!$gesehen) { return []; }
+        $platzhalter = implode(',', array_fill(0, count($gesehen), '%s'));
+        $betroffen = $wpdb->get_col($wpdb->prepare(
+            'SELECT artnr FROM ' . self::t_artikel() . "
+              WHERE artnr NOT IN ($platzhalter) AND (im_katalog = 1 OR aktiv = 1)", $gesehen));
+        if (!$betroffen) { return []; }
+        $wpdb->query($wpdb->prepare(
+            'UPDATE ' . self::t_artikel() . " SET im_katalog = 0, aktiv = 0
+              WHERE artnr NOT IN ($platzhalter) AND (im_katalog = 1 OR aktiv = 1)", $gesehen));
+        return $betroffen;
+    }
+
     /** Vorgang auf bezahlt/storniert setzen oder die Frist verlängern. */
     public static function vorgang_status($id, $status) {
         global $wpdb;

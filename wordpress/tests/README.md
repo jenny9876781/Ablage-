@@ -8,12 +8,23 @@ nichts ist nachgebaut.
 ## Logiktest
 
 ```bash
-php tests/test-logik.php          # 43 Prüfungen
+php tests/test-logik.php          # 51 Prüfungen
 ```
 
 Teil- und Vollreservierung, Überbuchung, Preiseinfrieren, Stornieren, Ablauf und
 Verlängerung, Bezahltsetzen, Mailversand samt Fehlerfall, Testdaten löschen, ungültige
-Eingaben, stillgelegte Artikel.
+Eingaben, stillgelegte Artikel, und Artikel, die aus der Importdatei verschwinden.
+
+## Kettentest
+
+```bash
+php tests/test-kette.php
+```
+
+Spielt die echte `ausgabe/katalog_import.json` ein und prüft den Weg, den der Nutzer geht:
+Artikel auf „entfällt" setzen, Artikel ganz aus der Datei streichen, Artikel zurückholen,
+Preise ändern — und dass Reservierungen dabei jedes Mal überleben und ihren eingefrorenen
+Preis behalten.
 
 ## Browsertest
 

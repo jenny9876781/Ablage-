@@ -66,27 +66,26 @@ Veröffentlichen. Die Seite trägt automatisch ein „nicht indexieren“ für S
 sie taucht also nicht bei Google auf – nur wer den Link und das Passwort hat, kommt rein.
 
 Damit unter **www.kikripp.de** direkt der Katalog erscheint, geh auf
-**Einstellungen → Lesen** und wähl bei *Deine Homepage zeigt* die Option *Eine statische
-Seite*, dann als Homepage die neue Katalogseite.
+**Einstellungen → Lesen**, wähl bei *Deine Homepage zeigt* die Option *Eine statische
+Seite* und dort als Homepage die neue Katalogseite. Speichern. Fertig – wer kikripp.de
+eintippt, landet jetzt im Katalog.
 
-Eins solltest du dabei wissen: Dann sieht **jeder**, der kikripp.de aufruft, als Erstes
-die Passwortabfrage – auch Eltern, Behörden oder Bewerberinnen. Wenn dir das recht ist,
-mach es so. Mir wäre lieber, du lässt die Startseite stehen, kürzt sie auf ein paar Sätze
-zur Auflösung ein und setzt den Katalog auf `www.kikripp.de/katalog` mit einem gut
-sichtbaren Knopf darauf. Der Link ist dann genauso kurz zu diktieren, und die Firma
-steht nicht hinter einem Passwort. Entscheide du.
+Setz über den Kurzbefehl noch ein paar Zeilen, damit jemand, der ohne Passwort kommt,
+weiß worum es geht. Der Inhalt der Seite sieht dann so aus:
 
-Text, den du über den Kurzbefehl auf die Seite setzen kannst – er steht dann über der
-Passwortabfrage und erklärt, worum es geht:
+    Artikelkatalog aus der Betriebsauflösung
 
-> **Artikelkatalog aus der Betriebsauflösung**
->
-> Wir lösen unseren Kindergarten auf und geben die komplette Einrichtung ab – Möbel,
-> Spielmaterial, Küche, Technik und Dekoration. Den vollständigen Katalog mit Fotos,
-> Preisen und tagesaktueller Verfügbarkeit öffnen Sie mit dem Passwort, das Sie von uns
-> erhalten haben. Sie haben noch keins? Schreiben Sie uns kurz an jennyp@kikripp.de.
->
-> Abholung nach Terminvereinbarung in Villingen-Schwenningen.
+    Wir lösen unseren Kindergarten auf und geben die komplette Einrichtung ab – Möbel,
+    Spielmaterial, Küche, Technik und Dekoration. Den vollständigen Katalog mit Fotos,
+    Preisen und tagesaktueller Verfügbarkeit öffnen Sie mit dem Passwort, das Sie von uns
+    erhalten haben. Sie haben noch keins? Schreiben Sie uns kurz an jennyp@kikripp.de.
+
+    Abholung nach Terminvereinbarung in Villingen-Schwenningen.
+
+    [kikripp_katalog]
+
+Die alte Startseite ist damit nicht weg, sie ist nur nicht mehr die erste Seite. Willst du
+sie weiter erreichbar halten, nimm sie ins Menü auf (**Design → Menüs**).
 
 ## 6. Einmal selbst durchtesten
 

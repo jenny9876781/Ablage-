@@ -153,7 +153,8 @@ kikripp.de hat ihn abgelöst. `build_katalog_pdf.py` gibt es nicht mehr.
 Am Webshop-Plugin geändert? Dann zusätzlich:
 
 ```bash
-php wordpress/tests/test-logik.php             # 43 Prüfungen, muss 0 Fehler melden
+php wordpress/tests/test-logik.php             # 51 Prüfungen, muss 0 Fehler melden
+php wordpress/tests/test-kette.php             # Datenbasis -> Import -> Katalog
 cd wordpress && ./paketieren.sh                # erzeugt ausgabe/kikripp-katalog.zip
 ```
 
@@ -250,12 +251,15 @@ eine zweite Schiene einbaut, vergibt Ware doppelt.
 | Alle Antworten mit `Cache-Control: no-store` | das Cache-Plugin der Seite würde sonst alte Bestände ausliefern |
 | Die Katalogseite liefert nur eine statische Hülle | damit der Seiten-Cache nichts Veraltetes zeigt |
 | Bezahlte Artikel fallen aus dem Katalog, nicht aus der Datenbank | die Verkaufsdaten werden gebraucht |
+| Artikel, die nicht mehr in der Importdatei stehen, werden stillgelegt statt gelöscht | an ihnen hängen Reservierungen und Verkäufe |
+| `build_katalog_import.py` lädt mit `nur_aktive=False` | sonst erfährt WordPress nie, dass eine Position entfallen ist |
 | Fotos kommen aus der Mediathek, nicht ins ZIP | sonst wird das Plugin 25 MB groß |
 
 ### Prüfen
 
 ```bash
-php wordpress/tests/test-logik.php     # 43 Prüfungen gegen eine SQLite-Attrappe
+php wordpress/tests/test-logik.php     # 51 Prüfungen gegen eine SQLite-Attrappe
+php wordpress/tests/test-kette.php     # ganze Kette mit der echten Importdatei
 ```
 
 Deckt ab: Teil- und Vollreservierung, Überbuchung, Preiseinfrieren, Stornieren, Ablauf und

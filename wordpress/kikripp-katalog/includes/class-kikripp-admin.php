@@ -276,7 +276,22 @@ class Kikripp_Admin {
             }
         }
 
+        // Artikel, die in der Importdatei gar nicht mehr vorkommen, werden aus dem Katalog
+        // genommen – aber nicht gelöscht, denn an ihnen können Reservierungen und
+        // Verkäufe hängen. Sonst bliebe eine gestrichene Position für immer sichtbar.
+        $verschwunden = Kikripp_DB::fehlende_stilllegen($gesehen);
+        // Wer eine Position streicht, auf der noch eine Reservierung liegt, muss das erfahren.
+        foreach ($verschwunden as $weg) {
+            $b = $belegung[$weg] ?? null;
+            if ($b && ($b['reserviert'] > 0 || $b['bezahlt'] > 0)) { $reserviert_entfernt[] = $weg; }
+        }
+
         $meldung = sprintf('Import abgeschlossen: %d neu, %d aktualisiert.', $neu, $geaendert);
+        if ($verschwunden) {
+            $meldung .= sprintf(' %d Artikel standen nicht mehr in der Datei und wurden aus dem '
+                              . 'Katalog genommen (%s).', count($verschwunden),
+                              implode(', ', array_slice($verschwunden, 0, 15)));
+        }
         if ($ohne_bild > 0) {
             $meldung .= sprintf(' %d Artikel ohne gefundenes Foto – bitte prüfen, ob die Bilder in der Mediathek liegen.', $ohne_bild);
         }

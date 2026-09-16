@@ -151,5 +151,20 @@ $wpdb->update(Kikripp_DB::t_artikel(), ['im_katalog' => 0], ['artnr' => 'K-003']
 pruefe('nicht mehr im Katalog', katalog_nach('K-003'), null);
 pruefe('auch nicht mehr reservierbar', is_wp_error(Kikripp_DB::reservieren(kontakt(), ['K-003' => 1])), true);
 
+titel('14. Artikel, der aus der Importdatei verschwunden ist');
+// K-002 kommt in der neuen Datei nicht mehr vor, K-001 und K-003 schon.
+$vorher = katalog_nach('K-002');
+pruefe('K-002 ist vorher im Katalog', $vorher !== null, true);
+$betroffen = Kikripp_DB::fehlende_stilllegen(['K-001', 'K-003']);
+pruefe('genau ein Artikel stillgelegt', $betroffen, ['K-002']);
+pruefe('K-002 ist aus dem Katalog verschwunden', katalog_nach('K-002'), null);
+pruefe('K-002 ist auch nicht mehr reservierbar',
+       is_wp_error(Kikripp_DB::reservieren(kontakt(), ['K-002' => 1])), true);
+pruefe('K-002 steht aber noch in der Datenbank',
+       (int) $wpdb->get_var("SELECT COUNT(*) FROM " . Kikripp_DB::t_artikel() . " WHERE artnr = 'K-002'"), 1);
+pruefe('K-001 blieb unberührt', katalog_nach('K-001') !== null, true);
+pruefe('leere Liste legt nichts still', Kikripp_DB::fehlende_stilllegen([]), []);
+pruefe('zweiter Lauf legt nichts mehr still', Kikripp_DB::fehlende_stilllegen(['K-001', 'K-003']), []);
+
 printf("\n== Ergebnis: %d Prüfungen, %d Fehler ==\n", $geprueft, $fehler);
 exit($fehler > 0 ? 1 : 0);

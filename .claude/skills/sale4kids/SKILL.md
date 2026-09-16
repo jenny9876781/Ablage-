@@ -200,6 +200,9 @@ Nach inhaltlichen Änderungen die geschützte Fassung neu erzeugen und **dieselb
 aktualisieren (gleicher Dateipfad in derselben Unterhaltung, sonst `url` mitgeben).
 Aktuelle Adresse: https://claude.ai/artifact/HdDGxJMQAWQ96Sy6z6Po4d
 
+**Das Passwort steht bewusst nicht im Repository.** Es beim Nutzer erfragen, wenn die geschützte
+Fassung neu erzeugt werden soll, und es nirgends in eine Datei schreiben.
+
 ## 8. Offene Punkte (Stand 15.09.2026)
 
 - **Logo:** liegt nur als Bildschirmbild vor. Der Schriftzug „KIKRIPP" ist derzeit gesetzter Text,

@@ -73,7 +73,7 @@ python3 scripts/make_signet.py              # nur wenn sich die Markenfarbe geä
 python3 scripts/build_artikelstamm_xlsx.py
 python3 scripts/build_angebot_xlsx.py
 python3 scripts/build_katalog_pdf.py
-python3 scripts/build_webkatalog.py --geschuetzt 'sale4kids_2026'
+python3 scripts/build_webkatalog.py --geschuetzt 'PASSWORT'   # Passwort bewusst nicht im Repo
 
 # 4. Vor der Übergabe prüfen – meldet Fehler und rechnet die Summen nach:
 python3 scripts/pruefen.py

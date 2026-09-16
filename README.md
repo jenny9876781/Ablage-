@@ -86,6 +86,7 @@ python3 scripts/build_artikelstamm_xlsx.py
 python3 scripts/build_angebot_xlsx.py
 python3 scripts/build_katalog_import.py                        # Importdatei für den Webshop
 python3 scripts/build_webkatalog.py --geschuetzt 'PASSWORT'    # Passwort bewusst nicht im Repo
+python3 scripts/build_anleitungen_pdf.py                       # Anleitungen als PDF
 
 # 4. Vor der Übergabe prüfen – meldet Fehler und rechnet die Summen nach:
 python3 scripts/pruefen.py
@@ -132,6 +133,9 @@ Stornieren und Bezahltsetzen in der Verwaltung.
 | `WEBSHOP_EINRICHTEN.md` | Plugin installieren, Fotos hochladen, Artikel importieren, Seite anlegen, testen |
 | `ARTIKEL_VERWALTEN.md` | Artikel streichen, Preise und Mengen ändern, Verkäufe zurückholen, was in WordPress und was in der Excel gemacht wird |
 | `FOTOGRAFIEREN.md` | Etikettieren, Aufnahmen, Datenschutz, was auf den Zettel gehört |
+
+Alle vier gibt es auch als PDF in `ausgabe/` (`A1`–`A4`) – Markdown lässt sich unter Windows
+nicht ohne Weiteres öffnen. Erzeugt werden sie mit `scripts/build_anleitungen_pdf.py`.
 | `ARBEITSANWEISUNG.md` | eine Seite Fließtext über den ganzen Ablauf |
 
 ## Offene Punkte

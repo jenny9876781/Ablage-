@@ -145,7 +145,11 @@ python3 scripts/build_artikelstamm_xlsx.py
 python3 scripts/build_angebot_xlsx.py
 python3 scripts/build_katalog_import.py        # Importdatei für den Webshop
 python3 scripts/build_webkatalog.py            # + --geschuetzt PASSWORT für die Fassung zum Veröffentlichen
+python3 scripts/build_anleitungen_pdf.py       # nur wenn sich eine Anleitung geändert hat
 ```
+
+> Die Nutzerin kann **keine .md-Dateien öffnen** (Windows). Anleitungen deshalb immer als
+> PDF mitschicken, nicht als Markdown.
 
 Der **PDF-Katalog ist entfallen** (Entscheidung des Nutzers, September 2026); der Webshop auf
 kikripp.de hat ihn abgelöst. `build_katalog_pdf.py` gibt es nicht mehr.

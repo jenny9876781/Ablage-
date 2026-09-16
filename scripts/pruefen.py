@@ -101,7 +101,9 @@ print("\n== 4. Ausgabedateien ==")
 # Der PDF-Katalog ist entfallen; der Webkatalog auf kikripp.de hat ihn abgelöst.
 for name, mindest in (("01_Artikelstamm_kikripp.xlsx", 20), ("02_Angebot_Klinik.xlsx", 500),
                       ("04_Webkatalog_MOCKUP.html", 500), ("06_Webkatalog_geschuetzt.html", 500),
-                      ("katalog_import.json", 10)):
+                      ("katalog_import.json", 10),
+                      ("A1_Webshop_einrichten.pdf", 20), ("A2_Artikel_verwalten.pdf", 20),
+                      ("A3_Fotografieren.pdf", 20), ("A4_Arbeitsanweisung.pdf", 20)):
     pf = os.path.join(AUSGABE, name)
     if not os.path.exists(pf): F(f"{name} fehlt")
     elif os.path.getsize(pf) // 1024 < mindest: F(f"{name} ist auffällig klein")

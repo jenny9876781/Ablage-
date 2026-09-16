@@ -101,6 +101,70 @@ SMTP-Zugang um.
 
 Zum Schluss: **Artikelkatalog → Einstellungen → Testreservierungen löschen**.
 
+## Wenn etwas nicht klappt
+
+### „Plugins" steht gar nicht im linken Menü
+
+Geh die vier Punkte der Reihe nach durch, es ist fast immer der erste oder der zweite.
+
+**1. Bist du als Administrator angemeldet?** Nur Administratoren sehen „Plugins".
+Als Redakteurin oder Autorin ist der Punkt unsichtbar. Klick oben rechts auf deinen Namen
+→ *Profil*. Wenn dort keine Rolle steht oder du unter **Benutzer** deinen eigenen Eintrag
+nicht bearbeiten kannst, bist du nicht Administratorin. Dann braucht es die Person, die den
+Zugang eingerichtet hat.
+
+**2. Läuft die Seite auf wordpress.com?** Schau auf die Adresse in der Browserzeile, während
+du im Backend bist. Steht dort `wordpress.com`, ist es die gehostete Variante – dort sind
+Plugins erst ab dem Business-Tarif erlaubt, vorher gibt es den Menüpunkt schlicht nicht.
+Steht dort `kikripp.de/wp-admin`, ist alles in Ordnung und es liegt an etwas anderem.
+
+**3. Ist es eine Multisite?** Dann liegen Plugins nicht in deiner Seite, sondern eine Ebene
+darüber. Oben in der schwarzen Leiste erscheint dann *Meine Websites* oder
+*Netzwerkverwaltung* – dort ist der Menüpunkt.
+
+**4. Hat der Hoster es gesperrt?** Manche Pakete mit „verwaltetem WordPress" schalten das
+Installieren ab. Dann fehlt der Punkt ebenfalls. Das lässt sich nur beim Hoster freischalten
+oder umgehen, indem der Ordner von Hand hochgeladen wird (siehe unten).
+
+### „Plugins" ist da, aber es fehlt „Installieren" oder „Plugin hochladen"
+
+Gleiche Ursache wie Punkt 4: Der Hoster hat das Ändern von Dateien gesperrt. Zwei Wege:
+
+- Beim Hoster anrufen und um Freischaltung bitten. Das Stichwort für die Hotline lautet
+  `DISALLOW_FILE_MODS` in der `wp-config.php`.
+- Oder das Plugin von Hand hochladen: `kikripp-katalog.zip` auf deinem Rechner entpacken,
+  dann über den Dateimanager des Hosters (oder FTP) den entstandenen Ordner
+  `kikripp-katalog` nach `wp-content/plugins/` legen. Danach steht es unter **Plugins →
+  Installierte Plugins** und muss nur noch aktiviert werden.
+
+### Das ZIP wird abgelehnt
+
+- *„Die Datei überschreitet die Höchstgröße"* – unwahrscheinlich, das Paket ist nur 25 KB.
+  Kommt die Meldung trotzdem, ist das Hochladen generell gesperrt: Weg von oben nehmen.
+- *„Das Paket konnte nicht installiert werden. Keine gültigen Plugins gefunden"* – dann ist
+  beim Herunterladen etwas mit der Datei passiert, meistens wurde sie unterwegs entpackt und
+  wieder gepackt. Lad sie hier noch einmal herunter und **nicht** vorher entpacken.
+
+### Nach dem Import steht „X Artikel ohne gefundenes Foto"
+
+Die Bilder liegen noch nicht in der Mediathek oder heißen anders. Schau unter **Medien**
+nach, ob `F-001.jpg` und die anderen da sind. Lad nach, was fehlt, und starte den Import
+einfach noch einmal – das schadet nie.
+
+### Die Testmail kommt nicht an
+
+Schau zuerst in den Spam-Ordner. Kommt sie auch dort nicht an, kann WordPress selbst keine
+Mails verschicken. Sag mir Bescheid, dann bauen wir den Versand über einen SMTP-Zugang um;
+die Reservierungen sind in der Zwischenzeit trotzdem gespeichert und unter
+**Artikelkatalog → Reservierungen** sichtbar.
+
+### Ich komme nicht weiter
+
+Mach ein Bildschirmfoto vom linken Menü und schreib dazu, welche Adresse oben in der
+Browserzeile steht. Damit sehe ich in der Regel sofort, woran es liegt.
+
+---
+
 ## Im laufenden Betrieb
 
 Unter **Artikelkatalog → Reservierungen** siehst du alle Vorgänge mit Ablaufdatum. Dort

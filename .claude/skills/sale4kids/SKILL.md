@@ -1,6 +1,6 @@
 ---
 name: sale4kids
-description: "Arbeitsablauf für die Auflösung und den Verkauf des Inventars der Kikripp GmbH (Kinderkrippe Villingen-Schwenningen). Auslösen bei dem Stichwort 'sale4kids', beim Hochladen neuer Artikelfotos (HEIC/JPG aus dem Haus), bei Rückgabe einer überarbeiteten Datei 01_Artikelstamm_kikripp.xlsx, oder bei Bitten wie 'neue Artikel aufnehmen', 'Angebot für die Klinik aktualisieren', 'Katalog neu erzeugen', 'Preise eingearbeitet', 'Fotos sind da'. Nicht verwenden für andere Verkaufs- oder Inventarprojekte."
+description: "Arbeitsablauf für die Auflösung und den Verkauf des Inventars der Kikripp GmbH (Kinderkrippe Villingen-Schwenningen). Auslösen bei dem Stichwort 'sale4kids', beim Hochladen neuer Artikelfotos (HEIC/JPG aus dem Haus), bei Rückgabe einer überarbeiteten Datei 01_Artikelstamm_kikripp.xlsx, bei einem Reservierungs-Export aus WordPress, bei Arbeiten am WordPress-Plugin kikripp-katalog, oder bei Bitten wie 'neue Artikel aufnehmen', 'Angebot für die Klinik aktualisieren', 'Katalog neu erzeugen', 'Webshop aktualisieren', 'Preise eingearbeitet', 'Fotos sind da', 'Reservierungen einlesen'. Nicht verwenden für andere Verkaufs- oder Inventarprojekte."
 ---
 
 # sale4kids — Inventarauflösung Kikripp GmbH
@@ -21,6 +21,7 @@ Ausgabedateien werden daraus erzeugt und sind jederzeit wegwerfbar. Die Datenbas
 | **Neue Fotos hochgeladen** | Ablauf A (erfassen) |
 | **Überarbeitete `01_Artikelstamm_kikripp.xlsx` hochgeladen** | Ablauf B (zurücklesen) |
 | **Beides** | erst B, dann A |
+| **Reservierungs-Export aus WordPress (CSV)** | Ablauf D (Verkäufe zurückholen) |
 | **Nur „sale4kids" ohne Anhang** | nachfragen, was ansteht; im Zweifel nur neu erzeugen (Ablauf C) |
 
 Immer endend mit **Ablauf C** (erzeugen, prüfen, ausliefern).
@@ -76,7 +77,8 @@ Spalten und Konventionen:
 | `Versand` | `nur Abholung` · `Versand möglich` · `Spedition` |
 | `Mengenhinweis` | **immer ausfüllen:** was auf dem Foto zu sehen ist, z. B. „ca. 8 Stück im Bild – bitte nachzählen" |
 | `Status` | `verfügbar` |
-| `Kanal` | `Klinik` |
+| `Kanal` | `Klinik` bei Neuaufnahme; das Rückeinlesen setzt später `Webkatalog` |
+| `Im_Katalog` | `ja`, wenn der Artikel im Webshop erscheinen soll, sonst `nein` |
 | übrige Verkaufsspalten | leer |
 
 ### A4. Preise schätzen
@@ -112,14 +114,47 @@ Größenordnung abweicht, oder eine Menge, die auf 0 gesetzt wurde.
 
 ---
 
-## 4. Ablauf C — erzeugen, prüfen, ausliefern
+## 4. Ablauf D — Verkäufe aus dem Webshop zurückholen
+
+Der Nutzer lädt in WordPress unter **Artikelkatalog → Reservierungen** eine CSV-Datei
+herunter und schickt sie her.
+
+```bash
+python3 scripts/reservierungen_einlesen.py <datei.csv>              # Probelauf
+python3 scripts/reservierungen_einlesen.py <datei.csv> --schreiben  # übernehmen
+```
+
+Übernommen werden `Status`, `Käufer`, `Reserviert_für`, `Verkauft_Menge`,
+`Verkaufspreis_netto` (als **Stückpreis** — der Artikelstamm multipliziert mit der Menge!),
+`Verkaufsdatum` und `Kanal`. **Rechnungsnummer, Zahlung und Zahlart bleiben unberührt** —
+die trägt der Mensch ein, sobald die Rechnung aus DATEV vorliegt.
+
+Ist ein Artikel nur teilweise verkauft, wird `Status = teilverkauft` gesetzt. Meldet das
+Skript überbuchte Artikel oder unbekannte Artikelnummern, **nicht schreiben**, sondern
+nachfragen — dann stimmt etwas zwischen Webshop und Datenbasis nicht.
+
+Danach immer Ablauf C.
+
+---
+
+## 5. Ablauf C — erzeugen, prüfen, ausliefern
 
 ```bash
 python3 scripts/make_signet.py                # nur wenn sich Farbe_Rot geändert hat
 python3 scripts/build_artikelstamm_xlsx.py
 python3 scripts/build_angebot_xlsx.py
-python3 scripts/build_katalog_pdf.py
+python3 scripts/build_katalog_import.py        # Importdatei für den Webshop
 python3 scripts/build_webkatalog.py            # + --geschuetzt PASSWORT für die Fassung zum Veröffentlichen
+```
+
+Der **PDF-Katalog ist entfallen** (Entscheidung des Nutzers, September 2026); der Webshop auf
+kikripp.de hat ihn abgelöst. `build_katalog_pdf.py` gibt es nicht mehr.
+
+Am Webshop-Plugin geändert? Dann zusätzlich:
+
+```bash
+php wordpress/tests/test-logik.php             # 43 Prüfungen, muss 0 Fehler melden
+cd wordpress && ./paketieren.sh                # erzeugt ausgabe/kikripp-katalog.zip
 ```
 
 ### Pflichtprüfung vor der Übergabe
@@ -157,7 +192,7 @@ angeben:
 
 ---
 
-## 5. Unverrückbare Regeln
+## 6. Unverrückbare Regeln
 
 | Regel | Grund |
 |---|---|
@@ -174,7 +209,7 @@ angeben:
 
 ---
 
-## 6. Gestaltung
+## 7. Gestaltung
 
 Rot `#C8102E` (Bollenhut), Schwarz `#1A1A1A`, Weiß, Papier `#F7F5F2`. **Rot nie flächig** — es
 markiert Preise, Eingabefelder und das Paketangebot. Statusfarben bewusst neutral (Grautöne),
@@ -185,26 +220,98 @@ Alle Werte stehen in `daten/design.csv` und im Blatt „Design" der Arbeitsmappe
 
 ---
 
-## 7. Veröffentlichte Fassung
+## 8. Der Webshop auf kikripp.de
 
-`scripts/build_webkatalog.py --geschuetzt PASSWORT` erzeugt zusätzlich
-`ausgabe/06_Webkatalog_geschuetzt.html`. Darin sind die Artikeldaten samt Bildern mit
-AES-256-GCM verschlüsselt, der Schlüssel wird im Browser aus dem Passwort abgeleitet
-(PBKDF2-SHA256, 210.000 Runden) — ohne Passwort stehen die Daten nicht in der Seite.
+Seit September 2026 läuft der Verkauf über ein eigenes WordPress-Plugin in
+`wordpress/kikripp-katalog/`. Es ersetzt den PDF-Katalog und die Wunschmengen-Spalten im
+Klinik-Angebot. **Es gibt genau einen Reservierungsweg: den Webshop.** Wer daneben noch
+eine zweite Schiene einbaut, vergibt Ware doppelt.
 
-Diese Fassung wird als Artifact veröffentlicht. **Sie funktioniert nur über HTTPS**, nicht als
-heruntergeladene Datei: `crypto.subtle` gibt es im Browser nur im sicheren Kontext. Für den
-Offline-Versand ist `04_Webkatalog_MOCKUP.html` gedacht (unverschlüsselt, dafür überall lauffähig).
+### Aufbau
 
-Nach inhaltlichen Änderungen die geschützte Fassung neu erzeugen und **dieselbe URL**
-aktualisieren (gleicher Dateipfad in derselben Unterhaltung, sonst `url` mitgeben).
-Aktuelle Adresse: https://claude.ai/artifact/HdDGxJMQAWQ96Sy6z6Po4d
+| Datei | Aufgabe |
+|---|---|
+| `kikripp-katalog.php` | Plugin-Kopf, Tabellen anlegen, Vorgabewerte |
+| `includes/class-kikripp-db.php` | drei Tabellen, Verfügbarkeit, Reservierung mit Sperre |
+| `includes/class-kikripp-zugang.php` | gemeinsames Passwort, signierter Keks |
+| `includes/class-kikripp-mail.php` | Benachrichtigung und Bestätigung |
+| `includes/class-kikripp-rest.php` | `/zugang`, `/artikel`, `/reservierung` |
+| `includes/class-kikripp-admin.php` | Reservierungen, Import, Einstellungen, CSV-Export |
+| `includes/class-kikripp-frontend.php` | Kurzbefehl `[kikripp_katalog]` |
+| `assets/katalog.css`, `assets/katalog.js` | Oberfläche |
 
-**Das Passwort steht bewusst nicht im Repository.** Es beim Nutzer erfragen, wenn die geschützte
-Fassung neu erzeugt werden soll, und es nirgends in eine Datei schreiben.
+### Was man dabei nicht kaputt machen darf
 
-## 8. Offene Punkte (Stand 15.09.2026)
+| Regel | Grund |
+|---|---|
+| Verfügbarkeit immer **rechnen**, nie mitzählen | ein mitgeführter Zähler läuft irgendwann aus dem Ruder |
+| Reservieren nur in einer Transaktion mit `SELECT … FOR UPDATE` | sonst überbuchen zwei gleichzeitige Besucher |
+| Preis beim Reservieren **einfrieren** | sonst ändert eine Preispflege rückwirkend den Vorgang |
+| Alle Antworten mit `Cache-Control: no-store` | das Cache-Plugin der Seite würde sonst alte Bestände ausliefern |
+| Die Katalogseite liefert nur eine statische Hülle | damit der Seiten-Cache nichts Veraltetes zeigt |
+| Bezahlte Artikel fallen aus dem Katalog, nicht aus der Datenbank | die Verkaufsdaten werden gebraucht |
+| Fotos kommen aus der Mediathek, nicht ins ZIP | sonst wird das Plugin 25 MB groß |
 
+### Prüfen
+
+```bash
+php wordpress/tests/test-logik.php     # 43 Prüfungen gegen eine SQLite-Attrappe
+```
+
+Deckt ab: Teil- und Vollreservierung, Überbuchung, Preiseinfrieren, Stornieren, Ablauf und
+Verlängerung, Bezahltsetzen, Mailversand samt Fehlerfall, Testdaten löschen, ungültige
+Eingaben, stillgelegte Artikel.
+
+Für die Oberfläche gibt es einen echten Browsertest:
+
+```bash
+rm -f /tmp/kikripp-web.sqlite /tmp/kikripp-optionen.json
+cd wordpress/tests && php -S 127.0.0.1:8801 -t /tmp/kikweb server.php &
+python3 <browsertest.py>       # Chromium: /opt/pw-browsers/chromium-1194/chrome-linux/chrome
+```
+
+`/tmp/kikweb` braucht die Verweise `assets` → `wordpress/kikripp-katalog/assets` und
+`fotos` → `fotos`. Der Testserver bedient die **echten** REST-Rückrufe über SQLite und
+schreibt alle Mails nach `/tmp/kikripp-mails.log`.
+
+> Ändert sich das Datenbankschema, `SCHEMA_VERSION` in `class-kikripp-db.php` hochzählen
+> **und** die Testdatenbanken unter `/tmp` löschen — die SQLite-Attrappe kennt kein `ALTER TABLE`.
+
+### Ausliefern
+
+```bash
+cd wordpress && ./paketieren.sh        # ausgabe/kikripp-katalog.zip
+```
+
+Zusammen mit `ausgabe/katalog_import.json` schicken. Die Einrichtung steht in
+`WEBSHOP_EINRICHTEN.md`.
+
+### Das Passwort
+
+`2026sales4kids`, gesetzt beim Aktivieren des Plugins. **Es steht bewusst in keiner Datei
+des Projekts** (ein älterer Stand hatte es im README — das ist in der Git-Historie noch zu
+finden, deshalb wurde es gewechselt). Wo ein Skript es braucht, kommt es aus der Umgebung:
+`export KIKRIPP_KATALOG_PW=…`.
+
+### Die alte Fassung als Artifact
+
+`scripts/build_webkatalog.py --geschuetzt PASSWORT` erzeugt weiterhin
+`ausgabe/06_Webkatalog_geschuetzt.html` (AES-256-GCM, PBKDF2 mit 210.000 Runden). Das war
+die Zwischenlösung, bevor der Webshop stand; aktuelle Adresse
+https://claude.ai/artifact/HdDGxJMQAWQ96Sy6z6Po4d. **Sobald der Webshop live ist, wird sie
+nicht mehr gepflegt** — sie kennt keine Reservierungen und würde veraltete Bestände zeigen.
+`04_Webkatalog_MOCKUP.html` bleibt als Datei zum Offline-Weiterleiten.
+
+## 9. Offene Punkte (Stand 16.09.2026)
+
+- **Webshop ist noch nicht installiert.** Plugin, Fotos und Importdatei liegen in `ausgabe/`,
+  die Einrichtung übernimmt der Nutzer nach `WEBSHOP_EINRICHTEN.md`. Danach erfragen, ob der
+  Mailversand aus WordPress funktioniert hat — sonst muss ein SMTP-Zugang dazu.
+- **Startseite:** Der Nutzer will den Katalog unter www.kikripp.de. Meine Empfehlung steht in
+  der Anleitung: Startseite behalten, Katalog auf `/katalog`, damit nicht jeder Besucher der
+  Firmenseite vor einer Passwortabfrage steht. Entscheidung offen.
+- **Noch nicht alle Artikel erfasst.** Es kommen weitere Fotos und Kategorien dazu. Der Import
+  ist darauf ausgelegt: neue Datei erzeugen, hochladen, bestehende Reservierungen bleiben.
 - **Logo:** liegt nur als Bildschirmbild vor. Der Schriftzug „KIKRIPP" ist derzeit gesetzter Text,
   das Signet ist nachgebaut. Sobald eine Logodatei kommt: `assets/kopflogo.png` ersetzen und
   `Farbe_Rot` aus dem Original übernehmen.
@@ -215,4 +322,5 @@ Fassung neu erzeugt werden soll, und es nirgends in eine Datei schreiben.
   ohne die gerahmten Bilder wäre besser.
 - **kikripp.de** ist aus dieser Umgebung nicht erreichbar (Netzwerkrichtlinie). Für
   Gestaltungsabgleiche Screenshots erbitten.
-- Der **PDF-Katalog** ist bewusst noch im alten Layout; das Redesign wurde zurückgestellt.
+- **Rechtstexte** im Webshop sind von mir formuliert, nicht anwaltlich geprüft. Sie stehen in
+  den Plugin-Einstellungen und lassen sich dort jederzeit ersetzen.

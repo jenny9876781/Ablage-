@@ -63,8 +63,9 @@ else:
     else: OK("alle sechs Blätter vorhanden")
     st, vu = wb["Artikelstamm"], wb["Verkaufsübersicht"]
     kopf = {c.column_letter: c.value for c in st[2] if c.value}
-    ERW = {5:["ArtNr"], 6:["Status"], 7:["Status"], 8:["Status"], 9:["Restmenge"],
-           10:["Positionswert_netto"], 13:["Verkauft_Menge"],
+    # Zeile 8 „davon teilverkauft“ ist dazugekommen, alles darunter rückt eins nach unten.
+    ERW = {5:["ArtNr"], 6:["Status"], 7:["Status"], 8:["Status"], 9:["Status"],
+           10:["Restmenge"], 11:["Positionswert_netto"], 13:["Verkauft_Menge"],
            14:["Verkauft_Menge","Verkaufspreis_netto"],
            17:["Zahlung","Verkauft_Menge","Verkaufspreis_netto"],
            21:["Status","Rechnungsnr"], 22:["Status","Zahlung"],
@@ -97,8 +98,10 @@ else:
     else: OK("alle Geld- und Mengenfelder sind Zahlen")
 
 print("\n== 4. Ausgabedateien ==")
+# Der PDF-Katalog ist entfallen; der Webkatalog auf kikripp.de hat ihn abgelöst.
 for name, mindest in (("01_Artikelstamm_kikripp.xlsx", 20), ("02_Angebot_Klinik.xlsx", 500),
-                      ("03_Katalog_Klinik.pdf", 500), ("04_Webkatalog_MOCKUP.html", 500), ("06_Webkatalog_geschuetzt.html", 500)):
+                      ("04_Webkatalog_MOCKUP.html", 500), ("06_Webkatalog_geschuetzt.html", 500),
+                      ("katalog_import.json", 10)):
     pf = os.path.join(AUSGABE, name)
     if not os.path.exists(pf): F(f"{name} fehlt")
     elif os.path.getsize(pf) // 1024 < mindest: F(f"{name} ist auffällig klein")

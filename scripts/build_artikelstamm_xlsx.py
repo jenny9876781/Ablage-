@@ -70,7 +70,7 @@ AUSWAHL = {
     "Zustand":    '"neuwertig,gut,gebraucht,stark gebraucht,defekt"',
     "Preisbasis": '"Fix,VHB"',
     "Versand":    '"nur Abholung,Versand möglich,Spedition"',
-    "Status":     '"verfügbar,reserviert,verkauft,gespendet,entsorgt"',
+    "Status":     '"verfügbar,reserviert,teilverkauft,verkauft,gespendet,entsorgt"',
     "Kanal":      '"Klinik,Kleinanzeigen,eBay,Direkt,Händler,Verkaufstag"',
     "Zahlung":    '"offen,bezahlt,teilbezahlt"',
     "Zahlart":    '"Überweisung,bar,PayPal"',
@@ -196,7 +196,7 @@ for name, formel in AUSWAHL.items():
     ws.add_data_validation(dv)
     dv.add(f"{L(name)}{Z0}:{L(name)}{Z0+800}")
 s = f"{L('Status')}{Z0}:{L('Status')}{Z1}"
-for wert, farbe in (("reserviert", "E4E4E4"), ("verkauft", "C9C9C9")):
+for wert, farbe in (("reserviert", "E4E4E4"), ("teilverkauft", "DCDCDC"), ("verkauft", "C9C9C9")):
     ws.conditional_formatting.add(s, CellIsRule(operator="equal", formula=[f'"{wert}"'],
                                                 fill=PatternFill("solid", bgColor=farbe)))
 wk = f"{L('Wertklasse')}{Z0}:{L('Wertklasse')}{Z1}"
@@ -237,6 +237,7 @@ r = 5
 r = kpi(r, "Artikelpositionen gesamt", f'=COUNTA({A("ArtNr")})', "0")
 r = kpi(r, "davon verfügbar", f'=COUNTIF({A("Status")},"verfügbar")', "0")
 r = kpi(r, "davon reserviert", f'=COUNTIF({A("Status")},"reserviert")', "0")
+r = kpi(r, "davon teilverkauft", f'=COUNTIF({A("Status")},"teilverkauft")', "0")
 r = kpi(r, "davon verkauft", f'=COUNTIF({A("Status")},"verkauft")', "0")
 r = kpi(r, "Einheiten noch im Bestand", f'=SUM({A("Restmenge")})', "0")
 r = kpi(r, "Restbestand zu Wunschpreisen (netto)", f'=SUM({A("Positionswert_netto")})', EUR, fett=True)
@@ -254,9 +255,9 @@ r = kpi(r, "noch offen (netto)", "=B14-B17", EUR)
 titel(20, "To-do")
 r = 21
 r = kpi(r, "Rechnungen noch zu schreiben",
-        f'=COUNTIFS({A("Status")},"verkauft",{A("Rechnungsnr")},"")', "0", fett=True)
+        f'=COUNTIFS({A("Status")},"*verkauft",{A("Rechnungsnr")},"")', "0", fett=True)
 r = kpi(r, "Rechnungen offen (unbezahlt)",
-        f'=COUNTIFS({A("Status")},"verkauft",{A("Zahlung")},"offen")', "0", fett=True)
+        f'=COUNTIFS({A("Status")},"*verkauft",{A("Zahlung")},"offen")', "0", fett=True)
 r = kpi(r, "Reservierungen ohne Abholtermin",
         f'=COUNTIFS({A("Status")},"reserviert",{A("Abholtermin")},"")', "0")
 r = kpi(r, "Artikel ohne Preis", f'=COUNTIFS({A("Preis_netto")},"")', "0")

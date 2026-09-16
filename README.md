@@ -5,11 +5,18 @@ Alle Verkaufsunterlagen entstehen aus **einer** gepflegten Artikelliste.
 ```
                      daten/artikel_kikripp.csv  →  Artikelstamm.xlsx (OneDrive)
                                    │
-        ┌──────────────┬───────────┼────────────┬───────────────────┐
-        ▼              ▼           ▼            ▼                   ▼
-  Angebot Klinik   PDF-Katalog  Webkatalog   eBay- / Kleinanzeigen-  Verkaufsübersicht
-  (Excel)          (zum Mailen) (kikripp.de)  Texte & Importdateien   + DATEV-Abtippliste
+        ┌──────────────┬───────────┴───────────┬───────────────────┐
+        ▼              ▼                       ▼                   ▼
+  Angebot Klinik   katalog_import.json    Webkatalog          Verkaufsübersicht
+  (Excel, nur      →  Webshop auf         (HTML, offline)     + DATEV-Abtippliste
+   zum Anschauen)     kikripp.de                              + Kassenbuch
+                           │
+                           └─ CSV-Export der Reservierungen  →  zurück in die Datenbasis
 ```
+
+**Reserviert wird ausschließlich im Webshop.** Der Artikelstamm führt Artikel, Preise,
+Rechnungen und Kasse; der Webshop führt Buch über Verfügbarkeit und Interessenten; das
+Klinik-Angebot ist ein reines Dokument ohne eigene Datenhaltung.
 
 ## Stand
 
@@ -33,6 +40,7 @@ Maße fehlen durchgängig – die Spalte `Maße` ist dafür vorbereitet.
 | `.claude/skills/sale4kids/` | Skill: Stichwort „sale4kids“ löst den ganzen Ablauf aus |
 | `fotos/` | Artikelfotos `F-001.jpg` … `F-112.jpg`, sortiert nach Aufnahmezeit |
 | `scripts/` | Generatoren – erzeugen aus den Daten die Ausgabedateien |
+| `wordpress/` | das Plugin `kikripp-katalog` samt Tests und Paketierskript |
 | `ausgabe/` | Die fertigen Dateien |
 
 ## Ausgabedateien
@@ -40,10 +48,14 @@ Maße fehlen durchgängig – die Spalte `Maße` ist dafür vorbereitet.
 | Datei | Zweck |
 |---|---|
 | `01_Artikelstamm_kikripp.xlsx` | Arbeitsdatei für OneDrive. Blätter: Anleitung · Artikelstamm · Verkaufsübersicht · Rechnungen (DATEV) · Kasse |
-| `02_Angebot_Klinik.xlsx` | Auswahlliste für die Klinik: Fotos, Einzelpositionen mit Wunschmengen-Spalten, Paketangebot |
-| `03_Katalog_Klinik.pdf` | Bildkatalog nach Räumen, 23 Seiten, mit Positionsübersicht und Verkaufsbedingungen |
+| `02_Angebot_Klinik.xlsx` | Übersichtsliste für die Klinik: Fotos, Einzelpositionen, Paketangebot. Ohne Eingabefelder – reserviert wird im Webshop. |
+| `katalog_import.json` | Artikel für den Webshop, wird in WordPress hochgeladen |
+| `kikripp-katalog.zip` | das WordPress-Plugin |
+| `kikripp-fotos.zip` | die 111 Fotos für die Mediathek |
 | `04_Webkatalog_MOCKUP.html` | Muster des Katalogs, offline lauffähig, ohne Verschlüsselung |
-| `06_Webkatalog_geschuetzt.html` | dieselbe Seite mit AES-verschlüsselten Daten – als Artifact veröffentlicht |
+| `06_Webkatalog_geschuetzt.html` | dieselbe Seite mit AES-verschlüsselten Daten – Zwischenlösung, bis der Webshop live ist |
+
+Der **PDF-Katalog ist entfallen**; der Webshop hat ihn abgelöst.
 
 ## Design
 
@@ -72,11 +84,26 @@ python3 scripts/prepare_fotos.py            # nur wenn neue Fotos dazugekommen s
 python3 scripts/make_signet.py              # nur wenn sich die Markenfarbe geändert hat
 python3 scripts/build_artikelstamm_xlsx.py
 python3 scripts/build_angebot_xlsx.py
-python3 scripts/build_katalog_pdf.py
-python3 scripts/build_webkatalog.py --geschuetzt 'PASSWORT'   # Passwort bewusst nicht im Repo
+python3 scripts/build_katalog_import.py                        # Importdatei für den Webshop
+python3 scripts/build_webkatalog.py --geschuetzt 'PASSWORT'    # Passwort bewusst nicht im Repo
 
 # 4. Vor der Übergabe prüfen – meldet Fehler und rechnet die Summen nach:
 python3 scripts/pruefen.py
+```
+
+Verkäufe aus dem Webshop kommen über den CSV-Export zurück:
+
+```bash
+python3 scripts/reservierungen_einlesen.py <export.csv>              # Probelauf
+python3 scripts/reservierungen_einlesen.py <export.csv> --schreiben  # übernehmen
+python3 scripts/build_artikelstamm_xlsx.py
+```
+
+Am Plugin gearbeitet? Dann vorher:
+
+```bash
+php wordpress/tests/test-logik.php     # 43 Prüfungen, muss 0 Fehler melden
+cd wordpress && ./paketieren.sh        # erzeugt ausgabe/kikripp-katalog.zip
 ```
 
 Kürzer geht es über den Skill: **„sale4kids"** in Claude Code eingeben. Der Skill kennt den
@@ -87,7 +114,17 @@ Zustand, Maße, Wertklasse, Preis, Preisbasis, Versand und Bemerkungen sowie all
 Design-Blattes. Gelöschte Zeilen werden **nicht** entfernt, sondern auf `Aktiv = entfällt`
 gesetzt; selbst ergänzte Zeilen werden übernommen (dann ohne Foto).
 
-Voraussetzungen: `python3`, `openpyxl`, `Pillow`, `pillow-heif`, Chromium (für die PDF-Ausgabe).
+Voraussetzungen: `python3`, `openpyxl`, `Pillow`, `pillow-heif`, Chromium (für Screenshots),
+`php` (für die Plugin-Tests).
+
+## Webshop
+
+Das WordPress-Plugin in `wordpress/kikripp-katalog/` bringt den Katalog auf kikripp.de:
+Passwortschutz, Reservierung mit Mailbenachrichtigung an `jennyp@kikripp.de`, geteilter
+Reserviert-Status für alle Besucher, Teilmengen („5 von 10 verfügbar"), sieben Tage Frist,
+Stornieren und Bezahltsetzen in der Verwaltung.
+
+Einrichtung Schritt für Schritt: **`WEBSHOP_EINRICHTEN.md`**.
 
 ## Arbeitsanweisung
 

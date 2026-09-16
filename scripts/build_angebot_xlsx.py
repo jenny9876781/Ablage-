@@ -4,7 +4,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from lib import (lade_artikel, foto, AUSGABE, ASSETS, USt_SATZ, PAKETRABATT, FIRMA, STRASSE,
                  PLZ_ORT, ANSPRECH, TELEFON, EMAIL, EMPF_FIRMA, EMPF_PERSON, ANGEBOT_NR,
                  DATUM, GUELTIG, ROT, SCHWARZ, PAPIER, GRAU, LINIE, FELD_KLINIK, FELD_INTERN,
-                 ZEILE, FONT, ABSENDER)
+                 ZEILE, FONT, ABSENDER, KATALOG_URL, KATALOG_PW)
 
 from openpyxl import Workbook
 from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
@@ -19,13 +19,14 @@ ROT_KANTE = Border(left=Side(style="thick", color=ROT), right=d_linie, top=d_lin
 TMP = "/tmp/angebot_thumbs"
 os.makedirs(TMP, exist_ok=True)
 
+# Reine Übersichtsliste: reserviert wird ausschließlich über den Webkatalog,
+# damit derselbe Artikel nicht zweimal vergeben werden kann.
 SPALTEN = [("Pos", 5), ("ArtNr", 9), ("Foto", 20), ("Artikel", 46), ("Maße", 18), ("Raum", 18),
            ("Zustand", 12), ("Verfügbar", 10), ("Einheit", 9), ("Einzelpreis netto", 15),
-           ("Preis", 7), ("Lieferung", 15), ("Ihre Wunschmenge", 13),
-           ("Ihre Bemerkung / Frage", 26), ("Summe netto", 14)]
+           ("Preis", 7), ("Lieferung", 15), ("Positionswert netto", 16)]
 IDX = {s[0]: i + 1 for i, s in enumerate(SPALTEN)}
 def L(n): return get_column_letter(IDX[n])
-KLINIK_FELD = {"Ihre Wunschmenge", "Ihre Bemerkung / Frage"}
+KLINIK_FELD = set()
 INTERN_FELD = {"Maße"}
 N = len(SPALTEN)
 
@@ -67,10 +68,14 @@ for i, (a, b, cc, dd) in enumerate(kopf, start=2):
 # ---- Hinweisbox -------------------------------------------------------------
 ws.merge_cells(start_row=5, start_column=1, end_row=5, end_column=N)
 c = ws.cell(row=5, column=1, value=
-    "So geht's:  Bitte tragen Sie in den beiden grau hinterlegten Spalten rechts ein, welche Artikel Sie in "
-    "welcher Menge übernehmen möchten, und schicken die Datei zurück. Die Summen rechnen sich automatisch. "
-    "Wenn Sie den gesamten Bestand übernehmen möchten, finden Sie am Ende der Liste ein Paketangebot. "
-    "Rot markierte Artikelnummern sind Marken- und Designstücke. Abholung nach Terminvereinbarung, Zahlung per Rechnung.")
+    "So geht's:  Diese Liste ist Ihre Übersicht zum Blättern und Weitergeben. Reserviert wird über unseren "
+    f"Onlinekatalog unter {KATALOG_URL}"
+    + (f" (Passwort: {KATALOG_PW})" if KATALOG_PW else " (Passwort haben Sie von uns per E-Mail erhalten)")
+    + ". Dort sehen Sie die tagesaktuelle Verfügbarkeit und merken Artikel mit einem Klick für sich vor – "
+    "so ist ausgeschlossen, dass ein Stück doppelt vergeben wird. Möchten Sie den gesamten Bestand übernehmen, "
+    "finden Sie am Ende der Liste ein Paketangebot; melden Sie sich dafür bitte direkt bei uns. "
+    "Rot markierte Artikelnummern sind Marken- und Designstücke. Abholung nach Terminvereinbarung, "
+    "Zahlung per Rechnung.")
 c.font = Font(name=FONT, size=10, color=SCHWARZ)
 c.fill = PatternFill("solid", fgColor=PAPIER)
 c.alignment = Alignment(vertical="center", wrap_text=True, indent=1)
@@ -99,9 +104,7 @@ for i, a in enumerate(artikel):
         "Maße": a.get("Maße") or None, "Raum": a["Raum"], "Zustand": a["Zustand"],
         "Verfügbar": a["Menge"], "Einheit": a["Einheit"], "Einzelpreis netto": a["Preis_netto"],
         "Preis": a["Preisbasis"], "Lieferung": a["Versand"],
-        "Ihre Wunschmenge": None, "Ihre Bemerkung / Frage": None,
-        "Summe netto": f'=IF({L("Ihre Wunschmenge")}{r}="","",'
-                       f'{L("Ihre Wunschmenge")}{r}*{L("Einzelpreis netto")}{r})',
+        "Positionswert netto": f'={L("Verfügbar")}{r}*{L("Einzelpreis netto")}{r}',
     }
     for name, _b in SPALTEN:
         c = ws.cell(row=r, column=IDX[name], value=werte[name])
@@ -111,8 +114,8 @@ for i, a in enumerate(artikel):
         c.alignment = Alignment(vertical="center",
                                 wrap_text=name in ("Artikel", "Lieferung", "Raum", "Maße"),
                                 horizontal="center" if name in ("Pos", "ArtNr", "Verfügbar", "Einheit",
-                                "Preis", "Zustand", "Ihre Wunschmenge") else "left")
-        if name in ("Einzelpreis netto", "Summe netto"):
+                                "Preis", "Zustand") else "left")
+        if name in ("Einzelpreis netto", "Positionswert netto"):
             c.number_format = EUR
         if name == "Einzelpreis netto":
             c.font = Font(name=FONT, size=10, bold=True, color=SCHWARZ)
@@ -125,7 +128,7 @@ for i, a in enumerate(artikel):
         if name == "ArtNr" and ist_a:
             c.fill = PatternFill("solid", fgColor=ROT)
             c.font = Font(name=FONT, size=10, bold=True, color="FFFFFF")
-        if name == "Ihre Wunschmenge":
+        if name == "Positionswert netto":
             c.border = ROT_KANTE
     ws.row_dimensions[r].height = 78
     p = foto(a["Foto"])
@@ -136,7 +139,7 @@ for i, a in enumerate(artikel):
         ws.add_image(XLImage(thumb), f'{L("Foto")}{r}')
 
 Z1 = Z0 + len(artikel) - 1
-SN, EP, VF = L("Summe netto"), L("Einzelpreis netto"), L("Verfügbar")
+SN, EP, VF = L("Positionswert netto"), L("Einzelpreis netto"), L("Verfügbar")
 
 def bandzeile(r, text, farbe):
     ws.merge_cells(start_row=r, start_column=1, end_row=r, end_column=N)
@@ -148,11 +151,11 @@ def bandzeile(r, text, farbe):
     ws.row_dimensions[r].height = 24
 
 def summenzeile(r, label, formel, fett=False, farbe=None, gross=False):
-    ws.merge_cells(start_row=r, start_column=1, end_row=r, end_column=IDX["Ihre Bemerkung / Frage"])
+    ws.merge_cells(start_row=r, start_column=1, end_row=r, end_column=IDX["Lieferung"])
     c = ws.cell(row=r, column=1, value=label)
     c.font = Font(name=FONT, size=12 if gross else 11, bold=True, color=SCHWARZ)
     c.alignment = Alignment(horizontal="right", vertical="center")
-    c2 = ws.cell(row=r, column=IDX["Summe netto"], value=formel)
+    c2 = ws.cell(row=r, column=IDX["Positionswert netto"], value=formel)
     c2.font = Font(name=FONT, size=12 if gross else 11, bold=fett,
                    color=("FFFFFF" if farbe == ROT else SCHWARZ))
     c2.number_format = EUR
@@ -163,32 +166,39 @@ def summenzeile(r, label, formel, fett=False, farbe=None, gross=False):
     ws.row_dimensions[r].height = 26 if gross else 22
 
 rA = Z1 + 2
-bandzeile(rA, "A · IHRE AUSWAHL  (Einzelpositionen)", SCHWARZ)
-summenzeile(rA + 1, "Zwischensumme netto", f"=SUM({SN}{Z0}:{SN}{Z1})")
+bandzeile(rA, "A · EINZELVERKAUF  (Reservierung über den Onlinekatalog)", SCHWARZ)
+summenzeile(rA + 1, "Gesamtwert aller Positionen netto", f"=SUM({SN}{Z0}:{SN}{Z1})")
 summenzeile(rA + 2, f"zzgl. {int(USt_SATZ*100)} % Umsatzsteuer", f"={SN}{rA+1}*{USt_SATZ}")
-summenzeile(rA + 3, "Gesamtsumme brutto", f"={SN}{rA+1}+{SN}{rA+2}", fett=True, farbe=ROT, gross=True)
-
-rB = rA + 5
-bandzeile(rB, "B · PAKETANGEBOT  (Übernahme des gesamten Bestands)", ROT)
-summenzeile(rB + 1, "Gesamtwert aller Positionen zu Einzelpreisen (netto)",
-            f"=SUMPRODUCT({VF}{Z0}:{VF}{Z1},{EP}{Z0}:{EP}{Z1})")
-summenzeile(rB + 2, f"abzüglich Paketnachlass {int(PAKETRABATT*100)} %", f"=-{SN}{rB+1}*{PAKETRABATT}")
-summenzeile(rB + 3, "Paketpreis netto", f"={SN}{rB+1}+{SN}{rB+2}", fett=True, farbe=PAPIER)
-summenzeile(rB + 4, f"zzgl. {int(USt_SATZ*100)} % Umsatzsteuer", f"={SN}{rB+3}*{USt_SATZ}")
-summenzeile(rB + 5, "Paketpreis brutto", f"={SN}{rB+3}+{SN}{rB+4}", fett=True, farbe=ROT, gross=True)
-ws.merge_cells(start_row=rB + 6, start_column=1, end_row=rB + 6, end_column=N)
-c = ws.cell(row=rB + 6, column=1, value="Das Paketangebot gilt für die Übernahme sämtlicher oben "
-            "gelisteter Positionen in einem Zug, inklusive Abholung innerhalb von zwei Wochen nach Zuschlag.")
+summenzeile(rA + 3, "Gesamtwert brutto", f"={SN}{rA+1}+{SN}{rA+2}", fett=True, farbe=ROT, gross=True)
+ws.merge_cells(start_row=rA + 4, start_column=1, end_row=rA + 4, end_column=N)
+c = ws.cell(row=rA + 4, column=1, value="Einzelne Artikel reservieren Sie bitte im Onlinekatalog; "
+            "der Wert oben ist die Summe aller hier gelisteten Positionen.")
 c.font = Font(name=FONT, size=9, italic=True, color=GRAU)
 c.alignment = Alignment(vertical="center", indent=1)
 
-rF = rB + 8
+# Abschnitt B baut auf dem Gesamtwert aus A auf – die Zahl steht nur einmal in der Datei.
+rB = rA + 6
+bandzeile(rB, "B · PAKETANGEBOT  (Übernahme des gesamten Bestands)", ROT)
+summenzeile(rB + 1, f"Gesamtwert netto abzüglich Paketnachlass {int(PAKETRABATT*100)} %",
+            f"=-{SN}{rA+1}*{PAKETRABATT}")
+summenzeile(rB + 2, "Paketpreis netto", f"={SN}{rA+1}+{SN}{rB+1}", fett=True, farbe=PAPIER)
+summenzeile(rB + 3, f"zzgl. {int(USt_SATZ*100)} % Umsatzsteuer", f"={SN}{rB+2}*{USt_SATZ}")
+summenzeile(rB + 4, "Paketpreis brutto", f"={SN}{rB+2}+{SN}{rB+3}", fett=True, farbe=ROT, gross=True)
+ws.merge_cells(start_row=rB + 5, start_column=1, end_row=rB + 5, end_column=N)
+c = ws.cell(row=rB + 5, column=1, value="Das Paketangebot gilt für die Übernahme sämtlicher oben "
+            "gelisteter Positionen in einem Zug, inklusive Abholung innerhalb von zwei Wochen nach Zuschlag. "
+            "Sprechen Sie uns dafür bitte direkt an – eine Reservierung im Onlinekatalog ist dann nicht nötig.")
+c.font = Font(name=FONT, size=9, italic=True, color=GRAU)
+c.alignment = Alignment(vertical="center", indent=1)
+
+rF = rB + 7
 ws.merge_cells(start_row=rF, start_column=1, end_row=rF + 3, end_column=N)
 c = ws.cell(row=rF, column=1, value=
     "Verkaufsbedingungen: Der Verkauf erfolgt aus einer Betriebsauflösung unter Ausschluss jeglicher "
     "Gewährleistung; es handelt sich durchweg um gebrauchte Gegenstände, die in dem Zustand verkauft werden, "
     "in dem sie sich befinden. Angebot freibleibend, Zwischenverkauf vorbehalten. Eine Reservierung wird erst "
-    "mit unserer schriftlichen Bestätigung verbindlich. Abholung nach Terminvereinbarung; Demontage, Verladung "
+    "mit unserer Bestätigung verbindlich; Reservierungen nehmen wir ausschließlich über den Onlinekatalog "
+    "entgegen. Abholung nach Terminvereinbarung; Demontage, Verladung "
     "und Transport erfolgen durch den Käufer auf eigene Kosten und Gefahr. Elektrogeräte werden ohne "
     "Prüfnachweis nach DGUV V3 übergeben. Die Rechnung wird nach Abholung gestellt, zahlbar innerhalb von "
     "14 Tagen ohne Abzug. Das Eigentum geht erst mit vollständiger Bezahlung über.\n\n" + ABSENDER)

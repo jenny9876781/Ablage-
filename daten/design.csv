@@ -4,7 +4,7 @@ Strasse;Hermann-Schwer-Str. 1;
 PLZ_Ort;78048 Villingen-Schwenningen;
 Ansprechpartner;Jenny Preisigke;
 Telefon;07725 5179702;Schreibweise bitte prüfen
-Email;jenny@kikripp.de;
+Email;jennyp@kikripp.de;
 Empfaenger_Firma;Mediclin Königsfeld;Empfänger des Angebots
 Empfaenger_Person;Frau Jessica Rose;
 Angebot_Nr;ANG-2026-0001;
@@ -12,6 +12,8 @@ Angebot_Datum;15.09.2026;
 Angebot_Gueltig_bis;15.10.2026;
 USt_Satz_Prozent;19;
 Paketrabatt_Prozent;20;Nachlass beim Paketangebot
+Katalog_URL;https://www.kikripp.de/katalog;Adresse des Webkatalogs, erscheint im Klinik-Angebot
+Katalog_Passwort;;Bewusst leer - Passwort gehoert nicht ins Projekt. Vor dem Erzeugen setzen: export KIKRIPP_KATALOG_PW=...
 Farbe_Rot;C8102E;Bollenhut-Rot - nur als Akzent verwenden
 Farbe_Schwarz;1A1A1A;Kopfzeilen und Struktur
 Farbe_Papier;F7F5F2;warme Fläche

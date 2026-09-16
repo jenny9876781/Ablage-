@@ -38,11 +38,22 @@ Was er nicht kann: Maße erkennen und Stückzahlen bei Stapeln sicher zählen �
 durch und überschreibt, was er anders sieht. Alle Preise sind netto; Firmen bekommen Nettopreise
 genannt, Privatleuten muss der Bruttopreis gezeigt werden.
 
-**Beim Verkaufen** trägst du im Artikelstamm ein: bei einer Reservierung den Status „reserviert",
-den Namen und einen **konkreten Abholtermin** — ohne Termin keine Reservierung, sonst blockiert
-jemand wochenlang Ware, die er nie holt. Nach der Abholung setzt du den Status auf „verkauft" und
-trägst Menge, erzielten Preis, Käufer, Datum und Zahlart ein. Am Objekt klebst du einen
+**Verkauft wird über den Webshop auf kikripp.de.** Interessenten bekommen die Adresse und das
+Passwort, suchen sich dort ihre Artikel aus und schicken eine Reservierung ab. Du bekommst
+sofort eine Mail an jennyp@kikripp.de, und der Artikel steht für alle anderen auf „reserviert" —
+sieben Tage lang, danach wird er von selbst wieder frei. **Trag Reservierungen bitte nicht
+zusätzlich von Hand in die Excel ein**, sonst ist derselbe Schrank am Ende zweimal vergeben.
+
+Ist bezahlt und abgeholt, setzt du den Vorgang in WordPress unter „Artikelkatalog →
+Reservierungen" auf **bezahlt**; der Artikel verschwindet dann aus dem Katalog. Holt jemand
+doch nicht ab, **stornierst** du — die Ware ist sofort wieder frei. Am Objekt klebst du einen
 „Verkauft"-Aufkleber, dann sieht man im Haus sofort, was schon weg ist.
+
+Damit die Zahlen in der Excel stimmen, lädst du ab und zu unter „Reservierungen" die CSV-Datei
+herunter und schickst sie mit dem Stichwort **sale4kids** her. Claude trägt Käufer, Menge, Preis
+und Datum in den Artikelstamm ein; Verkaufsübersicht, DATEV-Liste und Kassenbuch rechnen sich
+daraus neu. Was du weiterhin selbst einträgst: Rechnungsnummer, Zahlung und Zahlart, sobald die
+Rechnung aus DATEV vorliegt.
 
 **Rechnungen werden ausschließlich in DATEV geschrieben.** Im Blatt „Rechnungen (DATEV)" stehen
 alle Angaben in der Reihenfolge der Erfassungsmaske; die Rechnungsnummer trägst du danach in der

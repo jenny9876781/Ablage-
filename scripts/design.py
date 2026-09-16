@@ -26,6 +26,9 @@ DATUM        = D["Angebot_Datum"]
 GUELTIG      = D["Angebot_Gueltig_bis"]
 USt_SATZ     = float(D["USt_Satz_Prozent"]) / 100
 PAKETRABATT  = float(D["Paketrabatt_Prozent"]) / 100
+KATALOG_URL  = D.get("Katalog_URL", "")
+# Das Katalogpasswort steht bewusst nicht im Projekt; es kommt aus der Umgebung.
+KATALOG_PW   = os.environ.get("KIKRIPP_KATALOG_PW", "") or D.get("Katalog_Passwort", "")
 
 ROT      = D["Farbe_Rot"]
 SCHWARZ  = D["Farbe_Schwarz"]

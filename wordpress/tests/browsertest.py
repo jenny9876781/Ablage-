@@ -1,5 +1,14 @@
-"""Browsertest des Artikelkatalogs gegen die echten REST-Rueckrufe."""
-import re, sys
+"""Browsertest des Artikelkatalogs gegen die echten REST-Rueckrufe.
+
+Der Testserver muss laufen:
+
+    rm -f /tmp/kikripp-web.sqlite /tmp/kikripp-optionen.json /tmp/kikripp-mails.log
+    cd wordpress/tests && KIK_TEST_PW=... php -S 127.0.0.1:8801 -t /tmp/kikweb server.php &
+
+Beide Zustandsdateien loeschen, nicht nur eine: die Optionsdatei entscheidet ueber
+das Passwort, die SQLite-Datei ueber die Artikel.
+"""
+import re, sys, os
 from playwright.sync_api import sync_playwright
 
 CHROME = "/opt/pw-browsers/chromium-1194/chrome-linux/chrome"
@@ -16,6 +25,14 @@ def pruefe(name, bedingung, zusatz=""):
         fehler.append(f"{name} {zusatz}".strip())
         print(f"  FEHL {name} {zusatz}")
 
+# Vorbedingung pruefen, statt spaeter an einem leeren Katalog zu raten.
+import urllib.request, json as _json
+try:
+    with urllib.request.urlopen(BASIS, timeout=5) as a:
+        a.read(1)
+except Exception as e:
+    sys.exit(f"Testserver auf {BASIS} nicht erreichbar: {e}")
+
 with sync_playwright() as p:
     b = p.chromium.launch(executable_path=CHROME)
     s = b.new_context(viewport={"width": 1280, "height": 1100})
@@ -25,14 +42,14 @@ with sync_playwright() as p:
     seite.on("pageerror", lambda e: konsole.append(f"pageerror: {e}"))
 
     print("\n0) Zugang über das Passwort im Link")
-    seite.goto(BASIS + "?k=falsch", wait_until="networkidle")
+    seite.goto(BASIS + "?kik=falsch", wait_until="networkidle")
     pruefe("falscher Link öffnet nichts", seite.locator("#k-pw").count() == 1)
-    pruefe("auch dort ist das Passwort weg", "k=" not in seite.url, f"({seite.url})")
+    pruefe("auch dort ist das Passwort weg", "kik=" not in seite.url, f"({seite.url})")
 
-    seite.goto(BASIS + "?k=" + PW, wait_until="networkidle")
+    seite.goto(BASIS + "?kik=" + PW, wait_until="networkidle")
     seite.wait_for_selector(".karte", timeout=20000)
     pruefe("Link öffnet den Katalog direkt", seite.locator(".karte").count() > 50)
-    pruefe("Passwort steht nicht mehr in der Adresse", "k=" not in seite.url, f"({seite.url})")
+    pruefe("Passwort steht nicht mehr in der Adresse", "kik=" not in seite.url, f"({seite.url})")
     pruefe("keine Sperrseite", seite.locator("#k-pw").count() == 0)
     s.clear_cookies()
 
@@ -58,7 +75,8 @@ with sync_playwright() as p:
     print("\n2) Katalogaufbau")
     karten = seite.locator(".karte").count()
     import json
-    with open("/home/user/Ablage-/ausgabe/katalog_import.json", encoding="utf-8") as f:
+    hier = os.path.dirname(os.path.abspath(__file__))
+    with open(os.path.join(hier, "../../ausgabe/katalog_import.json"), encoding="utf-8") as f:
         erwartet = sum(1 for a in json.load(f) if a["aktiv"] and a["im_katalog"])
     pruefe("alle aktiven Artikel geladen", karten == erwartet, f"({karten} von {erwartet})")
     gesamt_bilder = seite.locator(".karte .bild img").count()

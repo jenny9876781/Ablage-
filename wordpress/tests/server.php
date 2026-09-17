@@ -18,6 +18,7 @@ class WP_REST_Request {
 }
 function register_rest_route() {}
 function add_action() {}
+function add_filter() {}
 function add_shortcode() {}
 function rest_url($n) { return '/wp-json/' . $n; }
 function esc_url_raw($u) { return $u; }
@@ -67,7 +68,11 @@ if (empty($GLOBALS['optionen'])) {
         'kikripp_abholadresse' => 'Kikripp GmbH, Hermann-Schwer-Str. 1, 78048 Villingen-Schwenningen',
         'kikripp_rechtstext' => 'Alle Artikel stammen aus der Auflösung unseres Kindergartens und sind gebraucht. Sie werden verkauft wie besichtigt; Abbildungen zeigen den tatsächlichen Zustand. Preise verstehen sich inklusive der gesetzlichen Umsatzsteuer. Eine Reservierung ist noch kein Kaufvertrag – dieser kommt erst bei der Abholung vor Ort zustande, ein Widerrufsrecht besteht daher nicht. Gegenüber Unternehmern ist die Gewährleistung ausgeschlossen; gegenüber Verbrauchern verjähren Ansprüche wegen Mängeln bei gebrauchten Sachen nach einem Jahr.',
     ];
-    global $wpdb;
+    file_put_contents($zustand, json_encode($GLOBALS['optionen']));
+}
+
+global $wpdb;
+if ((int) $wpdb->get_var('SELECT COUNT(*) FROM ' . Kikripp_DB::t_artikel()) === 0) {
     $daten = json_decode(file_get_contents(__DIR__ . '/../../ausgabe/katalog_import.json'), true);
     foreach ($daten as $i => $a) {
         $wpdb->insert(Kikripp_DB::t_artikel(), [
@@ -84,7 +89,6 @@ if (empty($GLOBALS['optionen'])) {
             'aktualisiert' => current_time('mysql'),
         ]);
     }
-    file_put_contents($zustand, json_encode($GLOBALS['optionen']));
 }
 
 // ---- Auslieferung ----------------------------------------------------------

@@ -208,7 +208,7 @@ kikripp.de hat ihn abgelöst. `build_katalog_pdf.py` gibt es nicht mehr.
 Am Webshop-Plugin geändert? Dann zusätzlich:
 
 ```bash
-php wordpress/tests/test-logik.php             # 75 Prüfungen, muss 0 Fehler melden
+php wordpress/tests/test-logik.php             # 76 Prüfungen, muss 0 Fehler melden
 php wordpress/tests/test-kette.php             # Datenbasis -> Import -> Katalog
 cd wordpress && ./paketieren.sh                # erzeugt ausgabe/kikripp-katalog.zip
 ```
@@ -322,11 +322,37 @@ Daraus folgen drei Dinge, die man nicht wegoptimieren darf:
 
 ### Passwort im Link
 
-`…/katalog/?k=PASSWORT` schaltet frei. `Kikripp_Zugang::link_einloesen()` läuft auf `init`,
-also **vor** jeder Ausgabe, setzt den Keks und leitet auf dieselbe Adresse ohne `k` um. So
-steht das Passwort nicht in der Adresszeile, nicht im Verlauf und kann über keinen Verweis
-nach außen gelangen (dazu `<meta name="referrer" content="same-origin">`). Die Bremse gegen
-Durchprobieren greift auch hier.
+`…/katalog/?kik=PASSWORT` schaltet frei. `Kikripp_Zugang::link_einloesen()` läuft auf `init`,
+also **vor** jeder Ausgabe, setzt den Keks und leitet auf dieselbe Adresse ohne den Parameter
+um. So steht das Passwort nicht in der Adresszeile, nicht im Verlauf und kann über keinen
+Verweis nach außen gelangen (dazu `<meta name="referrer" content="same-origin">`). Die Bremse
+gegen Durchprobieren greift auch hier.
+
+Der Parametername steht in `Kikripp_Zugang::LINK_PARAMETER` und ist bewusst **nicht** `k`:
+auf einer Seite mit fünfzehn Plugins ist ein einzelner Buchstabe zu wahrscheinlich schon
+belegt, und wir würden ihn fremden Plugins wegnehmen. Der Haken greift nur bei normalen
+Seitenaufrufen — REST, AJAX, Cron und Feeds sind ausgenommen, sonst löste er dort eine
+Weiterleitung aus.
+
+### Verträglichkeit mit der Umgebung auf schlabberschnuten.com
+
+Dort laufen rund fünfzehn Plugins. Was das Plugin deshalb von sich aus tut:
+
+| Maßnahme | Wogegen |
+|---|---|
+| `DONOTCACHEPAGE` auf der Katalogseite und bei `?kik=` plus `nocache_headers()` | ein Seiten-Cache würde den Zugangszustand eines Fremden ausliefern oder den Link-Einlöser gar nicht ausführen |
+| `wpseo_robots` und `wpseo_robots_array` gefiltert, eigenes `noindex` nur wenn Yoast fehlt | zwei robots-Angaben auf einer Seite sind unzuverlässig |
+| `data-cookieyes="cookieyes-necessary"` am eigenen Skript (`script_loader_tag`) | Zustimmungsbanner blockieren sonst das Skript und die Seite bleibt leer |
+| alles mit `kikripp_` benannt: Optionen, Tabellen, Hooks, Kurzbefehl, REST-Namensraum, Menü, CSS-Klasse | Namenskollisionen |
+
+Was die Nutzerin selbst erledigen muss, steht in `A1` unter „Was auf schlabberschnuten.com
+zu beachten ist": Elementor-Seite mit dem **Shortcode-Widget** oder ganz ohne Elementor,
+breites Seitenlayout, Cache leeren, Katalogseite von der JavaScript-Optimierung ausnehmen,
+`kikripp_zugang` in CookieYes als notwendig eintragen, Sicherung mit UpdraftPlus.
+
+> **Popup Maker meldet auf der Seite, dass es keine Cache-Dateien schreiben kann.** Das kann
+> heißen, dass Teile des Webspace nicht beschreibbar sind — dann scheitern Plugin-Upload und
+> Fotos. Deshalb steht in der Anleitung: erst **ein** Foto hochladen, dann die restlichen 110.
 
 ### Was es nicht mehr gibt
 
@@ -369,7 +395,7 @@ Durchprobieren greift auch hier.
 ### Prüfen
 
 ```bash
-php wordpress/tests/test-logik.php     # 75 Prüfungen gegen eine SQLite-Attrappe
+php wordpress/tests/test-logik.php     # 76 Prüfungen gegen eine SQLite-Attrappe
 php wordpress/tests/test-kette.php     # ganze Kette mit der echten Importdatei
 python3 wordpress/tests/browsertest.py # 53 Prüfungen im echten Chromium
 ```
@@ -392,6 +418,11 @@ schreibt alle Mails nach `/tmp/kikripp-mails.log`.
 
 > Ändert sich das Datenbankschema, `SCHEMA_VERSION` in `class-kikripp-db.php` hochzählen
 > **und** die Testdatenbanken unter `/tmp` löschen — die SQLite-Attrappe kennt kein `ALTER TABLE`.
+>
+> Für den Browsertest **beide** Zustandsdateien löschen: `/tmp/kikripp-web.sqlite` **und**
+> `/tmp/kikripp-optionen.json`. Nur eine zu löschen ergibt einen leeren Katalog bei
+> gültigem Passwort — der Testserver spielt die Artikel inzwischen selbst nach, wenn die
+> Tabelle leer ist, und der Browsertest bricht mit klarer Meldung ab, wenn der Server fehlt.
 
 ### Ausliefern
 

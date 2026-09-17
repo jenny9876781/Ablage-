@@ -146,6 +146,8 @@ function wp_check_password($p, $h) { return password_verify($p, $h); }
 function wp_salt($s = '') { return 'test-salt-1234567890'; }
 function is_ssl() { return !empty($_SERVER['HTTPS']); }
 function is_admin() { return false; }
+function nocache_headers() { if (!headers_sent()) { header('Cache-Control: no-store'); } }
+function is_feed() { return false; }
 function wp_unslash($w) { return is_array($w) ? array_map('stripslashes', $w) : stripslashes((string) $w); }
 function remove_query_arg($schluessel, $url = null) {
     $url = $url ?: ($_SERVER['REQUEST_URI'] ?? '/');

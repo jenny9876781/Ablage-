@@ -195,7 +195,7 @@ def knopf():
         p(d, f"{i}.  {satz}", nach=5)
 
     p(d, "Die Adresse mit Passwort sieht so aus:", vor=10, nach=4)
-    p(d, "https://www.schlabberschnuten.com/kikripp-artikelkatalog/?k=PASSWORT",
+    p(d, "https://www.schlabberschnuten.com/kikripp-artikelkatalog/?kik=PASSWORT",
       groesse=10, schrift="Consolas", farbe=ROT, nach=12)
 
     p(d, "Der Baustein", groesse=12, fett=True, vor=8, nach=6)

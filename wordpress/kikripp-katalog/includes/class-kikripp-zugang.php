@@ -19,8 +19,13 @@ class Kikripp_Zugang {
         return hash_hmac('sha256', 'kikripp-zugang|' . self::version(), wp_salt('auth'));
     }
 
+    /** Name des Parameters im Link. Bewusst nicht „k“: auf einer Seite mit vielen
+     *  Plugins ist ein einzelner Buchstabe als Parametername zu wahrscheinlich
+     *  schon belegt, und wir würden ihn fremden Plugins wegnehmen. */
+    const LINK_PARAMETER = 'kik';
+
     /**
-     * Passwort aus dem Link (?k=…) einlösen.
+     * Passwort aus dem Link (?kik=…) einlösen.
      *
      * Läuft früh auf `init`, also bevor irgendein HTML oder eine externe
      * Ressource geladen wird — danach wird auf dieselbe Adresse ohne den
@@ -28,8 +33,23 @@ class Kikripp_Zugang {
      * noch im Verlauf, und es kann über keinen Verweis nach außen gelangen.
      */
     public static function link_einloesen() {
-        if (is_admin() || empty($_GET['k'])) { return; }
-        $pw = trim(wp_unslash((string) $_GET['k']));
+        // Nur normale Seitenaufrufe: keine Schnittstelle, kein Hintergrundlauf,
+        // keine Feeds. Sonst würden wir dort eine Weiterleitung auslösen.
+        if (is_admin()
+            || (defined('REST_REQUEST') && REST_REQUEST)
+            || (defined('DOING_AJAX') && DOING_AJAX)
+            || (defined('DOING_CRON') && DOING_CRON)
+            || (function_exists('is_feed') && is_feed())) {
+            return;
+        }
+        if (empty($_GET[self::LINK_PARAMETER])) { return; }
+
+        // Die Seite darf in keinem Fall aus einem Seiten-Cache kommen, sonst
+        // liefe dieser Code gar nicht und der Besucher sähe die Passwortabfrage.
+        if (!defined('DONOTCACHEPAGE')) { define('DONOTCACHEPAGE', true); }
+        nocache_headers();
+
+        $pw = trim(wp_unslash((string) $_GET[self::LINK_PARAMETER]));
         $ip = substr((string) ($_SERVER['REMOTE_ADDR'] ?? 'unbekannt'), 0, 45);
         $schluessel = 'kikripp_versuche_' . md5($ip);
         if ((int) get_transient($schluessel) < 10 && self::passwort_pruefen($pw)) {
@@ -38,7 +58,7 @@ class Kikripp_Zugang {
         } else {
             set_transient($schluessel, (int) get_transient($schluessel) + 1, 15 * MINUTE_IN_SECONDS);
         }
-        wp_safe_redirect(remove_query_arg('k'));
+        wp_safe_redirect(remove_query_arg(self::LINK_PARAMETER));
         exit;
     }
 

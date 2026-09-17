@@ -91,11 +91,11 @@ bekommt und sich fragt, warum er auf einer Hundeschul-Seite landet.
 Die Seite trägt automatisch ein „nicht indexieren" für Suchmaschinen und taucht nicht bei
 Google auf.
 
-**Der Link mit Passwort.** Hängst du `?k=DASPASSWORT` an die Adresse, öffnet sich der Katalog
+**Der Link mit Passwort.** Hängst du `?kik=DASPASSWORT` an die Adresse, öffnet sich der Katalog
 direkt — niemand muss etwas eintippen. Das Passwort verschwindet dabei sofort wieder aus der
 Adresszeile. Diesen Link verschickst du an die Interessenten:
 
-    https://www.schlabberschnuten.com/kikripp-artikelkatalog/?k=DASPASSWORT
+    https://www.schlabberschnuten.com/kikripp-artikelkatalog/?kik=DASPASSWORT
 
 **Auf kikripp.de:** Dort brauchst du keine Plugin-Rechte, ein Knopf ist nur ein Link. Die
 fertige Vorlage liegt in **`U3_Knopf_fuer_kikripp.docx`** (und als `.txt`, falls das Kopieren
@@ -122,6 +122,88 @@ sag mir Bescheid — dann bauen wir den Versand über SMTP um.
 
 Zum Schluss: **Artikelkatalog → Einstellungen → Testreservierungen löschen**.
 
+## Was auf schlabberschnuten.com zu beachten ist
+
+Auf der Seite laufen rund fünfzehn Plugins. Fünf davon können dem Katalog in die Quere
+kommen. Das Plugin ist darauf vorbereitet, aber drei Kleinigkeiten musst du selbst erledigen.
+
+### Vorher: Sicherung anlegen
+
+Du hast **UpdraftPlus**. Mach einmal *Jetzt sichern* (Datenbank und Dateien), bevor du das
+Plugin installierst. Dauert ein paar Minuten und du kannst jeden Schritt zurücknehmen.
+
+### Elementor — die Katalogseite anders anlegen
+
+Die Seite ist mit **Elementor** gebaut (Hello-Theme, Royal Addons, UAE). Der Kurzbefehl
+gehört deshalb nicht in einen Block, sondern:
+
+- **Ohne Elementor:** Seite anlegen, `[kikripp_katalog]` in den normalen Inhalt schreiben,
+  veröffentlichen — **nicht** auf „Mit Elementor bearbeiten" klicken. Das ist der einfachste
+  Weg und der, den ich empfehle.
+- **Mit Elementor:** Seite mit Elementor bearbeiten, links nach dem Widget **Shortcode**
+  suchen, auf die Seite ziehen und `[kikripp_katalog]` eintragen.
+
+Wähle in beiden Fällen ein **breites Seitenlayout** (Elementor: *Elementor Canvas* oder
+*Elementor Full Width*, sonst die Vorlage ohne Seitenleiste). Der Katalog zeigt vier Karten
+nebeneinander — in einer schmalen Spalte mit Seitenleiste wird es eng.
+
+### CookieYes — den Zugangs-Keks eintragen
+
+**CookieYes** kann Skripte blockieren, bis jemand zustimmt. Das Katalog-Skript ist im Plugin
+ausdrücklich als *notwendig* markiert, es sollte also durchlaufen. Zwei Dinge trag bitte
+nachträglich ein:
+
+1. Im CookieYes-Cookie-Verzeichnis den Keks **`kikripp_zugang`** als *notwendig* aufnehmen
+   (Zweck: „merkt sich die Anmeldung am Artikelkatalog", Dauer 30 Tage). Er ist technisch
+   erforderlich und braucht keine Zustimmung, muss aber aufgeführt sein.
+2. Ruf die Katalogseite in einem privaten Fenster auf und **klick den Banner nicht weg**.
+   Lädt der Katalog trotzdem? Wenn ja, ist alles gut. Wenn die Seite leer bleibt, sag mir
+   Bescheid — dann müssen wir das Skript in CookieYes von der Blockierliste nehmen.
+
+### Cache — nach dem Installieren einmal leeren
+
+Oben in der Leiste hast du **Cache leeren**. Drück das nach der Installation und nach jedem
+Artikelimport.
+
+Das Plugin sagt dem Cache selbst, dass die Katalogseite nicht zwischengespeichert werden
+darf, und alle Daten kommen mit „nicht zwischenspeichern"-Kennzeichnung. Trotzdem:
+**Falls du im Cache-Plugin eine Ausschlussliste findest, trag die Katalogseite dort ein.**
+Und wenn es eine Option zum *Zusammenfassen oder Verkleinern von JavaScript* gibt, nimm die
+Katalogseite auch davon aus. Das ist die häufigste Ursache, wenn so eine Seite plötzlich leer
+bleibt.
+
+### Yoast — die Seite auf „nicht indexieren"
+
+Das Plugin setzt die Angabe selbst und stimmt sich mit **Yoast** ab. Zur Sicherheit: In der
+Katalogseite unten im Yoast-Kasten → *Erweitert* → *Erlauben, dass Suchmaschinen diese Seite
+anzeigen?* auf **Nein** stellen. Dann ist es doppelt abgesichert.
+
+### Der Hinweis von Popup Maker — den nimm ernst
+
+In deinem Dashboard steht, dass **Popup Maker keine Dateien im Cache-Ordner anlegen kann**.
+Das kann ein Eigenleben dieses Plugins sein, es kann aber auch heißen, dass der Webspace
+teilweise **nicht beschreibbar** ist. Dann scheitern sowohl der Plugin-Upload als auch die
+111 Fotos.
+
+Deshalb der Reihe nach vorgehen:
+
+1. Plugin hochladen. Klappt das, ist `wp-content/plugins` beschreibbar.
+2. **Ein einzelnes Foto** in die Mediathek laden — `F-001.jpg` genügt. Klappt das, ist
+   `wp-content/uploads` beschreibbar und du kannst den Rest hinterherschieben.
+3. Scheitert einer der beiden Schritte mit einer Rechte- oder Verzeichnismeldung, ist es ein
+   Fall für den Hoster („Schreibrechte auf wp-content wiederherstellen").
+
+Teste das **bevor** du eine Stunde mit Fotos hochladen verbringst.
+
+### Was unkritisch ist
+
+**WPForms**, **Popup Maker**, **Announcer**, **Font Audit** und **Fonts Plugin** stören den
+Katalog nicht. Das Plugin benutzt eigene Tabellen, eigene Einstellungsnamen, einen eigenen
+Kurzbefehl und ein Stylesheet, das nur innerhalb des Katalogs gilt. Dass WPForms bei dir
+funktioniert, ist übrigens ein gutes Zeichen: dann verschickt die Seite Mails.
+
+---
+
 ## Wenn etwas nicht klappt
 
 ### „Plugins" steht gar nicht im linken Menü
@@ -136,7 +218,7 @@ Ausweichweg: `kikripp-katalog.zip` auf dem Rechner entpacken und den Ordner
 `kikripp-katalog` über den Dateimanager des Hosters nach `wp-content/plugins/` legen. Danach
 steht es unter *Installierte Plugins* und muss nur aktiviert werden.
 
-### Der Link mit `?k=…` öffnet den Katalog nicht
+### Der Link mit `?kik=…` öffnet den Katalog nicht
 
 - **Passwort stimmt nicht.** Groß- und Kleinschreibung zählt. Prüf es unter
   *Artikelkatalog → Einstellungen*, indem du es neu setzt.
@@ -181,6 +263,21 @@ Bescheid, dann bauen wir den Versand über SMTP um. **In der Zwischenzeit gehen 
 Reservierungen verloren:** Sie stehen unter *Artikelkatalog → Reservierungen*, und weil der
 Mailversand gescheitert ist, bleiben die Kontaktdaten dort ausnahmsweise sichtbar. Notiere
 sie und klick dann auf „notiert – Kontaktdaten löschen".
+
+### Die Katalogseite bleibt leer
+
+Der Rahmen ist da, aber keine Artikel. Drei Ursachen, in dieser Reihenfolge prüfen:
+
+1. **Cache.** Oben *Cache leeren*, Seite neu laden.
+2. **JavaScript zusammengefasst oder verkleinert.** Im Cache- oder Optimierungs-Plugin die
+   Katalogseite von der JavaScript-Optimierung ausnehmen.
+3. **CookieYes blockiert das Skript.** Im privaten Fenster prüfen: Lädt der Katalog, wenn du
+   im Banner auf *Alle akzeptieren* klickst, aber nicht ohne? Dann ist es CookieYes.
+
+### Der Katalog sieht gequetscht aus
+
+Die Seite hat eine Seitenleiste oder ein schmales Layout. Seitenvorlage auf *Elementor
+Canvas*, *Full Width* oder die Vorlage ohne Seitenleiste umstellen.
 
 ### Ich komme nicht weiter
 

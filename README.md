@@ -112,7 +112,7 @@ python3 scripts/build_artikelstamm_xlsx.py
 Am Plugin gearbeitet? Dann vorher:
 
 ```bash
-php wordpress/tests/test-logik.php     # 75 Prüfungen, muss 0 Fehler melden
+php wordpress/tests/test-logik.php     # 76 Prüfungen, muss 0 Fehler melden
 php wordpress/tests/test-kette.php     # Datenbasis -> Import -> Katalog
 cd wordpress && ./paketieren.sh        # erzeugt ausgabe/kikripp-katalog.zip
 ```
@@ -131,7 +131,8 @@ Voraussetzungen: `python3`, `openpyxl`, `Pillow`, `pillow-heif`, Chromium (für 
 ## Webkatalog
 
 Das WordPress-Plugin in `wordpress/kikripp-katalog/` bringt den Katalog ins Netz:
-Zugang über einen Link mit eingebautem Passwort, Reservierung mit Mailbenachrichtigung an
+Zugang über einen Link mit eingebautem Passwort (`?kik=…`, wird sofort aus der Adresse
+entfernt), Reservierung mit Mailbenachrichtigung an
 `jennyp@kikripp.de`, geteilter Reserviert-Status für alle Besucher, Teilmengen
 („5 von 10 verfügbar"), sieben Tage Frist, Stornieren und Bezahltsetzen in der Verwaltung.
 

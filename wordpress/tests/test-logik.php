@@ -202,23 +202,28 @@ pruefe('Leerzeichen werden verziehen', Kikripp_Zugang::passwort_pruefen(trim('  
 $GLOBALS['ATTRAPPE_WIRFT_BEI_WEITERLEITUNG'] = true;
 
 function link_aufrufen($pw) {
-    $_GET['k'] = $pw;
-    $_SERVER['REQUEST_URI'] = '/katalog/?k=' . rawurlencode($pw) . '&seite=2';
+    $par = Kikripp_Zugang::LINK_PARAMETER;
+    $_GET[$par] = $pw;
+    $_SERVER['REQUEST_URI'] = '/katalog/?' . $par . '=' . rawurlencode($pw) . '&seite=2';
     $_COOKIE = [];
     $GLOBALS['weiterleitung'] = null;
     try { Kikripp_Zugang::link_einloesen(); } catch (Attrappe_Weiterleitung $e) { /* erwartet */ }
-    unset($_GET['k']);
+    unset($_GET[$par]);
     return $GLOBALS['weiterleitung'];
 }
 
 $ziel = link_aufrufen('geheim-im-link');
 pruefe('Zugang gilt sofort', Kikripp_Zugang::hat_zugang(), true);
-pruefe('Passwort ist aus der Adresse entfernt', strpos((string) $ziel, 'k=') === false, true);
+pruefe('Passwort ist aus der Adresse entfernt',
+       strpos((string) $ziel, Kikripp_Zugang::LINK_PARAMETER . '=') === false, true);
 pruefe('andere Parameter bleiben erhalten', strpos((string) $ziel, 'seite=2') !== false, true);
 
 $ziel = link_aufrufen('falsches-passwort');
 pruefe('falscher Link öffnet nichts', Kikripp_Zugang::hat_zugang(), false);
-pruefe('auch dann wird das Passwort entfernt', strpos((string) $ziel, 'k=') === false, true);
+pruefe('auch dann wird das Passwort entfernt',
+       strpos((string) $ziel, Kikripp_Zugang::LINK_PARAMETER . '=') === false, true);
+pruefe('Parametername ist nicht der einzelne Buchstabe k',
+       Kikripp_Zugang::LINK_PARAMETER !== 'k', true);
 
 $_COOKIE = [];
 pruefe('ohne Keks kein Zugang', Kikripp_Zugang::hat_zugang(), false);

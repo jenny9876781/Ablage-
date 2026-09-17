@@ -28,6 +28,51 @@ Immer endend mit **Ablauf C** (erzeugen, prüfen, ausliefern).
 
 ---
 
+## 1b. Das Raumschema
+
+`daten/raeume.csv` ist die Raumstammdatei, abgeleitet aus den Wohnflächenplänen von Karl Altmann
+(2019): **62 Räume**. Der Code sagt Gebäude und Ebene:
+
+| Präfix | Bereich | Räume |
+|---|---|---|
+| `NU` | Neubau, Untergeschoss | 7 — hier liegt auch der Eingang / die Elternlounge (`NU01`) |
+| `NE` | Neubau, Erdgeschoss | 8 |
+| `BU` | Bestandsgebäude, Untergeschoss | 14 |
+| `BE` | Bestandsgebäude, Erdgeschoss | 17 |
+| `BA` | Bestandsgebäude, Attika | 13 |
+| `TE` | Terrassen | `TE01` ebenerdig (drei zusammengefasst), `TE02` Dachterrasse |
+| `GA` | Gartenanlage | 1 |
+
+Die Umstellung von `K-###` auf dieses Schema ist am 17.09.2026 mit
+`scripts/umnummerieren.py` gelaufen und **läuft nur einmal**; das Skript bricht ab, wenn
+`Alt_ArtNr` schon gefüllt ist. Die Zuordnung der alten Raumnamen steht dort als Tabelle
+`ZUORDNUNG` — sie ist vom Nutzer bestätigt und dokumentiert, welcher alte Sammelname wohin ging.
+
+> Entfallene Positionen behalten ihre alte `K-###`-Nummer. Sie sollen im Raum keine Nummer
+> verbrauchen, sonst beginnt das Erfassungsblatt mit einer Lücke.
+
+### Unterlagen für den Rundgang
+
+```bash
+python3 scripts/build_erfassung.py
+```
+
+Erzeugt drei Dateien in `ausgabe/`:
+
+| Datei | Zweck |
+|---|---|
+| `T1_Tuerschilder.docx` | fünf Räume je A4-Blatt, zum Ausschneiden und an die Tür kleben |
+| `T2_Erfassungsblaetter.docx` | ein Blatt je Raum; bereits erfasste Artikel stehen grau hinterlegt oben mit ihrer Nummer, darunter freie Nummern |
+| `T3_Erfassungsliste.xlsx` | dieselben Nummern zum Abtippen der Stückzahlen, kommt zum Einlesen zurück |
+
+Zeilen je Raum nach Fläche: unter 5 m² fünf, bis 20 m² fünfzehn, bis 40 m² fünfundzwanzig,
+darüber vierzig — mindestens aber die schon erfassten Artikel plus zehn Reserve.
+
+**Das Türschild ist gleichzeitig das Raumblatt zum Fotografieren.** Ein eigenes Raumblatt
+braucht es nicht mehr.
+
+---
+
 ## 2. Ablauf A — neue Fotos erfassen
 
 ### A1. Fotos aufbereiten
@@ -52,19 +97,24 @@ bis niemand mehr erkennbar ist. Kinderfotos dürfen unter keinen Umständen in e
 
 ### A3. Artikel anlegen
 
-Neue Zeilen an `daten/artikel_kikripp.csv` anhängen. Artikelnummern **fortlaufend** ab der
-höchsten vorhandenen `K-xxx` — vorhandene Nummern nie neu vergeben, auch nicht für entfallene
-Positionen.
+Neue Zeilen an `daten/artikel_kikripp.csv` anhängen. Die Artikelnummer ergibt sich aus dem Raum:
+`<Raumcode>-NN`, fortlaufend ab der höchsten im Raum vorhandenen Nummer. Nummern nie neu vergeben,
+auch nicht für entfallene Positionen.
+
+Steht die Nummer schon auf einem Post-it im Foto, gilt **die vom Post-it** — nicht selbst
+weiterzählen. Die Erfassungsblätter (`T2`) geben die Nummern vor.
 
 Spalten und Konventionen:
 
 | Spalte | Regel |
 |---|---|
-| `ArtNr` | `K-###`, fortlaufend |
+| `ArtNr` | `<Raumcode>-NN`, z. B. `BE10-07` — die laufende Nummer je Raum aus `daten/raeume.csv` |
+| `Alt_ArtNr` | nur gefüllt bei Positionen aus der alten `K-###`-Zählung; nie ändern |
+| `Raumcode` | Code aus `daten/raeume.csv`; bestimmt die Artikelnummer |
 | `Bezeichnung` | kurz und verkäuflich, ohne Marketingsprache |
 | `Beschreibung` | Material, Ausführung, Besonderheiten. Marke nur nennen, wenn im Bild belegt oder vom Nutzer bestätigt. |
 | `Kategorie` | Möbel · Designmöbel · Kita-Ausstattung · Büro · Küchentechnik · Leuchten · Deko · Kunst · Uhren · Textilien · Pflanzen · Garten · Verbrauchsmaterial · Technik · Sonstiges |
-| `Raum` | wie vom Nutzer benannt, Schreibweise bestehender Räume übernehmen |
+| `Raum` | **nicht frei wählen** — der Raumname aus `daten/raeume.csv` zum jeweiligen `Raumcode` |
 | `Menge` | erkennbare Stückzahl |
 | `Einheit` | Stück · Karton · Set · Palette · Konvolut |
 | `Zustand` | neuwertig · gut · gebraucht · stark gebraucht · defekt |
@@ -146,6 +196,7 @@ python3 scripts/build_angebot_xlsx.py
 python3 scripts/build_katalog_import.py        # Importdatei für den Webshop
 python3 scripts/build_webkatalog.py            # + --geschuetzt PASSWORT für die Fassung zum Veröffentlichen
 python3 scripts/build_anleitungen_pdf.py       # nur wenn sich eine Anleitung geändert hat
+python3 scripts/build_erfassung.py             # nur wenn sich Räume oder erfasste Artikel geändert haben
 ```
 
 > Die Nutzerin kann **keine .md-Dateien öffnen** (Windows). Anleitungen deshalb immer als
@@ -181,7 +232,10 @@ Zusätzlich von Hand:
 - Nach einem Rückeinlesen stichprobenartig prüfen, dass eine als verkauft markierte Position
   noch Käufer, Rechnungsnummer und Zahlungsstatus trägt.
 
-> LibreOffice läuft in dieser Umgebung nicht durch — `recalc.py` scheitert selbst an einer
+> LibreOffice läuft in dieser Umgebung **überhaupt nicht** — es lädt nicht einmal eine leere
+> `.docx`. Word-Dateien deshalb strukturell prüfen (python-docx wieder öffnen, Zeilen, Nummern
+> und Vorbelegung zählen) und für die Optik eine HTML-Nachbildung mit Chromium rendern.
+> Dasselbe gilt für Excel: `recalc.py` scheitert selbst an einer
 > Tabelle mit zwei Zellen. Formeln deshalb **strukturell** prüfen (Spaltenbezüge auflösen) und
 > die Erwartungswerte in Python nachrechnen. Nicht als „geprüft" ausgeben, was nicht geprüft wurde.
 
@@ -202,7 +256,9 @@ angeben:
 | Regel | Grund |
 |---|---|
 | Fotonummern `F-xxx` nie neu vergeben | die Artikel-Foto-Zuordnung bricht |
-| Artikelnummern `K-xxx` nie wiederverwenden | Etiketten kleben physisch am Objekt |
+| Artikelnummern nie wiederverwenden, auch nicht die alten `K-xxx` | Etiketten kleben physisch am Objekt |
+| `Raumcode` und Artikelnummer müssen zusammenpassen | `pruefen.py` beanstandet das sonst |
+| Raumnamen nur in `daten/raeume.csv` ändern | sonst driften Katalog, Blätter und Schilder auseinander |
 | Verkaufsdaten nie überschreiben | Umsatz, Rechnungen und Zahlungen gingen verloren |
 | Entfallene Positionen nie löschen, nur `Aktiv = entfällt` | sonst verschwindet Ware unbemerkt |
 | Keine Personen in Ausgabedateien | Datenschutz, besonders Kinder |
@@ -310,25 +366,36 @@ https://claude.ai/artifact/HdDGxJMQAWQ96Sy6z6Po4d. **Sobald der Webshop live ist
 nicht mehr gepflegt** — sie kennt keine Reservierungen und würde veraltete Bestände zeigen.
 `04_Webkatalog_MOCKUP.html` bleibt als Datei zum Offline-Weiterleiten.
 
-## 9. Offene Punkte (Stand 16.09.2026)
+## 9. Offene Punkte (Stand 17.09.2026)
 
-- **Webshop ist noch nicht installiert.** Plugin, Fotos und Importdatei liegen in `ausgabe/`,
-  die Einrichtung übernimmt der Nutzer nach `WEBSHOP_EINRICHTEN.md`. Danach erfragen, ob der
-  Mailversand aus WordPress funktioniert hat — sonst muss ein SMTP-Zugang dazu.
-- **Startseite:** Der Nutzer will den Katalog unter www.kikripp.de. Meine Empfehlung steht in
-  der Anleitung: Startseite behalten, Katalog auf `/katalog`, damit nicht jeder Besucher der
-  Firmenseite vor einer Passwortabfrage steht. Entscheidung offen.
-- **Noch nicht alle Artikel erfasst.** Es kommen weitere Fotos und Kategorien dazu. Der Import
-  ist darauf ausgelegt: neue Datei erzeugen, hochladen, bestehende Reservierungen bleiben.
-- **Logo:** liegt nur als Bildschirmbild vor. Der Schriftzug „KIKRIPP" ist derzeit gesetzter Text,
-  das Signet ist nachgebaut. Sobald eine Logodatei kommt: `assets/kopflogo.png` ersetzen und
-  `Farbe_Rot` aus dem Original übernehmen.
-- **Maße** fehlen bei fast allen Positionen.
-- **Label-Fotos** ausstehend: Vitra-Sofa, drei USM-Haller-Teile, Kartell-Stühle, Weber-Grill,
-  Biohort-Boxen, große Kuckucksuhr.
-- **Foto F-110** (antike Vitrine) ist wegen zweier Teamfotos stark beschnitten — ein neues Foto
-  ohne die gerahmten Bilder wäre besser.
-- **kikripp.de** ist aus dieser Umgebung nicht erreichbar (Netzwerkrichtlinie). Für
-  Gestaltungsabgleiche Screenshots erbitten.
-- **Rechtstexte** im Webshop sind von mir formuliert, nicht anwaltlich geprüft. Sie stehen in
-  den Plugin-Einstellungen und lassen sich dort jederzeit ersetzen.
+- **Multisite-Sperre:** kikripp.de ist eine WordPress-Multisite mit drei Seiten. Plugins liegen
+  in der Netzwerkverwaltung, dafür fehlen der Nutzerin die Super-Admin-Rechte. Eine Anfrage an
+  die Betreuung der Seite ist raus (Super-Admin für den Benutzer `anna`, oder Installation durch
+  sie). **Bis das kommt, kann der Webshop nicht in Betrieb gehen.**
+- **Rundgang läuft an.** Türschilder, Erfassungsblätter und Erfassungsliste sind ausgeliefert.
+  Zurück kommt `T3_Erfassungsliste.xlsx` mit Stückzahlen plus die Fotos je Raum. Die Nummer auf
+  dem Post-it im Foto ist maßgeblich.
+- **Sieben Positionen wurden inhaltlich umgewidmet** (Vitrine → Dekoration darin, Regal →
+  Rattankörbe, Tonkartonschrank → buntes Papier, Hängeleuchte → Pflanze, Wandspiegel →
+  Trachtenportrait, Pflanzkübel Beton → Plastik, Gartentisch → inkl. Stühle). Ihre alten Fotos
+  zeigen teils noch das nicht mehr verkaufte Möbel — beim Rundgang neu fotografieren.
+  Besonders `BA04-01` (ehemals K-035, „Dekoration in der Vitrine"): Das Foto zeigt vor allem die
+  antike Vitrine, die nicht mitverkauft wird.
+- **Drei Positionen mit offener Stückzahl:** `NE05-01` (Massivholztische), `NU04-04`
+  (Kuckucksuhr-Wandgruppe), `BA09-04` (Kartell Masters Stuhl) — beim Rundgang zählen.
+- **Eine Annahme von mir, nicht bestätigt:** Der alte Sammelraum „UG" mit fünf Positionen liegt
+  bei `BU04` (Gruppenraum im Bestand-UG). Die Aufnahmereihenfolge spricht dafür; sicher ist es
+  nicht. Beim Rundgang prüfen.
+- **Der Mailversand aus WordPress ist ungetestet.** Sobald das Plugin läuft: Testreservierung
+  auslösen. Schneller Vorabtest ohne Plugin: Passwort-vergessen-Mail an `jennyp@kikripp.de`.
+- **Maße** fehlen bei allen Positionen. Der Nutzer hat sie vorerst zurückgestellt.
+- **Anlagennummern und Anschaffungswerte** fehlen komplett (Anlagenabgang bei einer GmbH).
+  Anlagenverzeichnis beim Steuerberater erbitten.
+- **Versand:** Empfehlung steht — alles auf Abholung, Versand nur für die Designstücke und nur
+  an Gewerbe, weil Versand an Verbraucher ein 14-tägiges Widerrufsrecht auslöst. Der Nutzer
+  arbeitet die Spalte `Versand` selbst ein.
+- **Logo:** liegt nur als Bildschirmbild vor. Der Schriftzug „KIKRIPP" ist gesetzter Text,
+  das Signet nachgebaut. Sobald eine Logodatei kommt: `assets/kopflogo.png` ersetzen.
+- **Foto F-110** ist wegen zweier Teamfotos stark beschnitten.
+- **kikripp.de** ist aus dieser Umgebung nicht erreichbar (Netzwerkrichtlinie).
+- **Rechtstexte** im Webshop sind von mir formuliert, nicht anwaltlich geprüft.

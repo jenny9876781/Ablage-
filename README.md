@@ -18,15 +18,16 @@ Alle Verkaufsunterlagen entstehen aus **einer** gepflegten Artikelliste.
 Rechnungen und Kasse; der Webshop führt Buch über Verfügbarkeit und Interessenten; das
 Klinik-Angebot ist ein reines Dokument ohne eigene Datenhaltung.
 
-## Stand
+## Stand (17.09.2026)
 
 | | |
 |---|---|
-| Positionen | 142 |
-| Einheiten | 234 |
-| Fotos | 112 (aus HEIC konvertiert, gedreht, verkleinert, ohne GPS-Daten) |
-| Gesamtwert zu Einzelpreisen | 24.031,00 € netto (Schätzwerte) |
-| Paketpreis Vorschlag (−20 %) | 19.224,80 € netto |
+| Artikelnummern | `<Raumcode>-NN`, z. B. `BE10-07` — Gebäude, Ebene, Raum, laufende Nummer |
+| Räume | 62 aus den Wohnflächenplänen; erfasst sind bisher 19 |
+| Positionen | 87 aktiv (55 auf „entfällt" gesetzt, Zeilen bleiben erhalten) |
+| Fotos | 111 (aus HEIC konvertiert, gedreht, verkleinert, ohne GPS-Daten) |
+| Gesamtwert zu Einzelpreisen | 19.653,00 € netto (Schätzwerte) |
+| Paketpreis Vorschlag (−20 %) | 15.722,40 € netto |
 
 Alle Preise sind **Schätzwerte auf Basis der Fotos** und zur Überarbeitung gedacht.
 Maße fehlen durchgängig – die Spalte `Maße` ist dafür vorbereitet.
@@ -35,7 +36,7 @@ Maße fehlen durchgängig – die Spalte `Maße` ist dafür vorbereitet.
 
 | Ordner | Inhalt |
 |---|---|
-| `daten/` | `artikel_kikripp.csv` (Artikelstamm) und `design.csv` (Farben, Firmendaten, Konditionen) |
+| `daten/` | `artikel_kikripp.csv` (Artikelstamm), `raeume.csv` (62 Räume aus den Bauplänen) und `design.csv` (Farben, Firmendaten, Konditionen) |
 | `assets/` | Bollenhut-Signet als SVG und PNG, Kopflogo |
 | `.claude/skills/sale4kids/` | Skill: Stichwort „sale4kids“ löst den ganzen Ablauf aus |
 | `fotos/` | Artikelfotos `F-001.jpg` … `F-112.jpg`, sortiert nach Aufnahmezeit |
@@ -52,6 +53,9 @@ Maße fehlen durchgängig – die Spalte `Maße` ist dafür vorbereitet.
 | `katalog_import.json` | Artikel für den Webshop, wird in WordPress hochgeladen |
 | `kikripp-katalog.zip` | das WordPress-Plugin |
 | `kikripp-fotos.zip` | die 111 Fotos für die Mediathek |
+| `T1_Tuerschilder.docx` | Türschilder für 62 Räume, fünf je A4-Blatt |
+| `T2_Erfassungsblaetter.docx` | ein Erfassungsblatt je Raum für den Rundgang |
+| `T3_Erfassungsliste.xlsx` | dieselben Nummern zum Abtippen der Stückzahlen |
 | `04_Webkatalog_MOCKUP.html` | Muster des Katalogs, offline lauffähig, ohne Verschlüsselung |
 | `06_Webkatalog_geschuetzt.html` | dieselbe Seite mit AES-verschlüsselten Daten – Zwischenlösung, bis der Webshop live ist |
 
@@ -87,6 +91,7 @@ python3 scripts/build_angebot_xlsx.py
 python3 scripts/build_katalog_import.py                        # Importdatei für den Webshop
 python3 scripts/build_webkatalog.py --geschuetzt 'PASSWORT'    # Passwort bewusst nicht im Repo
 python3 scripts/build_anleitungen_pdf.py                       # Anleitungen als PDF
+python3 scripts/build_erfassung.py                             # Türschilder und Erfassungsblätter
 
 # 4. Vor der Übergabe prüfen – meldet Fehler und rechnet die Summen nach:
 python3 scripts/pruefen.py

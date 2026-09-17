@@ -38,6 +38,32 @@ if ohne_mass: W(f"{len(ohne_mass)} Positionen ohne Maßangabe")
 nachzaehlen = [a["ArtNr"] for a in aktiv if "nachzählen" in (a.get("Mengenhinweis") or "")]
 if nachzaehlen: W(f"{len(nachzaehlen)} Positionen mit offener Stückzahl")
 
+print("\n== 1b. Raumstammdaten ==")
+import csv as _csv
+_rp = os.path.join(BASIS, "daten", "raeume.csv")
+_raeume = {r["Raumcode"]: r for r in _csv.DictReader(open(_rp, encoding="utf-8"), delimiter=";")}
+_codes = [r["Raumcode"] for r in _csv.DictReader(open(_rp, encoding="utf-8"), delimiter=";")]
+if len(set(_codes)) != len(_codes):
+    F("doppelte Raumcodes in raeume.csv")
+else:
+    OK(f"{len(_raeume)} Räume, Codes eindeutig")
+_ohne = sorted({a["Raumcode"] for a in alle if a.get("Raumcode") and a["Raumcode"] not in _raeume})
+if _ohne:
+    F("Artikel verweisen auf unbekannte Raumcodes: " + ", ".join(_ohne))
+else:
+    OK("alle Artikel verweisen auf einen bekannten Raum")
+_schief = [a["ArtNr"] for a in alle if a.get("Raumcode") in _raeume
+           and a["Raum"] != _raeume[a["Raumcode"]]["Raumname"]]
+if _schief:
+    F(f"Raumname weicht vom Raumcode ab: {', '.join(_schief[:8])}")
+else:
+    OK("Raumname und Raumcode passen zusammen")
+_falsch = [a["ArtNr"] for a in aktiv if not a["ArtNr"].startswith(a["Raumcode"] + "-")]
+if _falsch:
+    F(f"Artikelnummer passt nicht zum Raumcode: {', '.join(_falsch[:8])}")
+else:
+    OK("jede Artikelnummer trägt ihren Raumcode")
+
 print("\n== 2. Fotoindex ==")
 idx = os.path.join(BASIS, "daten", "fotos_index.csv")
 if not os.path.exists(idx):
@@ -103,7 +129,9 @@ for name, mindest in (("01_Artikelstamm_kikripp.xlsx", 20), ("02_Angebot_Klinik.
                       ("04_Webkatalog_MOCKUP.html", 500), ("06_Webkatalog_geschuetzt.html", 500),
                       ("katalog_import.json", 10),
                       ("A1_Webshop_einrichten.pdf", 20), ("A2_Artikel_verwalten.pdf", 20),
-                      ("A3_Fotografieren.pdf", 20), ("A4_Arbeitsanweisung.pdf", 20)):
+                      ("A3_Fotografieren.pdf", 20), ("A4_Arbeitsanweisung.pdf", 20),
+                      ("T1_Tuerschilder.docx", 10), ("T2_Erfassungsblaetter.docx", 20),
+                      ("T3_Erfassungsliste.xlsx", 20)):
     pf = os.path.join(AUSGABE, name)
     if not os.path.exists(pf): F(f"{name} fehlt")
     elif os.path.getsize(pf) // 1024 < mindest: F(f"{name} ist auffällig klein")

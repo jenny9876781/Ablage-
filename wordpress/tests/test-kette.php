@@ -54,54 +54,64 @@ function im_katalog($nr) {
 }
 
 echo "\n1. Erstimport\n";
+$erwartet = count(array_filter(json_decode(file_get_contents($IMPORT), true),
+    function ($a) { return !empty($a['aktiv']) && !empty($a['im_katalog']); }));
 importiere($IMPORT);
-pruefe('142 Artikel im Katalog', count(Kikripp_DB::katalog_artikel()), 142);
-pruefe('K-005 ist sichtbar', im_katalog('K-005') !== null, true);
-pruefe('K-005 hat ein Foto', im_katalog('K-005')['bild'] !== '', true);
+$katalog = Kikripp_DB::katalog_artikel();
+pruefe('alle aktiven Artikel im Katalog', count($katalog), $erwartet);
 
-echo "\n2. Jemand reserviert K-005\n";
+// Prüfartikel aus den Daten holen, damit der Test eine Umnummerierung übersteht:
+// A = ein Artikel mit Foto, B = ein zweiter.
+$A = $katalog[0]['nr'];
+$B = $katalog[1]['nr'];
+$A_bild = $katalog[0]['bild'];
+$A_preis = (float) $katalog[0]['preis'];
+pruefe("$A ist sichtbar", im_katalog($A) !== null, true);
+pruefe("$A hat ein Foto", $A_bild !== '', true);
+
+echo "\n2. Jemand reserviert $A\n";
 $v = Kikripp_DB::reservieren(['name' => 'Test', 'email' => 't@example.org', 'telefon' => '',
-    'wunschtermin' => '', 'nachricht' => ''], ['K-005' => 1]);
+    'wunschtermin' => '', 'nachricht' => ''], [$A => 1]);
 pruefe('Reservierung angelegt', is_int($v) && $v > 0, true);
-pruefe('K-005 ist reserviert', im_katalog('K-005')['status'], 'reserviert');
+pruefe("$A ist reserviert", im_katalog($A)['status'], 'reserviert');
 
-echo "\n3. K-005 wird in der Datenbasis auf „entfällt\" gesetzt\n";
+echo "\n3. $A wird in der Datenbasis auf „entfällt\" gesetzt\n";
 $daten = json_decode(file_get_contents($IMPORT), true);
-foreach ($daten as &$a) { if ($a['nr'] === 'K-005') { $a['aktiv'] = false; } } unset($a);
+foreach ($daten as &$a) { if ($a['nr'] === $A) { $a['aktiv'] = false; } } unset($a);
 file_put_contents('/tmp/import-entfaellt.json', json_encode($daten));
 importiere('/tmp/import-entfaellt.json');
-pruefe('K-005 ist aus dem Katalog verschwunden', im_katalog('K-005'), null);
-pruefe('nur noch 141 Artikel', count(Kikripp_DB::katalog_artikel()), 141);
+pruefe("$A ist aus dem Katalog verschwunden", im_katalog($A), null);
+pruefe('einer weniger im Katalog', count(Kikripp_DB::katalog_artikel()), $erwartet - 1);
 pruefe('die Reservierung ist noch da', Kikripp_DB::vorgang($v) !== null, true);
 
-echo "\n4. K-010 wird komplett aus der Datei gestrichen\n";
-// Weiter auf dem Stand aus Schritt 3: K-005 steht dort schon auf „entfällt".
+echo "\n4. $B wird komplett aus der Datei gestrichen\n";
+// Weiter auf dem Stand aus Schritt 3: $A steht dort schon auf „entfällt".
 $daten = json_decode(file_get_contents('/tmp/import-entfaellt.json'), true);
-$daten = array_values(array_filter($daten, function ($a) { return $a['nr'] !== 'K-010'; }));
+$daten = array_values(array_filter($daten, function ($a) use ($B) { return $a['nr'] !== $B; }));
 file_put_contents('/tmp/import-geloescht.json', json_encode($daten));
 $weg = importiere('/tmp/import-geloescht.json');
-pruefe('Import meldet genau K-010', $weg, ['K-010']);
-pruefe('K-010 ist weg', im_katalog('K-010'), null);
-pruefe('K-005 bleibt weg', im_katalog('K-005'), null);
-pruefe('noch 140 Artikel', count(Kikripp_DB::katalog_artikel()), 140);
+pruefe("Import meldet genau $B", $weg, [$B]);
+pruefe("$B ist weg", im_katalog($B), null);
+pruefe("$A bleibt weg", im_katalog($A), null);
+pruefe('zwei weniger im Katalog', count(Kikripp_DB::katalog_artikel()), $erwartet - 2);
 
-echo "\n5. K-005 kommt zurück\n";
+echo "\n5. $A kommt zurück\n";
 importiere($IMPORT);
-pruefe('K-005 ist wieder da', im_katalog('K-005') !== null, true);
-pruefe('K-005 hat wieder sein Foto', im_katalog('K-005')['bild'], '/fotos/F-003.jpg');
-pruefe('die alte Reservierung zählt wieder', im_katalog('K-005')['status'], 'reserviert');
-pruefe('wieder 142 Artikel', count(Kikripp_DB::katalog_artikel()), 142);
+pruefe("$A ist wieder da", im_katalog($A) !== null, true);
+pruefe("$A hat wieder sein Foto", im_katalog($A)['bild'], $A_bild);
+pruefe('die alte Reservierung zählt wieder', im_katalog($A)['status'], 'reserviert');
+pruefe('wieder alle im Katalog', count(Kikripp_DB::katalog_artikel()), $erwartet);
 
 echo "\n6. Preisänderung schlägt durch, friert aber nichts auf\n";
-$alt = im_katalog('K-020')['preis'];
+$C = $katalog[2]['nr'];
 $daten = json_decode(file_get_contents($IMPORT), true);
-foreach ($daten as &$a) { if ($a['nr'] === 'K-020') { $a['preis'] = 99.0; } } unset($a);
+foreach ($daten as &$a) { if ($a['nr'] === $C) { $a['preis'] = 99.0; } } unset($a);
 file_put_contents('/tmp/import-preis.json', json_encode($daten));
 importiere('/tmp/import-preis.json');
-pruefe('neuer Preis im Katalog', im_katalog('K-020')['preis'], 99.0);
+pruefe('neuer Preis im Katalog', im_katalog($C)['preis'], 99.0);
 $pos = $wpdb->get_row($wpdb->prepare('SELECT preis_netto FROM ' . Kikripp_DB::t_position()
-    . ' WHERE artnr = %s', 'K-005'), ARRAY_A);
-pruefe('alte Reservierung behält ihren Preis', (float) $pos['preis_netto'], 60.0);
+    . ' WHERE artnr = %s', $A), ARRAY_A);
+pruefe('alte Reservierung behält ihren Preis', (float) $pos['preis_netto'], $A_preis);
 
 printf("\n== Kettentest: %d Fehler ==\n", $fehler);
 exit($fehler > 0 ? 1 : 0);

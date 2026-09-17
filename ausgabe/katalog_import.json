@@ -2337,6 +2337,25 @@
   "im_katalog": true
  },
  {
+  "nr": "NU01-12",
+  "titel": "Läufer dunkelgrau, IKEA Morum",
+  "beschr": "IKEA Morum, Flachgewebe dunkelgrau, für innen und außen geeignet, schmaler Läufer – 15 Stück verfügbar",
+  "kat": "Textilien",
+  "raum": "Flur",
+  "zustand": "gebraucht",
+  "masse": "",
+  "menge": 15,
+  "einheit": "Stück",
+  "preis": 15.0,
+  "basis": "VHB",
+  "versand": "nur Abholung",
+  "design": false,
+  "foto": "",
+  "sortierung": 123,
+  "aktiv": true,
+  "im_katalog": false
+ },
+ {
   "nr": "NU02-01",
   "titel": "Kommode weiß, 6 Schubladen",
   "beschr": "IKEA Nordli, weiß, hoch, 6 Schubladen",
@@ -2351,7 +2370,7 @@
   "versand": "nur Abholung",
   "design": false,
   "foto": "F-003",
-  "sortierung": 123,
+  "sortierung": 124,
   "aktiv": true,
   "im_katalog": true
  },
@@ -2370,7 +2389,7 @@
   "versand": "nur Abholung",
   "design": false,
   "foto": "F-004",
-  "sortierung": 124,
+  "sortierung": 125,
   "aktiv": true,
   "im_katalog": true
  },
@@ -2389,7 +2408,7 @@
   "versand": "Versand möglich",
   "design": false,
   "foto": "F-005",
-  "sortierung": 125,
+  "sortierung": 126,
   "aktiv": true,
   "im_katalog": true
  },
@@ -2408,7 +2427,7 @@
   "versand": "nur Abholung",
   "design": false,
   "foto": "F-006",
-  "sortierung": 126,
+  "sortierung": 127,
   "aktiv": true,
   "im_katalog": true
  },
@@ -2427,7 +2446,7 @@
   "versand": "nur Abholung",
   "design": true,
   "foto": "F-007",
-  "sortierung": 127,
+  "sortierung": 128,
   "aktiv": true,
   "im_katalog": true
  },
@@ -2446,7 +2465,7 @@
   "versand": "nur Abholung",
   "design": false,
   "foto": "F-008",
-  "sortierung": 128,
+  "sortierung": 129,
   "aktiv": true,
   "im_katalog": true
  },
@@ -2465,7 +2484,7 @@
   "versand": "Versand möglich",
   "design": false,
   "foto": "F-009",
-  "sortierung": 129,
+  "sortierung": 130,
   "aktiv": true,
   "im_katalog": true
  },
@@ -2484,7 +2503,7 @@
   "versand": "Versand möglich",
   "design": false,
   "foto": "F-011",
-  "sortierung": 130,
+  "sortierung": 131,
   "aktiv": true,
   "im_katalog": true
  },
@@ -2503,7 +2522,7 @@
   "versand": "nur Abholung",
   "design": true,
   "foto": "F-094",
-  "sortierung": 131,
+  "sortierung": 132,
   "aktiv": true,
   "im_katalog": true
  },
@@ -2522,7 +2541,7 @@
   "versand": "nur Abholung",
   "design": true,
   "foto": "F-095",
-  "sortierung": 132,
+  "sortierung": 133,
   "aktiv": true,
   "im_katalog": true
  },
@@ -2541,7 +2560,7 @@
   "versand": "nur Abholung",
   "design": false,
   "foto": "F-096",
-  "sortierung": 133,
+  "sortierung": 134,
   "aktiv": true,
   "im_katalog": true
  },
@@ -2560,7 +2579,7 @@
   "versand": "nur Abholung",
   "design": true,
   "foto": "F-102",
-  "sortierung": 134,
+  "sortierung": 135,
   "aktiv": true,
   "im_katalog": true
  },
@@ -2579,7 +2598,7 @@
   "versand": "nur Abholung",
   "design": false,
   "foto": "F-103",
-  "sortierung": 135,
+  "sortierung": 136,
   "aktiv": true,
   "im_katalog": true
  },
@@ -2598,7 +2617,7 @@
   "versand": "nur Abholung",
   "design": false,
   "foto": "F-098",
-  "sortierung": 136,
+  "sortierung": 137,
   "aktiv": true,
   "im_katalog": true
  },
@@ -2617,7 +2636,7 @@
   "versand": "nur Abholung",
   "design": false,
   "foto": "F-099",
-  "sortierung": 137,
+  "sortierung": 138,
   "aktiv": true,
   "im_katalog": true
  },
@@ -2636,7 +2655,7 @@
   "versand": "nur Abholung",
   "design": false,
   "foto": "F-101",
-  "sortierung": 138,
+  "sortierung": 139,
   "aktiv": true,
   "im_katalog": true
  },
@@ -2655,7 +2674,7 @@
   "versand": "nur Abholung",
   "design": true,
   "foto": "F-105",
-  "sortierung": 139,
+  "sortierung": 140,
   "aktiv": true,
   "im_katalog": true
  },
@@ -2674,7 +2693,7 @@
   "versand": "nur Abholung",
   "design": false,
   "foto": "F-106",
-  "sortierung": 140,
+  "sortierung": 141,
   "aktiv": true,
   "im_katalog": true
  },
@@ -2693,7 +2712,7 @@
   "versand": "nur Abholung",
   "design": false,
   "foto": "F-107",
-  "sortierung": 141,
+  "sortierung": 142,
   "aktiv": true,
   "im_katalog": true
  }

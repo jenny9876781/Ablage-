@@ -20,7 +20,7 @@ UEBERNEHMEN = ["Bezeichnung", "Beschreibung", "Kategorie", "Raum", "Menge", "Ein
                "Preis_netto", "Preisbasis", "Versand", "Foto", "Status", "Kanal",
                "Reserviert_für", "Verkauft_Menge", "Verkaufspreis_netto", "Verkaufsdatum",
                "Käufer", "Rechnungsnr", "Zahlung", "Zahlart", "Abholtermin",
-               "Mengenhinweis", "Bemerkung"]
+               "Mengenhinweis", "Klinik_Markierung", "Bemerkung"]
 GELDFELDER = {"Preis_netto", "Anschaffungswert_netto", "Verkaufspreis_netto"}
 
 

@@ -24,10 +24,10 @@ Klinik-Angebot ist ein reines Dokument ohne eigene Datenhaltung.
 |---|---|
 | Artikelnummern | `<Raumcode>-NN`, z. B. `BE10-07` — Gebäude, Ebene, Raum, laufende Nummer |
 | Räume | 62 aus den Wohnflächenplänen; erfasst sind bisher 19 |
-| Positionen | 87 aktiv (55 auf „entfällt" gesetzt, Zeilen bleiben erhalten) |
+| Positionen | 88 aktiv (55 auf „entfällt" gesetzt, Zeilen bleiben erhalten) |
 | Fotos | 111 (aus HEIC konvertiert, gedreht, verkleinert, ohne GPS-Daten) |
-| Gesamtwert zu Einzelpreisen | 19.653,00 € netto (Schätzwerte) |
-| Paketpreis Vorschlag (−20 %) | 15.722,40 € netto |
+| Gesamtwert zu Einzelpreisen | 19.878,00 € netto (Schätzwerte) |
+| Paketpreis Vorschlag (−15 %) | 16.896,30 € netto |
 
 Alle Preise sind **Schätzwerte auf Basis der Fotos** und zur Überarbeitung gedacht.
 Maße fehlen durchgängig – die Spalte `Maße` ist dafür vorbereitet.
@@ -49,7 +49,7 @@ Maße fehlen durchgängig – die Spalte `Maße` ist dafür vorbereitet.
 | Datei | Zweck |
 |---|---|
 | `01_Artikelstamm_kikripp.xlsx` | Arbeitsdatei für OneDrive. Blätter: Anleitung · Artikelstamm · Verkaufsübersicht · Rechnungen (DATEV) · Kasse |
-| `02_Angebot_Klinik.xlsx` | Übersichtsliste für die Klinik: Fotos, Einzelpositionen, Paketangebot. Ohne Eingabefelder – reserviert wird im Webshop. |
+| `02_Angebot_Klinik.xlsx` | Angebot für die Klinik: Fotos, Preise netto und brutto, Spalten für Interesse, Stückzahl und Bemerkung mit automatischer Summe, Paketangebot mit 15 % Nachlass |
 | `katalog_import.json` | Artikel für den Webshop, wird in WordPress hochgeladen |
 | `kikripp-katalog.zip` | das WordPress-Plugin |
 | `kikripp-fotos.zip` | die 111 Fotos für die Mediathek |

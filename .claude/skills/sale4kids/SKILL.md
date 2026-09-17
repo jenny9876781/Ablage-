@@ -128,7 +128,8 @@ Spalten und Konventionen:
 | `Mengenhinweis` | **immer ausfüllen:** was auf dem Foto zu sehen ist, z. B. „ca. 8 Stück im Bild – bitte nachzählen" |
 | `Status` | `verfügbar` |
 | `Kanal` | `Klinik` bei Neuaufnahme; das Rückeinlesen setzt später `Webkatalog` |
-| `Im_Katalog` | `ja`, wenn der Artikel im Webshop erscheinen soll, sonst `nein` |
+| `Im_Katalog` | `ja`, wenn der Artikel im Webkatalog erscheinen soll, sonst `nein`. **`nein` ist der Weg, einen Artikel nur der Klinik anzubieten** — er steht dann im Klinik-Angebot und im Artikelstamm, aber nicht im Webkatalog und nicht im Muster-HTML. |
+| `Klinik_Markierung` | `ja` färbt die Zeile im Klinik-Angebot hellblau ein (`D6E3F0`). Ohne Bedeutung im System — die Nutzerin markiert damit Positionen für sich. |
 | übrige Verkaufsspalten | leer |
 
 ### A4. Preise schätzen
@@ -456,8 +457,65 @@ https://claude.ai/artifact/HdDGxJMQAWQ96Sy6z6Po4d. **Sobald der Webshop live ist
 nicht mehr gepflegt** — sie kennt keine Reservierungen und würde veraltete Bestände zeigen.
 `04_Webkatalog_MOCKUP.html` bleibt als Datei zum Offline-Weiterleiten.
 
+## 8b. Das Klinik-Angebot
+
+**Reihenfolge, seit 17.09.2026:** Die Klinik geht **zuerst**, der Webkatalog erst danach online.
+Mediclin hat Vorrang. Damit ist das alte Problem der zwei Reservierungswege entschärft — sie
+laufen nicht mehr gleichzeitig.
+
+> **Der entscheidende Übergabeschritt:** Was die Klinik nimmt, muss **vor** dem Livegang des
+> Webkatalogs aus dem Katalog verschwinden — `Im_Katalog = nein` oder als verkauft eintragen,
+> dann `build_katalog_import.py` und importieren. Sonst wird dasselbe Stück zweimal angeboten.
+
+Die Klinik trägt selbst ein, in drei grau hinterlegten Spalten:
+
+| Spalte | Verhalten |
+|---|---|
+| `Interesse` | Auswahlliste ja/nein, mit Eingabeprüfung |
+| `Stückzahl` | ganze Zahl > 0, **leer = volle verfügbare Menge** |
+| `Ihre Bemerkung` | freier Text |
+| `Wert netto` | rechnet selbst: `=IF(Interesse<>"ja","", IF(Stückzahl="",Verfügbar,Stückzahl)*Einzelpreis)` |
+
+Zeilen mit „ja" färben sich über eine bedingte Formatierung grünlich ein.
+
+**Die Sprache ist Absicht:** „Interesse" und „Wert Ihrer Auswahl", nicht „Wunschmenge" und
+nicht „Reservierung". Im Hinweiskasten und in den Verkaufsbedingungen steht ausdrücklich, dass
+die Eintragungen eine **Interessenbekundung** sind und die Zuteilung erst mit schriftlicher
+Bestätigung verbindlich wird. Das nicht verwässern — sonst entsteht ein Anspruch auf Ware, die
+parallel online weggehen könnte.
+
+Aufbau der Summen: **A · Ihre Auswahl** (leer, solange nichts eingetragen ist) · **B ·
+Gesamtbestand** · **C · Paketangebot** mit dem Nachlass aus `daten/design.csv`
+(`Paketrabatt_Prozent`, seit 17.09. **15 %**). C rechnet auf B, B auf den Zeilen — jede Zahl
+steht nur einmal in der Datei.
+
+Preise stehen **netto und brutto** je Position. Netto führt (die Klinik ist ein Unternehmen),
+brutto steht daneben in Grau.
+
+`pruefen.py` prüft das alles bei jedem Lauf: Spalten vorhanden, Brutto- und Wertformeln in
+jeder Zeile, Markierung deckungsgleich mit der Datenbasis, beide Eingabeprüfungen da, und
+**keine beschädigten eingebetteten Bilder**.
+
+> Eine von der Nutzerin zurückgeschickte Fassung hatte zwei **defekte Bilddateien**
+> (`Bad CRC-32`), wodurch vier Positionen ohne Bild dastanden. Meine erzeugte Fassung war
+> sauber — der Schaden entsteht unterwegs (Download, Excel-Speichern, Cloud-Abgleich). Bei
+> „Bild fehlt" also immer zuerst `zipfile.ZipFile(...).testzip()` laufen lassen, bevor man in
+> den Daten sucht.
+
+> **Das Klinik-Angebot ist eine erzeugte Datei.** Hand-Markierungen darin überleben keinen
+> Neuaufbau. Deshalb lebt die Markierung in `Klinik_Markierung` in der Datenbasis. Wenn die
+> Nutzerin von Hand färbt, die Farben auslesen (bei beschädigten Dateien direkt aus
+> `xl/worksheets/sheet1.xml` plus `xl/styles.xml`) und in die Spalte übertragen.
+
+---
+
 ## 9. Offene Punkte (Stand 17.09.2026)
 
+- **Die Klinik hat Vorrang.** Der Webkatalog geht erst online, wenn Mediclin durch ist. Vor dem
+  Livegang die verkauften Positionen aus dem Katalog nehmen (siehe 8b).
+- **`NU01-12` (Läufer dunkelgrau, IKEA Morum, 15 Stück) hat noch kein Foto.** Die Nutzerin
+  schickt es mit den übrigen Fotos des Rundgangs nach; bis dahin steht der Artikel ohne Bild im
+  Klinik-Angebot. Der Preis von 15,00 € netto je Stück ist meine Schätzung, nicht bestätigt.
 - **Der Katalog ist noch nicht installiert.** Plugin, Fotos, Importdatei und die drei
   Begleitunterlagen liegen in `ausgabe/`. Die Nutzerin richtet ihn auf
   **schlabberschnuten.com** ein (Anleitung `A1`). Danach fragen, ob die Benachrichtigungsmail

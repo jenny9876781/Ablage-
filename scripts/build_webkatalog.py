@@ -29,6 +29,9 @@ def b64bild(p, breite=520):
 def daten_sammeln():
     daten = []
     for a in lade_artikel():
+        # Was nicht in den Webkatalog gehört, gehört auch nicht in das Muster.
+        if (a.get("Im_Katalog") or "ja").strip().lower() != "ja":
+            continue
         p = foto(a["Foto"])
         daten.append({
             "nr": a["ArtNr"], "titel": a["Bezeichnung"], "beschr": a["Beschreibung"],

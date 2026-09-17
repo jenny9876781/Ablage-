@@ -11,7 +11,7 @@ Angebot_Nr;ANG-2026-0001;
 Angebot_Datum;15.09.2026;
 Angebot_Gueltig_bis;15.10.2026;
 USt_Satz_Prozent;19;
-Paketrabatt_Prozent;20;Nachlass beim Paketangebot
+Paketrabatt_Prozent;15;Nachlass beim Paketangebot
 Katalog_URL;https://www.kikripp.de/katalog;Adresse des Webkatalogs, erscheint im Klinik-Angebot
 Katalog_Passwort;;Bewusst leer - Passwort gehoert nicht ins Projekt. Vor dem Erzeugen setzen: export KIKRIPP_KATALOG_PW=...
 Farbe_Rot;C8102E;Bollenhut-Rot - nur als Akzent verwenden

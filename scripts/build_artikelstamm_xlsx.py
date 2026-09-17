@@ -19,7 +19,9 @@ RAHMEN = Border(left=duenn, right=duenn, top=duenn, bottom=duenn)
 
 # (Überschrift, Breite, Gruppe, Typ)  Typ: text|int|eur|formel
 SPALTEN = [
-    ("ArtNr",                  9,  "Stammdaten",   "text"),
+    ("ArtNr",                  10, "Stammdaten",   "text"),
+    ("Alt_ArtNr",              10, "Stammdaten",   "text"),
+    ("Raumcode",               10, "Stammdaten",   "text"),
     ("Bezeichnung",            34, "Stammdaten",   "text"),
     ("Beschreibung",           54, "Stammdaten",   "text"),
     ("Kategorie",              18, "Stammdaten",   "text"),
@@ -39,6 +41,8 @@ SPALTEN = [
     ("Positionswert_netto",    17, "Preis",        "formel"),
     ("Versand",                16, "Vermarktung",  "text"),
     ("Foto",                   9,  "Vermarktung",  "text"),
+    ("Im_Katalog",             12, "Vermarktung",  "text"),
+    ("Klinik_Markierung",      18, "Vermarktung",  "text"),
     ("Status",                 12, "Vermarktung",  "text"),
     ("Kanal",                  14, "Vermarktung",  "text"),
     ("Reserviert_für",         22, "Vermarktung",  "text"),
@@ -59,13 +63,16 @@ GRUPPENFARBE = {"Stammdaten": SCHWARZ, "Buchhaltung": "595959", "Preis": ROT,
 IDX = {s[0]: i + 1 for i, s in enumerate(SPALTEN)}
 def L(n): return get_column_letter(IDX[n])
 
-PFLEGE = {"Menge", "Verkauft_Menge", "Maße", "Aktiv", "Anlagennr", "Anschaffungswert_netto", "Preis_netto",
+PFLEGE = {"Menge", "Verkauft_Menge", "Maße", "Aktiv", "Im_Katalog", "Klinik_Markierung",
+          "Anlagennr", "Anschaffungswert_netto", "Preis_netto",
           "Preisbasis", "Status", "Kanal", "Reserviert_für", "Verkaufspreis_netto",
           "Verkaufsdatum", "Käufer", "Rechnungsnr", "Zahlung", "Zahlart", "Abholtermin", "Bemerkung"}
 
 AUSWAHL = {
     "Wertklasse": '"A,B,C"',
     "Aktiv":      '"ja,entfällt"',
+    "Im_Katalog": '"ja,nein"',
+    "Klinik_Markierung": '"ja,nein"',
     "Einheit":    '"Stück,Karton,Set,Palette,Konvolut"',
     "Zustand":    '"neuwertig,gut,gebraucht,stark gebraucht,defekt"',
     "Preisbasis": '"Fix,VHB"',

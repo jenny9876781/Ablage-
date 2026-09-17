@@ -71,9 +71,13 @@ class Kikripp_REST {
             'admin'    => Kikripp_Zugang::ist_admin(),
             'recht'    => (string) get_option('kikripp_rechtstext', ''),
             'abholung' => (string) get_option('kikripp_abholadresse', ''),
-            'absender' => [
-                'firma'   => get_bloginfo('name'),
-                'email'   => get_option('kikripp_mail_an', ''),
+            'anbieter' => [
+                'firma'       => (string) get_option('kikripp_firma', 'Kikripp GmbH'),
+                'adresse'     => (string) get_option('kikripp_abholadresse', ''),
+                'telefon'     => (string) get_option('kikripp_telefon', ''),
+                'email'       => (string) get_option('kikripp_mail_an', ''),
+                'impressum'   => (string) get_option('kikripp_impressum_url', ''),
+                'datenschutz' => (string) get_option('kikripp_datenschutz_url', ''),
             ],
         ]));
     }
@@ -86,7 +90,6 @@ class Kikripp_REST {
             'name'         => sanitize_text_field((string) $anfrage->get_param('name')),
             'email'        => sanitize_email((string) $anfrage->get_param('email')),
             'telefon'      => sanitize_text_field((string) $anfrage->get_param('telefon')),
-            'wunschtermin' => sanitize_text_field((string) $anfrage->get_param('wunschtermin')),
             'nachricht'    => sanitize_textarea_field((string) $anfrage->get_param('nachricht')),
         ];
         if ($kontakt['name'] === '') {
@@ -97,6 +100,13 @@ class Kikripp_REST {
             return self::ohne_cache(new WP_REST_Response([
                 'ok' => false, 'meldung' => 'Bitte geben Sie eine gültige E-Mail-Adresse an.'], 400));
         }
+        // Telefon ist Pflicht: es geht keine Bestätigungsmail an den Interessenten,
+        // ein Tippfehler in der Adresse würde also niemandem auffallen.
+        if (strlen(preg_replace('/\D/', '', $kontakt['telefon'])) < 6) {
+            return self::ohne_cache(new WP_REST_Response([
+                'ok' => false, 'meldung' => 'Bitte geben Sie eine Telefonnummer an, '
+                . 'unter der wir Sie erreichen.'], 400));
+        }
         $wunsch = $anfrage->get_param('artikel');
         if (!is_array($wunsch)) { $wunsch = []; }
 
@@ -106,14 +116,16 @@ class Kikripp_REST {
                 'ok' => false, 'meldung' => $id->get_error_message()], 409));
         }
 
+        // Die Mail an die Kikripp GmbH ist die einzige, die rausgeht. Danach werden
+        // die Kontaktdaten aus der Datenbank gelöscht.
         $mail = Kikripp_Mail::reservierung($id);
-        Kikripp_Mail::bestaetigung($id);
 
         return self::ohne_cache(new WP_REST_Response([
             'ok'       => true,
             'vorgang'  => $id,
             'mail'     => (bool) $mail,
             'frist'    => (int) get_option('kikripp_frist_tage', 7),
+            'kontakt'  => ['email' => $kontakt['email'], 'telefon' => $kontakt['telefon']],
             'artikel'  => Kikripp_DB::katalog_artikel(),   // aktualisierter Stand für die Anzeige
         ]));
     }

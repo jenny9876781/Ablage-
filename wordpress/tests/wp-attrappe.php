@@ -145,6 +145,26 @@ function wp_hash_password($p) { return password_hash($p, PASSWORD_DEFAULT); }
 function wp_check_password($p, $h) { return password_verify($p, $h); }
 function wp_salt($s = '') { return 'test-salt-1234567890'; }
 function is_ssl() { return !empty($_SERVER['HTTPS']); }
+function is_admin() { return false; }
+function wp_unslash($w) { return is_array($w) ? array_map('stripslashes', $w) : stripslashes((string) $w); }
+function remove_query_arg($schluessel, $url = null) {
+    $url = $url ?: ($_SERVER['REQUEST_URI'] ?? '/');
+    $teile = parse_url($url);
+    $frage = [];
+    if (!empty($teile['query'])) { parse_str($teile['query'], $frage); }
+    unset($frage[$schluessel]);
+    return ($teile['path'] ?? '/') . ($frage ? '?' . http_build_query($frage) : '');
+}
+class Attrappe_Weiterleitung extends Exception {}
+function wp_safe_redirect($ziel, $status = 302) {
+    $GLOBALS['weiterleitung'] = $ziel;
+    if (!headers_sent()) { header('Location: ' . $ziel, true, $status); }
+    // Im Test statt `exit` eine Ausnahme – sonst bricht der ganze Lauf ab.
+    if (!empty($GLOBALS['ATTRAPPE_WIRFT_BEI_WEITERLEITUNG'])) {
+        throw new Attrappe_Weiterleitung($ziel);
+    }
+    return true;
+}
 function esc_html($s) { return htmlspecialchars((string) $s, ENT_QUOTES); }
 function esc_attr($s) { return htmlspecialchars((string) $s, ENT_QUOTES); }
 function esc_textarea($s) { return htmlspecialchars((string) $s, ENT_QUOTES); }

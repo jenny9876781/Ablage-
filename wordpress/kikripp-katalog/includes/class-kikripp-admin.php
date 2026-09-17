@@ -96,11 +96,28 @@ class Kikripp_Admin {
             echo '<tr>';
             echo '<td>#' . (int) $v['id'] . ($v['testdaten'] ? ' <em>(Test)</em>' : '') . '</td>';
             echo '<td>' . esc_html(mysql2date('d.m.Y H:i', $v['erstellt'])) . '</td>';
-            echo '<td><strong>' . esc_html($v['name']) . '</strong><br>'
-               . '<a href="mailto:' . esc_attr($v['email']) . '">' . esc_html($v['email']) . '</a><br>'
-               . esc_html($v['telefon'])
-               . ($v['mail_versandt'] ? '' : '<br><span style="color:#b32d2e">Mail nicht versandt</span>')
-               . '</td>';
+            // Die Kontaktdaten stehen nach erfolgreichem Mailversand nur noch in der
+            // Mail. Hier erscheint deshalb der Suchbegriff fürs Postfach.
+            $suche = sprintf('[%s] Neue Reservierung #%d',
+                get_option('kikripp_firma', 'Kikripp GmbH'), (int) $v['id']);
+            echo '<td>';
+            if ((int) $v['kontakt_weg']) {
+                echo '<span style="color:#555">Kontaktdaten stehen in der Mail.</span><br>'
+                   . '<code style="font-size:11px">' . esc_html($suche) . '</code><br>'
+                   . '<span style="color:#777;font-size:11px">Diesen Text im Postfach suchen.</span>';
+            } elseif ($v['name'] !== '') {
+                $loesch = wp_nonce_url(admin_url('admin-post.php?action=kikripp_aktion&was=kontakt&id='
+                    . (int) $v['id']), 'kikripp_aktion_' . $v['id']);
+                echo '<span style="color:#b32d2e"><strong>Mail nicht versandt</strong></span><br>'
+                   . '<strong>' . esc_html($v['name']) . '</strong><br>'
+                   . '<a href="mailto:' . esc_attr($v['email']) . '">' . esc_html($v['email']) . '</a><br>'
+                   . '<a href="tel:' . esc_attr(preg_replace('/[^0-9+]/', '', $v['telefon'])) . '">'
+                   . esc_html($v['telefon']) . '</a><br>'
+                   . '<a href="' . esc_url($loesch) . '" style="font-size:11px">notiert – Kontaktdaten löschen</a>';
+            } else {
+                echo '<span style="color:#777">—</span>';
+            }
+            echo '</td>';
             echo '<td>' . implode('<br>', $posten) . '</td>';
             echo '<td>' . esc_html(Kikripp_Mail::eur($summe)) . '</td>';
             echo '<td>' . $status_text . '</td>';
@@ -119,12 +136,9 @@ class Kikripp_Admin {
             }
             echo '</td></tr>';
 
-            if (trim((string) $v['nachricht']) !== '' || $v['wunschtermin'] !== '') {
-                echo '<tr><td></td><td colspan="7" style="color:#555">';
-                if ($v['wunschtermin'] !== '') {
-                    echo 'Wunschtermin: ' . esc_html($v['wunschtermin']) . '. ';
-                }
-                echo esc_html($v['nachricht']) . '</td></tr>';
+            if (trim((string) $v['nachricht']) !== '') {
+                echo '<tr><td></td><td colspan="7" style="color:#555">'
+                   . esc_html($v['nachricht']) . '</td></tr>';
             }
         }
         echo '</tbody></table></div>';
@@ -146,6 +160,10 @@ class Kikripp_Admin {
             case 'storniert':
                 Kikripp_DB::vorgang_status($id, 'storniert');
                 self::zurueck('kikripp-reservierungen', sprintf('Vorgang #%d wurde storniert, die Artikel sind wieder frei.', $id));
+            case 'kontakt':
+                Kikripp_DB::kontakt_loeschen($id);
+                self::zurueck('kikripp-reservierungen', sprintf(
+                    'Die Kontaktdaten zu Vorgang #%d wurden gelöscht.', $id));
             case 'verlaengern':
                 Kikripp_DB::vorgang_verlaengern($id);
                 self::zurueck('kikripp-reservierungen', sprintf('Die Frist für Vorgang #%d wurde verlängert.', $id));
@@ -165,13 +183,15 @@ class Kikripp_Admin {
         $aus = fopen('php://output', 'w');
         fwrite($aus, "\xEF\xBB\xBF");   // BOM, damit Excel die Umlaute erkennt
         fputcsv($aus, ['Vorgang', 'Eingegangen', 'Ablauf', 'Status', 'Name', 'Email', 'Telefon',
-                       'Wunschtermin', 'Nachricht', 'ArtNr', 'Menge', 'Preis_netto', 'Positionsstatus',
+                       'Mailsuche', 'Nachricht', 'ArtNr', 'Menge', 'Preis_netto', 'Positionsstatus',
                        'Bezahlt_am'], ';');
+        $firma = get_option('kikripp_firma', 'Kikripp GmbH');
         foreach ($vorgaenge as $v) {
             foreach ($v['positionen'] as $p) {
                 fputcsv($aus, [
                     $v['id'], $v['erstellt'], $v['ablauf'], $v['status'], $v['name'], $v['email'],
-                    $v['telefon'], $v['wunschtermin'], str_replace(["\r", "\n"], ' ', (string) $v['nachricht']),
+                    $v['telefon'], sprintf('[%s] Neue Reservierung #%d', $firma, (int) $v['id']),
+                    str_replace(["\r", "\n"], ' ', (string) $v['nachricht']),
                     $p['artnr'], $p['menge'],
                     number_format((float) $p['preis_netto'], 2, ',', '.'), $p['status'],
                     $p['bezahlt_am'] ?? '',
@@ -221,6 +241,7 @@ class Kikripp_Admin {
 
         global $wpdb;
         $neu = $geaendert = $ohne_bild = 0;
+        $fehlende_fotos = [];
         $reserviert_entfernt = [];
         $belegung = Kikripp_DB::belegung();
         $gesehen = [];
@@ -231,7 +252,10 @@ class Kikripp_Admin {
             $gesehen[] = $artnr;
 
             $bild = self::bild_url(isset($a['foto']) ? (string) $a['foto'] : '');
-            if ($bild === '') { $ohne_bild++; }
+            if ($bild === '') {
+                $ohne_bild++;
+                if (!empty($a['foto'])) { $fehlende_fotos[] = (string) $a['foto']; }
+            }
 
             $daten = [
                 'nr'      => $artnr,
@@ -293,7 +317,12 @@ class Kikripp_Admin {
                               implode(', ', array_slice($verschwunden, 0, 15)));
         }
         if ($ohne_bild > 0) {
-            $meldung .= sprintf(' %d Artikel ohne gefundenes Foto – bitte prüfen, ob die Bilder in der Mediathek liegen.', $ohne_bild);
+            $fehlende_fotos = array_values(array_unique($fehlende_fotos));
+            sort($fehlende_fotos);
+            $meldung .= sprintf(' %d Artikel ohne gefundenes Foto. Diese Bilder fehlen in der '
+                . 'Mediathek: %s%s', $ohne_bild,
+                implode(', ', array_slice($fehlende_fotos, 0, 25)),
+                count($fehlende_fotos) > 25 ? ' … und weitere' : '.');
         }
         if (!empty($reserviert_entfernt)) {
             $meldung .= ' ACHTUNG: Diese Artikel wurden stillgelegt, haben aber noch Reservierungen: '
@@ -364,6 +393,29 @@ class Kikripp_Admin {
              . '<input type="number" id="k_ust" name="ust" min="0" max="30" step="0.1" value="%s" class="small-text"> %%</td></tr>',
              esc_attr(get_option('kikripp_ust_prozent', 19)));
 
+        printf('<tr><th scope="row"><label for="k_firma">Verkäuferin (Firma)</label></th><td>'
+             . '<input type="text" id="k_firma" name="firma" class="regular-text" value="%s" required>'
+             . '<p class="description">Erscheint im Katalog, im Mailbetreff und im Anbieter-Block. '
+             . 'Bewusst hier und nicht der Name dieser Website – der Katalog läuft auf fremdem '
+             . 'Speicherplatz.</p></td></tr>',
+             esc_attr(get_option('kikripp_firma', '')));
+
+        printf('<tr><th scope="row"><label for="k_tel">Telefon</label></th><td>'
+             . '<input type="text" id="k_tel" name="telefon" class="regular-text" value="%s">'
+             . '</td></tr>',
+             esc_attr(get_option('kikripp_telefon', '')));
+
+        printf('<tr><th scope="row"><label for="k_imp">Impressum</label></th><td>'
+             . '<input type="url" id="k_imp" name="impressum_url" class="large-text" value="%s">'
+             . '<p class="description">Vollständige Adresse der Impressumsseite der Verkäuferin. '
+             . '<strong>Bitte prüfen</strong> – die Vorgabe ist geraten.</p></td></tr>',
+             esc_attr(get_option('kikripp_impressum_url', '')));
+
+        printf('<tr><th scope="row"><label for="k_ds">Datenschutzerklärung</label></th><td>'
+             . '<input type="url" id="k_ds" name="datenschutz_url" class="large-text" value="%s">'
+             . '<p class="description">Ebenfalls prüfen.</p></td></tr>',
+             esc_attr(get_option('kikripp_datenschutz_url', '')));
+
         printf('<tr><th scope="row"><label for="k_abhol">Abholadresse</label></th><td>'
              . '<input type="text" id="k_abhol" name="abholadresse" class="large-text" value="%s">'
              . '<p class="description">Steht in der Bestätigungsmail an den Interessenten und unter dem Katalog.</p></td></tr>',
@@ -403,6 +455,10 @@ class Kikripp_Admin {
         update_option('kikripp_vorschau', isset($_POST['vorschau']) ? 1 : 0);
         update_option('kikripp_abholadresse', sanitize_text_field(wp_unslash($_POST['abholadresse'] ?? '')));
         update_option('kikripp_rechtstext', sanitize_textarea_field(wp_unslash($_POST['rechtstext'] ?? '')));
+        update_option('kikripp_firma', sanitize_text_field(wp_unslash($_POST['firma'] ?? '')));
+        update_option('kikripp_telefon', sanitize_text_field(wp_unslash($_POST['telefon'] ?? '')));
+        update_option('kikripp_impressum_url', esc_url_raw(wp_unslash($_POST['impressum_url'] ?? '')));
+        update_option('kikripp_datenschutz_url', esc_url_raw(wp_unslash($_POST['datenschutz_url'] ?? '')));
         self::zurueck('kikripp-einstellungen', 'Einstellungen gespeichert.'
             . ($pw !== '' ? ' Das Passwort wurde geändert – alle Besucher müssen sich neu anmelden.' : ''));
     }

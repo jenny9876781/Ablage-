@@ -45,5 +45,10 @@ register_activation_hook(__FILE__, function () {
     add_option('kikripp_vorschau', 1);
     add_option('kikripp_ust_prozent', 19);
     add_option('kikripp_abholadresse', 'Kikripp GmbH, Hermann-Schwer-Str. 1, 78048 Villingen-Schwenningen');
+    add_option('kikripp_firma', 'Kikripp GmbH');
+    add_option('kikripp_telefon', '07725 5179702');
+    // Geraten – die Nutzerin prüft die beiden Adressen in den Einstellungen.
+    add_option('kikripp_impressum_url', 'https://www.kikripp.de/impressum/');
+    add_option('kikripp_datenschutz_url', 'https://www.kikripp.de/datenschutz/');
     add_option('kikripp_rechtstext', 'Alle Artikel stammen aus der Auflösung unseres Kindergartens und sind gebraucht. Sie werden verkauft wie besichtigt; Abbildungen zeigen den tatsächlichen Zustand. Preise verstehen sich inklusive der gesetzlichen Umsatzsteuer. Eine Reservierung ist noch kein Kaufvertrag – dieser kommt erst bei der Abholung vor Ort zustande, ein Widerrufsrecht besteht daher nicht. Gegenüber Unternehmern ist die Gewährleistung ausgeschlossen; gegenüber Verbrauchern verjähren Ansprüche wegen Mängeln bei gebrauchten Sachen nach einem Jahr.');
 });

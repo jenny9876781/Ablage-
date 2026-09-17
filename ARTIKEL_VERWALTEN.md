@@ -105,16 +105,20 @@ lädst die Fotos nach und startest den Import einfach noch einmal.
 
 Alle ein, zwei Wochen: **Artikelkatalog → Reservierungen → Alle Reservierungen als CSV
 exportieren**. Die Datei schickst du mir mit **sale4kids**. Ich trage in den Artikelstamm
-ein, wer was zu welchem Preis wann gekauft hat, und erzeuge Verkaufsübersicht, DATEV-Liste
+ein, was zu welchem Preis wann verkauft wurde, und erzeuge Verkaufsübersicht, DATEV-Liste
 und Kassenbuch neu.
 
 Was **du** danach noch einträgst, sobald die Rechnung aus DATEV vorliegt:
 
 | Spalte | Inhalt |
 |---|---|
+| `Käufer` | Name aus der Benachrichtigungsmail — der Katalog speichert ihn nicht |
 | `Rechnungsnr` | Nummer aus DATEV |
 | `Zahlung` | `offen` oder `bezahlt` |
 | `Zahlart` | `bar` oder `Überweisung` |
+
+Den Käufer findest du über den Suchbegriff, den die Verwaltung bei jedem Vorgang anzeigt —
+zum Beispiel `[Kikripp GmbH] Neue Reservierung #14`. Damit im Postfach suchen.
 
 Bei Barzahlung muss der Betrag zusätzlich **am selben Tag** ins Blatt „Kasse". Der Vermerk
 „bar bezahlt" auf der Rechnung reicht bei einer GmbH nicht.
@@ -147,6 +151,10 @@ Abgelaufene Reservierungen geben die Ware **von selbst** wieder frei. Da musst d
 Excel ein. Der Katalog weiß dann nichts davon und vergibt denselben Schrank ein zweites Mal.
 Wenn jemand telefonisch reserviert, leg ihm die Reservierung selbst im Katalog an — du hast
 ja das Passwort.
+
+**Die Benachrichtigungsmails sind dein Kontaktarchiv.** Der Katalog speichert keine Namen,
+Mailadressen oder Telefonnummern — die stehen ausschließlich in den Mails an
+jennyp@kikripp.de. Leg dir dafür einen Ordner an und lösche dort nichts.
 
 **Artikelnummern werden nie wiederverwendet.** Auch nicht die von entfallenen Positionen.
 Die Etiketten kleben physisch an den Sachen; eine zweitvergebene Nummer führt garantiert

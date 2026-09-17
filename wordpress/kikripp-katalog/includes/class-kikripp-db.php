@@ -9,7 +9,7 @@ if (!defined('ABSPATH')) { exit; }
  */
 class Kikripp_DB {
 
-    const SCHEMA_VERSION = 2;
+    const SCHEMA_VERSION = 3;
 
     public static function t_artikel()  { global $wpdb; return $wpdb->prefix . 'kikripp_artikel'; }
     public static function t_vorgang()  { global $wpdb; return $wpdb->prefix . 'kikripp_vorgang'; }
@@ -38,14 +38,13 @@ class Kikripp_DB {
             name VARCHAR(190) NOT NULL DEFAULT '',
             email VARCHAR(190) NOT NULL DEFAULT '',
             telefon VARCHAR(80) NOT NULL DEFAULT '',
-            wunschtermin VARCHAR(20) NOT NULL DEFAULT '',
             nachricht TEXT NULL,
             erstellt DATETIME NOT NULL,
             ablauf DATETIME NOT NULL,
             status VARCHAR(20) NOT NULL DEFAULT 'offen',
             mail_versandt TINYINT(1) NOT NULL DEFAULT 0,
+            kontakt_weg TINYINT(1) NOT NULL DEFAULT 0,
             testdaten TINYINT(1) NOT NULL DEFAULT 0,
-            herkunft VARCHAR(45) NOT NULL DEFAULT '',
             PRIMARY KEY (id),
             KEY status (status, ablauf)
         ) ENGINE=InnoDB $coll;");
@@ -197,14 +196,14 @@ class Kikripp_DB {
                 'name'         => $kontakt['name'],
                 'email'        => $kontakt['email'],
                 'telefon'      => $kontakt['telefon'],
-                'wunschtermin' => $kontakt['wunschtermin'],
                 'nachricht'    => $kontakt['nachricht'],
                 'erstellt'     => $jetzt,
                 'ablauf'       => $ablauf,
                 'status'       => 'offen',
                 'testdaten'    => (int) get_option('kikripp_vorschau', 1),
-                'herkunft'     => substr((string) ($_SERVER['REMOTE_ADDR'] ?? ''), 0, 45),
             ]);
+            // Die IP-Adresse wird bewusst nicht gespeichert: der Katalog liegt auf
+            // fremdem Speicherplatz und soll dort keine personenbezogenen Daten ablegen.
             if ($ok === false) {
                 $wpdb->query('ROLLBACK');
                 return new WP_Error('db', 'Die Reservierung konnte nicht gespeichert werden.');
@@ -271,6 +270,27 @@ class Kikripp_DB {
             'UPDATE ' . self::t_artikel() . " SET im_katalog = 0, aktiv = 0
               WHERE artnr NOT IN ($platzhalter) AND (im_katalog = 1 OR aktiv = 1)", $gesehen));
         return $betroffen;
+    }
+
+    /**
+     * Löscht Name, E-Mail, Telefon und Nachricht eines Vorgangs.
+     * Positionen, Mengen, Preise und Daten bleiben — die braucht die Buchhaltung.
+     * Wird direkt nach erfolgreichem Mailversand aufgerufen: die Kontaktdaten
+     * liegen dann nur für den Moment des Versands in der Datenbank.
+     */
+    public static function kontakt_loeschen($id) {
+        global $wpdb;
+        return (bool) $wpdb->update(self::t_vorgang(), [
+            'name' => '', 'email' => '', 'telefon' => '', 'nachricht' => '',
+            'kontakt_weg' => 1,
+        ], ['id' => (int) $id]);
+    }
+
+    /** Vorgänge, an denen noch Kontaktdaten hängen (Mailversand war gescheitert). */
+    public static function kontakte_offen() {
+        global $wpdb;
+        return $wpdb->get_col('SELECT id FROM ' . self::t_vorgang() . '
+                                WHERE kontakt_weg = 0 AND name <> \'\'');
     }
 
     /** Vorgang auf bezahlt/storniert setzen oder die Frist verlängern. */

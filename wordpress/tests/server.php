@@ -60,6 +60,10 @@ if (empty($GLOBALS['optionen'])) {
         'kikripp_frist_tage' => 7,
         'kikripp_vorschau' => 1,
         'kikripp_ust_prozent' => 19,
+        'kikripp_firma' => 'Kikripp GmbH',
+        'kikripp_telefon' => '07725 5179702',
+        'kikripp_impressum_url' => 'https://www.kikripp.de/impressum/',
+        'kikripp_datenschutz_url' => 'https://www.kikripp.de/datenschutz/',
         'kikripp_abholadresse' => 'Kikripp GmbH, Hermann-Schwer-Str. 1, 78048 Villingen-Schwenningen',
         'kikripp_rechtstext' => 'Alle Artikel stammen aus der Auflösung unseres Kindergartens und sind gebraucht. Sie werden verkauft wie besichtigt; Abbildungen zeigen den tatsächlichen Zustand. Preise verstehen sich inklusive der gesetzlichen Umsatzsteuer. Eine Reservierung ist noch kein Kaufvertrag – dieser kommt erst bei der Abholung vor Ort zustande, ein Widerrufsrecht besteht daher nicht. Gegenüber Unternehmern ist die Gewährleistung ausgeschlossen; gegenüber Verbrauchern verjähren Ansprüche wegen Mängeln bei gebrauchten Sachen nach einem Jahr.',
     ];
@@ -84,6 +88,9 @@ if (empty($GLOBALS['optionen'])) {
 }
 
 // ---- Auslieferung ----------------------------------------------------------
+// Passwort aus dem Link einlösen – genau wie das Plugin es auf `init` tut.
+Kikripp_Zugang::link_einloesen();
+
 $pfad = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 
 if (strpos($pfad, '/wp-json/kikripp/v1/') === 0) {

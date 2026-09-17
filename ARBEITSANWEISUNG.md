@@ -38,11 +38,18 @@ Was er nicht kann: Maße erkennen und Stückzahlen bei Stapeln sicher zählen �
 durch und überschreibt, was er anders sieht. Alle Preise sind netto; Firmen bekommen Nettopreise
 genannt, Privatleuten muss der Bruttopreis gezeigt werden.
 
-**Verkauft wird über den Webshop auf kikripp.de.** Interessenten bekommen die Adresse und das
-Passwort, suchen sich dort ihre Artikel aus und schicken eine Reservierung ab. Du bekommst
-sofort eine Mail an jennyp@kikripp.de, und der Artikel steht für alle anderen auf „reserviert" —
-sieben Tage lang, danach wird er von selbst wieder frei. **Trag Reservierungen bitte nicht
-zusätzlich von Hand in die Excel ein**, sonst ist derselbe Schrank am Ende zweimal vergeben.
+**Verkauft wird über den Webkatalog.** Auf kikripp.de steht ein Knopf, der dorthin führt;
+die Seite selbst liegt auf schlabberschnuten.com, weil dort die technischen Rechte vorhanden
+sind — Verkäuferin ist und bleibt die Kikripp GmbH. Interessenten bekommen einen Link, in dem
+das Passwort schon steckt, suchen sich ihre Artikel aus und schicken eine Reservierung ab.
+Du bekommst sofort eine Mail an jennyp@kikripp.de, und der Artikel steht für alle anderen auf
+„reserviert" — sieben Tage lang, danach wird er von selbst wieder frei. **Trag Reservierungen
+bitte nicht zusätzlich von Hand in die Excel ein**, sonst ist derselbe Schrank am Ende zweimal
+vergeben.
+
+Die Interessenten bekommen **keine Bestätigungsmail** — sie sehen die Bestätigung nur am
+Bildschirm. Du meldest dich persönlich. Und weil der Katalog keine Kontaktdaten speichert,
+sind **deine Benachrichtigungsmails das einzige Kontaktarchiv**: bitte aufbewahren.
 
 Ist bezahlt und abgeholt, setzt du den Vorgang in WordPress unter „Artikelkatalog →
 Reservierungen" auf **bezahlt**; der Artikel verschwindet dann aus dem Katalog. Holt jemand

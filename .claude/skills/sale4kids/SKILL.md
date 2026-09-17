@@ -208,7 +208,7 @@ kikripp.de hat ihn abgelöst. `build_katalog_pdf.py` gibt es nicht mehr.
 Am Webshop-Plugin geändert? Dann zusätzlich:
 
 ```bash
-php wordpress/tests/test-logik.php             # 51 Prüfungen, muss 0 Fehler melden
+php wordpress/tests/test-logik.php             # 75 Prüfungen, muss 0 Fehler melden
 php wordpress/tests/test-kette.php             # Datenbasis -> Import -> Katalog
 cd wordpress && ./paketieren.sh                # erzeugt ausgabe/kikripp-katalog.zip
 ```
@@ -281,12 +281,61 @@ Alle Werte stehen in `daten/design.csv` und im Blatt „Design" der Arbeitsmappe
 
 ---
 
-## 8. Der Webshop auf kikripp.de
+## 8. Der Webkatalog
 
 Seit September 2026 läuft der Verkauf über ein eigenes WordPress-Plugin in
 `wordpress/kikripp-katalog/`. Es ersetzt den PDF-Katalog und die Wunschmengen-Spalten im
-Klinik-Angebot. **Es gibt genau einen Reservierungsweg: den Webshop.** Wer daneben noch
+Klinik-Angebot. **Es gibt genau einen Reservierungsweg: den Katalog.** Wer daneben noch
 eine zweite Schiene einbaut, vergibt Ware doppelt.
+
+### Wo er läuft, und warum das wichtig ist
+
+Der Katalog liegt auf **www.schlabberschnuten.com** — der Website der Hundeschule der
+Nutzerin, weil sie dort Super-Admin-Rechte hat. Auf **kikripp.de** steht nur ein Knopf, der
+dorthin verweist (Vorlage: `ausgabe/U3_Knopf_fuer_kikripp.docx`). Auf kikripp.de selbst ist
+kein Plugin installierbar: Multisite, und die Netzwerkverwaltung ist der Nutzerin gesperrt.
+
+Daraus folgen drei Dinge, die man nicht wegoptimieren darf:
+
+| Regel | Grund |
+|---|---|
+| Der Firmenname kommt aus `kikripp_firma`, **nie** aus `get_bloginfo('name')` | sonst steht „Schlabberschnuten" im Katalog und im Mailbetreff |
+| Unter dem Katalog steht ein **Anbieter-Block** mit Kikripp-Adresse und Links auf Impressum und Datenschutz von kikripp.de | die Seite selbst hat das Impressum der Hundeschule — ohne den Block wäre das ein Impressumsverstoß |
+| **Keine personenbezogenen Daten** in der Datenbank | fremder Speicherplatz; ohne Speicherung braucht es keinen Auftragsverarbeitungsvertrag |
+
+### Der Ablauf einer Reservierung
+
+1. Reservieren läuft in einer Transaktion mit Sperre; reicht der Bestand nicht, wird nichts
+   gespeichert und der Browser lädt neu.
+2. Gespeichert werden Vorgang (Frist, Status) und Positionen mit **eingefrorenem Preis**.
+3. **Eine** Mail geht an `kikripp_mail_an`, mit Antwort-an auf den Interessenten.
+4. War der Versand erfolgreich, ruft `Kikripp_Mail::reservierung()` sofort
+   `Kikripp_DB::kontakt_loeschen()` — Name, Mail, Telefon und Nachricht sind damit aus der
+   Datenbank verschwunden, `kontakt_weg = 1`.
+5. Scheiterte der Versand, **bleiben** die Kontaktdaten liegen. Die Verwaltung zeigt sie mit
+   Warnung und einem Knopf zum Löschen. Ohne dieses Netz wäre ein Kontakt endgültig verloren.
+6. Der Interessent bekommt **keine Mail**, sondern einen Beleg am Bildschirm mit
+   Vorgangsnummer, Positionen, Frist und seinen Kontaktdaten zum Gegenlesen.
+
+> Die Benachrichtigungsmails sind das **einzige Kontaktarchiv**. Das gehört in jeden Bericht
+> an die Nutzerin, wenn es um Reservierungen geht.
+
+### Passwort im Link
+
+`…/katalog/?k=PASSWORT` schaltet frei. `Kikripp_Zugang::link_einloesen()` läuft auf `init`,
+also **vor** jeder Ausgabe, setzt den Keks und leitet auf dieselbe Adresse ohne `k` um. So
+steht das Passwort nicht in der Adresszeile, nicht im Verlauf und kann über keinen Verweis
+nach außen gelangen (dazu `<meta name="referrer" content="same-origin">`). Die Bremse gegen
+Durchprobieren greift auch hier.
+
+### Was es nicht mehr gibt
+
+- **Keine Bestätigungsmail an Interessenten** — `Kikripp_Mail::bestaetigung()` ist entfernt,
+  ein Test prüft, dass die Methode nicht wiederkehrt.
+- **Kein Wunschtermin-Feld** — wird telefonisch geklärt.
+- **Keine IP-Adresse** am Vorgang.
+- **Telefon ist Pflichtfeld**, mindestens sechs Ziffern — ohne Bestätigungsmail fällt ein
+  Tippfehler in der Adresse sonst niemandem auf.
 
 ### Aufbau
 
@@ -313,13 +362,16 @@ eine zweite Schiene einbaut, vergibt Ware doppelt.
 | Bezahlte Artikel fallen aus dem Katalog, nicht aus der Datenbank | die Verkaufsdaten werden gebraucht |
 | Artikel, die nicht mehr in der Importdatei stehen, werden stillgelegt statt gelöscht | an ihnen hängen Reservierungen und Verkäufe |
 | `build_katalog_import.py` lädt mit `nur_aktive=False` | sonst erfährt WordPress nie, dass eine Position entfallen ist |
-| Fotos kommen aus der Mediathek, nicht ins ZIP | sonst wird das Plugin 25 MB groß |
+| Fotos kommen aus der Mediathek, nicht ins ZIP | sonst wird das Plugin 25 MB groß (24 MB gegen 2 MB Upload-Grenze — geprüft und verworfen) |
+| Nach erfolgreichem Mailversand Kontaktdaten löschen | der Speicherplatz gehört einem anderen Unternehmen |
+| Käufernamen nie aus dem CSV-Export schreiben, wenn er leer ist | der Katalog kennt keine Namen mehr |
 
 ### Prüfen
 
 ```bash
-php wordpress/tests/test-logik.php     # 51 Prüfungen gegen eine SQLite-Attrappe
+php wordpress/tests/test-logik.php     # 75 Prüfungen gegen eine SQLite-Attrappe
 php wordpress/tests/test-kette.php     # ganze Kette mit der echten Importdatei
+python3 wordpress/tests/browsertest.py # 53 Prüfungen im echten Chromium
 ```
 
 Deckt ab: Teil- und Vollreservierung, Überbuchung, Preiseinfrieren, Stornieren, Ablauf und
@@ -344,11 +396,18 @@ schreibt alle Mails nach `/tmp/kikripp-mails.log`.
 ### Ausliefern
 
 ```bash
-cd wordpress && ./paketieren.sh        # ausgabe/kikripp-katalog.zip
+cd wordpress && ./paketieren.sh          # ausgabe/kikripp-katalog.zip
+python3 scripts/build_unterlagen_docx.py # Aktennotiz, Datenschutz-Absatz, Knopf
 ```
 
 Zusammen mit `ausgabe/katalog_import.json` schicken. Die Einrichtung steht in
-`WEBSHOP_EINRICHTEN.md`.
+`WEBSHOP_EINRICHTEN.md` (als PDF: `A1`). Dazu gehören:
+
+| Datei | Zweck |
+|---|---|
+| `U1_Aktennotiz_Speicherplatz.docx` | dokumentiert die Nutzung fremden Speicherplatzes; die Nutzerin wollte **keinen** Vertrag |
+| `U2_Datenschutz_Absatz.docx` | Textbaustein für die Datenschutzerklärung von schlabberschnuten.com |
+| `U3_Knopf_fuer_kikripp.docx` / `.txt` | der HTML-Baustein für den Knopf auf kikripp.de |
 
 ### Das Passwort
 
@@ -368,34 +427,49 @@ nicht mehr gepflegt** — sie kennt keine Reservierungen und würde veraltete Be
 
 ## 9. Offene Punkte (Stand 17.09.2026)
 
-- **Multisite-Sperre:** kikripp.de ist eine WordPress-Multisite mit drei Seiten. Plugins liegen
-  in der Netzwerkverwaltung, dafür fehlen der Nutzerin die Super-Admin-Rechte. Eine Anfrage an
-  die Betreuung der Seite ist raus (Super-Admin für den Benutzer `anna`, oder Installation durch
-  sie). **Bis das kommt, kann der Webshop nicht in Betrieb gehen.**
-- **Rundgang läuft an.** Türschilder, Erfassungsblätter und Erfassungsliste sind ausgeliefert.
-  Zurück kommt `T3_Erfassungsliste.xlsx` mit Stückzahlen plus die Fotos je Raum. Die Nummer auf
-  dem Post-it im Foto ist maßgeblich.
+- **Der Katalog ist noch nicht installiert.** Plugin, Fotos, Importdatei und die drei
+  Begleitunterlagen liegen in `ausgabe/`. Die Nutzerin richtet ihn auf
+  **schlabberschnuten.com** ein (Anleitung `A1`). Danach fragen, ob die Benachrichtigungsmail
+  angekommen ist — sonst muss SMTP dazu.
+- **Impressum- und Datenschutz-Adresse sind geraten** (`https://www.kikripp.de/impressum/`
+  und `/datenschutz/`), weil kikripp.de aus dieser Umgebung gesperrt ist. Die Nutzerin prüft
+  sie in den Plugin-Einstellungen. **Ohne funktionierenden Impressum-Link fehlt die
+  Anbieterkennzeichnung** — das nach der Einrichtung nachfragen.
+- **kikripp.de bleibt gesperrt.** Multisite, Netzwerkverwaltung nicht zugänglich. Eine
+  Anfrage an die Betreuung ist raus (Super-Admin für `anna`). Kommt sie durch, wäre
+  `katalog.kikripp.de` die schönere Adresse — empfohlen, aber verworfen zugunsten der
+  schnelleren Lösung.
+- **Rundgang läuft.** Türschilder, Erfassungsblätter und Erfassungsliste sind ausgeliefert
+  und ausgedruckt. Zurück kommen `T3_Erfassungsliste.xlsx` mit Stückzahlen und die Fotos je
+  Raum. Die Nummer auf dem Post-it im Foto ist maßgeblich.
 - **Sieben Positionen wurden inhaltlich umgewidmet** (Vitrine → Dekoration darin, Regal →
   Rattankörbe, Tonkartonschrank → buntes Papier, Hängeleuchte → Pflanze, Wandspiegel →
-  Trachtenportrait, Pflanzkübel Beton → Plastik, Gartentisch → inkl. Stühle). Ihre alten Fotos
+  Trachtenportrait, Pflanzkübel Beton → Plastik, Gartentisch → inkl. Stühle). Ihre Fotos
   zeigen teils noch das nicht mehr verkaufte Möbel — beim Rundgang neu fotografieren.
-  Besonders `BA04-01` (ehemals K-035, „Dekoration in der Vitrine"): Das Foto zeigt vor allem die
-  antike Vitrine, die nicht mitverkauft wird.
-- **Drei Positionen mit offener Stückzahl:** `NE05-01` (Massivholztische), `NU04-04`
-  (Kuckucksuhr-Wandgruppe), `BA09-04` (Kartell Masters Stuhl) — beim Rundgang zählen.
-- **Eine Annahme von mir, nicht bestätigt:** Der alte Sammelraum „UG" mit fünf Positionen liegt
-  bei `BU04` (Gruppenraum im Bestand-UG). Die Aufnahmereihenfolge spricht dafür; sicher ist es
-  nicht. Beim Rundgang prüfen.
-- **Der Mailversand aus WordPress ist ungetestet.** Sobald das Plugin läuft: Testreservierung
-  auslösen. Schneller Vorabtest ohne Plugin: Passwort-vergessen-Mail an `jennyp@kikripp.de`.
-- **Maße** fehlen bei allen Positionen. Der Nutzer hat sie vorerst zurückgestellt.
+  Besonders `BA04-01`: das Foto zeigt vor allem die antike Vitrine, die nicht mitgeht.
+- **Drei Positionen mit offener Stückzahl:** `NE05-01`, `NU04-04`, `BA09-04` — nachzählen.
+- **Eine Annahme, nicht bestätigt:** Der alte Sammelraum „UG" mit fünf Positionen liegt bei
+  `BU04`. Die Aufnahmereihenfolge spricht dafür; sicher ist es nicht.
+- **Maße** fehlen bei allen Positionen; von der Nutzerin bewusst zurückgestellt.
 - **Anlagennummern und Anschaffungswerte** fehlen komplett (Anlagenabgang bei einer GmbH).
   Anlagenverzeichnis beim Steuerberater erbitten.
-- **Versand:** Empfehlung steht — alles auf Abholung, Versand nur für die Designstücke und nur
-  an Gewerbe, weil Versand an Verbraucher ein 14-tägiges Widerrufsrecht auslöst. Der Nutzer
+- **Versand:** Empfehlung steht — alles auf Abholung, Versand nur für Designstücke und nur
+  an Gewerbe, weil Versand an Verbraucher ein 14-tägiges Widerrufsrecht auslöst. Die Nutzerin
   arbeitet die Spalte `Versand` selbst ein.
-- **Logo:** liegt nur als Bildschirmbild vor. Der Schriftzug „KIKRIPP" ist gesetzter Text,
-  das Signet nachgebaut. Sobald eine Logodatei kommt: `assets/kopflogo.png` ersetzen.
+- **Logo:** liegt nur als Bildschirmbild vor; Signet nachgebaut.
 - **Foto F-110** ist wegen zweier Teamfotos stark beschnitten.
-- **kikripp.de** ist aus dieser Umgebung nicht erreichbar (Netzwerkrichtlinie).
-- **Rechtstexte** im Webshop sind von mir formuliert, nicht anwaltlich geprüft.
+- **Rechtstexte, Aktennotiz und Datenschutz-Absatz** sind von mir formuliert, nicht
+  anwaltlich geprüft. Das steht auch in den Dokumenten selbst.
+
+## 10. Was die Nutzerin nicht mag
+
+- **Keine `.md`-Dateien** — sie kann sie unter Windows nicht öffnen. Anleitungen immer als
+  PDF, Formulare als Word oder Excel.
+- **Keine PDFs, wo Word oder Excel geht.** Ausdrücklich gewünscht: „ich möchte bitte keine
+  pdf. wenn dann word und excel." Für Anleitungen zum Lesen ist PDF in Ordnung, für alles
+  zum Ausfüllen nicht.
+- **Keine langen Anleitungen.** Eine frühere 14-seitige Fassung wurde abgelehnt. Fließtext,
+  kurz, ohne Fachsprache.
+- **Keine Verträge, wenn es auch eine Aktennotiz tut.**
+- Sie will **Widerspruch**, wenn etwas schiefläuft — ausdrücklich und mehrfach erbeten.
+  Bedenken benennen, Empfehlung geben, dann ihre Entscheidung umsetzen.

@@ -4,9 +4,10 @@
 
 Die Datei laden Sie in WordPress unter „Artikelkatalog → Reservierungen →
 Alle Reservierungen als CSV exportieren“ herunter. Übernommen werden je Artikel
-Status, Käufer, verkaufte Menge, Verkaufspreis und Verkaufsdatum. Rechnungsnummer,
-Zahlung und Zahlart bleiben unberührt – die tragen Sie weiterhin selbst ein,
-sobald die Rechnung aus DATEV vorliegt.
+Status, verkaufte Menge, Verkaufspreis und Verkaufsdatum. Rechnungsnummer, Zahlung,
+Zahlart und **Käufer** bleiben unberührt – die tragen Sie selbst ein, sobald die
+Rechnung aus DATEV vorliegt. Der Webkatalog speichert keine Namen; die stehen
+ausschließlich in den Benachrichtigungsmails an jennyp@kikripp.de.
 
 Ohne --schreiben wird nur angezeigt, was sich ändern würde.
 """
@@ -111,11 +112,15 @@ def eintragen(pfad, schreiben):
             # Hier gehört deshalb der Stückpreis hin, nicht der Gesamterlös.
             neu["Verkaufspreis_netto"] = geld(e["erloes"] / e["verkauft"])
             neu["Verkaufsdatum"] = e["datum"]
-            neu["Käufer"] = ", ".join(e["kaeufer"])
+            # Der Webkatalog speichert keine Namen mehr (die stehen nur in den
+            # Benachrichtigungsmails). Nur überschreiben, wenn wirklich etwas kam.
+            if e["kaeufer"]:
+                neu["Käufer"] = ", ".join(e["kaeufer"])
             neu["Kanal"] = "Webkatalog"
         elif e["reserviert"] > 0:
             neu["Status"] = "reserviert"
-            neu["Reserviert_für"] = ", ".join(e["reserviert_fuer"])
+            if e["reserviert_fuer"]:
+                neu["Reserviert_für"] = ", ".join(e["reserviert_fuer"])
             neu["Kanal"] = "Webkatalog"
         else:
             neu["Status"] = "verfügbar"

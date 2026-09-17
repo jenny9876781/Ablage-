@@ -8,7 +8,7 @@
   if (!wurzel) { return; }
 
   var ARTIKEL = [], UST = 0.19, HINWEIS = '', FRIST = 7, IST_ADMIN = false;
-  var RECHT = '', ABHOLUNG = '';
+  var RECHT = '', ABHOLUNG = '', ANBIETER = {};
   var merk = {};                       // ArtNr -> gewünschte Stückzahl
 
   function eur(v) {
@@ -79,6 +79,7 @@
       IST_ADMIN = !!a.daten.admin;
       RECHT = a.daten.recht || '';
       ABHOLUNG = a.daten.abholung || '';
+      ANBIETER = a.daten.anbieter || {};
       geruest();
       render();
     }).catch(function () {
@@ -104,7 +105,8 @@
       '<div class="kopf">' +
         '<div class="marke"><img src="' + sicher(W.signet) + '" alt=""><span class="wort">KIKRIPP</span></div>' +
         '<h2>Artikelkatalog aus der Betriebsauflösung</h2>' +
-        '<p>Abholung nach Terminvereinbarung · Preise inklusive ' + Math.round(UST * 100) + '&nbsp;% USt' +
+        '<p>' + (ANBIETER.firma ? 'Ein Angebot der ' + sicher(ANBIETER.firma) + ' · ' : '') +
+        'Abholung nach Terminvereinbarung · Preise inklusive ' + Math.round(UST * 100) + '&nbsp;% USt' +
         (IST_ADMIN ? ' · <a href="' + sicher(W.verwaltung) + '">Reservierungen verwalten</a>' : '') + '</p>' +
       '</div>' +
       '<div class="filter">' +
@@ -119,8 +121,10 @@
       '</div>' +
       '<div class="raster" id="k-raster"></div>' +
       '<div id="k-formular"></div>' +
-      (RECHT ? '<div class="recht"><h4>Rechtliche Hinweise</h4><p>' + sicher(RECHT) + '</p>' +
-        (ABHOLUNG ? '<p>Abholung nach Terminvereinbarung: ' + sicher(ABHOLUNG) + '</p>' : '') +
+      ((RECHT || ANBIETER.firma) ? '<div class="recht">' + anbieterBlock() +
+        (RECHT ? '<h4>Rechtliche Hinweise</h4><p>' + sicher(RECHT) + '</p>' : '') +
+        ((ABHOLUNG && ABHOLUNG !== ANBIETER.adresse)
+          ? '<p>Abholung nach Terminvereinbarung: ' + sicher(ABHOLUNG) + '</p>' : '') +
         '</div>' : '') +
       '<div class="leiste"><div class="inner">' +
         '<div class="sum" id="k-merk"></div>' +
@@ -136,6 +140,32 @@
     });
     el('k-anfragen').addEventListener('click', formular);
     leiste();
+  }
+
+  /* Anbieterkennzeichnung. Der Katalog liegt auf fremdem Speicherplatz — es muss
+     deshalb unmissverständlich dranstehen, wer hier verkauft. */
+  function anbieterBlock() {
+    if (!ANBIETER.firma) { return ''; }
+    var zeilen = [sicher(ANBIETER.firma)];
+    if (ANBIETER.adresse) {
+      // Die Abholadresse beginnt meist mit der Firma – dann nicht doppelt nennen.
+      var a = String(ANBIETER.adresse);
+      zeilen.push(sicher(a.indexOf(ANBIETER.firma) === 0
+        ? a.slice(ANBIETER.firma.length).replace(/^[,\s]+/, '') : a));
+    }
+    var kontakt = [];
+    if (ANBIETER.telefon) { kontakt.push('Telefon ' + sicher(ANBIETER.telefon)); }
+    if (ANBIETER.email) {
+      kontakt.push('<a href="mailto:' + sicher(ANBIETER.email) + '">' + sicher(ANBIETER.email) + '</a>');
+    }
+    if (ANBIETER.impressum) {
+      kontakt.push('<a href="' + sicher(ANBIETER.impressum) + '" target="_blank" rel="noopener">Impressum</a>');
+    }
+    if (ANBIETER.datenschutz) {
+      kontakt.push('<a href="' + sicher(ANBIETER.datenschutz) + '" target="_blank" rel="noopener">Datenschutz</a>');
+    }
+    return '<h4>Anbieter</h4><p>' + zeilen.join(' · ') + '</p>' +
+           (kontakt.length ? '<p>' + kontakt.join(' · ') + '</p>' : '');
   }
 
   // ------------------------------------------------------------------ Karten
@@ -257,7 +287,7 @@
     el('k-formular').innerHTML =
       '<div class="dlg" id="k-dlg">' +
       '<h3>Reservierung abschicken</h3>' +
-      '<p class="s">Wir bestätigen Ihnen die Reservierung per E-Mail und stimmen einen Abholtermin ab. ' +
+      '<p class="s">Wir melden uns schnellstmöglich bei Ihnen, um einen Abholtermin abzustimmen. ' +
       'Die Artikel bleiben ' + FRIST + ' Tage für Sie vorgemerkt. Bezahlt wird bei Abholung bzw. per Rechnung. ' +
       'Mit der Reservierung kommt noch kein Kaufvertrag zustande – dieser wird bei der Abholung vor Ort ' +
       'geschlossen. Sie können die Reservierung jederzeit formlos zurücknehmen.</p>' +
@@ -266,11 +296,14 @@
         '<b>' + stueck + ' Stück gesamt</b><b>' + eur(netto * (1 + UST)) + ' inkl. USt</b></div></div>' +
       '<div class="feld"><label for="k-name">Name / Firma *</label><input id="k-name" required></div>' +
       '<div class="feld"><label for="k-mail">E-Mail *</label><input id="k-mail" type="email" required></div>' +
-      '<div class="feld"><label for="k-tel">Telefon</label><input id="k-tel"></div>' +
-      '<div class="feld"><label for="k-termin">Wunschtermin zur Abholung</label><input id="k-termin" type="date"></div>' +
+      '<div class="feld"><label for="k-tel">Telefon *</label><input id="k-tel" type="tel" required>' +
+      '<small class="hint">Wir melden uns telefonisch – bitte unbedingt angeben.</small></div>' +
       '<div class="feld"><label for="k-text">Nachricht (optional)</label><textarea id="k-text" rows="2"></textarea></div>' +
       '<p class="datenschutz">Ihre Angaben werden ausschließlich zur Abwicklung dieser Reservierung ' +
-      'verwendet und nach Abschluss des Verkaufs gelöscht.</p>' +
+      'verwendet. Sie werden nicht in dieser Website gespeichert, sondern gehen per E-Mail an ' +
+      (ANBIETER.firma ? sicher(ANBIETER.firma) : 'den Anbieter') + ' und werden nach Abschluss des ' +
+      'Verkaufs gelöscht. <strong>Sie erhalten keine Bestätigungsmail</strong> – bitte machen Sie ' +
+      'im nächsten Schritt ein Bildschirmfoto.</p>' +
       '<div id="k-meldung"></div>' +
       '<button id="k-senden">Reservierung verbindlich abschicken</button> ' +
       '<button class="sek" style="color:#1a1a1a;border-color:#dcdcdc" id="k-abbrechen">Abbrechen</button>' +
@@ -281,31 +314,76 @@
     el('k-dlg').scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
+  var letzteAuswahl = [];
+
+  function fristDatum(tage) {
+    var d = new Date();
+    d.setDate(d.getDate() + (parseInt(tage, 10) || 7));
+    return d.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' });
+  }
+
+  function beleg_positionen() {
+    var netto = 0, stueck = 0;
+    var zeilen = letzteAuswahl.map(function (p) {
+      netto += p.menge * p.preis; stueck += p.menge;
+      return '<div class="zeile"><span>' + p.menge + ' × ' + sicher(p.nr) + ' ' +
+             sicher(p.titel) + '</span><b>' + eur(p.menge * p.preis * (1 + UST)) + '</b></div>';
+    }).join('');
+    return zeilen + '<div class="zeile summe"><span>' + stueck + ' Stück gesamt</span><b>' +
+           eur(netto * (1 + UST)) + ' inkl. USt</b></div>';
+  }
+
   function senden() {
     var knopf = el('k-senden'), meldung = el('k-meldung');
+    letzteAuswahl = auswahl().map(function (p) {
+      return { nr: p.a.nr, titel: p.a.titel, preis: p.a.preis, menge: p.menge };
+    });
     var nutzlast = {
       name: el('k-name').value.trim(),
       email: el('k-mail').value.trim(),
       telefon: el('k-tel').value.trim(),
-      wunschtermin: el('k-termin').value,
       nachricht: el('k-text').value.trim(),
       artikel: merk
     };
     if (!nutzlast.name) { meldung.innerHTML = '<div class="meldung schlecht">Bitte geben Sie Ihren Namen oder Ihre Firma an.</div>'; return; }
     if (!nutzlast.email) { meldung.innerHTML = '<div class="meldung schlecht">Bitte geben Sie eine E-Mail-Adresse an.</div>'; return; }
+    if (nutzlast.telefon.replace(/\D/g, '').length < 6) {
+      meldung.innerHTML = '<div class="meldung schlecht">Bitte geben Sie eine Telefonnummer an, ' +
+        'unter der wir Sie erreichen. Sie erhalten keine Bestätigungsmail – ohne Telefonnummer ' +
+        'können wir uns nicht bei Ihnen melden.</div>';
+      return;
+    }
 
     knopf.disabled = true; knopf.textContent = 'Wird abgeschickt …'; meldung.innerHTML = '';
     hole('/reservierung', { method: 'POST', body: JSON.stringify(nutzlast) })
       .then(function (a) {
         if (a.daten && a.daten.ok) {
-          ARTIKEL = a.daten.artikel || ARTIKEL;
-          merk = {};
+          // Die Bildschirmbestätigung ist der einzige Nachweis, den der Interessent
+          // bekommt – es geht bewusst keine Mail an ihn. Deshalb steht hier alles,
+          // was er später braucht, in einem Block zum Abfotografieren.
+          var k = a.daten.kontakt || {};
           el('k-formular').innerHTML =
             '<div class="meldung gut"><strong>Vielen Dank – Ihre Reservierung ist eingegangen.</strong><br>' +
-            'Vorgangsnummer ' + a.daten.vorgang + '. Die Artikel sind ' + (a.daten.frist || FRIST) +
-            ' Tage für Sie vorgemerkt. Wir melden uns zur Terminabsprache.' +
-            (a.daten.mail ? '' : '<br><em>Hinweis: Die Bestätigungsmail konnte nicht versandt werden. ' +
-            'Ihre Reservierung ist trotzdem gespeichert.</em>') + '</div>';
+            'Wir melden uns schnellstmöglich bei Ihnen.' +
+            '<div class="beleg">' +
+              '<div class="zeile"><span>Vorgangsnummer</span><b>' + a.daten.vorgang + '</b></div>' +
+              '<div class="zeile"><span>Reserviert bis</span><b>' + fristDatum(a.daten.frist || FRIST) + '</b></div>' +
+              beleg_positionen() +
+              (k.email || k.telefon
+                ? '<div class="zeile"><span>Wir erreichen Sie unter</span><b>' +
+                  [k.email, k.telefon].filter(Boolean).map(sicher).join(' · ') + '</b></div>'
+                : '') +
+            '</div>' +
+            '<p class="s" style="margin:10px 0 0">Bitte machen Sie ein <strong>Bildschirmfoto</strong> – ' +
+            'Sie erhalten keine Bestätigungsmail. Stimmen Ihre Kontaktdaten nicht? Schreiben Sie uns ' +
+            (ANBIETER.email ? 'an <a href="mailto:' + sicher(ANBIETER.email) + '">' +
+              sicher(ANBIETER.email) + '</a>' : 'kurz') + '.</p>' +
+            (a.daten.mail ? '' : '<p class="s" style="margin:8px 0 0"><em>Ihre Reservierung ist ' +
+            'gespeichert. Sollten wir uns nicht innerhalb von zwei Werktagen melden, ' +
+            'kontaktieren Sie uns bitte noch einmal.</em></p>') +
+            '</div>';
+          ARTIKEL = a.daten.artikel || ARTIKEL;
+          merk = {};
           render(); leiste();
           el('k-formular').scrollIntoView({ behavior: 'smooth', block: 'center' });
           return;

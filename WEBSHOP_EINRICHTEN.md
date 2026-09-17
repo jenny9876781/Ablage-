@@ -1,14 +1,25 @@
-# Webshop auf kikripp.de einrichten
+# Webkatalog einrichten
 
-Du brauchst dafür drei Dateien aus dem Ordner `ausgabe`: **kikripp-katalog.zip** (das
-Plugin), **kikripp-fotos.zip** (die 111 Fotos) und **katalog_import.json** (die Artikel).
-Rechne mit einer knappen Stunde, das meiste davon ist Warten beim Hochladen der Fotos.
+Der Katalog läuft auf **www.schlabberschnuten.com** — dort hast du Super-Admin-Rechte und
+kannst Plugins hochladen. Auf **www.kikripp.de** steht nur ein Knopf, der dorthin führt.
+Verkäuferin ist und bleibt die Kikripp GmbH; die Hundeschule stellt ausschließlich den
+Speicherplatz. Das steht auch so im Katalog und in der Aktennotiz (`U1`).
+
+Du brauchst drei Dateien aus dem Ordner `ausgabe`: **kikripp-katalog.zip** (das Plugin),
+**kikripp-fotos.zip** (die Fotos) und **katalog_import.json** (die Artikel). Rechne mit einer
+knappen Stunde, das meiste davon ist Warten beim Hochladen der Fotos.
+
+> **Wichtig zum Verständnis:** Der Katalog speichert auf der Hundeschul-Seite **keine Namen,
+> keine Mailadressen, keine Telefonnummern**. Die gehen ausschließlich per Mail an
+> `jennyp@kikripp.de` und werden danach sofort aus der Datenbank gelöscht. Diese Mails sind
+> damit dein einziges Kontaktarchiv — **bitte nicht löschen.** Leg dir einen Ordner an.
 
 ## 1. Plugin installieren
 
-Melde dich in WordPress an und geh auf **Plugins → Installieren → Plugin hochladen**.
-Wähle `kikripp-katalog.zip`, klick auf *Jetzt installieren* und danach auf *Plugin
-aktivieren*. In der linken Leiste erscheint jetzt der Menüpunkt **Artikelkatalog**.
+Melde dich auf **www.schlabberschnuten.com/wp-admin** an und geh auf
+**Plugins → Installieren → Plugin hochladen**. Wähle `kikripp-katalog.zip`, klick auf
+*Jetzt installieren* und danach auf *Plugin aktivieren*. In der linken Leiste erscheint der
+Menüpunkt **Artikelkatalog**.
 
 ## 2. Fotos in die Mediathek
 
@@ -35,69 +46,79 @@ aktualisiert, neue kommen dazu, und Reservierungen bleiben erhalten.
 
 ## 4. Einstellungen prüfen
 
-Nach dem Aktivieren erscheint oben ein gelber Hinweis: es ist noch **kein Passwort
-vergeben**, und ohne Passwort kommt niemand in den Katalog – auch du nicht. Das ist Absicht,
-damit das Passwort nirgends in einer Datei steht.
+Nach dem Aktivieren erscheint oben ein gelber Hinweis: es ist noch **kein Passwort vergeben**,
+und ohne Passwort kommt niemand in den Katalog — auch du nicht. Das ist Absicht, damit das
+Passwort nirgends in einer Datei steht.
 
-Geh auf **Artikelkatalog → Einstellungen**, trag oben bei *Katalog-Passwort* das vereinbarte
-Passwort ein und speichere. Der gelbe Hinweis verschwindet dann.
+Geh auf **Artikelkatalog → Einstellungen** und arbeite die Seite von oben nach unten durch:
 
-Auf derselben Seite stehen die Mailadresse für Reservierungen (`jennyp@kikripp.de`), das
-Hinweisband über dem Katalog, die Reservierungsfrist von sieben Tagen, der Umsatzsteuersatz,
-die Abholadresse und die rechtlichen Hinweise. Schau einmal drüber; ändern musst du dort
-erst einmal nichts.
+| Feld | Was hineingehört |
+|---|---|
+| Katalog-Passwort | das vereinbarte Passwort, einmal eintragen |
+| Verkäuferin (Firma) | `Kikripp GmbH` — steht so im Katalog und im Mailbetreff |
+| Reservierungen melden an | `jennyp@kikripp.de` |
+| Telefon | die Nummer der Kikripp GmbH |
+| **Impressum** | **bitte prüfen** — die Vorgabe `https://www.kikripp.de/impressum/` ist geraten |
+| **Datenschutzerklärung** | **ebenfalls prüfen** |
+| Abholadresse | erscheint unter dem Katalog |
+| Hinweisband | Text über dem Katalog, zum Livegang leeren |
+| Reservierung gilt | 7 Tage |
+| Umsatzsteuer | 19 % |
+| Rechtliche Hinweise | Verkaufsbedingungen, änderbar |
 
-Willst du das Passwort später wechseln, trägst du hier einfach ein neues ein. Alle, die schon
-angemeldet waren, müssen sich danach neu anmelden – praktisch, falls das Passwort mal
-weitergereicht wurde.
+Die beiden Adressen zu Impressum und Datenschutz sind die einzigen Felder, bei denen ich
+raten musste — von hier aus ist kikripp.de nicht erreichbar. Öffne die Links einmal und
+korrigiere sie, falls die Seiten anders heißen. **Sie müssen funktionieren**, sonst fehlt
+im Katalog die Anbieterkennzeichnung.
 
-Lass **Vorschaubetrieb** eingeschaltet, solange ihr testet. Dann werden alle
-eingehenden Reservierungen als Testdaten markiert und lassen sich am Ende mit einem
-Klick wieder löschen. Zum echten Start schaltest du den Haken aus.
+Lass **Vorschaubetrieb** eingeschaltet, solange ihr testet. Dann werden alle eingehenden
+Reservierungen als Testdaten markiert und lassen sich am Ende mit einem Klick löschen.
 
-## 5. Seite anlegen
+Und füge noch den Absatz aus **`U2_Datenschutz_Absatz.docx`** in die Datenschutzerklärung
+von schlabberschnuten.com ein. Das ist der einzige Papierkram, der nötig ist.
 
-Geh auf **Seiten → Erstellen**, nenn die Seite *Artikelkatalog* und setz als einzigen
-Inhalt den Kurzbefehl:
+## 5. Seite anlegen und den Knopf setzen
 
-    [kikripp_katalog]
-
-Veröffentlichen. Die Seite trägt automatisch ein „nicht indexieren“ für Suchmaschinen,
-sie taucht also nicht bei Google auf – nur wer den Link und das Passwort hat, kommt rein.
-
-Damit unter **www.kikripp.de** direkt der Katalog erscheint, geh auf
-**Einstellungen → Lesen**, wähl bei *Deine Homepage zeigt* die Option *Eine statische
-Seite* und dort als Homepage die neue Katalogseite. Speichern. Fertig – wer kikripp.de
-eintippt, landet jetzt im Katalog.
-
-Setz über den Kurzbefehl noch ein paar Zeilen, damit jemand, der ohne Passwort kommt,
-weiß worum es geht. Der Inhalt der Seite sieht dann so aus:
-
-    Artikelkatalog aus der Betriebsauflösung
-
-    Wir lösen unseren Kindergarten auf und geben die komplette Einrichtung ab – Möbel,
-    Spielmaterial, Küche, Technik und Dekoration. Den vollständigen Katalog mit Fotos,
-    Preisen und tagesaktueller Verfügbarkeit öffnen Sie mit dem Passwort, das Sie von uns
-    erhalten haben. Sie haben noch keins? Schreiben Sie uns kurz an jennyp@kikripp.de.
-
-    Abholung nach Terminvereinbarung in Villingen-Schwenningen.
+**Auf schlabberschnuten.com:** Geh auf **Seiten → Erstellen**, nenn die Seite
+*Kikripp Artikelkatalog* und setz als einzigen Inhalt den Kurzbefehl:
 
     [kikripp_katalog]
 
-Die alte Startseite ist damit nicht weg, sie ist nur nicht mehr die erste Seite. Willst du
-sie weiter erreichbar halten, nimm sie ins Menü auf (**Design → Menüs**).
+Veröffentlichen. Achte darauf, dass die Adresse sprechend ist — etwa
+`www.schlabberschnuten.com/kikripp-artikelkatalog`. Das beruhigt jeden, der den Link
+bekommt und sich fragt, warum er auf einer Hundeschul-Seite landet.
+
+Die Seite trägt automatisch ein „nicht indexieren" für Suchmaschinen und taucht nicht bei
+Google auf.
+
+**Der Link mit Passwort.** Hängst du `?k=DASPASSWORT` an die Adresse, öffnet sich der Katalog
+direkt — niemand muss etwas eintippen. Das Passwort verschwindet dabei sofort wieder aus der
+Adresszeile. Diesen Link verschickst du an die Interessenten:
+
+    https://www.schlabberschnuten.com/kikripp-artikelkatalog/?k=DASPASSWORT
+
+**Auf kikripp.de:** Dort brauchst du keine Plugin-Rechte, ein Knopf ist nur ein Link. Die
+fertige Vorlage liegt in **`U3_Knopf_fuer_kikripp.docx`** (und als `.txt`, falls das Kopieren
+aus Word zickt). Seite bearbeiten, Block **Custom HTML** einfügen, Baustein hineinkopieren,
+die Adresse eintragen, speichern.
 
 ## 6. Einmal selbst durchtesten
 
-Ruf die Seite in einem privaten Browserfenster auf, melde dich mit dem Passwort an,
-merk dir zwei Artikel vor und schick eine Reservierung ab. Dann solltest du zwei Mails
-bekommen: die Benachrichtigung an `jennyp@kikripp.de` und eine Bestätigung an die
-Adresse, die du im Formular eingetragen hast.
+Ruf den Link mit Passwort in einem privaten Browserfenster auf. Der Katalog sollte sich
+**ohne Passwortabfrage** öffnen. Merk dir zwei Artikel vor und schick eine Reservierung ab.
 
-Kommt keine Mail an, liegt das fast immer daran, dass WordPress selbst keine Mails
-verschicken kann. Das Kontaktformular auf der alten Seite hat funktioniert, also sollte
-es gehen – falls doch nicht, sag mir Bescheid, dann bauen wir den Versand über einen
-SMTP-Zugang um.
+Du solltest danach sehen:
+
+- **Am Bildschirm** die Bestätigung mit Vorgangsnummer, Positionen, Frist und deinen
+  eingetragenen Kontaktdaten. Das ist alles, was der Interessent bekommt — keine Mail.
+- **In deinem Postfach** eine Mail „[Kikripp GmbH] Neue Reservierung #1". Antworten geht
+  direkt: das Antwort-an steht auf den Interessenten.
+- **Unter Artikelkatalog → Reservierungen** den Vorgang — **ohne Namen**, dafür mit dem
+  Suchbegriff für dein Postfach.
+
+Kommt keine Mail an, liegt es daran, dass schlabberschnuten.com keine Mails verschicken kann.
+Schneller Vorabtest: abmelden, „Passwort vergessen" mit deiner Adresse. Kommt die auch nicht,
+sag mir Bescheid — dann bauen wir den Versand über SMTP um.
 
 Zum Schluss: **Artikelkatalog → Einstellungen → Testreservierungen löschen**.
 
@@ -105,37 +126,36 @@ Zum Schluss: **Artikelkatalog → Einstellungen → Testreservierungen löschen*
 
 ### „Plugins" steht gar nicht im linken Menü
 
-Geh die vier Punkte der Reihe nach durch, es ist fast immer der erste oder der zweite.
+Auf schlabberschnuten.com solltest du den Punkt sehen. Fehlt er trotzdem: Bist du als
+**Administrator** angemeldet? Nur Administratoren sehen „Plugins". Ist die Seite eine
+Multisite, liegen Plugins in der **Netzwerkverwaltung** — oben in der schwarzen Leiste über
+„Meine Websites". Und manche Hostingpakete sperren das Installieren; dann fehlt auch der
+Knopf „Plugin hochladen" (Stichwort für die Hotline: `DISALLOW_FILE_MODS`).
 
-**1. Bist du als Administrator angemeldet?** Nur Administratoren sehen „Plugins".
-Als Redakteurin oder Autorin ist der Punkt unsichtbar. Klick oben rechts auf deinen Namen
-→ *Profil*. Wenn dort keine Rolle steht oder du unter **Benutzer** deinen eigenen Eintrag
-nicht bearbeiten kannst, bist du nicht Administratorin. Dann braucht es die Person, die den
-Zugang eingerichtet hat.
+Ausweichweg: `kikripp-katalog.zip` auf dem Rechner entpacken und den Ordner
+`kikripp-katalog` über den Dateimanager des Hosters nach `wp-content/plugins/` legen. Danach
+steht es unter *Installierte Plugins* und muss nur aktiviert werden.
 
-**2. Läuft die Seite auf wordpress.com?** Schau auf die Adresse in der Browserzeile, während
-du im Backend bist. Steht dort `wordpress.com`, ist es die gehostete Variante – dort sind
-Plugins erst ab dem Business-Tarif erlaubt, vorher gibt es den Menüpunkt schlicht nicht.
-Steht dort `kikripp.de/wp-admin`, ist alles in Ordnung und es liegt an etwas anderem.
+### Der Link mit `?k=…` öffnet den Katalog nicht
 
-**3. Ist es eine Multisite?** Dann liegen Plugins nicht in deiner Seite, sondern eine Ebene
-darüber. Oben in der schwarzen Leiste erscheint dann *Meine Websites* oder
-*Netzwerkverwaltung* – dort ist der Menüpunkt.
+- **Passwort stimmt nicht.** Groß- und Kleinschreibung zählt. Prüf es unter
+  *Artikelkatalog → Einstellungen*, indem du es neu setzt.
+- **Zu viele Fehlversuche.** Nach zehn falschen Versuchen macht die Bremse 15 Minuten zu.
+  Kurz warten.
+- **Sonderzeichen im Passwort.** `&`, `?`, `+` und Leerzeichen brechen die Adresse. Wenn dein
+  Passwort so etwas enthält, nimm eines ohne — das jetzige (`2026…`) ist unproblematisch.
 
-**4. Hat der Hoster es gesperrt?** Manche Pakete mit „verwaltetem WordPress" schalten das
-Installieren ab. Dann fehlt der Punkt ebenfalls. Das lässt sich nur beim Hoster freischalten
-oder umgehen, indem der Ordner von Hand hochgeladen wird (siehe unten).
+### Unter dem Katalog fehlt der Anbieter-Block
 
-### „Plugins" ist da, aber es fehlt „Installieren" oder „Plugin hochladen"
+Dann ist das Feld „Verkäuferin (Firma)" leer. Eintragen unter
+*Artikelkatalog → Einstellungen*.
 
-Gleiche Ursache wie Punkt 4: Der Hoster hat das Ändern von Dateien gesperrt. Zwei Wege:
+### Der Impressum-Link geht auf eine Fehlerseite
 
-- Beim Hoster anrufen und um Freischaltung bitten. Das Stichwort für die Hotline lautet
-  `DISALLOW_FILE_MODS` in der `wp-config.php`.
-- Oder das Plugin von Hand hochladen: `kikripp-katalog.zip` auf deinem Rechner entpacken,
-  dann über den Dateimanager des Hosters (oder FTP) den entstandenen Ordner
-  `kikripp-katalog` nach `wp-content/plugins/` legen. Danach steht es unter **Plugins →
-  Installierte Plugins** und muss nur noch aktiviert werden.
+Die beiden Adressen habe ich geraten, weil kikripp.de von mir aus nicht erreichbar ist.
+Öffne die Seite auf kikripp.de, kopier die Adresse aus der Browserzeile und trag sie in den
+Einstellungen ein. Das ist wichtig — ohne funktionierenden Impressum-Link fehlt die
+Anbieterkennzeichnung.
 
 ### Das ZIP wird abgelehnt
 
@@ -151,12 +171,16 @@ Die Bilder liegen noch nicht in der Mediathek oder heißen anders. Schau unter *
 nach, ob `F-001.jpg` und die anderen da sind. Lad nach, was fehlt, und starte den Import
 einfach noch einmal – das schadet nie.
 
-### Die Testmail kommt nicht an
+### Die Mail an jennyp kommt nicht an
 
-Schau zuerst in den Spam-Ordner. Kommt sie auch dort nicht an, kann WordPress selbst keine
-Mails verschicken. Sag mir Bescheid, dann bauen wir den Versand über einen SMTP-Zugang um;
-die Reservierungen sind in der Zwischenzeit trotzdem gespeichert und unter
-**Artikelkatalog → Reservierungen** sichtbar.
+Zuerst im Spam-Ordner schauen und die Absenderadresse auf die Whitelist setzen — sie kommt
+von schlabberschnuten.com, das kennt dein Postfach noch nicht.
+
+Kommt sie auch dort nicht an, kann WordPress selbst keine Mails verschicken. Dann sag mir
+Bescheid, dann bauen wir den Versand über SMTP um. **In der Zwischenzeit gehen keine
+Reservierungen verloren:** Sie stehen unter *Artikelkatalog → Reservierungen*, und weil der
+Mailversand gescheitert ist, bleiben die Kontaktdaten dort ausnahmsweise sichtbar. Notiere
+sie und klick dann auf „notiert – Kontaktdaten löschen".
 
 ### Ich komme nicht weiter
 
@@ -167,23 +191,36 @@ Browserzeile steht. Damit sehe ich in der Regel sofort, woran es liegt.
 
 ## Im laufenden Betrieb
 
-Unter **Artikelkatalog → Reservierungen** siehst du alle Vorgänge mit Ablaufdatum. Dort
-setzt du einen Vorgang auf *bezahlt* (dann verschwinden die Artikel aus dem Katalog),
-*stornierst* ihn (dann werden sie wieder frei) oder *verlängerst die Frist* um weitere
-sieben Tage. Abgelaufene Reservierungen geben die Ware von selbst wieder frei, du musst
-nichts tun.
+Unter **Artikelkatalog → Reservierungen** siehst du alle Vorgänge mit Ablaufdatum — ohne
+Namen, dafür mit dem Suchbegriff für dein Postfach. Dort setzt du einen Vorgang auf
+*bezahlt* (dann verschwinden die Artikel aus dem Katalog), *stornierst* ihn (dann werden sie
+wieder frei) oder *verlängerst die Frist* um weitere sieben Tage. Abgelaufene Reservierungen
+geben die Ware von selbst wieder frei, du musst nichts tun.
 
-Für die Buchhaltung exportierst du die Reservierungen als CSV und liest sie mit
+Für die Buchhaltung exportierst du die Reservierungen als CSV und schickst sie mir. Ich
+trage Menge, Preis und Verkaufsdatum in den Artikelstamm ein. **Den Käufernamen trägst du
+selbst ein** — im selben Moment, in dem du Rechnungsnummer, Zahlung und Zahlart einträgst.
+Der Katalog kennt die Namen nicht.
 
-    python3 scripts/reservierungen_einlesen.py <exportdatei.csv> --schreiben
+## Wenn der Verkauf durch ist
 
-in den Artikelstamm ein. Danach `python3 scripts/build_artikelstamm_xlsx.py`, und
-Verkaufsübersicht, DATEV-Liste und Kassenbuch sind auf Stand. Rechnungsnummer, Zahlung
-und Zahlart trägst du weiterhin selbst ein, sobald die Rechnung aus DATEV vorliegt.
+Damit auf der Hundeschul-Seite nichts zurückbleibt:
+
+1. Reservierungen als CSV exportieren und mir schicken — danach sind sie entbehrlich.
+2. **Artikelkatalog → Einstellungen → Testreservierungen löschen**, falls noch welche da sind.
+3. Die Katalogseite löschen.
+4. Das Plugin deaktivieren und löschen.
+5. Die 111 Fotos aus der Mediathek entfernen.
+6. Den Absatz aus der Datenschutzerklärung wieder herausnehmen.
+7. Den Knopf auf kikripp.de entfernen.
+8. Enddatum in die Aktennotiz (`U1`) eintragen und ablegen.
 
 ## Was wohin gehört
 
-Der **Artikelstamm** (die Excel-Datei) ist die Quelle für alles: Artikel, Preise,
-Rechnungen, Kasse. Der **Webshop** führt allein Buch darüber, was reserviert und was
-bezahlt ist. Das **Klinik-Angebot** ist nur noch ein Dokument zum Anschauen – reserviert
-wird ausschließlich im Webshop, sonst vergibst du dasselbe Stück zweimal.
+Der **Artikelstamm** (die Excel-Datei) ist die Quelle für alles: Artikel, Preise, Rechnungen,
+Kasse. Der **Webkatalog** führt allein Buch darüber, was reserviert und was bezahlt ist —
+ohne Personendaten. Deine **Mails** sind das Kontaktarchiv. Das **Klinik-Angebot** ist nur
+noch ein Dokument zum Anschauen; reserviert wird ausschließlich im Katalog, sonst vergibst du
+dasselbe Stück zweimal.
+
+Und die Hundeschule? Die stellt Speicherplatz. Nichts weiter.

@@ -7,12 +7,16 @@ class Kikripp_Frontend {
     public static function start() {
         add_shortcode('kikripp_katalog', [__CLASS__, 'ausgabe']);
         add_action('wp_head', [__CLASS__, 'kein_index']);
+        // Muss vor jeder Ausgabe laufen, damit das Passwort aus dem Link
+        // sofort wieder aus der Adresse verschwindet.
+        add_action('init', ['Kikripp_Zugang', 'link_einloesen']);
     }
 
     /** Die Katalogseite gehört nicht in Suchmaschinen. */
     public static function kein_index() {
         if (self::ist_katalogseite()) {
             echo '<meta name="robots" content="noindex, nofollow">' . "\n";
+            echo '<meta name="referrer" content="same-origin">' . "\n";
         }
     }
 

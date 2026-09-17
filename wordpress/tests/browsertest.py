@@ -24,6 +24,18 @@ with sync_playwright() as p:
     seite.on("console", lambda m: konsole.append(f"{m.type}: {m.text}"))
     seite.on("pageerror", lambda e: konsole.append(f"pageerror: {e}"))
 
+    print("\n0) Zugang über das Passwort im Link")
+    seite.goto(BASIS + "?k=falsch", wait_until="networkidle")
+    pruefe("falscher Link öffnet nichts", seite.locator("#k-pw").count() == 1)
+    pruefe("auch dort ist das Passwort weg", "k=" not in seite.url, f"({seite.url})")
+
+    seite.goto(BASIS + "?k=" + PW, wait_until="networkidle")
+    seite.wait_for_selector(".karte", timeout=20000)
+    pruefe("Link öffnet den Katalog direkt", seite.locator(".karte").count() > 50)
+    pruefe("Passwort steht nicht mehr in der Adresse", "k=" not in seite.url, f"({seite.url})")
+    pruefe("keine Sperrseite", seite.locator("#k-pw").count() == 0)
+    s.clear_cookies()
+
     print("\n1) Anmeldung")
     seite.goto(BASIS, wait_until="networkidle")
     pruefe("Sperrseite sichtbar", seite.locator("#k-pw").is_visible())
@@ -45,7 +57,10 @@ with sync_playwright() as p:
 
     print("\n2) Katalogaufbau")
     karten = seite.locator(".karte").count()
-    pruefe("Artikel geladen", karten > 100, f"({karten} Karten)")
+    import json
+    with open("/home/user/Ablage-/ausgabe/katalog_import.json", encoding="utf-8") as f:
+        erwartet = sum(1 for a in json.load(f) if a["aktiv"] and a["im_katalog"])
+    pruefe("alle aktiven Artikel geladen", karten == erwartet, f"({karten} von {erwartet})")
     gesamt_bilder = seite.locator(".karte .bild img").count()
     seite.mouse.wheel(0, 40000); seite.wait_for_timeout(1500)
     seite.mouse.wheel(0, 80000); seite.wait_for_timeout(2000)
@@ -68,6 +83,14 @@ with sync_playwright() as p:
     pruefe("Rechtshinweis vorhanden", "Gewährleistung" in recht and "Widerrufsrecht" in recht,
            f"({recht[:160]!r})")
     pruefe("Abholadresse genannt", "Hermann-Schwer-Str. 1" in recht)
+    pruefe("Anbieter benannt",
+           "anbieter" in recht.lower() and "Kikripp GmbH" in recht, f"({recht[:200]!r})")
+    pruefe("Impressum verlinkt",
+           seite.locator('.recht a[href*="impressum"]').count() == 1)
+    pruefe("Datenschutz verlinkt",
+           seite.locator('.recht a[href*="datenschutz"]').count() == 1)
+    pruefe("Kopf nennt die Verkäuferin",
+           "Ein Angebot der Kikripp GmbH" in seite.inner_text(".kopf"))
     seite.screenshot(path="/tmp/kikweb/t02-katalog.png")
 
     print("\n3) Menge und Knopf")
@@ -123,6 +146,12 @@ with sync_playwright() as p:
     pruefe("Frist genannt", "7 Tage" in dlg)
     pruefe("Datenschutzhinweis", seite.locator(".datenschutz").count() == 1)
     pruefe("Hinweis: noch kein Kaufvertrag", "noch kein Kaufvertrag" in dlg, f"({dlg[:400]!r})")
+    pruefe("Hinweis: keine Bestätigungsmail",
+           "keine Bestätigungsmail" in seite.inner_text(".datenschutz"),
+           f"({seite.inner_text('.datenschutz')!r})")
+    pruefe("kein Wunschtermin-Feld mehr", seite.locator("#k-termin").count() == 0)
+    pruefe("Telefon ist als Pflichtfeld markiert",
+           "Telefon *" in dlg and seite.locator("#k-tel[required]").count() == 1)
 
     seite.click("#k-senden")
     seite.wait_for_timeout(600)
@@ -131,15 +160,27 @@ with sync_playwright() as p:
 
     seite.fill("#k-name", "Testkaeufer Muster GmbH")
     seite.fill("#k-mail", "test@example.org")
+    seite.click("#k-senden")
+    seite.wait_for_timeout(500)
+    pruefe("ohne Telefon wird nicht abgeschickt",
+           "Telefonnummer" in seite.inner_text("#k-meldung"),
+           f"({seite.inner_text('#k-meldung')!r})")
+
     seite.fill("#k-tel", "07721 123456")
     seite.fill("#k-text", "Automatischer Testlauf")
     seite.click("#k-senden")
     seite.wait_for_selector(".meldung.gut", timeout=15000)
     erfolg = seite.inner_text(".meldung.gut")
-    pruefe("Erfolgsmeldung mit Vorgangsnummer",
-           "Vielen Dank" in erfolg and re.search(r"Vorgangsnummer\s+\S+", erfolg) is not None,
+    pruefe("Erfolgsmeldung", "Vielen Dank" in erfolg and "schnellstmöglich" in erfolg,
            f"({erfolg[:200]!r})")
-    pruefe("kein Mailfehler-Hinweis", "konnte nicht versandt" not in erfolg, f"({erfolg!r})")
+    beleg = seite.inner_text(".beleg")
+    pruefe("Beleg zeigt Vorgangsnummer", "Vorgangsnummer" in beleg, f"({beleg[:200]!r})")
+    pruefe("Beleg zeigt das Fristdatum",
+           re.search(r"Reserviert bis\s+\d{2}\.\d{2}\.\d{4}", beleg) is not None, f"({beleg!r})")
+    pruefe("Beleg zeigt die Positionen", "3 Stück gesamt" in beleg, f"({beleg!r})")
+    pruefe("Beleg zeigt die Kontaktdaten zum Gegenlesen",
+           "test@example.org" in beleg and "07721 123456" in beleg, f"({beleg!r})")
+    pruefe("Hinweis auf Bildschirmfoto", "Bildschirmfoto" in erfolg)
     pruefe("Leiste zurueckgesetzt", "Noch nichts vorgemerkt" in seite.inner_text("#k-merk"))
     seite.screenshot(path="/tmp/kikweb/t04-erfolg.png")
 

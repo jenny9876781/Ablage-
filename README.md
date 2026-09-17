@@ -56,6 +56,9 @@ Maße fehlen durchgängig – die Spalte `Maße` ist dafür vorbereitet.
 | `T1_Tuerschilder.docx` | Türschilder für 62 Räume, fünf je A4-Blatt |
 | `T2_Erfassungsblaetter.docx` | ein Erfassungsblatt je Raum für den Rundgang |
 | `T3_Erfassungsliste.xlsx` | dieselben Nummern zum Abtippen der Stückzahlen |
+| `U1_Aktennotiz_Speicherplatz.docx` | Aktennotiz zur Nutzung fremden Speicherplatzes |
+| `U2_Datenschutz_Absatz.docx` | Textbaustein für die Datenschutzerklärung |
+| `U3_Knopf_fuer_kikripp.docx` / `.txt` | HTML-Baustein für den Knopf auf kikripp.de |
 | `04_Webkatalog_MOCKUP.html` | Muster des Katalogs, offline lauffähig, ohne Verschlüsselung |
 | `06_Webkatalog_geschuetzt.html` | dieselbe Seite mit AES-verschlüsselten Daten – Zwischenlösung, bis der Webshop live ist |
 
@@ -92,6 +95,7 @@ python3 scripts/build_katalog_import.py                        # Importdatei fü
 python3 scripts/build_webkatalog.py --geschuetzt 'PASSWORT'    # Passwort bewusst nicht im Repo
 python3 scripts/build_anleitungen_pdf.py                       # Anleitungen als PDF
 python3 scripts/build_erfassung.py                             # Türschilder und Erfassungsblätter
+python3 scripts/build_unterlagen_docx.py                       # Aktennotiz, Datenschutz, Knopf
 
 # 4. Vor der Übergabe prüfen – meldet Fehler und rechnet die Summen nach:
 python3 scripts/pruefen.py
@@ -108,7 +112,7 @@ python3 scripts/build_artikelstamm_xlsx.py
 Am Plugin gearbeitet? Dann vorher:
 
 ```bash
-php wordpress/tests/test-logik.php     # 51 Prüfungen, muss 0 Fehler melden
+php wordpress/tests/test-logik.php     # 75 Prüfungen, muss 0 Fehler melden
 php wordpress/tests/test-kette.php     # Datenbasis -> Import -> Katalog
 cd wordpress && ./paketieren.sh        # erzeugt ausgabe/kikripp-katalog.zip
 ```
@@ -124,12 +128,21 @@ gesetzt; selbst ergänzte Zeilen werden übernommen (dann ohne Foto).
 Voraussetzungen: `python3`, `openpyxl`, `Pillow`, `pillow-heif`, Chromium (für Screenshots),
 `php` (für die Plugin-Tests).
 
-## Webshop
+## Webkatalog
 
-Das WordPress-Plugin in `wordpress/kikripp-katalog/` bringt den Katalog auf kikripp.de:
-Passwortschutz, Reservierung mit Mailbenachrichtigung an `jennyp@kikripp.de`, geteilter
-Reserviert-Status für alle Besucher, Teilmengen („5 von 10 verfügbar"), sieben Tage Frist,
-Stornieren und Bezahltsetzen in der Verwaltung.
+Das WordPress-Plugin in `wordpress/kikripp-katalog/` bringt den Katalog ins Netz:
+Zugang über einen Link mit eingebautem Passwort, Reservierung mit Mailbenachrichtigung an
+`jennyp@kikripp.de`, geteilter Reserviert-Status für alle Besucher, Teilmengen
+(„5 von 10 verfügbar"), sieben Tage Frist, Stornieren und Bezahltsetzen in der Verwaltung.
+
+Er läuft auf **schlabberschnuten.com**, weil auf kikripp.de keine Plugins installierbar sind
+(Multisite ohne Netzwerkrechte). Auf kikripp.de steht nur ein Knopf. Verkäuferin ist die
+Kikripp GmbH — der Katalog nennt sie als Anbieterin und verlinkt ihr Impressum.
+
+**Der Katalog speichert keine personenbezogenen Daten.** Name, Mail und Telefon gehen per
+Mail an die Kikripp GmbH und werden unmittelbar danach aus der Datenbank gelöscht. In der
+Datenbank bleiben nur Artikelnummer, Menge, Preis und Frist. Interessenten erhalten **keine**
+Bestätigungsmail, sondern einen Beleg am Bildschirm.
 
 ## Anleitungen
 

@@ -127,8 +127,8 @@ Spalten und Konventionen:
 | `Versand` | `nur Abholung` · `Versand möglich` · `Spedition` |
 | `Mengenhinweis` | **immer ausfüllen:** was auf dem Foto zu sehen ist, z. B. „ca. 8 Stück im Bild – bitte nachzählen" |
 | `Status` | `verfügbar` |
-| `Kanal` | `Klinik` bei Neuaufnahme; das Rückeinlesen setzt später `Webkatalog` |
-| `Im_Katalog` | `ja`, wenn der Artikel im Webkatalog erscheinen soll, sonst `nein`. **`nein` ist der Weg, einen Artikel nur der Klinik anzubieten** — er steht dann im Klinik-Angebot und im Artikelstamm, aber nicht im Webkatalog und nicht im Muster-HTML. |
+| `Kanal` | **leer lassen** — trägt erst der tatsächliche Verkauf ein; das Rückeinlesen setzt `Webkatalog` |
+| `Im_Katalog` | `ja` für Möbel und große Dekostücke (**Welle 1**, gehen zuerst online). `nein` für Spielzeug und Konvolute (**Welle 2**) — die Zeile steht dann im Artikelstamm, aber nicht im Webkatalog und nicht im Muster-HTML. |
 | `Klinik_Markierung` | `ja` färbt die Zeile im Klinik-Angebot hellblau ein (`D6E3F0`). Ohne Bedeutung im System — die Nutzerin markiert damit Positionen für sich. |
 | übrige Verkaufsspalten | leer |
 

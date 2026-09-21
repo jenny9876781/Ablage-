@@ -78,7 +78,7 @@ AUSWAHL = {
     "Preisbasis": '"Fix,VHB"',
     "Versand":    '"nur Abholung,Versand möglich,Spedition"',
     "Status":     '"verfügbar,reserviert,teilverkauft,verkauft,gespendet,entsorgt"',
-    "Kanal":      '"Klinik,Kleinanzeigen,eBay,Direkt,Händler,Verkaufstag"',
+    "Kanal":      '"Webkatalog,Kleinanzeigen,eBay,Direkt,Händler,Verkaufstag"',
     "Zahlung":    '"offen,bezahlt,teilbezahlt"',
     "Zahlart":    '"Überweisung,bar,PayPal"',
 }

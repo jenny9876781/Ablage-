@@ -2353,7 +2353,7 @@
   "foto": "",
   "sortierung": 123,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "NU02-01",

@@ -22,6 +22,7 @@ def main():
             "basis":      a["Preisbasis"],
             "versand":    a["Versand"],
             "marke":      a.get("Marke", ""),
+            "buendel":    a.get("Bündel", ""),
             "foto":       a["Foto"],
             "sortierung": i,
             "aktiv":      a.get("Aktiv", "ja").lower() != "entfällt",

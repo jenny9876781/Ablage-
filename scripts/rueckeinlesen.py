@@ -15,7 +15,7 @@ DESIGN_PFAD = os.path.join(BASIS, "daten", "design.csv")
 STANDARD = os.path.join(AUSGABE, "01_Artikelstamm_kikripp.xlsx")
 
 # Spalten, die aus der Arbeitsmappe zurückwandern (Excel-Spalte -> CSV-Spalte)
-UEBERNEHMEN = ["Bezeichnung", "Beschreibung", "Kategorie", "Marke", "Weitere_ArtNr",
+UEBERNEHMEN = ["Bezeichnung", "Beschreibung", "Kategorie", "Marke", "Bündel", "Weitere_ArtNr",
                "Raum", "Menge", "Einheit",
                "Zustand", "Maße", "Wertklasse", "Aktiv", "Anlagennr", "Anschaffungswert_netto",
                "Preis_netto", "Preisbasis", "Versand", "Foto", "Status", "Kanal",

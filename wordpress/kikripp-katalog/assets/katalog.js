@@ -175,7 +175,7 @@
     var kat = el('k-kat').value, raum = el('k-raum').value;
     var nurFrei = el('k-frei').checked, nurDesign = el('k-design').checked;
     var liste = ARTIKEL.filter(function (a) {
-      return (!q || (a.nr + ' ' + a.titel + ' ' + a.beschr).toLowerCase().indexOf(q) >= 0)
+      return (!q || (a.nr + ' ' + a.titel + ' ' + a.beschr + ' ' + (a.buendel || '')).toLowerCase().indexOf(q) >= 0)
         && (!kat || a.kat === kat) && (!raum || a.raum === raum)
         && (!nurFrei || a.frei > 0) && (!nurDesign || !!a.marke);
     });
@@ -220,6 +220,7 @@
         (a.masse ? '<span>' + sicher(a.masse) + '</span>' : '') +
         '<span>' + sicher(a.raum) + '</span>' +
         '<span>' + sicher(a.versand) + '</span>' +
+        (a.buendel ? '<span class="bnd">Sammlung ' + sicher(a.buendel) + '</span>' : '') +
       '</div>' +
       '<div class="preis"><b>' + eur(brutto) + vhb + '</b>' +
         '<small>inkl. USt · netto ' + eur(a.preis) + ' je ' + sicher(a.einheit) + '</small></div>' +

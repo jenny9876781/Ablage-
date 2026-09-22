@@ -26,7 +26,7 @@ function importiere($pfad) {
                   'daten' => wp_json_encode(['nr' => $a['nr'], 'titel' => $a['titel'],
                       'beschr' => $a['beschr'], 'kat' => $a['kat'], 'raum' => $a['raum'],
                       'zustand' => $a['zustand'], 'masse' => $a['masse'], 'einheit' => $a['einheit'],
-                      'basis' => $a['basis'], 'versand' => $a['versand'], 'marke' => $a['marke'] ?? '',
+                      'basis' => $a['basis'], 'versand' => $a['versand'], 'marke' => $a['marke'] ?? '', 'buendel' => $a['buendel'] ?? '',
                       'foto' => $a['foto'], 'bild' => '/fotos/' . $a['foto'] . '.jpg']),
                   'aktualisiert' => current_time('mysql')];
         if ($wpdb->get_var($wpdb->prepare('SELECT artnr FROM ' . Kikripp_DB::t_artikel()

@@ -76,6 +76,7 @@
 .kikripp .badge { position: absolute; top: 8px; right: 8px; font-size: 10.5px; font-weight: 700; padding: 3px 9px; border-radius: 2px; letter-spacing: .03em; text-transform: uppercase; }
 .kikripp .badge.frei { background: rgba(255,255,255,.92); color: var(--schwarz); border: 1px solid var(--linie); }
 .kikripp .badge.res { background: var(--rot); color: #fff; }
+.kikripp .meta span.bnd { background: var(--rot); color: #fff; font-weight: 700; }
 .kikripp .markenschild { position: absolute; left: 0; bottom: 0; background: var(--rot); color: #fff; font-size: 10px; font-weight: 700; padding: 3px 8px; letter-spacing: .04em; text-transform: uppercase; }
 .kikripp .txt { padding: 12px 14px 14px; display: flex; flex-direction: column; flex: 1; }
 .kikripp .txt h3 { margin: 0 0 4px; font-size: 15px; font-weight: 600; line-height: 1.3; }

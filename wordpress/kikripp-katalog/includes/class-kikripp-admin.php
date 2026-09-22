@@ -269,6 +269,7 @@ class Kikripp_Admin {
                 'basis'   => (string) ($a['basis'] ?? ''),
                 'versand' => (string) ($a['versand'] ?? ''),
                 'marke'   => (string) ($a['marke'] ?? ''),
+                'buendel' => (string) ($a['buendel'] ?? ''),
                 'foto'    => (string) ($a['foto'] ?? ''),
                 'bild'    => $bild,
             ];

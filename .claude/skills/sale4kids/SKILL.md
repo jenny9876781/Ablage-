@@ -124,6 +124,7 @@ Spalten und Konventionen:
 |---|---|
 | `ArtNr` | `<Raumcode>-NN`, z. B. `BE10-07` — die laufende Nummer je Raum aus `daten/raeume.csv` |
 | `Alt_ArtNr` | nur gefüllt bei Positionen aus der alten `K-###`-Zählung; nie ändern |
+| `Bündel` | **Sammlung über Räume hinweg.** Ein Textkennzeichen, z. B. `Schwarzwald`. Es steht als rotes Schild in der Kachel und liegt im Suchtext: wer „Schwarzwald" eintippt, bekommt die ganze Gruppe auf einen Schlag, egal in welchem Raum sie steht. Anders als `Weitere_ArtNr` wird **nichts zusammengelegt** — die Positionen bleiben einzeln reservierbar. Gedacht für Interessenten, die ein Thema komplett wollen. |
 | `Weitere_ArtNr` | **Zusammenfassung über Räume.** Steht derselbe Artikel in mehreren Räumen, wird daraus **eine** Zeile: die Nummer des Raums, in dem er zuerst erfasst wurde, die **Gesamtmenge** in `Menge`, die Post-it-Nummern der anderen Räume hier (mit Komma getrennt) und die Aufteilung im Klartext im `Mengenhinweis` („2 im Gruppenraum, 2 im Gruppenraum 5"). So lebt jede Menge genau einmal — Verfügbarkeit, Reservierung und Rückeinlesen bleiben eindeutig. `pruefen.py` beanstandet eine Nummer, die hier **und** als eigene Zeile steht. Nur zusammenfassen, was wirklich gleich ist: andere Farbe oder deutlich anderer Zustand bleibt getrennt. |
 | `Raumcode` | Code aus `daten/raeume.csv`; bestimmt die Artikelnummer |
 | `Bezeichnung` | kurz und verkäuflich, ohne Marketingsprache |

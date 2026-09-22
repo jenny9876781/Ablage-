@@ -39,6 +39,7 @@ def daten_sammeln():
             "masse": a.get("Maße", ""), "menge": a["Menge"], "einheit": a["Einheit"],
             "preis": a["Preis_netto"], "basis": a["Preisbasis"], "versand": a["Versand"],
             "marke": a.get("Marke", ""),
+            "buendel": a.get("Bündel", ""),
             "status": "verfügbar" if a["Menge"] > 0 else "verkauft",
             "bild": b64bild(p) if p else "",
         })
@@ -108,6 +109,7 @@ input:focus,select:focus{outline:none;border-color:var(--rot)}
 .badge.frei{background:rgba(255,255,255,.92);color:var(--schwarz);border:1px solid var(--linie)}
 .badge.res{background:var(--rot);color:#fff}
 .badge.verk{background:#c9c9c9;color:#4b5563}
+.meta span.bnd{background:var(--rot);color:#fff;font-weight:700}
 .markenschild{position:absolute;left:0;bottom:0;background:var(--rot);color:#fff;font-size:10px;
       font-weight:700;padding:3px 8px;letter-spacing:.04em;text-transform:uppercase}
 .txt{padding:12px 14px 14px;display:flex;flex-direction:column;flex:1}
@@ -217,7 +219,7 @@ function render(){
   const k = $('fkat').value, r = $('fraum').value;
   const nur = $('fnur').checked, nurD = $('fdesign').checked;
   const liste = ARTIKEL.filter(a =>
-    (!q || (a.nr+' '+a.titel+' '+a.beschr).toLowerCase().includes(q)) &&
+    (!q || (a.nr+' '+a.titel+' '+a.beschr+' '+a.buendel).toLowerCase().includes(q)) &&
     (!k || a.kat === k) && (!r || a.raum === r) &&
     (!nur || a.status === 'verfügbar') && (!nurD || !!a.marke));
   const wert = liste.reduce((s,a)=>s+a.preis*a.menge,0);
@@ -230,6 +232,7 @@ function karte(a){
   const bild = a.bild ? `<img src="${a.bild}" alt="${a.titel}">` : '';
   const mk = a.marke ? `<span class="markenschild">${a.marke}</span>` : '';
   const masse = a.masse ? `<span>${a.masse}</span>` : '';
+  const bnd = a.buendel ? `<span class="bnd">Sammlung ${a.buendel}</span>` : '';
   const kauf = a.status==='verfügbar' ? `<div class="mengen">
       <input type="number" min="0" max="${a.menge}" value="${merk[a.nr]||''}" placeholder="Menge"
              id="m-${a.nr}" aria-label="Wunschmenge ${a.nr}" data-nr="${a.nr}">
@@ -239,7 +242,7 @@ function karte(a){
       <span class="badge ${bc}">${a.status}</span>${mk}</div>
     <div class="txt"><h3>${a.titel}</h3><p class="b">${a.beschr}</p>
       <div class="meta"><span>${a.zustand}</span><span>${a.menge} ${a.einheit}</span>
-        ${masse}<span>${a.raum}</span><span>${a.versand}</span></div>
+        ${masse}<span>${a.raum}</span><span>${a.versand}</span>${bnd}</div>
       <div class="preis"><b>${eur(a.preis)}</b>${a.basis==='VHB'?'<span class="vhb">VHB</span>':''}
         <small>netto je ${a.einheit} · ${eur(a.preis*(1+UST))} brutto</small></div>
       ${kauf}</div></div>`;

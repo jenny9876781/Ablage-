@@ -21,6 +21,7 @@ RAHMEN = Border(left=duenn, right=duenn, top=duenn, bottom=duenn)
 SPALTEN = [
     ("ArtNr",                  10, "Stammdaten",   "text"),
     ("Alt_ArtNr",              10, "Stammdaten",   "text"),
+    ("Weitere_ArtNr",          14, "Stammdaten",   "text"),
     ("Raumcode",               10, "Stammdaten",   "text"),
     ("Bezeichnung",            34, "Stammdaten",   "text"),
     ("Beschreibung",           54, "Stammdaten",   "text"),

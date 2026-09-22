@@ -38,6 +38,21 @@ if ohne_mass: W(f"{len(ohne_mass)} Positionen ohne Maßangabe")
 nachzaehlen = [a["ArtNr"] for a in aktiv if "nachzählen" in (a.get("Mengenhinweis") or "")]
 if nachzaehlen: W(f"{len(nachzaehlen)} Positionen mit offener Stückzahl")
 
+# Zusammengefasste Positionen: die Post-it-Nummern der weiteren Räume müssen eindeutig
+# bleiben und dürfen nicht zugleich als eigene Zeile existieren, sonst wird dieselbe Ware
+# zweimal angeboten.
+_weitere = []
+for a in alle:
+    _weitere += [n.strip() for n in (a.get("Weitere_ArtNr") or "").split(",") if n.strip()]
+_kollision = sorted(set(_weitere) & set(nummern))
+_mehrfach = sorted({n for n in _weitere if _weitere.count(n) > 1})
+if _kollision:
+    F(f"Nummer steht in Weitere_ArtNr und ist zugleich eine eigene Zeile: {_kollision}")
+elif _mehrfach:
+    F(f"Nummer mehrfach in Weitere_ArtNr: {_mehrfach}")
+elif _weitere:
+    OK(f"{len(_weitere)} zusammengefasste Post-it-Nummern, alle eindeutig")
+
 print("\n== 1b. Raumstammdaten ==")
 import csv as _csv
 _rp = os.path.join(BASIS, "daten", "raeume.csv")

@@ -549,6 +549,17 @@ jeder Zeile, Markierung deckungsgleich mit der Datenbasis, beide Eingabeprüfung
 - **Wellen:** Möbel und große Dekostücke zuerst (`Im_Katalog = ja`), Spielzeug und Konvolute
   später (`nein`). Für die 88 Positionen der alten Klinikauswahl gilt die Trennung **nicht** —
   die stehen alle im Katalog. Sie greift für die rund 900 noch zu erfassenden Artikel.
+
+### Am Ende des Rundgangs nachziehen (von der Nutzerin ausdrücklich vorgemerkt)
+
+Beides liegt bewusst hinten an: die Nutzerin sammelt die fehlenden Fotos und liefert sie in
+einem Zug nach. **Nicht vorher abschließen und nicht vergessen** — sie hat darum gebeten, es
+sich zu merken.
+
+| Offen | Was dann zu tun ist |
+|---|---|
+| **`NU02-18` Elefanten** | Steht auf `Im_Katalog = nein`, Menge 2 (weiß + schwarz, gleiche Größe). Sobald die Nahaufnahme des Signaturplättchens und der Unterseite da ist: Marke klären. Vitra Eames Elephant gebraucht 150–280 € je Stück, Nachbau 20–40 € — der Preis von 180 € ist auf den Originalfall gesetzt. Danach `Im_Katalog = ja`. Der **kleinere schwarze** wird eine **eigene Position** (nächste freie Nummer in NU02), weil Vitra zwei Größen baut und die kleine deutlich weniger wert ist. |
+| **`NU02-14` Kunststoffstühle** | Bisher 3 erfasst (2 rosa, 1 grün) von einer unbekannten Gesamtzahl. Es gibt sie in weiteren Farben, auch in den Außenanlagen. Wenn alle Fotos da sind: auf die Gesamtmenge bringen und die Post-it-Nummern der anderen Räume in `Weitere_ArtNr`. |
 - **Der Katalog ist noch nicht installiert.** Plugin, Fotos, Importdatei und die drei
   Begleitunterlagen liegen in `ausgabe/`. Die Nutzerin richtet ihn auf
   **schlabberschnuten.com** ein (Anleitung `A1`). Danach fragen, ob die Benachrichtigungsmail

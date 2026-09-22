@@ -76,7 +76,7 @@ c = ws.cell(row=5, column=1, value=
     "So geht's:  Tragen Sie in den drei grau hinterlegten Spalten rechts ein, woran Sie Interesse "
     "haben. „Interesse = ja\" genügt; lassen Sie die Stückzahl leer, zählt die volle verfügbare "
     "Menge. Der Wert Ihrer Auswahl rechnet sich unten automatisch. Rot markierte Artikelnummern "
-    "sind Marken- und Designstücke. "
+    "sind Markenware oder Designstücke. "
     "Ihre Eintragungen sind eine Interessenbekundung und keine Reservierung — wir stimmen die "
     "Mengen anschließend gemeinsam ab. Abholung nach Terminvereinbarung, Zahlung per Rechnung. "
     f"Möchten Sie den gesamten Bestand übernehmen, finden Sie am Ende ein Paketangebot mit "

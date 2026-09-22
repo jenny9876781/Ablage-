@@ -38,7 +38,7 @@ def daten_sammeln():
             "kat": a["Kategorie"], "raum": a["Raum"], "zustand": a["Zustand"],
             "masse": a.get("Maße", ""), "menge": a["Menge"], "einheit": a["Einheit"],
             "preis": a["Preis_netto"], "basis": a["Preisbasis"], "versand": a["Versand"],
-            "design": a["Wertklasse"] == "A",
+            "marke": a.get("Marke", ""),
             "status": "verfügbar" if a["Menge"] > 0 else "verkauft",
             "bild": b64bild(p) if p else "",
         })
@@ -108,7 +108,7 @@ input:focus,select:focus{outline:none;border-color:var(--rot)}
 .badge.frei{background:rgba(255,255,255,.92);color:var(--schwarz);border:1px solid var(--linie)}
 .badge.res{background:var(--rot);color:#fff}
 .badge.verk{background:#c9c9c9;color:#4b5563}
-.dsgn{position:absolute;left:0;bottom:0;background:var(--rot);color:#fff;font-size:10px;
+.markenschild{position:absolute;left:0;bottom:0;background:var(--rot);color:#fff;font-size:10px;
       font-weight:700;padding:3px 8px;letter-spacing:.04em;text-transform:uppercase}
 .txt{padding:12px 14px 14px;display:flex;flex-direction:column;flex:1}
 .txt h3{margin:0 0 4px;font-size:15px;font-weight:600;line-height:1.3;text-wrap:balance}
@@ -158,7 +158,7 @@ RUMPF = """
 <header><div class="wrap">
   <div class="marke">__SIGNET__<span class="wort">KIKRIPP</span></div>
   <h1>Artikelkatalog aus der Betriebsauflösung</h1>
-  <p>Abholung nach Terminvereinbarung · Preise netto zzgl. __USTP__&nbsp;% USt · rot markiert = Marken- und Designstücke</p>
+  <p>Abholung nach Terminvereinbarung · Preise netto zzgl. __USTP__&nbsp;% USt · rot markiert = Markenware, die Marke steht am Bild</p>
 </div></header>
 
 <div class="filter"><div class="wrap">
@@ -166,7 +166,7 @@ RUMPF = """
     <input type="search" id="q" placeholder="Suchen: Bezeichnung, Nummer, Beschreibung …">
     <select id="fkat"><option value="">Alle Kategorien</option></select>
     <select id="fraum"><option value="">Alle Räume</option></select>
-    <label class="chk"><input type="checkbox" id="fdesign"> nur Designstücke</label>
+    <label class="chk"><input type="checkbox" id="fdesign"> nur Markenware</label>
     <label class="chk"><input type="checkbox" id="fnur" checked> nur verfügbare</label>
   </div>
   <div class="zaehler" id="zaehler"></div>
@@ -219,7 +219,7 @@ function render(){
   const liste = ARTIKEL.filter(a =>
     (!q || (a.nr+' '+a.titel+' '+a.beschr).toLowerCase().includes(q)) &&
     (!k || a.kat === k) && (!r || a.raum === r) &&
-    (!nur || a.status === 'verfügbar') && (!nurD || a.design));
+    (!nur || a.status === 'verfügbar') && (!nurD || !!a.marke));
   const wert = liste.reduce((s,a)=>s+a.preis*a.menge,0);
   $('zaehler').innerHTML = `<b>${liste.length}</b> von ${ARTIKEL.length} Positionen · Listenwert ${eur(wert)} netto`;
   $('raster').innerHTML = liste.length ? liste.map(karte).join('')
@@ -228,7 +228,7 @@ function render(){
 function karte(a){
   const bc = a.status==='verfügbar'?'frei':(a.status==='reserviert'?'res':'verk');
   const bild = a.bild ? `<img src="${a.bild}" alt="${a.titel}">` : '';
-  const dsgn = a.design ? '<span class="dsgn">Designstück</span>' : '';
+  const mk = a.marke ? `<span class="markenschild">${a.marke}</span>` : '';
   const masse = a.masse ? `<span>${a.masse}</span>` : '';
   const kauf = a.status==='verfügbar' ? `<div class="mengen">
       <input type="number" min="0" max="${a.menge}" value="${merk[a.nr]||''}" placeholder="Menge"
@@ -236,7 +236,7 @@ function karte(a){
       <button data-plus="${a.nr}">vormerken</button></div>` : '';
   return `<div class="karte ${a.status!=='verfügbar'?'weg':''}">
     <div class="bild">${bild}<span class="nr">${a.nr}</span>
-      <span class="badge ${bc}">${a.status}</span>${dsgn}</div>
+      <span class="badge ${bc}">${a.status}</span>${mk}</div>
     <div class="txt"><h3>${a.titel}</h3><p class="b">${a.beschr}</p>
       <div class="meta"><span>${a.zustand}</span><span>${a.menge} ${a.einheit}</span>
         ${masse}<span>${a.raum}</span><span>${a.versand}</span></div>

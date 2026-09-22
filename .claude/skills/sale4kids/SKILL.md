@@ -91,9 +91,23 @@ Doppel. Es gibt aus, welche neuen Fotonummern entstanden sind.
 ### A2. Personen prüfen
 
 Jedes neue Foto ansehen. Sind Personen erkennbar — auch Spiegelungen in Scheiben, gerahmte
-Portraits, Teamfotos in Vitrinen —, dann in `daten/fotos_beschnitt.csv` eine Zeile ergänzen
-(`Foto;Anteil_oben;Grund`), `prepare_fotos.py` erneut laufen lassen und das Ergebnis **ansehen**,
-bis niemand mehr erkennbar ist. Kinderfotos dürfen unter keinen Umständen in eine Ausgabedatei.
+Portraits, Teamfotos in Vitrinen —, dann in `daten/fotos_beschnitt.csv` eine Zeile ergänzen,
+`prepare_fotos.py` erneut laufen lassen und das Ergebnis **ansehen**, bis niemand mehr erkennbar
+ist. Kinderfotos dürfen unter keinen Umständen in eine Ausgabedatei.
+
+Spalten: `Foto;Anteil_oben;Maske;Grund`
+
+| Mittel | wann |
+|---|---|
+| `Anteil_oben` | die Person steht am oberen Bildrand — ein Streifen fällt weg |
+| `Maske` | die Person steckt **mitten** im Bild: ein gerahmtes Foto in der Vitrine, eine Spiegelung in der Gerätescheibe. Rechtecke `x1/y1/x2/y2`, Werte 0..1 bezogen auf das **fertige** Bild, mehrere durch Leerzeichen. Die Fläche wird zum Mosaik gerechnet und dann weichgezeichnet — nicht umkehrbar. |
+
+> Beides greift auch bei Fotos, die schon auf der Platte liegen: der Index merkt sich eine
+> Signatur der Vorgabe, und weicht sie ab, wird das Bild aus der Quelldatei neu erzeugt. Die
+> Fotonummer bleibt. Fehlt die Quelldatei, warnt das Skript und ändert nichts.
+>
+> **Glas spiegelt.** Bei Geräten, Vitrinen und Bilderrahmen immer zweimal hinsehen — in F-119
+> war ein Kinderfoto nur als Spiegelung in der Waschmaschinenscheibe zu sehen.
 
 ### A3. Artikel anlegen
 
@@ -114,13 +128,14 @@ Spalten und Konventionen:
 | `Bezeichnung` | kurz und verkäuflich, ohne Marketingsprache |
 | `Beschreibung` | Material, Ausführung, Besonderheiten. Marke nur nennen, wenn im Bild belegt oder vom Nutzer bestätigt. |
 | `Kategorie` | Möbel · Designmöbel · Kita-Ausstattung · Büro · Küchentechnik · Leuchten · Deko · Kunst · Uhren · Textilien · Pflanzen · Garten · Verbrauchsmaterial · Technik · Sonstiges |
+| `Marke` | **nur wenn belegt** — Typenschild, Aufdruck oder Aussage der Nutzerin. Steuert das rote Markenschild am Bild im Katalog und den Filter „nur Markenware". Leer lassen, wo die Marke nur vermutet ist: das Schild ist eine Zusicherung. Bisher belegt: Vitra, USM Haller, Kartell, Biohort, Weber, LG, Miele, Candy, Mr Maria, IKEA. |
 | `Raum` | **nicht frei wählen** — der Raumname aus `daten/raeume.csv` zum jeweiligen `Raumcode` |
 | `Menge` | erkennbare Stückzahl |
 | `Einheit` | Stück · Karton · Set · Palette · Konvolut |
 | `Zustand` | neuwertig · gut · gebraucht · stark gebraucht · defekt |
 | `Maße` | **leer lassen** — trägt der Mensch ein |
 | `Foto` | `F-xxx` |
-| `Wertklasse` | `A` über 150 € oder Markenware · `B` 30–150 € · `C` darunter |
+| `Wertklasse` | `A` über 150 € oder Markenware · `B` 30–150 € · `C` darunter. **Nur interne Triage** — sie steuert das Markenschild im Katalog nicht (mehr). Bis 22.09. hing das Etikett „Designstück" an dieser Spalte und klebte damit auf einer Waschmaschine; seitdem trägt `Marke` das. |
 | `Aktiv` | `ja` |
 | `Preis_netto` | Schätzung netto, deutsches Format (`1.200,00`) |
 | `Preisbasis` | `Fix` oder `VHB` |
@@ -424,6 +439,15 @@ schreibt alle Mails nach `/tmp/kikripp-mails.log`.
 > `/tmp/kikripp-optionen.json`. Nur eine zu löschen ergibt einen leeren Katalog bei
 > gültigem Passwort — der Testserver spielt die Artikel inzwischen selbst nach, wenn die
 > Tabelle leer ist, und der Browsertest bricht mit klarer Meldung ab, wenn der Server fehlt.
+>
+> **Falle:** `pkill -f "php -S …"` trifft die eigene Shell mit, weil das Muster in deren
+> Kommandozeile steht — der Befehl stirbt, und das `rm` dahinter läuft nie. Erst löschen, dann
+> beenden, oder ein Muster wählen, das sich nicht selbst trifft. Zwei Testläufe schienen
+> deshalb Artikel zu verlieren („96 von 98"); in Wahrheit waren es Reservierungen aus dem
+> Lauf davor, die der Filter „nur verfügbare" ausblendete.
+>
+> Den Server mit `KIK_TEST_PW=2026sales4kids` starten — `server.php` nimmt sonst
+> `test-passwort`, und der Browsertest kommt nicht an der Sperrseite vorbei.
 
 ### Ausliefern
 
@@ -509,13 +533,15 @@ jeder Zeile, Markierung deckungsgleich mit der Datenbasis, beide Eingabeprüfung
 
 ---
 
-## 9. Offene Punkte (Stand 17.09.2026)
+## 9. Offene Punkte (Stand 22.09.2026)
 
-- **Die Klinik hat Vorrang.** Der Webkatalog geht erst online, wenn Mediclin durch ist. Vor dem
-  Livegang die verkauften Positionen aus dem Katalog nehmen (siehe 8b).
-- **`NU01-12` (Läufer dunkelgrau, IKEA Morum, 15 Stück) hat noch kein Foto.** Die Nutzerin
-  schickt es mit den übrigen Fotos des Rundgangs nach; bis dahin steht der Artikel ohne Bild im
-  Klinik-Angebot. Der Preis von 15,00 € netto je Stück ist meine Schätzung, nicht bestätigt.
+- **Die Klinik hat abgesagt.** Damit fällt die Vorrangregel weg, alle Artikel gehen in den
+  Webkatalog, und `Kanal` ist bei allen Zeilen leer — er trägt erst den tatsächlichen
+  Verkaufsweg ein. Das Klinik-Angebot bleibt erzeugt, wird aber nicht weiter überarbeitet;
+  es soll später ein allgemeines Händlerangebot werden.
+- **Wellen:** Möbel und große Dekostücke zuerst (`Im_Katalog = ja`), Spielzeug und Konvolute
+  später (`nein`). Für die 88 Positionen der alten Klinikauswahl gilt die Trennung **nicht** —
+  die stehen alle im Katalog. Sie greift für die rund 900 noch zu erfassenden Artikel.
 - **Der Katalog ist noch nicht installiert.** Plugin, Fotos, Importdatei und die drei
   Begleitunterlagen liegen in `ausgabe/`. Die Nutzerin richtet ihn auf
   **schlabberschnuten.com** ein (Anleitung `A1`). Danach fragen, ob die Benachrichtigungsmail

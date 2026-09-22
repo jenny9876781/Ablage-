@@ -114,7 +114,7 @@
           '<input type="search" id="k-q" placeholder="Suchen: Bezeichnung, Nummer, Beschreibung …">' +
           '<select id="k-kat"><option value="">Alle Kategorien</option>' + optionen(kats) + '</select>' +
           '<select id="k-raum"><option value="">Alle Räume</option>' + optionen(raeume) + '</select>' +
-          '<label class="chk"><input type="checkbox" id="k-design"> nur Designstücke</label>' +
+          '<label class="chk"><input type="checkbox" id="k-design"> nur Markenware</label>' +
           '<label class="chk"><input type="checkbox" id="k-frei" checked> nur verfügbare</label>' +
         '</div>' +
         '<div class="zaehler" id="k-zaehler"></div>' +
@@ -177,7 +177,7 @@
     var liste = ARTIKEL.filter(function (a) {
       return (!q || (a.nr + ' ' + a.titel + ' ' + a.beschr).toLowerCase().indexOf(q) >= 0)
         && (!kat || a.kat === kat) && (!raum || a.raum === raum)
-        && (!nurFrei || a.frei > 0) && (!nurDesign || a.design);
+        && (!nurFrei || a.frei > 0) && (!nurDesign || !!a.marke);
     });
     el('k-zaehler').innerHTML = '<b>' + liste.length + '</b> von ' + ARTIKEL.length + ' Positionen';
     el('k-raster').innerHTML = liste.length
@@ -211,7 +211,7 @@
       : '';
     return '<div class="karte' + (frei ? '' : ' weg') + '">' +
       '<div class="bild">' + bild + '<span class="nr">' + sicher(a.nr) + '</span>' + abzeichen +
-        (a.design ? '<span class="dsgn">Designstück</span>' : '') + '</div>' +
+        (a.marke ? '<span class="markenschild">' + sicher(a.marke) + '</span>' : '') + '</div>' +
       '<div class="txt"><h3>' + sicher(a.titel) + '</h3>' +
       '<p class="b">' + sicher(a.beschr) + '</p>' +
       '<div class="meta">' +

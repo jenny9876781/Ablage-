@@ -83,7 +83,7 @@ if ((int) $wpdb->get_var('SELECT COUNT(*) FROM ' . Kikripp_DB::t_artikel()) === 
                 'nr' => $a['nr'], 'titel' => $a['titel'], 'beschr' => $a['beschr'],
                 'kat' => $a['kat'], 'raum' => $a['raum'], 'zustand' => $a['zustand'],
                 'masse' => $a['masse'], 'einheit' => $a['einheit'], 'basis' => $a['basis'],
-                'versand' => $a['versand'], 'design' => $a['design'], 'foto' => $a['foto'],
+                'versand' => $a['versand'], 'marke' => $a['marke'] ?? '', 'foto' => $a['foto'],
                 'bild' => '/fotos/' . $a['foto'] . '.jpg',
             ]),
             'aktualisiert' => current_time('mysql'),

@@ -79,13 +79,25 @@ with sync_playwright() as p:
     with open(os.path.join(hier, "../../ausgabe/katalog_import.json"), encoding="utf-8") as f:
         erwartet = sum(1 for a in json.load(f) if a["aktiv"] and a["im_katalog"])
     pruefe("alle aktiven Artikel geladen", karten == erwartet, f"({karten} von {erwartet})")
+    # Fotos haengen an loading="lazy". Zaehlen, wie viele insgesamt geladen sind, taugt hier
+    # nicht: der eingebaute PHP-Testserver bedient genau eine Anfrage nach der anderen, also
+    # haengt das Ergebnis am Zufall. Geprueft wird deshalb, was zaehlt — ein Bild, das in den
+    # Blick geraet, wird nachgeladen. Dafuer drei Karten quer durch die Liste.
     gesamt_bilder = seite.locator(".karte .bild img").count()
-    seite.mouse.wheel(0, 40000); seite.wait_for_timeout(1500)
-    seite.mouse.wheel(0, 80000); seite.wait_for_timeout(2000)
-    geladen = seite.eval_on_selector_all(
-        ".karte .bild img", "els => els.filter(e => e.naturalWidth > 0).length")
-    pruefe("Fotos laden", geladen > 30, f"({geladen}/{gesamt_bilder} sichtbar geladen)")
-    seite.mouse.wheel(0, -200000); seite.wait_for_timeout(500)
+    stellen = [0, gesamt_bilder // 2, gesamt_bilder - 1]
+    nicht_geladen = []
+    for i in stellen:
+        bild = seite.locator(".karte .bild img").nth(i)
+        bild.scroll_into_view_if_needed()
+        try:
+            seite.wait_for_function(
+                "el => el.complete && el.naturalWidth > 0", arg=bild.element_handle(),
+                timeout=15000)
+        except Exception:
+            nicht_geladen.append(i)
+    pruefe("Fotos laden beim Hineinscrollen", not nicht_geladen,
+           f"(Karten {nicht_geladen} von {gesamt_bilder} blieben leer)")
+    seite.evaluate("window.scrollTo(0, 0)"); seite.wait_for_timeout(500)
 
     erste = seite.locator(".karte").first.inner_text()
     alles = seite.inner_text(".kikripp")

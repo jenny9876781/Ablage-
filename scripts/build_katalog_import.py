@@ -21,7 +21,7 @@ def main():
             "preis":      a["Preis_netto"] or 0,
             "basis":      a["Preisbasis"],
             "versand":    a["Versand"],
-            "design":     a["Wertklasse"] == "A",
+            "marke":      a.get("Marke", ""),
             "foto":       a["Foto"],
             "sortierung": i,
             "aktiv":      a.get("Aktiv", "ja").lower() != "entfällt",

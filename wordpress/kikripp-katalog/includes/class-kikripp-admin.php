@@ -268,7 +268,7 @@ class Kikripp_Admin {
                 'einheit' => (string) ($a['einheit'] ?? 'Stück'),
                 'basis'   => (string) ($a['basis'] ?? ''),
                 'versand' => (string) ($a['versand'] ?? ''),
-                'design'  => !empty($a['design']),
+                'marke'   => (string) ($a['marke'] ?? ''),
                 'foto'    => (string) ($a['foto'] ?? ''),
                 'bild'    => $bild,
             ];

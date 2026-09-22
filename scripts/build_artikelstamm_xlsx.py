@@ -44,6 +44,7 @@ SPALTEN = [
     ("Im_Katalog",             12, "Vermarktung",  "text"),
     ("Klinik_Markierung",      18, "Vermarktung",  "text"),
     ("Status",                 12, "Vermarktung",  "text"),
+    ("Marke",                  14, "Vermarktung",  "text"),
     ("Kanal",                  14, "Vermarktung",  "text"),
     ("Reserviert_für",         22, "Vermarktung",  "text"),
     ("Verkaufspreis_netto",    17, "Verkauf",      "eur"),
@@ -65,7 +66,7 @@ def L(n): return get_column_letter(IDX[n])
 
 PFLEGE = {"Menge", "Verkauft_Menge", "Maße", "Aktiv", "Im_Katalog", "Klinik_Markierung",
           "Anlagennr", "Anschaffungswert_netto", "Preis_netto",
-          "Preisbasis", "Status", "Kanal", "Reserviert_für", "Verkaufspreis_netto",
+          "Preisbasis", "Marke", "Status", "Kanal", "Reserviert_für", "Verkaufspreis_netto",
           "Verkaufsdatum", "Käufer", "Rechnungsnr", "Zahlung", "Zahlart", "Abholtermin", "Bemerkung"}
 
 AUSWAHL = {

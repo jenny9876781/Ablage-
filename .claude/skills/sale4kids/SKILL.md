@@ -563,6 +563,7 @@ Zwei Sorten kommen laufend vor:
 | Sorte | Vorgehen |
 |---|---|
 | **`OFFEN: wächst noch`** | Derselbe Artikel steht in weiteren, noch nicht erfassten Räumen — Betten, Hochstühle, Kunststoffstühle. Die Position bleibt bei der bisher gezählten Menge stehen. **Am Ende des Rundgangs** auf die Gesamtzahl bringen und die Post-it-Nummern der anderen Räume in `Weitere_ArtNr`. |
+| **`OFFEN: buendeln am Schluss`** | Die Nutzerin will Sammlungen erst bilden, **wenn der Rundgang durch ist** — es kommt noch viel. Bis dahin nur vormerken, nicht schon Spalten füllen. Steht eine Gruppe erkennbar zusammen (Schwarzwald, Kindergarderoben, Spielküche und Kaufladen, Sitzbänke mit Stauraum), im Bericht erwähnen und weitergehen. |
 | **`OFFEN: NICHT VEROEFFENTLICHEN`** | `Im_Katalog = nein`, weil eine Angabe fehlt, die den Preis um eine Größenordnung verschiebt. Aktuell `NU02-18`: Form und Signaturplättchen sprechen für einen Vitra Eames Elephant (gebraucht 150–280 € je Stück) gegen 20–40 € für einen Nachbau. Erst nach der Nahaufnahme entscheiden, dann `ja`. Der kleinere schwarze wird dabei eine **eigene Position**, weil Vitra zwei Größen baut. |
 
 > Die Nutzerin sammelt fehlende Fotos bewusst und liefert sie **in einem Zug am Ende** nach.

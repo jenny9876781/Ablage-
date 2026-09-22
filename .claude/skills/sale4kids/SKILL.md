@@ -153,6 +153,12 @@ Netto, konservativ, in realistischen Stufen. Anhaltspunkt: gebrauchte Möbel 10�
 Neupreis, Markenware deutlich höher. Bei Unsicherheit lieber niedriger ansetzen und im Bericht
 darauf hinweisen — der Vorgesetzte legt ohnehin final fest.
 
+> **Möbel sind grundsätzlich `gebraucht`, nicht `gut`.** Angabe der Nutzerin (22.09.):
+> „die Möbel sind alle in gebrauchtem Zustand und abgelebt von den Kindern." Auf dem Foto
+> sieht ein weiß beschichtetes Kita-Möbel makellos aus — das täuscht. `gut` nur im
+> Personal- und Bürobereich, und auch dort nur nach Rückfrage. Geräte mit Typenschild
+> (Waschmaschine, Trockner) und Kunststoffdeko sind davon nicht betroffen.
+
 **Markenware immer als solche benennen** (Vitra, USM Haller, Kartell, Weber, Biohort). Diese
 Positionen bekommen Wertklasse `A`; sie haben einen eigenen Gebrauchtmarkt und dürfen nicht im
 Sammelpreis untergehen. Bereits bestätigt: Vitra Alcove und USM Haller sind echt.

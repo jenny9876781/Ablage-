@@ -550,16 +550,23 @@ jeder Zeile, Markierung deckungsgleich mit der Datenbasis, beide Eingabeprüfung
   später (`nein`). Für die 88 Positionen der alten Klinikauswahl gilt die Trennung **nicht** —
   die stehen alle im Katalog. Sie greift für die rund 900 noch zu erfassenden Artikel.
 
-### Am Ende des Rundgangs nachziehen (von der Nutzerin ausdrücklich vorgemerkt)
+### Offene Punkte stehen an der Ware, nicht in einer Merkliste
 
-Beides liegt bewusst hinten an: die Nutzerin sammelt die fehlenden Fotos und liefert sie in
-einem Zug nach. **Nicht vorher abschließen und nicht vergessen** — sie hat darum gebeten, es
-sich zu merken.
+Wartet eine Position noch auf etwas, beginnt ihre `Bemerkung` mit **`OFFEN:`**. `pruefen.py`
+listet diese Zeilen bei **jedem** Lauf einzeln auf, mit Artikelnummer und Text. Damit hängt
+nichts an einer handgepflegten Liste und nichts an meinem Gedächtnis: der Hinweis klebt an der
+Ware und verschwindet erst, wenn ihn jemand entfernt.
 
-| Offen | Was dann zu tun ist |
+Zwei Sorten kommen laufend vor:
+
+| Sorte | Vorgehen |
 |---|---|
-| **`NU02-18` Elefanten** | Steht auf `Im_Katalog = nein`, Menge 2 (weiß + schwarz, gleiche Größe). Sobald die Nahaufnahme des Signaturplättchens und der Unterseite da ist: Marke klären. Vitra Eames Elephant gebraucht 150–280 € je Stück, Nachbau 20–40 € — der Preis von 180 € ist auf den Originalfall gesetzt. Danach `Im_Katalog = ja`. Der **kleinere schwarze** wird eine **eigene Position** (nächste freie Nummer in NU02), weil Vitra zwei Größen baut und die kleine deutlich weniger wert ist. |
-| **`NU02-14` Kunststoffstühle** | Bisher 3 erfasst (2 rosa, 1 grün) von einer unbekannten Gesamtzahl. Es gibt sie in weiteren Farben, auch in den Außenanlagen. Wenn alle Fotos da sind: auf die Gesamtmenge bringen und die Post-it-Nummern der anderen Räume in `Weitere_ArtNr`. |
+| **`OFFEN: wächst noch`** | Derselbe Artikel steht in weiteren, noch nicht erfassten Räumen — Betten, Hochstühle, Kunststoffstühle. Die Position bleibt bei der bisher gezählten Menge stehen. **Am Ende des Rundgangs** auf die Gesamtzahl bringen und die Post-it-Nummern der anderen Räume in `Weitere_ArtNr`. |
+| **`OFFEN: NICHT VEROEFFENTLICHEN`** | `Im_Katalog = nein`, weil eine Angabe fehlt, die den Preis um eine Größenordnung verschiebt. Aktuell `NU02-18`: Form und Signaturplättchen sprechen für einen Vitra Eames Elephant (gebraucht 150–280 € je Stück) gegen 20–40 € für einen Nachbau. Erst nach der Nahaufnahme entscheiden, dann `ja`. Der kleinere schwarze wird dabei eine **eigene Position**, weil Vitra zwei Größen baut. |
+
+> Die Nutzerin sammelt fehlende Fotos bewusst und liefert sie **in einem Zug am Ende** nach.
+> Nicht vorher drängen, aber auch nichts abschließen, solange `pruefen.py` noch `OFFEN:`-Zeilen
+> meldet.
 - **Der Katalog ist noch nicht installiert.** Plugin, Fotos, Importdatei und die drei
   Begleitunterlagen liegen in `ausgabe/`. Die Nutzerin richtet ihn auf
   **schlabberschnuten.com** ein (Anleitung `A1`). Danach fragen, ob die Benachrichtigungsmail

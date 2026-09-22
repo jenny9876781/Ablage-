@@ -53,6 +53,19 @@ elif _mehrfach:
 elif _weitere:
     OK(f"{len(_weitere)} zusammengefasste Post-it-Nummern, alle eindeutig")
 
+# Positionen, die noch auf etwas warten, tragen "OFFEN:" am Anfang der Bemerkung. Sie hier
+# aufzulisten ist zuverlässiger als eine Merkliste: der Hinweis steht an der Ware selbst und
+# taucht bei jedem Lauf wieder auf, bis jemand ihn entfernt.
+_offen = [a for a in aktiv if (a.get("Bemerkung") or "").strip().startswith("OFFEN:")]
+if _offen:
+    W(f"{len(_offen)} Positionen mit offenem Punkt:")
+    for a in _offen:
+        _text = a["Bemerkung"].split("OFFEN:", 1)[1].strip()
+        _kurz = _text if len(_text) <= 96 else _text[:93] + "..."
+        print(f"             {a['ArtNr']}  {_kurz}")
+else:
+    OK("keine Position mit offenem Punkt")
+
 print("\n== 1b. Raumstammdaten ==")
 import csv as _csv
 _rp = os.path.join(BASIS, "daten", "raeume.csv")

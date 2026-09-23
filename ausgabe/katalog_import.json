@@ -7638,5 +7638,25 @@
   "sortierung": 381,
   "aktiv": true,
   "im_katalog": true
+ },
+ {
+  "nr": "NE05-12",
+  "titel": "Freischwinger weiß, Kindergröße",
+  "beschr": "Freischwinger aus einem Stück Kunststoff, weiß matt, S-förmig geschwungen. Kindergröße.",
+  "kat": "Kita-Ausstattung",
+  "raum": "Speisesaal",
+  "zustand": "gebraucht",
+  "masse": "",
+  "menge": 5,
+  "einheit": "Stück",
+  "preis": 120.0,
+  "basis": "VHB",
+  "versand": "nur Abholung",
+  "marke": "",
+  "buendel": "",
+  "foto": "F-479",
+  "sortierung": 382,
+  "aktiv": true,
+  "im_katalog": false
  }
 ]

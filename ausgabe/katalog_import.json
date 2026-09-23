@@ -5622,7 +5622,7 @@
  {
   "nr": "BA06-09",
   "titel": "Holz-Lastwagen zum Rutschen",
-  "beschr": "Rutschfahrzeug aus Massivholz in Lastwagenform mit offener Ladefläche, Holzlenkrad und roten Rädern.",
+  "beschr": "Rutschfahrzeug aus Massivholz in Lastwagenform: offene Ladefläche mit Bordwänden, gepolsterter Sitz vor dem Führerhaus, Holzlenkrad und vier Gummiräder mit roten Felgen.",
   "kat": "Kita-Ausstattung",
   "raum": "Material / Turnraum",
   "zustand": "gebraucht",
@@ -5634,10 +5634,10 @@
   "versand": "nur Abholung",
   "marke": "",
   "buendel": "",
-  "foto": "",
+  "foto": "F-335",
   "sortierung": 281,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "BA06-10",
@@ -5681,8 +5681,8 @@
  },
  {
   "nr": "BA06-12",
-  "titel": "Spieltunnel grün",
-  "beschr": "Spieltunnel aus grünem Stoff mit roten Ringen, etwa 180 cm lang und 45 cm Durchmesser, zusammenfaltbar, mit Originalkarton.",
+  "titel": "Spieltunnel grün, 180 cm",
+  "beschr": "Spieltunnel aus grünem Stoff mit roten Ringen, etwa 180 cm lang bei 45 cm Durchmesser. Faltbar, mit Originalkarton.",
   "kat": "Kita-Ausstattung",
   "raum": "Material / Turnraum",
   "zustand": "gebraucht",
@@ -5694,9 +5694,9 @@
   "versand": "nur Abholung",
   "marke": "",
   "buendel": "",
-  "foto": "",
+  "foto": "F-336",
   "sortierung": 284,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  }
 ]

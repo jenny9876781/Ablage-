@@ -5362,7 +5362,7 @@
  {
   "nr": "BA05-05",
   "titel": "Sprossenwand einzeln",
-  "beschr": "Sprossenwand aus Massivholz zur Wandmontage, mit Querholmen über die volle Breite.",
+  "beschr": "Sprossenwand aus Massivholz zur Wandmontage: zwei kräftige Holme mit durchgehenden Rundsprossen, oben eine ausladende Aufhängeleiste.",
   "kat": "Kita-Ausstattung",
   "raum": "Turnraum",
   "zustand": "gebraucht",
@@ -5374,10 +5374,10 @@
   "versand": "nur Abholung",
   "marke": "",
   "buendel": "",
-  "foto": "",
+  "foto": "F-321",
   "sortierung": 268,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "BA05-06",
@@ -5461,8 +5461,8 @@
  },
  {
   "nr": "BA05-10",
-  "titel": "Wandschutz grün, gepolstert",
-  "beschr": "Gepolsterter Wand- und Säulenschutz mit grünem Kunstlederbezug und grauer Oberseite.",
+  "titel": "Polstersäule grün, Raumteiler",
+  "beschr": "Standsäule aus Schaumstoff mit Kunstlederbezug: Mantel in Limettengrün, Oberseiten in Grau, mehrere Lappen ergeben im Querschnitt eine Blütenform. Als Wand- und Säulenschutz oder als Raumteiler nutzbar.",
   "kat": "Kita-Ausstattung",
   "raum": "Turnraum",
   "zustand": "gebraucht",
@@ -5474,9 +5474,9 @@
   "versand": "nur Abholung",
   "marke": "",
   "buendel": "",
-  "foto": "",
+  "foto": "F-322",
   "sortierung": 273,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  }
 ]

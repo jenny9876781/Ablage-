@@ -19,7 +19,9 @@ def lade_artikel(nur_aktive=True):
     out = []
     for r in rows:
         d = {k: (v or "").strip() for k, v in r.items()}
-        if nur_aktive and d.get("Aktiv", "ja").lower() == "entfällt":
+        # "entfällt" = nie verkauft worden, "nein" = nicht mehr vorhanden.
+        # Beides zählt nicht zum Bestand und darf nicht in Summen oder Angebote.
+        if nur_aktive and (d.get("Aktiv") or "ja").lower() in ("entfällt", "nein"):
             continue
         # Geld- und Mengenfelder müssen Zahlen sein, sonst rechnen die Excel-Formeln nicht
         for feld in ("Preis_netto", "Anschaffungswert_netto", "Verkaufspreis_netto"):

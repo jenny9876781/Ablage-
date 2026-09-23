@@ -25,7 +25,7 @@ def main():
             "buendel":    a.get("Bündel", ""),
             "foto":       a["Foto"],
             "sortierung": i,
-            "aktiv":      a.get("Aktiv", "ja").lower() != "entfällt",
+            "aktiv":      (a.get("Aktiv") or "ja").lower() == "ja",
             "im_katalog": a.get("Im_Katalog", "ja").lower() == "ja",
         })
     pfad = os.path.join(AUSGABE, "katalog_import.json")

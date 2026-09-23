@@ -38,6 +38,18 @@ if ohne_mass: W(f"{len(ohne_mass)} Positionen ohne Maßangabe")
 nachzaehlen = [a["ArtNr"] for a in aktiv if "nachzählen" in (a.get("Mengenhinweis") or "")]
 if nachzaehlen: W(f"{len(nachzaehlen)} Positionen mit offener Stückzahl")
 
+# Eine Ware, die nicht mehr im Haus steht (Aktiv = nein), darf nicht zugleich für den
+# Katalog freigegeben sein - sonst reserviert jemand etwas, das es nicht mehr gibt.
+# "entfällt" ist etwas anderes: das sind die alten K-Nummern, die durch das Raumschema
+# ersetzt wurden. Sie fallen über Aktiv ohnehin aus jeder Ausgabe heraus.
+_widerspruch = [a["ArtNr"] for a in alle
+                if (a.get("Aktiv") or "ja").lower() == "nein"
+                and (a.get("Im_Katalog") or "ja").lower() == "ja"]
+if _widerspruch:
+    F(f"Aktiv = nein, aber Im_Katalog = ja: {_widerspruch}")
+else:
+    OK("keine abgemeldete Position ist für den Katalog freigegeben")
+
 # Zusammengefasste Positionen: die Post-it-Nummern der weiteren Räume müssen eindeutig
 # bleiben und dürfen nicht zugleich als eigene Zeile existieren, sonst wird dieselbe Ware
 # zweimal angeboten.

@@ -183,7 +183,7 @@ def main():
 
     with open(INDEX, "w", encoding="utf-8", newline="") as f:
         w = csv.DictWriter(f, fieldnames=["Foto", "Quelldatei", "Aufnahmezeit", "Beschnitten",
-                                          "Pruefsumme"], delimiter=";")
+                                          "Pruefsumme"], delimiter=";", lineterminator="\n")
         w.writeheader()
         w.writerows(sorted(index.values(), key=lambda r: int(r["Foto"].split("-")[1])))
 

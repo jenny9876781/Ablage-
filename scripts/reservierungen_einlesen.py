@@ -153,7 +153,7 @@ def eintragen(pfad, schreiben):
     stempel = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
     shutil.copy2(CSV_PFAD, f"{CSV_PFAD}.{stempel}.bak")
     with open(CSV_PFAD, "w", encoding="utf-8", newline="") as f:
-        w = csv.DictWriter(f, fieldnames=felder, delimiter=";")
+        w = csv.DictWriter(f, fieldnames=felder, delimiter=";", lineterminator="\n")
         w.writeheader(); w.writerows(zeilen)
     print(f"\nGeschrieben. Sicherung: {CSV_PFAD}.{stempel}.bak")
     print("Jetzt neu erzeugen:  python3 scripts/build_artikelstamm_xlsx.py")

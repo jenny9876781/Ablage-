@@ -19,6 +19,9 @@
       return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[z];
     });
   }
+  // Zeilenumbrueche aus der Arbeitsmappe (Alt+Enter in Excel) sollen im Katalog
+  // auch als Umbruch ankommen. Erst maskieren, dann umwandeln - nie umgekehrt.
+  function absatz(s) { return sicher(s).replace(/\r?\n/g, '<br>'); }
   function el(id) { return document.getElementById(id); }
 
   function hole(pfad, optionen) {
@@ -213,8 +216,8 @@
       '<div class="bild">' + bild + '<span class="nr">' + sicher(a.nr) + '</span>' + abzeichen +
         (a.marke ? '<span class="markenschild">' + sicher(a.marke) + '</span>' : '') + '</div>' +
       '<div class="txt"><h3>' + sicher(a.titel) + '</h3>' +
-      '<p class="b">' + sicher(a.beschr) + '</p>' +
-      (a.mengenhinweis ? '<p class="hw">' + sicher(a.mengenhinweis) + '</p>' : '') +
+      '<p class="b">' + absatz(a.beschr) + '</p>' +
+      (a.mengenhinweis ? '<p class="hw">' + absatz(a.mengenhinweis) + '</p>' : '') +
       '<div class="meta">' +
         '<span>Zustand: ' + sicher(a.zustand) + '</span>' +
         '<span' + knapp + '>' + mengeText + '</span>' +

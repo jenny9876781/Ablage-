@@ -209,6 +209,8 @@ SKRIPT = """
 let ARTIKEL = [];
 const UST = __UST__, merk = {};
 const eur = v => v.toLocaleString('de-DE',{style:'currency',currency:'EUR'});
+// Zeilenumbrueche aus der Arbeitsmappe als Umbruch anzeigen (wie im Plugin).
+const br = s => String(s??'').replace(/[&<>"]/g,z=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[z])).replace(/\r?\n/g,'<br>');
 const $ = id => document.getElementById(id);
 
 function fuelleFilter(){
@@ -243,8 +245,8 @@ function karte(a){
   return `<div class="karte ${a.status!=='verfügbar'?'weg':''}">
     <div class="bild">${bild}<span class="nr">${a.nr}</span>
       <span class="badge ${bc}">${a.status}</span>${mk}</div>
-    <div class="txt"><h3>${a.titel}</h3><p class="b">${a.beschr}</p>
-      ${a.hinweis ? `<p class="hw">${a.hinweis}</p>` : ''}
+    <div class="txt"><h3>${a.titel}</h3><p class="b">${br(a.beschr)}</p>
+      ${a.hinweis ? `<p class="hw">${br(a.hinweis)}</p>` : ''}
       <div class="meta"><span>${a.zustand}</span><span>${a.menge} ${a.einheit}</span>
         ${masse}<span>${a.raum}</span><span>${a.versand}</span>${bnd}</div>
       <div class="preis"><b>${eur(a.preis)}</b>${a.basis==='VHB'?'<span class="vhb">VHB</span>':''}

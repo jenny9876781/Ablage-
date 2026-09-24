@@ -210,6 +210,21 @@ ergänzte Zeilen werden übernommen (dann ohne Foto).
 Den Änderungsbericht durchsehen und auffällige Werte ansprechen — etwa ein Preis, der um eine
 Größenordnung abweicht, oder eine Menge, die auf 0 gesetzt wurde.
 
+**Vor dem Schreiben immer ein Probelauf.** `rueckeinlesen.py` schreibt sofort. Bei einer
+zurückkommenden Mappe deshalb zuerst mit einem kurzen Wegwerf-Skript gegen
+`daten/artikel_kikripp.csv` vergleichen und die Liste der Abweichungen lesen — erst dann
+einlesen. Danach ein zweiter Vergleich gegen `git show HEAD:daten/artikel_kikripp.csv`
+trennt die sachlichen Änderungen (Preis, Menge, Aktiv, Bezeichnung) von den redaktionellen
+und macht sie berichtsfähig.
+
+**Worauf beim Bericht besonders zu achten ist:** ob ein geleerter `Mengenhinweis` einen
+Ausschluss mitgenommen hat („Der Inhalt gehört nicht dazu"). Das ist Käufertext mit
+rechtlicher Wirkung — steht er weder im Hinweis noch in der Beschreibung, zeigt das Foto
+mehr, als verkauft wird. Nicht selbst zurückschreiben, sondern ansprechen.
+
+Zeilenumbrüche aus Excel (Alt+Enter) landen als `\n` in der CSV. Katalog und Muster-HTML
+machen daraus ein `<br>` — maskiert wird **vor** der Umwandlung, nie danach.
+
 ---
 
 ## 4. Ablauf D — Verkäufe aus dem Webshop zurückholen
@@ -326,6 +341,34 @@ damit Rot der Marke gehört und nicht „verkauft" bedeutet. Eingabefelder grau,
 Das Bollenhut-Signet liegt in `assets/`.
 
 Alle Werte stehen in `daten/design.csv` und im Blatt „Design" der Arbeitsmappe.
+
+---
+
+## 7b. Die Arbeitsmappe `01_Artikelstamm_kikripp.xlsx`
+
+Blatt **Artikelstamm**, Spalte A ist **Bild**: je Zeile ein Miniaturfoto des Artikels, dasselbe
+Bild wie im Webkatalog. Damit lässt sich der Preis am Stück beurteilen, ohne die Fotos daneben
+zu öffnen. Drei Dinge hängen daran zusammen und dürfen nicht einzeln geändert werden:
+
+* `BILD_PX = 130` bestimmt Kantenlänge, Zeilenhöhe (`ZEILE_PT`) und Spaltenbreite. Die
+  Miniaturen liegen in `ausgabe/.miniaturen/` (gitignoriert) und werden zwischengespeichert;
+  ein zweiter Lauf ist dadurch schnell. Die Mappe wächst dadurch auf rund 1,5 MB.
+* Die Bilder hängen an einem **`TwoCellAnchor` mit `editAs="twoCell"`**. Nur so wird ein Bild
+  beim Filtern zusammen mit seiner Zeile ausgeblendet. Ein `OneCellAnchor` (das, was
+  `ws.add_image(bild, "A3")` erzeugt) bliebe stehen und stünde dann beim falschen Artikel.
+* **Sortieren ist im Blatt gesperrt** (`ws.protection.sort = True`). Excel ordnet beim
+  Sortieren die Zeilen um, lässt die Bilder aber stehen — danach passt kein Foto mehr zu
+  seiner Zeile. Filtern ist erlaubt und erledigt dasselbe. Steht in der Anleitung.
+
+Fixierung ist **G3**: Bild, ArtNr, Raumcode, Raum, Bezeichnung, Menge bleiben stehen. Die
+Detailspalten `Kategorie` bis `Maße` sind eine zugeklappte Gruppe, damit `Preis_netto` ohne
+langes Scrollen neben dem Bild steht; die Verkaufsspalten sind wie bisher zugeklappt.
+
+Nach jedem Umbau der Mappe **zwei Proben**: der Rundlauf (`rueckeinlesen.py`-Logik gegen die
+frisch gebaute Datei, erwartet 0 Abweichungen) und die Bildzuordnung (Prüfsumme des
+eingebetteten Bildes gegen die erwartete Miniatur, Zeile für Zeile). LibreOffice kann in
+dieser Umgebung **keine** xlsx laden — auch keine triviale. Das ist kein Fehler der Datei;
+geprüft wird deshalb über das Zip und die Zeichnungs-XML, nicht über eine Bildschirmansicht.
 
 ---
 
@@ -544,7 +587,20 @@ entschieden, die Klinik-Spalte aus dem Artikelstamm zu nehmen. Seitdem gilt:
   dann der Webkatalog**, und was die Klinik nimmt, muss vor dem Livegang auf
   `Im_Katalog = nein` stehen. Sonst wird dasselbe Stück zweimal angeboten.
 
-## 9. Offene Punkte (Stand 22.09.2026)
+## 9. Offene Punkte (Stand 24.09.2026)
+
+- **Prüfrunde 1 ist eingearbeitet** (Rücklauf vom 24.09.2026). Sachlich geändert hat die
+  Nutzerin: `NE01-10` Menge 2 → 3, `NU01-03` auf `entfällt`, `BA05-04` Preis 750 → 250 €,
+  Bezeichnung von `NU02-18` und `NU02-24` präzisiert. Redaktionell hat sie **alle
+  Mengenhinweise** durchgesehen und stark gekürzt — der Hinweis nennt jetzt nur noch das,
+  was Menge und Zustand nicht schon sagen. Das ist der gewollte Stand.
+- **Offen dazu:** bei rund 55 Positionen ist mit dem gekürzten Hinweis auch der Ausschluss
+  verschwunden („Der Inhalt gehört nicht dazu", „Bettwäsche gehört nicht dazu"). Das Foto
+  zeigt dort mehr, als verkauft wird. Vorschlag an die Nutzerin: **ein** allgemeiner Satz in
+  den Katalogbedingungen statt 55 Einzelhinweise. Noch nicht entschieden.
+- **Drei Beschreibungen** (`BA10-03`, `BA10-04`, `TE01-01`) wiederholen in der ersten Zeile
+  die Bezeichnung; die Nutzerin hat dort einen Zeilenumbruch gesetzt. Katalog und Muster-HTML
+  zeigen den Umbruch jetzt als `<br>`. Ob die Wiederholung raus soll, ist offen.
 
 - **Die Klinik hat abgesagt.** Damit fällt die Vorrangregel weg, alle Artikel gehen in den
   Webkatalog, und `Kanal` ist bei allen Zeilen leer — er trägt erst den tatsächlichen

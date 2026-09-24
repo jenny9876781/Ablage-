@@ -1,10 +1,11 @@
 """Erzeugt 01_Artikelstamm_kikripp.xlsx – die Arbeitsdatei für OneDrive."""
 import sys, os
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from lib import (lade_artikel, AUSGABE, ASSETS, USt_SATZ, ROT, SCHWARZ, PAPIER, GRAU, LINIE,
+from lib import (lade_artikel, foto, AUSGABE, ASSETS, USt_SATZ, ROT, SCHWARZ, PAPIER, GRAU, LINIE,
                  FELD_KLINIK, FELD_INTERN, ZEILE, FONT, FIRMA, ABSENDER)
 from openpyxl.drawing.image import Image as XLImage
-from PIL import Image as PILImage
+from openpyxl.drawing.spreadsheet_drawing import TwoCellAnchor, AnchorMarker
+from PIL import Image as PILImage, ImageOps
 
 from openpyxl import Workbook
 from openpyxl.styles import Font, PatternFill, Alignment, Border, Side, Protection
@@ -17,25 +18,28 @@ EUR = '#,##0.00 "€"'
 duenn = Side(style="thin", color=LINIE)
 RAHMEN = Border(left=duenn, right=duenn, top=duenn, bottom=duenn)
 
-# (Überschrift, Breite, Gruppe, Typ)  Typ: text|int|eur|formel
-# Die ersten fuenf Spalten bleiben beim Scrollen stehen (Fixierung ab F). Sie sind
-# deshalb bewusst schmal und beantworten die Frage "welche Zeile ist das gerade?":
-# Nummer, Raum, Bezeichnung, Menge. Die breite Beschreibung steht danach und scrollt mit.
+# (Überschrift, Breite, Gruppe, Typ)  Typ: text|int|eur|formel|bild
+# Die ersten sechs Spalten bleiben beim Scrollen stehen (Fixierung ab G). Sie
+# beantworten die Frage "welcher Artikel ist das gerade?": Bild, Nummer, Raum,
+# Bezeichnung, Menge. Die breite Beschreibung steht danach und scrollt mit.
+# Die selten gebrauchten Detailspalten dahinter sind eine zugeklappte Gruppe,
+# damit Preis_netto ohne langes Scrollen neben dem Bild steht.
 SPALTEN = [
+    ("Bild",                   19, "Stammdaten",   "bild"),
     ("ArtNr",                  10, "Stammdaten",   "text"),
     ("Raumcode",               10, "Stammdaten",   "text"),
-    ("Raum",                   20, "Stammdaten",   "text"),
-    ("Bezeichnung",            34, "Stammdaten",   "text"),
-    ("Menge",                   8, "Stammdaten",   "int"),
-    ("Beschreibung",           54, "Stammdaten",   "text"),
+    ("Raum",                   18, "Stammdaten",   "text"),
+    ("Bezeichnung",            32, "Stammdaten",   "text"),
+    ("Menge",                   7, "Stammdaten",   "int"),
+    ("Beschreibung",           46, "Stammdaten",   "text"),
     ("Kategorie",              18, "Stammdaten",   "text"),
     ("Weitere_ArtNr",          14, "Stammdaten",   "text"),
     ("Wertklasse",             10, "Stammdaten",   "text"),
+    ("Einheit",                10, "Stammdaten",   "text"),
+    ("Maße",                   22, "Stammdaten",   "text"),
+    ("Zustand",                14, "Stammdaten",   "text"),
     ("Verkauft_Menge",         13, "Stammdaten",   "int"),
     ("Restmenge",              10, "Stammdaten",   "formel"),
-    ("Einheit",                10, "Stammdaten",   "text"),
-    ("Zustand",                14, "Stammdaten",   "text"),
-    ("Maße",                   22, "Stammdaten",   "text"),
     ("Aktiv",                  9,  "Stammdaten",   "text"),
     ("Anlagennr",              12, "Buchhaltung",  "text"),
     ("Anschaffungswert_netto", 17, "Buchhaltung",  "eur"),
@@ -61,6 +65,13 @@ SPALTEN = [
     ("Mengenhinweis",          40, "Notizen",      "text"),
     ("Bemerkung",              32, "Notizen",      "text"),
 ]
+# Miniaturbilder: Kantenlaenge in Bildpunkten. 130 px sind gross genug, um einen
+# Artikel wiederzuerkennen, und klein genug, dass die Datei unter 3 MB bleibt.
+BILD_PX   = 130
+ZEILE_PT  = round(BILD_PX * 0.76, 1)      # Zeilenhoehe in Punkt (1 pt = 1,333 px)
+MINI_DIR  = os.path.join(AUSGABE, ".miniaturen")
+RAND      = 28575 * 3          # 3 px Luft ringsum (1 px = 9525 EMU)
+
 GRUPPENFARBE = {"Stammdaten": SCHWARZ, "Buchhaltung": "595959", "Preis": ROT,
                 "Vermarktung": "404040", "Verkauf": ROT, "Kaufmännisch": "595959",
                 "Notizen": "8C8C8C"}
@@ -88,6 +99,25 @@ AUSWAHL = {
 
 daten = lade_artikel(nur_aktive=False)   # entfallene Zeilen bleiben sichtbar
 Z0, Z1 = 3, 2 + len(daten)
+
+
+def miniatur(fotoname):
+    """Legt ein verkleinertes Bild an und gibt den Pfad zurueck (None, wenn kein Foto).
+
+    Die Miniaturen liegen in ausgabe/.miniaturen und werden nur neu berechnet, wenn
+    das Originalfoto juenger ist. Ein zweiter Lauf des Skriptes ist dadurch schnell.
+    """
+    quelle = foto(fotoname)
+    if not quelle:
+        return None
+    os.makedirs(MINI_DIR, exist_ok=True)
+    ziel = os.path.join(MINI_DIR, f"{fotoname}-{BILD_PX}.jpg")
+    if not os.path.exists(ziel) or os.path.getmtime(ziel) < os.path.getmtime(quelle):
+        with PILImage.open(quelle) as im:
+            im = ImageOps.exif_transpose(im).convert("RGB")
+            im.thumbnail((BILD_PX, BILD_PX), PILImage.LANCZOS)
+            im.save(ziel, "JPEG", quality=75, optimize=True)
+    return ziel
 
 wb = Workbook()
 
@@ -139,10 +169,12 @@ TEXTE = [
     ("Kunst", "Die Acrylbilder sind Eigenarbeiten einer Privatperson, die Schwarzwald-Trachtenmotive sind Kaufware. Beides ist in der Beschreibung vermerkt."),
     ("", ""),
     ("Für die Prüfrunde", ""),
+    ("  So geht es am schnellsten", "Von oben nach unten durchgehen: Bild und Bezeichnung ansehen, Preis_netto prüfen oder überschreiben, weiter. Die Räume stehen zusammen, es ist also ein Rundgang durchs Haus."),
     ("  Was angefasst wird", "Nur vier Spalten: Preis_netto, Anlagennr, Anschaffungswert_netto und – falls etwas gar nicht angeboten werden soll – Im_Katalog auf „nein“. Alles andere kann so bleiben."),
     ("  Was man lassen sollte", "Keine Zeilen löschen. Eine fehlende Zeile wird beim Einlesen als „entfällt“ gewertet und verschwindet aus dem Katalog. Soll etwas raus, bitte Aktiv auf „entfällt“ setzen."),
-    ("  Sortieren ist erlaubt", "Jede Zeile wird über die Artikelnummer wiedergefunden, nicht über ihre Position. Filtern und Sortieren ändert nichts."),
-    ("  Zugeklappte Spalten", "Rechts sind die Verkaufsspalten als Gruppe zugeklappt – sie werden erst gebraucht, wenn wirklich verkauft wird. Das Plus über der Spaltenleiste klappt sie auf."),
+    ("  Das Bild in Spalte A", "Jede Zeile zeigt links das Foto des Artikels – dasselbe Bild, das später im Webkatalog steht. So lässt sich der Preis direkt am Stück beurteilen, ohne die Fotos daneben zu öffnen."),
+    ("  Filtern statt Sortieren", "Zum Eingrenzen bitte den Filter in Zeile 2 benutzen (z. B. nur ein Raum). Sortieren ist in diesem Blatt gesperrt: Excel ordnet dabei zwar die Zeilen um, lässt die Bilder aber stehen – danach stünde jedes Foto beim falschen Artikel."),
+    ("  Zugeklappte Spalten", "Zweimal sind Spalten als Gruppe zugeklappt: die Detailangaben (Kategorie bis Maße) und ganz rechts die Verkaufsspalten. So steht Preis_netto gleich neben Bild und Bezeichnung. Das Plus über der Spaltenleiste klappt sie auf."),
     ("  Formeln", "Restmenge, Positionswert und Umsatz rechnen sich selbst und sind gegen Überschreiben geschützt."),
 ]
 r = 4
@@ -191,6 +223,8 @@ for j, art in enumerate(daten):
         elif name == "Umsatz_netto":
             wert = (f'=IF({L("Verkauft_Menge")}{r}="","",'
                     f'{L("Verkauft_Menge")}{r}*{L("Verkaufspreis_netto")}{r})')
+        elif typ == "bild":
+            wert = None
         else:
             wert = art.get(name) or None
         c = ws.cell(row=r, column=IDX[name], value=wert)
@@ -204,7 +238,20 @@ for j, art in enumerate(daten):
             c.number_format = "0"
         if name in PFLEGE:
             c.fill = PatternFill("solid", fgColor=FELD_INTERN)
-    ws.row_dimensions[r].height = 30
+    mini = miniatur(art.get("Foto"))
+    if mini:
+        bild = XLImage(mini)
+        # Zwei-Zellen-Anker mit editAs="twoCell": das Bild gehoert damit der Zelle und
+        # nicht dem Blatt. Es wird beim Filtern zusammen mit seiner Zeile ausgeblendet
+        # und passt sich der Zeilenhoehe an. Ein Ein-Zellen-Anker bliebe beim Filtern
+        # stehen und stuende dann neben dem falschen Artikel.
+        sp = IDX["Bild"] - 1
+        bild.anchor = TwoCellAnchor(
+            editAs="twoCell",
+            _from=AnchorMarker(col=sp,     colOff=RAND, row=r - 1, rowOff=RAND),
+            to=AnchorMarker(col=sp + 1, colOff=-RAND, row=r,     rowOff=-RAND))
+        ws.add_image(bild)
+    ws.row_dimensions[r].height = ZEILE_PT
 
 # Die Bloecke "Verkauf" und "Kaufmaennisch" sind leer, solange nichts verkauft ist.
 # Sie werden als aufklappbare Gruppe angelegt und starten zugeklappt - ein Klick auf
@@ -217,7 +264,14 @@ for _i in range(_g0, _g1 + 1):
     _sp.hidden = True
 ws.sheet_properties.outlinePr.summaryRight = True
 
-ws.freeze_panes = "F3"
+# Kategorie bis Masze werden bei der Preisrunde nicht gebraucht. Zugeklappt steht
+# Preis_netto direkt neben Bild und Bezeichnung - ein Klick auf das Plus holt sie zurueck.
+for _i in range(IDX["Kategorie"], IDX["Maße"] + 1):
+    _sp = ws.column_dimensions[get_column_letter(_i)]
+    _sp.outlineLevel = 1
+    _sp.hidden = True
+
+ws.freeze_panes = f"{get_column_letter(IDX['Beschreibung'])}3"
 ws.auto_filter.ref = f"A2:{get_column_letter(len(SPALTEN))}{Z1}"
 for name, formel in AUSWAHL.items():
     dv = DataValidation(type="list", formula1=formel, allow_blank=True, showDropDown=False)
@@ -473,8 +527,11 @@ for _name in FORMELN:
     for _r in range(Z0, Z1 + 1):
         ws.cell(row=_r, column=IDX[_name]).protection = Protection(locked=True)
 ws.protection.sheet = True
-for _erlaubt in ("autoFilter", "sort", "formatCells", "formatColumns", "formatRows", "selectLockedCells"):
+# Filtern ist erlaubt, Sortieren nicht: Excel ordnet beim Sortieren die Zeilen um,
+# laesst die Bilder aber stehen - danach stuende jedes Foto beim falschen Artikel.
+for _erlaubt in ("autoFilter", "formatCells", "formatColumns", "formatRows", "selectLockedCells"):
     setattr(ws.protection, _erlaubt, False)
+ws.protection.sort = True
 vu.protection.sheet = True          # reines Auswertungsblatt
 for _erlaubt in ("autoFilter", "sort", "selectLockedCells"):
     setattr(vu.protection, _erlaubt, False)

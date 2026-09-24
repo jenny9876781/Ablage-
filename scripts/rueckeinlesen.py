@@ -98,7 +98,7 @@ def einlesen(xlsx):
 
     sicherung = sichern(CSV_PFAD)
     with open(CSV_PFAD, "w", encoding="utf-8", newline="") as f:
-        w = csv.DictWriter(f, fieldnames=felder, delimiter=";")
+        w = csv.DictWriter(f, fieldnames=felder, delimiter=";", lineterminator="\n")
         w.writeheader(); w.writerows(alt)
 
     print(f"\nArtikel: {len(geaendert)} Feldänderungen · {len(ergaenzt)} neu · {len(entfallen)} auf „entfällt“")
@@ -128,7 +128,7 @@ def einlesen(xlsx):
                 z["Wert"] = werte[k]
         sichern(DESIGN_PFAD)
         with open(DESIGN_PFAD, "w", encoding="utf-8", newline="") as f:
-            w = csv.DictWriter(f, fieldnames=["Schluessel", "Wert", "Hinweis"], delimiter=";")
+            w = csv.DictWriter(f, fieldnames=["Schluessel", "Wert", "Hinweis"], delimiter=";", lineterminator="\n")
             w.writeheader(); w.writerows(zeilen)
         print(f"\nDesign: {len(d_geaendert)} Änderungen")
         for k, a, b in d_geaendert:

@@ -142,7 +142,7 @@ def umstellen(schreiben):
     stempel = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
     shutil.copy2(CSV_PFAD, f"{CSV_PFAD}.{stempel}.bak")
     with open(CSV_PFAD, "w", encoding="utf-8", newline="") as f:
-        w = csv.DictWriter(f, fieldnames=neue_felder, delimiter=";")
+        w = csv.DictWriter(f, fieldnames=neue_felder, delimiter=";", lineterminator="\n")
         w.writeheader(); w.writerows(ergebnis)
     print(f"\nGeschrieben. Sicherung: {CSV_PFAD}.{stempel}.bak")
 

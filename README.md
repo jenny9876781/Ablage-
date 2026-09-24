@@ -25,7 +25,7 @@ Klinik-Angebot ist ein reines Dokument ohne eigene Datenhaltung.
 | Artikelnummern | `<Raumcode>-NN`, z. B. `BE10-07` — Gebäude, Ebene, Raum, laufende Nummer |
 | Räume | 62 aus den Wohnflächenplänen; erfasst sind bisher 19 |
 | Positionen | 88 aktiv (55 auf „entfällt" gesetzt, Zeilen bleiben erhalten) |
-| Fotos | 111 (aus HEIC konvertiert, gedreht, verkleinert, ohne GPS-Daten) |
+| Fotos | 540 (aus HEIC konvertiert, gedreht, verkleinert, ohne GPS-Daten, Personen unkenntlich) |
 | Gesamtwert zu Einzelpreisen | 19.878,00 € netto (Schätzwerte) |
 | Paketpreis Vorschlag (−15 %) | 16.896,30 € netto |
 
@@ -52,7 +52,7 @@ Maße fehlen durchgängig – die Spalte `Maße` ist dafür vorbereitet.
 | `02_Angebot_Klinik.xlsx` | Angebot für die Klinik: Fotos, Preise netto und brutto, Spalten für Interesse, Stückzahl und Bemerkung mit automatischer Summe, Paketangebot mit 15 % Nachlass |
 | `katalog_import.json` | Artikel für den Webshop, wird in WordPress hochgeladen |
 | `kikripp-katalog.zip` | das WordPress-Plugin |
-| `kikripp-fotos.zip` | die 111 Fotos für die Mediathek |
+| `kikripp-fotos.zip` | die Fotos für die Mediathek, erzeugt von `build_fotopaket.py` |
 | `T1_Tuerschilder.docx` | Türschilder für 62 Räume, fünf je A4-Blatt |
 | `T2_Erfassungsblaetter.docx` | ein Erfassungsblatt je Raum für den Rundgang |
 | `T3_Erfassungsliste.xlsx` | dieselben Nummern zum Abtippen der Stückzahlen |

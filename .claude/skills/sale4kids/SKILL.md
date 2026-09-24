@@ -218,6 +218,7 @@ python3 scripts/make_signet.py                # nur wenn sich Farbe_Rot geänder
 python3 scripts/build_artikelstamm_xlsx.py
 python3 scripts/build_angebot_xlsx.py
 python3 scripts/build_katalog_import.py        # Importdatei für den Webshop
+python3 scripts/build_fotopaket.py             # Fotos für die Mediathek (kikripp-fotos.zip)
 python3 scripts/build_webkatalog.py            # + --geschuetzt PASSWORT für die Fassung zum Veröffentlichen
 python3 scripts/build_anleitungen_pdf.py       # nur wenn sich eine Anleitung geändert hat
 python3 scripts/build_erfassung.py             # nur wenn sich Räume oder erfasste Artikel geändert haben
@@ -460,9 +461,15 @@ schreibt alle Mails nach `/tmp/kikripp-mails.log`.
 ### Ausliefern
 
 ```bash
-cd wordpress && ./paketieren.sh          # ausgabe/kikripp-katalog.zip
-python3 scripts/build_unterlagen_docx.py # Aktennotiz, Datenschutz-Absatz, Knopf
+cd wordpress && ./paketieren.sh           # ausgabe/kikripp-katalog.zip
+python3 scripts/build_fotopaket.py        # ausgabe/kikripp-fotos.zip
+python3 scripts/build_unterlagen_docx.py  # Aktennotiz, Datenschutz-Absatz, Knopf
 ```
+
+> Das Fotopaket enthält **nur** die Bilder, auf die eine sichtbare Katalogposition zeigt,
+> plus die, die in einem Mengenhinweis als weitere Ansicht genannt sind. Es wird bei jedem
+> Livegang neu erzeugt — ein altes Paket lädt zu wenige Fotos hoch, und das Plugin meldet
+> dann „X Artikel ohne gefundenes Foto".
 
 Zusammen mit `ausgabe/katalog_import.json` schicken. Die Einrichtung steht in
 `WEBSHOP_EINRICHTEN.md` (als PDF: `A1`). Dazu gehören:

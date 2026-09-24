@@ -6,8 +6,8 @@ Verkäuferin ist und bleibt die Kikripp GmbH; die Hundeschule stellt ausschließ
 Speicherplatz. Das steht auch so im Katalog und in der Aktennotiz (`U1`).
 
 Du brauchst drei Dateien aus dem Ordner `ausgabe`: **kikripp-katalog.zip** (das Plugin),
-**kikripp-fotos.zip** (die Fotos) und **katalog_import.json** (die Artikel). Rechne mit einer
-knappen Stunde, das meiste davon ist Warten beim Hochladen der Fotos.
+**kikripp-fotos.zip** (die Fotos) und **katalog_import.json** (die Artikel). Rechne mit zwei
+Stunden, das meiste davon ist Warten beim Hochladen der Fotos.
 
 > **Wichtig zum Verständnis:** Der Katalog speichert auf der Hundeschul-Seite **keine Namen,
 > keine Mailadressen, keine Telefonnummern**. Die gehen ausschließlich per Mail an
@@ -24,9 +24,11 @@ Menüpunkt **Artikelkatalog**.
 ## 2. Fotos in die Mediathek
 
 Entpacke `kikripp-fotos.zip` auf deinem Rechner – du bekommst einen Ordner `fotos` mit
-111 Bildern (F-001.jpg bis F-112.jpg). Geh in WordPress auf **Medien → Datei hinzufügen**
-und zieh alle Bilder auf einmal in das Feld. Das dauert ein paar Minuten; lass das
-Browserfenster offen, bis alle durch sind.
+gut 400 Bildern (rund 80 MB). Geh in WordPress auf **Medien → Datei hinzufügen** und zieh
+die Bilder in das Feld — am besten in Paketen von hundert, nicht alle auf einmal. Das
+dauert; lass das Browserfenster offen, bis jedes Paket durch ist.
+
+Die genaue Zahl steht in der Meldung von `build_fotopaket.py`, das die Datei erzeugt.
 
 Wichtig: Die Dateinamen dürfen sich nicht ändern. Das Plugin findet die Fotos über den
 Namen. Lade sie deshalb bitte nur einmal hoch – lädst du dasselbe Bild zweimal hoch,
@@ -183,7 +185,7 @@ anzeigen?* auf **Nein** stellen. Dann ist es doppelt abgesichert.
 In deinem Dashboard steht, dass **Popup Maker keine Dateien im Cache-Ordner anlegen kann**.
 Das kann ein Eigenleben dieses Plugins sein, es kann aber auch heißen, dass der Webspace
 teilweise **nicht beschreibbar** ist. Dann scheitern sowohl der Plugin-Upload als auch die
-111 Fotos.
+Fotos.
 
 Deshalb der Reihe nach vorgehen:
 
@@ -193,7 +195,7 @@ Deshalb der Reihe nach vorgehen:
 3. Scheitert einer der beiden Schritte mit einer Rechte- oder Verzeichnismeldung, ist es ein
    Fall für den Hoster („Schreibrechte auf wp-content wiederherstellen").
 
-Teste das **bevor** du eine Stunde mit Fotos hochladen verbringst.
+Teste das **bevor** du Stunden mit Fotos hochladen verbringst.
 
 ### Was unkritisch ist
 
@@ -307,7 +309,7 @@ Damit auf der Hundeschul-Seite nichts zurückbleibt:
 2. **Artikelkatalog → Einstellungen → Testreservierungen löschen**, falls noch welche da sind.
 3. Die Katalogseite löschen.
 4. Das Plugin deaktivieren und löschen.
-5. Die 111 Fotos aus der Mediathek entfernen.
+5. Die Fotos aus der Mediathek entfernen.
 6. Den Absatz aus der Datenschutzerklärung wieder herausnehmen.
 7. Den Knopf auf kikripp.de entfernen.
 8. Enddatum in die Aktennotiz (`U1`) eintragen und ablegen.

@@ -17,7 +17,8 @@ STANDARD = os.path.join(AUSGABE, "01_Artikelstamm_kikripp.xlsx")
 # Spalten, die aus der Arbeitsmappe zurückwandern (Excel-Spalte -> CSV-Spalte)
 UEBERNEHMEN = ["Bezeichnung", "Beschreibung", "Kategorie", "Marke", "Bündel", "Weitere_ArtNr",
                "Raum", "Menge", "Einheit",
-               "Zustand", "Maße", "Wertklasse", "Aktiv", "Anlagennr", "Anschaffungswert_netto",
+               "Zustand", "Maße", "Wertklasse", "Aktiv", "Im_Katalog",
+               "Anlagennr", "Anschaffungswert_netto",
                "Preis_netto", "Preisbasis", "Versand", "Foto", "Status", "Kanal",
                "Reserviert_für", "Verkauft_Menge", "Verkaufspreis_netto", "Verkaufsdatum",
                "Käufer", "Rechnungsnr", "Zahlung", "Zahlart", "Abholtermin",

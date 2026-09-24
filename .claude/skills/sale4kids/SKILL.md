@@ -422,8 +422,9 @@ breites Seitenlayout, Cache leeren, Katalogseite von der JavaScript-Optimierung 
 ```bash
 php wordpress/tests/test-logik.php      # 87 Prüfungen gegen eine SQLite-Attrappe
 php wordpress/tests/test-kette.php      # ganze Kette mit der echten Importdatei
-python3 wordpress/tests/browsertest.py  # 53 Prüfungen im echten Chromium
-python3 scripts/pruefe_uebergabe.py     # die drei Dateien, die nach WordPress gehen
+python3 wordpress/tests/browsertest.py       # 53 Prüfungen im echten Chromium
+python3 wordpress/tests/browsertest_mobil.py # 16 Prüfungen in Telefonbreite (375 px)
+python3 scripts/pruefe_uebergabe.py          # die drei Dateien, die nach WordPress gehen
 ```
 
 `pruefe_uebergabe.py` schaut sich an, was beim Einspielen schiefgehen kann, bevor es

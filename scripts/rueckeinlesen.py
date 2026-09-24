@@ -136,8 +136,12 @@ def einlesen(xlsx):
 
     print(f"\nSicherung der alten Datenbasis: {sicherung}")
     print("Jetzt die Ausgabedateien neu erzeugen:")
-    print("   python3 scripts/build_artikelstamm_xlsx.py && python3 scripts/build_angebot_xlsx.py "
-          "&& python3 scripts/build_katalog_pdf.py && python3 scripts/build_webkatalog_mockup.py")
+    print("   python3 scripts/build_artikelstamm_xlsx.py")
+    print("   python3 scripts/build_angebot_xlsx.py")
+    print("   python3 scripts/build_katalog_import.py")
+    print("   python3 scripts/build_fotopaket.py")
+    print("   python3 scripts/build_webkatalog.py")
+    print("   python3 scripts/pruefen.py")
 
 
 if __name__ == "__main__":

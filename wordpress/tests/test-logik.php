@@ -228,5 +228,26 @@ pruefe('Parametername ist nicht der einzelne Buchstabe k',
 $_COOKIE = [];
 pruefe('ohne Keks kein Zugang', Kikripp_Zugang::hat_zugang(), false);
 
+// -----------------------------------------------------------------------------
+// Fotos aus der Mediathek: Der Import findet ein Bild ueber den Dateinamen.
+// Ein falscher Schluessel bedeutet: kein einziger Artikel hat ein Bild.
+// -----------------------------------------------------------------------------
+titel('Zuordnung der Fotos aus der Mediathek');
+require_once __DIR__ . '/../kikripp-katalog/includes/class-kikripp-admin.php';
+function schluessel($n) { $r = Kikripp_Admin::bild_schluessel($n); return $r[0]; }
+function ist_genau($n) { $r = Kikripp_Admin::bild_schluessel($n); return $r[1]; }
+
+pruefe('F-001.jpg behaelt seine Nummer',      schluessel('F-001.jpg'), 'F-001');
+pruefe('dreistellige Nummer bleibt ganz',     schluessel('F-540.jpg'), 'F-540');
+pruefe('vierstellige Nummer bleibt ganz',     schluessel('F-1024.jpg'), 'F-1024');
+pruefe('Kleinschreibung wird angeglichen',    schluessel('f-007.JPEG'), 'F-007');
+pruefe('Pfad davor stoert nicht',             schluessel('2026/09/F-123.jpg'), 'F-123');
+pruefe('WordPress-Zusatz -1 faellt weg',      schluessel('F-001-1.jpg'), 'F-001');
+pruefe('auch -12 faellt weg',                 schluessel('F-001-12.jpg'), 'F-001');
+pruefe('fremder Dateiname bleibt unberuehrt', schluessel('logo-2024.png'), 'LOGO-2024');
+pruefe('leerer Name ergibt leeren Schluessel', schluessel(''), '');
+pruefe('genaue Datei ist als genau erkannt',  ist_genau('F-001.jpg'), true);
+pruefe('Datei mit Zusatz ist nicht genau',    ist_genau('F-001-1.jpg'), false);
+
 printf("\n== Ergebnis: %d Prüfungen, %d Fehler ==\n", $geprueft, $fehler);
 exit($fehler > 0 ? 1 : 0);

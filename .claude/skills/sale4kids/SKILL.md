@@ -420,10 +420,20 @@ breites Seitenlayout, Cache leeren, Katalogseite von der JavaScript-Optimierung 
 ### Prüfen
 
 ```bash
-php wordpress/tests/test-logik.php     # 76 Prüfungen gegen eine SQLite-Attrappe
-php wordpress/tests/test-kette.php     # ganze Kette mit der echten Importdatei
-python3 wordpress/tests/browsertest.py # 53 Prüfungen im echten Chromium
+php wordpress/tests/test-logik.php      # 87 Prüfungen gegen eine SQLite-Attrappe
+php wordpress/tests/test-kette.php      # ganze Kette mit der echten Importdatei
+python3 wordpress/tests/browsertest.py  # 53 Prüfungen im echten Chromium
+python3 scripts/pruefe_uebergabe.py     # die drei Dateien, die nach WordPress gehen
 ```
+
+`pruefe_uebergabe.py` schaut sich an, was beim Einspielen schiefgehen kann, bevor es
+jemand im Browser merkt: Aufbau der beiden ZIP-Dateien, PHP-Syntax jeder Plugin-Datei,
+Lesbarkeit jedes Fotos, Vollständigkeit der Felder in `katalog_import.json` — und es
+stellt die Zuordnung Foto → Mediathek nach, die `Kikripp_Admin::bild_schluessel()`
+vornimmt. Genau dort steckte bis zum 24.09.2026 ein Fehler: `preg_replace('/-\d+$/', …)`
+sollte den Zusatz `-1` abschneiden, den WordPress bei Namensgleichheit anhängt, hat aber
+aus `F-540` ein `F` gemacht. Damit landeten alle Fotos unter demselben Schlüssel und
+**kein einziger Artikel** hätte ein Bild bekommen.
 
 Deckt ab: Teil- und Vollreservierung, Überbuchung, Preiseinfrieren, Stornieren, Ablauf und
 Verlängerung, Bezahltsetzen, Mailversand samt Fehlerfall, Testdaten löschen, ungültige

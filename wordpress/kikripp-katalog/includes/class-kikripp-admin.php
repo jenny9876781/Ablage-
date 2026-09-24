@@ -334,6 +334,25 @@ class Kikripp_Admin {
     }
 
     /** Foto in der Mediathek anhand des Dateinamens finden (F-001 -> Anhang). */
+    /**
+     * Schlüssel, unter dem ein Bild aus der Mediathek gefunden wird.
+     *
+     * Aus "F-001.jpg" wird "F-001". Lädt jemand dasselbe Bild ein zweites Mal hoch,
+     * legt WordPress es als "F-001-1.jpg" ab - dieser Zusatz wird abgeschnitten,
+     * damit das Foto trotzdem gefunden wird. Die Nummer des Fotos selbst darf dabei
+     * nicht verlorengehen: "F-540" ist der Name, nicht "F" mit dem Zusatz "-540".
+     *
+     * Zweiter Rückgabewert: ob der Dateiname der genaue ist (ohne WordPress-Zusatz).
+     * Bei Namensgleichheit gewinnt die genaue Datei.
+     */
+    public static function bild_schluessel($dateiname) {
+        $datei = basename(trim((string) $dateiname));
+        $name  = strtoupper(preg_replace('/\.[a-zA-Z0-9]+$/', '', $datei));
+        if ($name === '') { return ['', false]; }
+        if (preg_match('/^(F-\d{3,})-\d+$/', $name, $t)) { return [$t[1], false]; }
+        return [$name, true];
+    }
+
     private static function bild_url($fotoname) {
         $fotoname = trim($fotoname);
         if ($fotoname === '') { return ''; }
@@ -348,10 +367,10 @@ class Kikripp_Admin {
                 'fields'         => 'ids',
             ]);
             foreach ($anhaenge as $id) {
-                $datei = basename((string) get_post_meta($id, '_wp_attached_file', true));
-                $basis = strtoupper(preg_replace('/\.[a-zA-Z0-9]+$/', '', $datei));
-                $basis = preg_replace('/-\d+$/', '', $basis);   // WordPress hängt bei Namensgleichheit -1 an
-                if ($basis !== '' && !isset($karte[$basis])) {
+                list($basis, $genau) = self::bild_schluessel(
+                    (string) get_post_meta($id, '_wp_attached_file', true));
+                if ($basis === '') { continue; }
+                if ($genau || !isset($karte[$basis])) {
                     $karte[$basis] = wp_get_attachment_url($id);
                 }
             }

@@ -1160,9 +1160,9 @@
   "im_katalog": true
  },
  {
-  "nr": "K-038",
-  "titel": "Konsolentisch schwarz mit Glasplatte",
-  "beschr": "Metallrahmen schwarz, Glasablagen",
+  "nr": "BE10-09",
+  "titel": "Konsolentisch schwarz mit Glasablagen",
+  "beschr": "Schmaler Konsolentisch mit schwarzem Metallrahmen und zwei Ablagen aus Glas.",
   "kat": "Möbel",
   "raum": "Büro / Besprechung",
   "zustand": "gut",
@@ -1176,7 +1176,7 @@
   "buendel": "",
   "foto": "F-024",
   "sortierung": 58,
-  "aktiv": false,
+  "aktiv": true,
   "im_katalog": true
  },
  {
@@ -1200,9 +1200,9 @@
   "im_katalog": true
  },
  {
-  "nr": "K-041",
+  "nr": "BE10-10",
   "titel": "Kommode Holz, antik",
-  "beschr": "Alte Holzkommode/Sekretär, dunkel",
+  "beschr": "Alte Holzkommode beziehungsweise Sekretär in dunklem Holz. Die linke Tür schließt nicht mehr; der übrige Zustand ist gut.",
   "kat": "Möbel",
   "raum": "Büro / Besprechung",
   "zustand": "gebraucht",
@@ -1216,7 +1216,7 @@
   "buendel": "",
   "foto": "F-025",
   "sortierung": 60,
-  "aktiv": false,
+  "aktiv": true,
   "im_katalog": true
  },
  {
@@ -1240,9 +1240,9 @@
   "im_katalog": true
  },
  {
-  "nr": "K-045",
+  "nr": "BE10-11",
   "titel": "Bürodrehstuhl weiß",
-  "beschr": "Drehstuhl auf Rollen, weiß",
+  "beschr": "Bürodrehstuhl in Weiß auf fünf Rollen, Sitzhöhe verstellbar.",
   "kat": "Büro",
   "raum": "Büro / Besprechung",
   "zustand": "gebraucht",
@@ -1256,13 +1256,13 @@
   "buendel": "",
   "foto": "F-027",
   "sortierung": 62,
-  "aktiv": false,
+  "aktiv": true,
   "im_katalog": true
  },
  {
-  "nr": "K-046",
+  "nr": "BE10-12",
   "titel": "Aktenschrank weiß",
-  "beschr": "Büroschrank weiß, mit Türen",
+  "beschr": "Büroschrank in Weiß mit Türen und Einlegeböden.",
   "kat": "Büro",
   "raum": "Büro / Besprechung",
   "zustand": "gut",
@@ -1276,7 +1276,7 @@
   "buendel": "",
   "foto": "F-027",
   "sortierung": 63,
-  "aktiv": false,
+  "aktiv": true,
   "im_katalog": true
  },
  {

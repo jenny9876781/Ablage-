@@ -35,7 +35,10 @@ if ohne_preis: W(f"{len(ohne_preis)} Positionen ohne Preis: {ohne_preis[:8]}")
 else:          OK("alle aktiven Positionen haben einen Preis")
 ohne_mass = [a["ArtNr"] for a in aktiv if not a.get("Maße")]
 if ohne_mass: W(f"{len(ohne_mass)} Positionen ohne Maßangabe")
-nachzaehlen = [a["ArtNr"] for a in aktiv if "nachzählen" in (a.get("Mengenhinweis") or "")]
+# Seit die internen Notizen in der Bemerkung stehen, muss dort mitgesucht werden -
+# sonst verschwindet eine offene Stueckzahl still aus der Prüfung.
+nachzaehlen = [a["ArtNr"] for a in aktiv
+               if "nachzählen" in ((a.get("Mengenhinweis") or "") + (a.get("Bemerkung") or ""))]
 if nachzaehlen: W(f"{len(nachzaehlen)} Positionen mit offener Stückzahl")
 
 # Eine Ware, die nicht mehr im Haus steht (Aktiv = nein), darf nicht zugleich für den
@@ -163,76 +166,9 @@ else:
     if text_in_zahl: F(f"Text in Zahlenspalten (Formeln rechnen nicht): {text_in_zahl[:5]}")
     else: OK("alle Geld- und Mengenfelder sind Zahlen")
 
-print("\n== 3b. Klinik-Angebot ==")
-_mk = {(a.get("Klinik_Markierung") or "").strip().lower() for a in alle}
-if _mk - {"", "ja", "nein"}:
-    F(f"unerlaubte Werte in Klinik_Markierung: {sorted(_mk - {chr(0)*0, 'ja', 'nein'})}")
-else:
-    OK("Klinik_Markierung enthält nur ja/nein/leer")
-_markiert = {a["ArtNr"] for a in aktiv if (a.get("Klinik_Markierung") or "").lower() == "ja"}
-
-_ang = os.path.join(AUSGABE, "02_Angebot_Klinik.xlsx")
-if not os.path.exists(_ang):
-    F("02_Angebot_Klinik.xlsx fehlt")
-else:
-    from openpyxl.utils import get_column_letter as _GL
-    _wb = load_workbook(_ang)
-    _ws = _wb.active
-    _K = 7
-    _sp = {_ws.cell(row=_K, column=c).value: c for c in range(1, _ws.max_column + 1)}
-    def _L(n): return _GL(_sp[n])
-    _pflicht = ["Einzelpreis netto", "Einzelpreis brutto", "Interesse", "Stückzahl",
-                "Ihre Bemerkung", "Wert netto"]
-    _fehlt = [s for s in _pflicht if s not in _sp]
-    if _fehlt:
-        F(f"Spalten fehlen im Angebot: {', '.join(_fehlt)}")
-    else:
-        OK("alle Eingabe- und Preisspalten vorhanden")
-        _z0 = _K + 1
-        _z1 = _z0 + len(aktiv) - 1
-        _schief = []
-        for _i, _a in enumerate(aktiv):
-            _r = _z0 + _i
-            if _ws.cell(row=_r, column=_sp["Einzelpreis brutto"]).value \
-               != f'={_L("Einzelpreis netto")}{_r}*{1 + USt_SATZ}':
-                _schief.append(f"Z{_r} brutto")
-            _soll = (f'=IF({_L("Interesse")}{_r}<>"ja","",'
-                     f'IF({_L("Stückzahl")}{_r}="",{_L("Verfügbar")}{_r},{_L("Stückzahl")}{_r})'
-                     f'*{_L("Einzelpreis netto")}{_r})')
-            if _ws.cell(row=_r, column=_sp["Wert netto"]).value != _soll:
-                _schief.append(f"Z{_r} Wert")
-        if _schief:
-            F(f"Formeln weichen ab: {', '.join(_schief[:5])}")
-        else:
-            OK(f"Brutto- und Wertformeln in allen {len(aktiv)} Zeilen korrekt")
-
-        _ist = set()
-        for _i, _a in enumerate(aktiv):
-            _f = _ws.cell(row=_z0 + _i, column=_sp["Artikel"]).fill
-            if _f and _f.fgColor and _f.fgColor.rgb and "D6E3F0" in str(_f.fgColor.rgb):
-                _ist.add(_a["ArtNr"])
-        if _ist != _markiert:
-            F(f"Markierung weicht ab – fehlt {sorted(_markiert - _ist)}, "
-              f"zuviel {sorted(_ist - _markiert)}")
-        else:
-            OK(f"{len(_markiert)} markierte Zeilen stimmen mit der Datenbasis")
-
-        if len(_ws.data_validations.dataValidation) != 2:
-            F(f"erwartet 2 Eingabeprüfungen, gefunden {len(_ws.data_validations.dataValidation)}")
-        else:
-            OK("Eingabeprüfung für Interesse und Stückzahl vorhanden")
-
-    import zipfile as _zf
-    _z = _zf.ZipFile(_ang)
-    _kaputt = _z.testzip()
-    if _kaputt:
-        F(f"beschädigtes eingebettetes Bild: {_kaputt}")
-    else:
-        OK(f"{sum(1 for n in _z.namelist() if n.startswith('xl/media/'))} eingebettete Bilder, alle lesbar")
-
 print("\n== 4. Ausgabedateien ==")
 # Der PDF-Katalog ist entfallen; der Webkatalog auf kikripp.de hat ihn abgelöst.
-for name, mindest in (("01_Artikelstamm_kikripp.xlsx", 20), ("02_Angebot_Klinik.xlsx", 500),
+for name, mindest in (("01_Artikelstamm_kikripp.xlsx", 20),
                       ("04_Webkatalog_MOCKUP.html", 500), ("06_Webkatalog_geschuetzt.html", 500),
                       ("katalog_import.json", 10),
                       ("A1_Webshop_einrichten.pdf", 20), ("A2_Artikel_verwalten.pdf", 20),

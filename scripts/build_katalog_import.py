@@ -23,6 +23,10 @@ def main():
             "versand":    a["Versand"],
             "marke":      a.get("Marke", ""),
             "buendel":    a.get("Bündel", ""),
+            # Der Mengenhinweis erscheint im Katalog unter der Beschreibung. Er sagt,
+            # was nicht dabei ist und wie sich die Stückzahl verteilt - genau das, was
+            # sonst erst beim Abholen auffällt.
+            "mengenhinweis": a.get("Mengenhinweis", ""),
             "foto":       a["Foto"],
             "sortierung": i,
             "aktiv":      (a.get("Aktiv") or "ja").lower() == "ja",

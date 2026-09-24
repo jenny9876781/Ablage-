@@ -73,6 +73,23 @@ braucht es nicht mehr.
 
 ---
 
+### Raumname im Katalog ≠ Raumbezeichnung im Haus
+
+Seit dem 24.09.2026 zeigt der Katalog **Funktionsnamen ohne Geschoss**: „Gruppenraum",
+„Schlafraum", „Flur", „Küche". Mehrere Räume dürfen denselben Namen tragen — das
+Auswahlfeld „Alle Räume" baut sich aus den *verschiedenen* Namen und bündelt sie dann
+zu einem Eintrag. Aus 36 Einträgen wurden so 24, und ein Käufer sucht ohnehin nach
+„Sachen aus einem Gruppenraum", nicht nach „Gruppenraum 5 im Neubau-Untergeschoss".
+
+Zugeordnet wird über den **Raumcode**, der in jeder Artikelnummer steckt. Der Code ist
+die Arbeitsebene, der Name die Außenwirkung. Wer einen Raum umbenennt, ändert
+`daten/raeume.csv` **und** die Spalte `Raum` in jeder Artikelzeile — `pruefen.py`
+prüft, dass beide zusammenpassen.
+
+Nicht in den Katalog gehören: interne Nummerierungen („Gruppenraum 5"), Bauwörter
+(„Attika") und Bezeichnungen, die nach außen schief wirken („Klassenzimmer" in einer
+Kinderkrippe → „Lernraum").
+
 ## 2. Ablauf A — neue Fotos erfassen
 
 ### A1. Fotos aufbereiten
@@ -149,6 +166,13 @@ Spalten und Konventionen:
 | `Klinik_Markierung` | `ja` färbt die Zeile im Klinik-Angebot hellblau ein (`D6E3F0`). Ohne Bedeutung im System — die Nutzerin markiert damit Positionen für sich. |
 | übrige Verkaufsspalten | leer |
 
+> **`Mengenhinweis` ist Käufertext, `Bemerkung` ist Arbeitsnotiz.** Seit dem 24.09.2026
+> erscheint der Mengenhinweis im Katalog unter der Beschreibung. Dort gehört hinein, was
+> ein Käufer wissen muss: was **nicht** dabei ist, dass ein Foto nur eines von mehreren
+> Stücken zeigt, wie sich die Stückzahl verteilt, wer abbaut. Nicht hinein gehören
+> Fotonummern, Post-it-Nummern und Notizen an uns („bitte nachzählen") — die stehen in
+> der `Bemerkung`, die nirgends veröffentlicht wird.
+
 ### A4. Preise schätzen
 
 Netto, konservativ, in realistischen Stufen. Anhaltspunkt: gebrauchte Möbel 10–30 % vom
@@ -216,7 +240,6 @@ Danach immer Ablauf C.
 ```bash
 python3 scripts/make_signet.py                # nur wenn sich Farbe_Rot geändert hat
 python3 scripts/build_artikelstamm_xlsx.py
-python3 scripts/build_angebot_xlsx.py
 python3 scripts/build_katalog_import.py        # Importdatei für den Webshop
 python3 scripts/build_fotopaket.py             # Fotos für die Mediathek (kikripp-fotos.zip)
 python3 scripts/build_webkatalog.py            # + --geschuetzt PASSWORT für die Fassung zum Veröffentlichen
@@ -507,57 +530,19 @@ https://claude.ai/artifact/HdDGxJMQAWQ96Sy6z6Po4d. **Sobald der Webshop live ist
 nicht mehr gepflegt** — sie kennt keine Reservierungen und würde veraltete Bestände zeigen.
 `04_Webkatalog_MOCKUP.html` bleibt als Datei zum Offline-Weiterleiten.
 
-## 8b. Das Klinik-Angebot
+## 8b. Das Klinik-Angebot — ruht
 
-**Reihenfolge, seit 17.09.2026:** Die Klinik geht **zuerst**, der Webkatalog erst danach online.
-Mediclin hat Vorrang. Damit ist das alte Problem der zwei Reservierungswege entschärft — sie
-laufen nicht mehr gleichzeitig.
+Die Nutzerin hat das Angebot an Mediclin am 22.09.2026 zurückgestellt und am 24.09.2026
+entschieden, die Klinik-Spalte aus dem Artikelstamm zu nehmen. Seitdem gilt:
 
-> **Der entscheidende Übergabeschritt:** Was die Klinik nimmt, muss **vor** dem Livegang des
-> Webkatalogs aus dem Katalog verschwinden — `Im_Katalog = nein` oder als verkauft eintragen,
-> dann `build_katalog_import.py` und importieren. Sonst wird dasselbe Stück zweimal angeboten.
-
-Die Klinik trägt selbst ein, in drei grau hinterlegten Spalten:
-
-| Spalte | Verhalten |
-|---|---|
-| `Interesse` | Auswahlliste ja/nein, mit Eingabeprüfung |
-| `Stückzahl` | ganze Zahl > 0, **leer = volle verfügbare Menge** |
-| `Ihre Bemerkung` | freier Text |
-| `Wert netto` | rechnet selbst: `=IF(Interesse<>"ja","", IF(Stückzahl="",Verfügbar,Stückzahl)*Einzelpreis)` |
-
-Zeilen mit „ja" färben sich über eine bedingte Formatierung grünlich ein.
-
-**Die Sprache ist Absicht:** „Interesse" und „Wert Ihrer Auswahl", nicht „Wunschmenge" und
-nicht „Reservierung". Im Hinweiskasten und in den Verkaufsbedingungen steht ausdrücklich, dass
-die Eintragungen eine **Interessenbekundung** sind und die Zuteilung erst mit schriftlicher
-Bestätigung verbindlich wird. Das nicht verwässern — sonst entsteht ein Anspruch auf Ware, die
-parallel online weggehen könnte.
-
-Aufbau der Summen: **A · Ihre Auswahl** (leer, solange nichts eingetragen ist) · **B ·
-Gesamtbestand** · **C · Paketangebot** mit dem Nachlass aus `daten/design.csv`
-(`Paketrabatt_Prozent`, seit 17.09. **15 %**). C rechnet auf B, B auf den Zeilen — jede Zahl
-steht nur einmal in der Datei.
-
-Preise stehen **netto und brutto** je Position. Netto führt (die Klinik ist ein Unternehmen),
-brutto steht daneben in Grau.
-
-`pruefen.py` prüft das alles bei jedem Lauf: Spalten vorhanden, Brutto- und Wertformeln in
-jeder Zeile, Markierung deckungsgleich mit der Datenbasis, beide Eingabeprüfungen da, und
-**keine beschädigten eingebetteten Bilder**.
-
-> Eine von der Nutzerin zurückgeschickte Fassung hatte zwei **defekte Bilddateien**
-> (`Bad CRC-32`), wodurch vier Positionen ohne Bild dastanden. Meine erzeugte Fassung war
-> sauber — der Schaden entsteht unterwegs (Download, Excel-Speichern, Cloud-Abgleich). Bei
-> „Bild fehlt" also immer zuerst `zipfile.ZipFile(...).testzip()` laufen lassen, bevor man in
-> den Daten sucht.
-
-> **Das Klinik-Angebot ist eine erzeugte Datei.** Hand-Markierungen darin überleben keinen
-> Neuaufbau. Deshalb lebt die Markierung in `Klinik_Markierung` in der Datenbasis. Wenn die
-> Nutzerin von Hand färbt, die Farben auslesen (bei beschädigten Dateien direkt aus
-> `xl/worksheets/sheet1.xml` plus `xl/styles.xml`) und in die Spalte übertragen.
-
----
+* `scripts/build_angebot_xlsx.py` bleibt liegen und wird **nicht mehr in Ablauf C
+  aufgerufen**; `ausgabe/02_Angebot_Klinik.xlsx` ist gelöscht, `pruefen.py` prüft es
+  nicht mehr.
+* Die Spalte `Klinik_Markierung` steht weiter in der Datenbasis, erscheint aber weder
+  in der Arbeitsmappe noch beim Zurücklesen.
+* Wird die Klinik wieder aktuell, gilt die alte Reihenfolge erneut: **erst die Klinik,
+  dann der Webkatalog**, und was die Klinik nimmt, muss vor dem Livegang auf
+  `Im_Katalog = nein` stehen. Sonst wird dasselbe Stück zweimal angeboten.
 
 ## 9. Offene Punkte (Stand 22.09.2026)
 

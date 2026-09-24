@@ -81,6 +81,9 @@
 .kikripp .txt { padding: 12px 14px 14px; display: flex; flex-direction: column; flex: 1; }
 .kikripp .txt h3 { margin: 0 0 4px; font-size: 15px; font-weight: 600; line-height: 1.3; }
 .kikripp .txt .b { font-size: 13px; color: var(--grau); margin: 0 0 10px; line-height: 1.4; }
+/* Mengenhinweis: was dazugehoert, was nicht, wie sich die Stueckzahl verteilt. */
+.kikripp .txt .hw { font-size: 12.5px; color: var(--schwarz); margin: 0 0 10px; line-height: 1.45;
+                    border-left: 2px solid var(--linie); padding-left: 9px; }
 .kikripp .meta { font-size: 12px; color: var(--grau); display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 11px; }
 .kikripp .meta span { background: var(--papier); padding: 3px 8px; border-radius: 2px; }
 .kikripp .meta span.knapp { background: #fde8ea; color: #8d1220; }
@@ -128,5 +131,19 @@
 .kikripp .recht { border-top: 1px solid var(--linie); margin: 26px 0 90px; padding-top: 16px; font-size: 12.5px; line-height: 1.65; color: var(--grau); }
 .kikripp .recht h4 { margin: 0 0 6px; font-size: 13px; font-weight: 700; color: var(--schwarz); text-transform: uppercase; letter-spacing: .06em; }
 .kikripp .recht p { margin: 0 0 6px; }
-@media (max-width: 560px) { .kikripp .leiste .sum { flex: 1 1 100%; } }
+/* Telefon: Auf 375 px fuellten Kopf, Filterzeile und Leiste zusammen den ganzen
+   Bildschirm - von der ersten Artikelkarte blieb ein Streifen. Deshalb hier die
+   Filterzeile auf drei statt fuenf Reihen und eine Leiste, die erst Knoepfe zeigt,
+   wenn wirklich etwas vorgemerkt ist. */
+@media (max-width: 560px) {
+  .kikripp .leiste .sum { flex: 1 1 100%; }
+  .kikripp .leiste.leer { padding: 10px 14px; }
+  .kikripp .leiste.leer button { display: none; }
+  .kikripp .leiste.leer .sum { font-size: 13px; }
+  .kikripp input[type=search] { flex: 1 1 100%; }
+  .kikripp select { flex: 1 1 calc(50% - 4px); min-width: 0; }
+  .kikripp .chk { flex: 1 1 calc(50% - 4px); font-size: 13px; white-space: normal; }
+  .kikripp .filter { padding: 10px 0 9px; }
+  .kikripp .zaehler { padding-top: 7px; }
+}
 @media (prefers-reduced-motion: reduce) { .kikripp * { animation: none !important; transition: none !important; } }

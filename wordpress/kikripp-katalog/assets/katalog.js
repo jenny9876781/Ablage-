@@ -214,6 +214,7 @@
         (a.marke ? '<span class="markenschild">' + sicher(a.marke) + '</span>' : '') + '</div>' +
       '<div class="txt"><h3>' + sicher(a.titel) + '</h3>' +
       '<p class="b">' + sicher(a.beschr) + '</p>' +
+      (a.mengenhinweis ? '<p class="hw">' + sicher(a.mengenhinweis) + '</p>' : '') +
       '<div class="meta">' +
         '<span>Zustand: ' + sicher(a.zustand) + '</span>' +
         '<span' + knapp + '>' + mengeText + '</span>' +
@@ -271,6 +272,9 @@
       ? stueck + ' Stück vorgemerkt · <b>' + eur(netto * (1 + UST)) + '</b> <span style="opacity:.8">inkl. USt</span>'
       : 'Noch nichts vorgemerkt – Stückzahl eintragen und auf „reservieren“ klicken.';
     el('k-anfragen').disabled = stueck === 0;
+    // Ohne Auswahl braucht die Leiste auf dem Telefon keine Knoepfe (siehe katalog.css).
+    var l = wurzel.querySelector('.leiste');
+    if (l) { l.className = stueck ? 'leiste' : 'leiste leer'; }
   }
 
   // ------------------------------------------------------------------ Formular

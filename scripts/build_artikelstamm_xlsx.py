@@ -7,7 +7,7 @@ from openpyxl.drawing.image import Image as XLImage
 from PIL import Image as PILImage
 
 from openpyxl import Workbook
-from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
+from openpyxl.styles import Font, PatternFill, Alignment, Border, Side, Protection
 from openpyxl.utils import get_column_letter
 from openpyxl.worksheet.datavalidation import DataValidation
 from openpyxl.formatting.rule import CellIsRule
@@ -18,17 +18,19 @@ duenn = Side(style="thin", color=LINIE)
 RAHMEN = Border(left=duenn, right=duenn, top=duenn, bottom=duenn)
 
 # (Überschrift, Breite, Gruppe, Typ)  Typ: text|int|eur|formel
+# Die ersten fuenf Spalten bleiben beim Scrollen stehen (Fixierung ab F). Sie sind
+# deshalb bewusst schmal und beantworten die Frage "welche Zeile ist das gerade?":
+# Nummer, Raum, Bezeichnung, Menge. Die breite Beschreibung steht danach und scrollt mit.
 SPALTEN = [
     ("ArtNr",                  10, "Stammdaten",   "text"),
-    ("Alt_ArtNr",              10, "Stammdaten",   "text"),
-    ("Weitere_ArtNr",          14, "Stammdaten",   "text"),
     ("Raumcode",               10, "Stammdaten",   "text"),
+    ("Raum",                   20, "Stammdaten",   "text"),
     ("Bezeichnung",            34, "Stammdaten",   "text"),
+    ("Menge",                   8, "Stammdaten",   "int"),
     ("Beschreibung",           54, "Stammdaten",   "text"),
     ("Kategorie",              18, "Stammdaten",   "text"),
-    ("Raum",                   20, "Stammdaten",   "text"),
+    ("Weitere_ArtNr",          14, "Stammdaten",   "text"),
     ("Wertklasse",             10, "Stammdaten",   "text"),
-    ("Menge",                   8, "Stammdaten",   "int"),
     ("Verkauft_Menge",         13, "Stammdaten",   "int"),
     ("Restmenge",              10, "Stammdaten",   "formel"),
     ("Einheit",                10, "Stammdaten",   "text"),
@@ -43,7 +45,6 @@ SPALTEN = [
     ("Versand",                16, "Vermarktung",  "text"),
     ("Foto",                   9,  "Vermarktung",  "text"),
     ("Im_Katalog",             12, "Vermarktung",  "text"),
-    ("Klinik_Markierung",      18, "Vermarktung",  "text"),
     ("Status",                 12, "Vermarktung",  "text"),
     ("Marke",                  14, "Vermarktung",  "text"),
     ("Bündel",                 14, "Vermarktung",  "text"),
@@ -66,7 +67,7 @@ GRUPPENFARBE = {"Stammdaten": SCHWARZ, "Buchhaltung": "595959", "Preis": ROT,
 IDX = {s[0]: i + 1 for i, s in enumerate(SPALTEN)}
 def L(n): return get_column_letter(IDX[n])
 
-PFLEGE = {"Menge", "Verkauft_Menge", "Maße", "Aktiv", "Im_Katalog", "Klinik_Markierung",
+PFLEGE = {"Menge", "Verkauft_Menge", "Maße", "Aktiv", "Im_Katalog",
           "Anlagennr", "Anschaffungswert_netto", "Preis_netto",
           "Preisbasis", "Marke", "Bündel", "Status", "Kanal", "Reserviert_für", "Verkaufspreis_netto",
           "Verkaufsdatum", "Käufer", "Rechnungsnr", "Zahlung", "Zahlart", "Abholtermin", "Bemerkung"}
@@ -75,7 +76,6 @@ AUSWAHL = {
     "Wertklasse": '"A,B,C"',
     "Aktiv":      '"ja,entfällt"',
     "Im_Katalog": '"ja,nein"',
-    "Klinik_Markierung": '"ja,nein"',
     "Einheit":    '"Stück,Karton,Set,Palette,Konvolut"',
     "Zustand":    '"neuwertig,gut,gebraucht,stark gebraucht,defekt"',
     "Preisbasis": '"Fix,VHB"',
@@ -119,7 +119,7 @@ an.row_dimensions[2].height = 28
 an["A2"].alignment = Alignment(wrap_text=True, vertical="center")
 
 TEXTE = [
-    ("Die vier Blätter", ""),
+    ("Die Blätter", ""),
     ("  Artikelstamm", "Alle Artikel. Hier wird gepflegt. Grau hinterlegte Spalten sind die Felder zum Ausfüllen, alles andere rechnet sich selbst oder bleibt stehen."),
     ("  Verkaufsübersicht", "Reines Auswertungsblatt. Umsatz, offene Rechnungen, Restbestand – rechnet automatisch. Hier nichts eintragen."),
     ("  Rechnungen (DATEV)", "Abtippliste: je Zeile eine Rechnung, in der Reihenfolge der DATEV-Erfassungsmaske. Ausdrucken und abarbeiten."),
@@ -134,9 +134,16 @@ TEXTE = [
     ("  Barzahlung", "Immer zusätzlich im Blatt „Kasse“ erfassen. Die Rechnung mit dem Vermerk „bar erhalten“ allein genügt bei einer GmbH nicht."),
     ("  Anlagennummer", "Wenn bekannt eintragen – der Steuerberater braucht sie für den Anlagenabgang."),
     ("", ""),
-    ("Hinweise zu den Preisen", "Alle Preise in dieser Datei sind Schätzwerte auf Basis der Fotos. Maße, Marken und Stückzahlen fehlen teilweise – die gelb markierten Spalten „Maße“ und „Preis_netto“ sind zur Überarbeitung gedacht."),
-    ("Designmöbel", "Vitra Alcove und USM Haller sind als solche vermerkt. Für beide gibt es einen eigenen Gebrauchtmarkt mit Fachhändlern – dort sind höhere Preise erzielbar als im Sammelangebot."),
+    ("Hinweise zu den Preisen", "Alle Preise in dieser Datei sind Schätzwerte auf Basis der Fotos. Sie sind zur Überarbeitung gedacht."),
+    ("Markenware", "Vitra, Stokke, USM Haller und Kartell sind dort vermerkt, wo die Marke am Stück belegt ist. Für diese Stücke gibt es einen eigenen Gebrauchtmarkt mit Fachhändlern – dort sind höhere Preise erzielbar als im Sammelangebot."),
     ("Kunst", "Die Acrylbilder sind Eigenarbeiten einer Privatperson, die Schwarzwald-Trachtenmotive sind Kaufware. Beides ist in der Beschreibung vermerkt."),
+    ("", ""),
+    ("Für die Prüfrunde", ""),
+    ("  Was angefasst wird", "Nur vier Spalten: Preis_netto, Anlagennr, Anschaffungswert_netto und – falls etwas gar nicht angeboten werden soll – Im_Katalog auf „nein“. Alles andere kann so bleiben."),
+    ("  Was man lassen sollte", "Keine Zeilen löschen. Eine fehlende Zeile wird beim Einlesen als „entfällt“ gewertet und verschwindet aus dem Katalog. Soll etwas raus, bitte Aktiv auf „entfällt“ setzen."),
+    ("  Sortieren ist erlaubt", "Jede Zeile wird über die Artikelnummer wiedergefunden, nicht über ihre Position. Filtern und Sortieren ändert nichts."),
+    ("  Zugeklappte Spalten", "Rechts sind die Verkaufsspalten als Gruppe zugeklappt – sie werden erst gebraucht, wenn wirklich verkauft wird. Das Plus über der Spaltenleiste klappt sie auf."),
+    ("  Formeln", "Restmenge, Positionswert und Umsatz rechnen sich selbst und sind gegen Überschreiben geschützt."),
 ]
 r = 4
 for a, b in TEXTE:
@@ -199,7 +206,18 @@ for j, art in enumerate(daten):
             c.fill = PatternFill("solid", fgColor=FELD_INTERN)
     ws.row_dimensions[r].height = 30
 
-ws.freeze_panes = "C3"
+# Die Bloecke "Verkauf" und "Kaufmaennisch" sind leer, solange nichts verkauft ist.
+# Sie werden als aufklappbare Gruppe angelegt und starten zugeklappt - ein Klick auf
+# das Plus ueber der Spaltenleiste holt sie zurueck.
+_g0 = IDX["Verkaufspreis_netto"]
+_g1 = IDX["Abholtermin"]
+for _i in range(_g0, _g1 + 1):
+    _sp = ws.column_dimensions[get_column_letter(_i)]
+    _sp.outlineLevel = 1
+    _sp.hidden = True
+ws.sheet_properties.outlinePr.summaryRight = True
+
+ws.freeze_panes = "F3"
 ws.auto_filter.ref = f"A2:{get_column_letter(len(SPALTEN))}{Z1}"
 for name, formel in AUSWAHL.items():
     dv = DataValidation(type="list", formula1=formel, allow_blank=True, showDropDown=False)
@@ -305,7 +323,7 @@ nz = block(29, "Nach Wertklasse", "Wertklasse", ["A", "B", "C"])
 nz = block(nz, "Nach Kategorie", "Kategorie", sorted({a["Kategorie"] for a in daten}))
 nz = block(nz, "Nach Raum", "Raum", sorted({a["Raum"] for a in daten}))
 block(nz, "Nach Verkaufskanal", "Kanal",
-      ["Klinik", "Kleinanzeigen", "eBay", "Direkt", "Händler", "Verkaufstag"], mit_rest=False)
+      ["Webkatalog", "Kleinanzeigen", "eBay", "Direkt", "Händler", "Verkaufstag"], mit_rest=False)
 
 # =============================================================================
 # Blatt 4: Rechnungen (DATEV)
@@ -439,6 +457,27 @@ with open(os.path.join(os.path.dirname(AUSGABE), "daten", "design.csv"), encodin
             except Exception:
                 pass
 dg.freeze_panes = "A5"
+
+# =============================================================================
+# Blattschutz: nur die Rechenspalten
+# =============================================================================
+# Restmenge, Positionswert und Umsatz sind Formeln. Schreibt jemand hinein, ist die
+# Formel weg und niemandem faellt es auf. Geschuetzt wird deshalb genau das - alles
+# andere bleibt frei. Der Schutz hat kein Passwort: wer ihn braucht, hebt ihn unter
+# Ueberpruefen > Blattschutz aufheben auf.
+FORMELN = {"Restmenge", "Positionswert_netto", "Umsatz_netto"}
+for _zeile in ws.iter_rows(min_row=1, max_row=Z1, max_col=len(SPALTEN)):
+    for _c in _zeile:
+        _c.protection = Protection(locked=False)
+for _name in FORMELN:
+    for _r in range(Z0, Z1 + 1):
+        ws.cell(row=_r, column=IDX[_name]).protection = Protection(locked=True)
+ws.protection.sheet = True
+for _erlaubt in ("autoFilter", "sort", "formatCells", "formatColumns", "formatRows", "selectLockedCells"):
+    setattr(ws.protection, _erlaubt, False)
+vu.protection.sheet = True          # reines Auswertungsblatt
+for _erlaubt in ("autoFilter", "sort", "selectLockedCells"):
+    setattr(vu.protection, _erlaubt, False)
 
 pfad = os.path.join(AUSGABE, "01_Artikelstamm_kikripp.xlsx")
 os.makedirs(AUSGABE, exist_ok=True)

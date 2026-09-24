@@ -121,7 +121,7 @@ def pruefe_import(vorhanden):
 
     PFLICHT = ["nr", "titel", "beschr", "kat", "raum", "zustand", "masse", "menge",
                "einheit", "preis", "basis", "versand", "marke", "buendel", "foto",
-               "sortierung", "aktiv", "im_katalog"]
+               "sortierung", "aktiv", "im_katalog", "mengenhinweis"]
     fehlt = {k for a in liste for k in PFLICHT if k not in a}
     if fehlt: F(f"Feld fehlt in mindestens einer Zeile: {sorted(fehlt)}")
     else:     OK("jede Zeile bringt alle Felder mit, die der Import ausliest")

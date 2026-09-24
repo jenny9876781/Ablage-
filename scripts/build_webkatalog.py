@@ -40,6 +40,7 @@ def daten_sammeln():
             "preis": a["Preis_netto"], "basis": a["Preisbasis"], "versand": a["Versand"],
             "marke": a.get("Marke", ""),
             "buendel": a.get("Bündel", ""),
+            "hinweis": a.get("Mengenhinweis", ""),
             "status": "verfügbar" if a["Menge"] > 0 else "verkauft",
             "bild": b64bild(p) if p else "",
         })
@@ -115,6 +116,8 @@ input:focus,select:focus{outline:none;border-color:var(--rot)}
 .txt{padding:12px 14px 14px;display:flex;flex-direction:column;flex:1}
 .txt h3{margin:0 0 4px;font-size:15px;font-weight:600;line-height:1.3;text-wrap:balance}
 .txt .b{font-size:13px;color:var(--grau);margin:0 0 10px;line-height:1.4}
+.txt .hw{font-size:12.5px;color:var(--schwarz);margin:0 0 10px;line-height:1.45;
+         border-left:2px solid var(--linie);padding-left:9px}
 .meta{font-size:12px;color:var(--grau);display:flex;gap:6px;flex-wrap:wrap;margin-bottom:11px}
 .meta span{background:var(--papier);padding:3px 8px;border-radius:2px}
 .preis{margin-top:auto;border-top:1px solid var(--linie);padding-top:10px;
@@ -219,7 +222,7 @@ function render(){
   const k = $('fkat').value, r = $('fraum').value;
   const nur = $('fnur').checked, nurD = $('fdesign').checked;
   const liste = ARTIKEL.filter(a =>
-    (!q || (a.nr+' '+a.titel+' '+a.beschr+' '+a.buendel).toLowerCase().includes(q)) &&
+    (!q || (a.nr+' '+a.titel+' '+a.beschr+' '+a.buendel+' '+a.hinweis).toLowerCase().includes(q)) &&
     (!k || a.kat === k) && (!r || a.raum === r) &&
     (!nur || a.status === 'verfügbar') && (!nurD || !!a.marke));
   const wert = liste.reduce((s,a)=>s+a.preis*a.menge,0);
@@ -241,6 +244,7 @@ function karte(a){
     <div class="bild">${bild}<span class="nr">${a.nr}</span>
       <span class="badge ${bc}">${a.status}</span>${mk}</div>
     <div class="txt"><h3>${a.titel}</h3><p class="b">${a.beschr}</p>
+      ${a.hinweis ? `<p class="hw">${a.hinweis}</p>` : ''}
       <div class="meta"><span>${a.zustand}</span><span>${a.menge} ${a.einheit}</span>
         ${masse}<span>${a.raum}</span><span>${a.versand}</span>${bnd}</div>
       <div class="preis"><b>${eur(a.preis)}</b>${a.basis==='VHB'?'<span class="vhb">VHB</span>':''}

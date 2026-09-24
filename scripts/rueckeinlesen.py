@@ -22,7 +22,7 @@ UEBERNEHMEN = ["Bezeichnung", "Beschreibung", "Kategorie", "Marke", "Bündel", "
                "Preis_netto", "Preisbasis", "Versand", "Foto", "Status", "Kanal",
                "Reserviert_für", "Verkauft_Menge", "Verkaufspreis_netto", "Verkaufsdatum",
                "Käufer", "Rechnungsnr", "Zahlung", "Zahlart", "Abholtermin",
-               "Mengenhinweis", "Klinik_Markierung", "Bemerkung"]
+               "Mengenhinweis", "Bemerkung"]
 GELDFELDER = {"Preis_netto", "Anschaffungswert_netto", "Verkaufspreis_netto"}
 
 
@@ -137,7 +137,6 @@ def einlesen(xlsx):
     print(f"\nSicherung der alten Datenbasis: {sicherung}")
     print("Jetzt die Ausgabedateien neu erzeugen:")
     print("   python3 scripts/build_artikelstamm_xlsx.py")
-    print("   python3 scripts/build_angebot_xlsx.py")
     print("   python3 scripts/build_katalog_import.py")
     print("   python3 scripts/build_fotopaket.py")
     print("   python3 scripts/build_webkatalog.py")

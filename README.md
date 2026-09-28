@@ -56,9 +56,7 @@ Maße fehlen durchgängig – die Spalte `Maße` ist dafür vorbereitet.
 | `T1_Tuerschilder.docx` | Türschilder für 62 Räume, fünf je A4-Blatt |
 | `T2_Erfassungsblaetter.docx` | ein Erfassungsblatt je Raum für den Rundgang |
 | `T3_Erfassungsliste.xlsx` | dieselben Nummern zum Abtippen der Stückzahlen |
-| `U1_Aktennotiz_Speicherplatz.docx` | Aktennotiz zur Nutzung fremden Speicherplatzes |
-| `U2_Datenschutz_Absatz.docx` | Textbaustein für die Datenschutzerklärung |
-| `U3_Knopf_fuer_kikripp.docx` / `.txt` | HTML-Baustein für den Knopf auf kikripp.de |
+| `U2_Datenschutz_Absatz.docx` | Textbaustein für die Datenschutzerklärung von kikripp.de |
 | `04_Webkatalog_MOCKUP.html` | Muster des Katalogs, offline lauffähig, ohne Verschlüsselung |
 | `06_Webkatalog_geschuetzt.html` | dieselbe Seite mit AES-verschlüsselten Daten – Zwischenlösung, bis der Webshop live ist |
 
@@ -136,9 +134,10 @@ entfernt), Reservierung mit Mailbenachrichtigung an
 `jennyp@kikripp.de`, geteilter Reserviert-Status für alle Besucher, Teilmengen
 („5 von 10 verfügbar"), sieben Tage Frist, Stornieren und Bezahltsetzen in der Verwaltung.
 
-Er läuft auf **schlabberschnuten.com**, weil auf kikripp.de keine Plugins installierbar sind
-(Multisite ohne Netzwerkrechte). Auf kikripp.de steht nur ein Knopf. Verkäuferin ist die
-Kikripp GmbH — der Katalog nennt sie als Anbieterin und verlinkt ihr Impressum.
+Er läuft auf **www.kikripp.de/artikelkatalog** — der eigenen Website der Gesellschaft.
+kikripp.de ist ein Multisite-Netzwerk; die Nutzerin ist dort Super-Admin, das Plugin wird
+über die Netzwerkverwaltung installiert und nur auf der Seite KIKRIPP aktiviert. Verkäuferin
+ist die Kikripp GmbH — der Katalog nennt sie als Anbieterin und verlinkt ihr Impressum.
 
 **Der Katalog speichert keine personenbezogenen Daten.** Name, Mail und Telefon gehen per
 Mail an die Kikripp GmbH und werden unmittelbar danach aus der Datenbank gelöscht. In der

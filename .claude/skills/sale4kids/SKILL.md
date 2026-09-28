@@ -381,18 +381,29 @@ eine zweite Schiene einbaut, vergibt Ware doppelt.
 
 ### Wo er läuft, und warum das wichtig ist
 
-Der Katalog liegt auf **www.schlabberschnuten.com** — der Website der Hundeschule der
-Nutzerin, weil sie dort Super-Admin-Rechte hat. Auf **kikripp.de** steht nur ein Knopf, der
-dorthin verweist (Vorlage: `ausgabe/U3_Knopf_fuer_kikripp.docx`). Auf kikripp.de selbst ist
-kein Plugin installierbar: Multisite, und die Netzwerkverwaltung ist der Nutzerin gesperrt.
+Der Katalog liegt seit dem **28.09.2026** auf **www.kikripp.de/artikelkatalog** — der eigenen
+Website der Gesellschaft. Die Nutzerin ist dort **Super-Admin**; die frühere Annahme, die
+Netzwerkverwaltung sei ihr gesperrt, war falsch. Damit sind die Zwischenlösung über
+schlabberschnuten.com, die Aktennotiz `U1` und der Knopf `U3` **gegenstandslos** — die beiden
+Unterlagen werden nicht mehr erzeugt.
 
-Daraus folgen drei Dinge, die man nicht wegoptimieren darf:
+kikripp.de ist ein **Multisite-Netzwerk**. Das Plugin wird über die **Netzwerkverwaltung**
+installiert und danach **nur auf der Seite KIKRIPP** aktiviert, nicht im Netzwerk: der
+Katalog gehört auf eine Website, nicht auf alle.
+
+Was trotzdem so bleibt, wie es ist:
 
 | Regel | Grund |
 |---|---|
-| Der Firmenname kommt aus `kikripp_firma`, **nie** aus `get_bloginfo('name')` | sonst steht „Schlabberschnuten" im Katalog und im Mailbetreff |
-| Unter dem Katalog steht ein **Anbieter-Block** mit Kikripp-Adresse und Links auf Impressum und Datenschutz von kikripp.de | die Seite selbst hat das Impressum der Hundeschule — ohne den Block wäre das ein Impressumsverstoß |
-| **Keine personenbezogenen Daten** in der Datenbank | fremder Speicherplatz; ohne Speicherung braucht es keinen Auftragsverarbeitungsvertrag |
+| Der Firmenname kommt aus `kikripp_firma`, **nie** aus `get_bloginfo('name')` | der Seitenname im Netzwerk ist nicht zwingend die Firmierung, und im Mailbetreff muss die Firma stehen |
+| Unter dem Katalog steht ein **Anbieter-Block** mit Kikripp-Adresse und Links auf Impressum und Datenschutz | Anbieterkennzeichnung am Angebot selbst; sie bleibt richtig, auch wenn die Seite später umzieht |
+| **Keine personenbezogenen Daten** in der Datenbank | war ursprünglich wegen des fremden Speicherplatzes so gebaut. Der Grund ist weggefallen, die Regel bleibt: weniger gespeicherte Daten sind weniger Risiko, und die Mails sind das Kontaktarchiv. **Nicht zurückbauen.** |
+
+> **Offen und blockierend für den Livegang:** Auf kikripp.de stehen **Impressum und
+> Datenschutz als Entwurf** (Stand 28.09.2026), sind also öffentlich nicht erreichbar. Der
+> Katalog verlinkt beide. Ohne Veröffentlichung geht kein Link hinaus — § 5 DDG und
+> Art. 13 DSGVO. Außerdem ist die Startseite auf *Wartung* gesetzt; ob ein Wartungsplugin
+> Besucher aussperrt, ist noch zu prüfen.
 
 ### Der Ablauf einer Reservierung
 
@@ -425,9 +436,11 @@ belegt, und wir würden ihn fremden Plugins wegnehmen. Der Haken greift nur bei 
 Seitenaufrufen — REST, AJAX, Cron und Feeds sind ausgenommen, sonst löste er dort eine
 Weiterleitung aus.
 
-### Verträglichkeit mit der Umgebung auf schlabberschnuten.com
+### Verträglichkeit mit der Umgebung auf kikripp.de
 
-Dort laufen rund fünfzehn Plugins. Was das Plugin deshalb von sich aus tut:
+Sichtbar sind dort **Autoptimize**, ein Performance-/Cache-Plugin, **Simply Gallery Block &
+Lightbox**, **Statify**, **ACF**, **CPT UI**, **NS Cloner** und der Block-Editor (kein
+Elementor). Die vollständige Plugin-Liste steht noch aus. Was das Plugin von sich aus tut:
 
 | Maßnahme | Wogegen |
 |---|---|
@@ -436,14 +449,17 @@ Dort laufen rund fünfzehn Plugins. Was das Plugin deshalb von sich aus tut:
 | `data-cookieyes="cookieyes-necessary"` am eigenen Skript (`script_loader_tag`) | Zustimmungsbanner blockieren sonst das Skript und die Seite bleibt leer |
 | alles mit `kikripp_` benannt: Optionen, Tabellen, Hooks, Kurzbefehl, REST-Namensraum, Menü, CSS-Klasse | Namenskollisionen |
 
-Was die Nutzerin selbst erledigen muss, steht in `A1` unter „Was auf schlabberschnuten.com
-zu beachten ist": Elementor-Seite mit dem **Shortcode-Widget** oder ganz ohne Elementor,
-breites Seitenlayout, Cache leeren, Katalogseite von der JavaScript-Optimierung ausnehmen,
-`kikripp_zugang` in CookieYes als notwendig eintragen, Sicherung mit UpdraftPlus.
+Die Filter für **Yoast** und **CookieYes** bleiben drin, auch wenn auf kikripp.de weder das
+eine noch das andere zu sehen ist: sie tun nichts, wenn das Plugin fehlt, und kosten nichts.
 
-> **Popup Maker meldet auf der Seite, dass es keine Cache-Dateien schreiben kann.** Das kann
-> heißen, dass Teile des Webspace nicht beschreibbar sind — dann scheitern Plugin-Upload und
-> Fotos. Deshalb steht in der Anleitung: erst **ein** Foto hochladen, dann die restlichen 110.
+Was die Nutzerin selbst erledigen muss, steht in `A1` unter „Was auf kikripp.de zu beachten
+ist": **`kikripp` in Autoptimize bei JavaScript und CSS ausschließen** (der wichtigste
+Punkt — alle Dateien des Katalogs tragen `kikripp` im Namen), Cache nach jedem Import leeren,
+breite Seitenvorlage ohne Seitenleiste, WordPress vorher aktualisieren, Sicherung anlegen.
+
+> Vor dem Hochladen von 350 Fotos steht in der Anleitung weiterhin: erst **ein** Foto
+> hochladen. Klappt das, ist `wp-content/uploads` beschreibbar. Das kostet eine Minute und
+> spart im Zweifel zwei Stunden.
 
 ### Was es nicht mehr gibt
 
@@ -553,9 +569,9 @@ Zusammen mit `ausgabe/katalog_import.json` schicken. Die Einrichtung steht in
 
 | Datei | Zweck |
 |---|---|
-| `U1_Aktennotiz_Speicherplatz.docx` | dokumentiert die Nutzung fremden Speicherplatzes; die Nutzerin wollte **keinen** Vertrag |
-| `U2_Datenschutz_Absatz.docx` | Textbaustein für die Datenschutzerklärung von schlabberschnuten.com |
-| `U3_Knopf_fuer_kikripp.docx` / `.txt` | der HTML-Baustein für den Knopf auf kikripp.de |
+| `U2_Datenschutz_Absatz.docx` | Textbaustein für die Datenschutzerklärung von kikripp.de |
+
+`U1` (Aktennotiz) und `U3` (Knopf) sind mit dem Umzug auf kikripp.de entfallen.
 
 ### Das Passwort
 
@@ -628,18 +644,22 @@ Zwei Sorten kommen laufend vor:
 > Die Nutzerin sammelt fehlende Fotos bewusst und liefert sie **in einem Zug am Ende** nach.
 > Nicht vorher drängen, aber auch nichts abschließen, solange `pruefen.py` noch `OFFEN:`-Zeilen
 > meldet.
-- **Der Katalog ist noch nicht installiert.** Plugin, Fotos, Importdatei und die drei
-  Begleitunterlagen liegen in `ausgabe/`. Die Nutzerin richtet ihn auf
-  **schlabberschnuten.com** ein (Anleitung `A1`). Danach fragen, ob die Benachrichtigungsmail
-  angekommen ist — sonst muss SMTP dazu.
-- **Impressum- und Datenschutz-Adresse sind geraten** (`https://www.kikripp.de/impressum/`
-  und `/datenschutz/`), weil kikripp.de aus dieser Umgebung gesperrt ist. Die Nutzerin prüft
-  sie in den Plugin-Einstellungen. **Ohne funktionierenden Impressum-Link fehlt die
-  Anbieterkennzeichnung** — das nach der Einrichtung nachfragen.
-- **kikripp.de bleibt gesperrt.** Multisite, Netzwerkverwaltung nicht zugänglich. Eine
-  Anfrage an die Betreuung ist raus (Super-Admin für `anna`). Kommt sie durch, wäre
-  `katalog.kikripp.de` die schönere Adresse — empfohlen, aber verworfen zugunsten der
-  schnelleren Lösung.
+- **Die Adressfrage ist entschieden (28.09.2026): kikripp.de.** Die Nutzerin ist dort
+  Super-Admin; die Zwischenlösung über schlabberschnuten.com ist vom Tisch. Der Katalog
+  kommt auf `www.kikripp.de/artikelkatalog`, das Plugin über die Netzwerkverwaltung,
+  aktiviert nur auf der Seite KIKRIPP.
+- **Der Katalog ist noch nicht installiert.** Plugin, Fotos, Importdatei und `U2` liegen in
+  `ausgabe/`, die Anleitung ist `A1`. Nach der Einrichtung fragen, ob die
+  Benachrichtigungsmail angekommen ist — sonst muss SMTP dazu. Absender und Empfänger liegen
+  beide auf `kikripp.de`; auch im Spam-Ordner nachsehen lassen.
+- **Blockierend: Impressum und Datenschutz stehen auf kikripp.de als Entwurf.** Beide müssen
+  veröffentlicht sein, bevor ein Link hinausgeht. Der Katalog verlinkt sie im Anbieter-Block.
+- **Zu prüfen: Wartungsmodus.** Startseite von kikripp.de ist die Seite *Wartung*, alles
+  andere steht auf Entwurf. Sperrt ein Wartungs- oder Coming-Soon-Plugin Besucher aus, muss
+  die Katalogseite dort als Ausnahme eingetragen werden.
+- **Ausstehend von der Nutzerin:** die vollständige Plugin-Liste von kikripp.de
+  (Plugins → Installierte Plugins), die Maße und die überarbeitete Artikelliste der
+  Kindergartenleitung.
 - **Rundgang läuft.** Türschilder, Erfassungsblätter und Erfassungsliste sind ausgeliefert
   und ausgedruckt. Zurück kommen `T3_Erfassungsliste.xlsx` mit Stückzahlen und die Fotos je
   Raum. Die Nummer auf dem Post-it im Foto ist maßgeblich.

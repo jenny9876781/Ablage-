@@ -1,25 +1,40 @@
 # Webkatalog einrichten
 
-Der Katalog läuft auf **www.schlabberschnuten.com** — dort hast du Super-Admin-Rechte und
-kannst Plugins hochladen. Auf **www.kikripp.de** steht nur ein Knopf, der dorthin führt.
-Verkäuferin ist und bleibt die Kikripp GmbH; die Hundeschule stellt ausschließlich den
-Speicherplatz. Das steht auch so im Katalog und in der Aktennotiz (`U1`).
+Der Katalog läuft auf **www.kikripp.de** — der eigenen Website der Gesellschaft. Du bist
+dort Super-Admin und kannst Plugins installieren. Damit entfällt der Umweg über eine fremde
+Website: keine Aktennotiz, kein Knopf von einer Seite zur anderen, keine Erklärung, warum
+der Katalog woanders liegt. Verkäuferin, Website und Impressum gehören derselben Firma.
+
+> **kikripp.de ist ein Multisite-Netzwerk** (oben in der Leiste steht „Meine Websites").
+> Plugins lassen sich dort nur über die **Netzwerkverwaltung** installieren — deshalb geht
+> es nur als Super-Admin. Die einzelnen Schritte stehen unten.
 
 Du brauchst drei Dateien aus dem Ordner `ausgabe`: **kikripp-katalog.zip** (das Plugin),
 **kikripp-fotos.zip** (die Fotos) und **katalog_import.json** (die Artikel). Rechne mit zwei
 Stunden, das meiste davon ist Warten beim Hochladen der Fotos.
 
-> **Wichtig zum Verständnis:** Der Katalog speichert auf der Hundeschul-Seite **keine Namen,
+> **Wichtig zum Verständnis:** Der Katalog speichert in WordPress **keine Namen,
 > keine Mailadressen, keine Telefonnummern**. Die gehen ausschließlich per Mail an
 > `jennyp@kikripp.de` und werden danach sofort aus der Datenbank gelöscht. Diese Mails sind
 > damit dein einziges Kontaktarchiv — **bitte nicht löschen.** Leg dir einen Ordner an.
 
 ## 1. Plugin installieren
 
-Melde dich auf **www.schlabberschnuten.com/wp-admin** an und geh auf
-**Plugins → Installieren → Plugin hochladen**. Wähle `kikripp-katalog.zip`, klick auf
-*Jetzt installieren* und danach auf *Plugin aktivieren*. In der linken Leiste erscheint der
-Menüpunkt **Artikelkatalog**.
+Melde dich auf **www.kikripp.de/wp-admin** an. Weil kikripp.de ein Netzwerk ist, läuft die
+Installation in zwei Schritten:
+
+1. Oben links auf **Meine Websites → Netzwerkverwaltung → Plugins**, dann
+   **Installieren → Plugin hochladen**. Wähle `kikripp-katalog.zip` und klick auf
+   *Jetzt installieren*.
+2. **Nicht** „Im Netzwerk aktivieren" wählen. Geh zurück auf die Seite **KIKRIPP**
+   (Meine Websites → KIKRIPP → Dashboard), dort auf **Plugins**, und aktiviere
+   *Kikripp Artikelkatalog* nur für diese eine Website.
+
+In der linken Leiste erscheint danach der Menüpunkt **Artikelkatalog**.
+
+Warum nicht im Netzwerk aktivieren: der Katalog gehört auf eine Website, nicht auf alle.
+Eine Netzwerk-Aktivierung würde ihn auf jeder Seite des Netzwerks einschalten und liesse
+sich später nur wieder zentral abschalten.
 
 ## 2. Fotos in die Mediathek
 
@@ -60,49 +75,58 @@ Geh auf **Artikelkatalog → Einstellungen** und arbeite die Seite von oben nach
 | Verkäuferin (Firma) | `Kikripp GmbH` — steht so im Katalog und im Mailbetreff |
 | Reservierungen melden an | `jennyp@kikripp.de` |
 | Telefon | die Nummer der Kikripp GmbH |
-| **Impressum** | **bitte prüfen** — die Vorgabe `https://www.kikripp.de/impressum/` ist geraten |
-| **Datenschutzerklärung** | **ebenfalls prüfen** |
+| **Impressum** | `https://www.kikripp.de/impressum/` — **die Seite muss veröffentlicht sein**, siehe unten |
+| **Datenschutzerklärung** | `https://www.kikripp.de/datenschutz/` — **ebenfalls veröffentlicht**, siehe unten |
 | Abholadresse | erscheint unter dem Katalog |
 | Hinweisband | Text über dem Katalog, zum Livegang leeren |
 | Reservierung gilt | 7 Tage |
 | Umsatzsteuer | 19 % |
 | Rechtliche Hinweise | Verkaufsbedingungen, änderbar |
 
-Die beiden Adressen zu Impressum und Datenschutz sind die einzigen Felder, bei denen ich
-raten musste — von hier aus ist kikripp.de nicht erreichbar. Öffne die Links einmal und
-korrigiere sie, falls die Seiten anders heißen. **Sie müssen funktionieren**, sonst fehlt
-im Katalog die Anbieterkennzeichnung.
+**Achtung, das ist der eine Punkt, der den Livegang aufhält:** Impressum und Datenschutz
+stehen auf kikripp.de zurzeit als **Entwurf**, sind also öffentlich nicht erreichbar. Ein
+Katalog, in dem Ware gegen Geld angeboten wird, braucht beides erreichbar — das Impressum
+nach § 5 DDG, die Datenschutzerklärung nach Art. 13 DSGVO, weil das Reservierungsformular
+Name, Mailadresse und Telefonnummer entgegennimmt. Beide Seiten also **veröffentlichen**,
+bevor der erste Link hinausgeht, und danach die Adressen hier einmal anklicken.
 
 Lass **Vorschaubetrieb** eingeschaltet, solange ihr testet. Dann werden alle eingehenden
 Reservierungen als Testdaten markiert und lassen sich am Ende mit einem Klick löschen.
 
 Und füge noch den Absatz aus **`U2_Datenschutz_Absatz.docx`** in die Datenschutzerklärung
-von schlabberschnuten.com ein. Das ist der einzige Papierkram, der nötig ist.
+von kikripp.de ein. Er beschreibt, was mit den Daten aus dem Reservierungsformular passiert.
+Das ist der einzige Papierkram, der nötig ist.
 
-## 5. Seite anlegen und den Knopf setzen
+## 5. Seite anlegen
 
-**Auf schlabberschnuten.com:** Geh auf **Seiten → Erstellen**, nenn die Seite
-*Kikripp Artikelkatalog* und setz als einzigen Inhalt den Kurzbefehl:
+Geh auf **Seiten → Erstellen**, nenn die Seite *Artikelkatalog* und setz als einzigen Inhalt
+den Kurzbefehl:
 
     [kikripp_katalog]
 
-Veröffentlichen. Achte darauf, dass die Adresse sprechend ist — etwa
-`www.schlabberschnuten.com/kikripp-artikelkatalog`. Das beruhigt jeden, der den Link
-bekommt und sich fragt, warum er auf einer Hundeschul-Seite landet.
+Veröffentlichen. Die Adresse lautet dann `www.kikripp.de/artikelkatalog`. Wähle eine
+**breite Vorlage ohne Seitenleiste** — der Katalog zeigt vier Karten nebeneinander, in einer
+schmalen Spalte wird es eng.
 
 Die Seite trägt automatisch ein „nicht indexieren" für Suchmaschinen und taucht nicht bei
 Google auf.
+
+**Der Wartungsmodus.** Auf kikripp.de ist zurzeit die Seite *Wartung* als Startseite gesetzt
+und alles andere steht auf Entwurf. Prüfe, ob ein Wartungs- oder Coming-Soon-Plugin die
+Website für Besucher sperrt. Wenn ja, muss die Katalogseite dort als **Ausnahme** eingetragen
+werden — sonst sehen die Interessenten die Wartungsseite statt des Katalogs. Am einfachsten
+prüfst du das, indem du den fertigen Link in einem privaten Browserfenster öffnest, in dem du
+nicht angemeldet bist. Genau das macht Schritt 6.
 
 **Der Link mit Passwort.** Hängst du `?kik=DASPASSWORT` an die Adresse, öffnet sich der Katalog
 direkt — niemand muss etwas eintippen. Das Passwort verschwindet dabei sofort wieder aus der
 Adresszeile. Diesen Link verschickst du an die Interessenten:
 
-    https://www.schlabberschnuten.com/kikripp-artikelkatalog/?kik=DASPASSWORT
+    https://www.kikripp.de/artikelkatalog/?kik=DASPASSWORT
 
-**Auf kikripp.de:** Dort brauchst du keine Plugin-Rechte, ein Knopf ist nur ein Link. Die
-fertige Vorlage liegt in **`U3_Knopf_fuer_kikripp.docx`** (und als `.txt`, falls das Kopieren
-aus Word zickt). Seite bearbeiten, Block **Custom HTML** einfügen, Baustein hineinkopieren,
-die Adresse eintragen, speichern.
+**Ein Knopf im Menü** ist möglich, aber nicht nötig: der Katalog ist ohnehin nur über den
+Link mit Passwort erreichbar. Solange kikripp.de im Wartungsmodus ist, würde ein Menüpunkt
+auch niemandem angezeigt.
 
 ## 6. Einmal selbst durchtesten
 
@@ -118,76 +142,71 @@ Du solltest danach sehen:
 - **Unter Artikelkatalog → Reservierungen** den Vorgang — **ohne Namen**, dafür mit dem
   Suchbegriff für dein Postfach.
 
-Kommt keine Mail an, liegt es daran, dass schlabberschnuten.com keine Mails verschicken kann.
-Schneller Vorabtest: abmelden, „Passwort vergessen" mit deiner Adresse. Kommt die auch nicht,
-sag mir Bescheid — dann bauen wir den Versand über SMTP um.
+Kommt keine Mail an, kann kikripp.de keine Mails verschicken. Schneller Vorabtest: abmelden,
+„Passwort vergessen" mit deiner Adresse. Kommt die auch nicht, sag mir Bescheid — dann bauen
+wir den Versand über SMTP um. Hier gibt es eine Besonderheit: Absender und Empfänger liegen
+beide auf `kikripp.de`. Manche Postfächer sortieren eine Mail, die scheinbar von einem selbst
+kommt, in den Spam-Ordner. **Sieh beim ersten Test also auch dort nach.**
 
 Zum Schluss: **Artikelkatalog → Einstellungen → Testreservierungen löschen**.
 
-## Was auf schlabberschnuten.com zu beachten ist
+## Was auf kikripp.de zu beachten ist
 
-Auf der Seite laufen rund fünfzehn Plugins. Fünf davon können dem Katalog in die Quere
-kommen. Das Plugin ist darauf vorbereitet, aber drei Kleinigkeiten musst du selbst erledigen.
+Die Seite ist mit dem **Block-Editor** gebaut, nicht mit Elementor — das macht die
+Katalogseite einfacher als gedacht: Seite anlegen, Kurzbefehl hineinschreiben, fertig.
+
+Was ich in deinem Dashboard sehe, und was daraus folgt:
+
+### Autoptimize — die Katalogseite ausnehmen
+
+**Das ist der wichtigste Punkt.** Autoptimize fasst JavaScript und CSS aller Seiten zu
+gemeinsamen Dateien zusammen. Genau daran gehen Katalogseiten am häufigsten kaputt: die
+Seite lädt, bleibt aber leer, weil das Katalog-Skript im Sammelpaket steckt und dort in
+der falschen Reihenfolge ausgeführt wird.
+
+Geh auf **Einstellungen → Autoptimize → JavaScript-Optionen**, öffne *Erweiterte
+Einstellungen anzeigen* und trag unter **„Scripts ausschliessen von Autoptimize"** hinten
+mit Komma getrennt ein:
+
+    kikripp
+
+Dasselbe unter **CSS-Optionen → „CSS ausschliessen von Autoptimize"**. Danach oben
+**Cache leeren**. Alle Dateien des Katalogs tragen `kikripp` im Namen, ein Eintrag genügt
+also für beide.
+
+### Performance / Cache — nach jedem Import leeren
+
+In der oberen Leiste steht **Performance**. Das Plugin sagt dem Cache selbst, dass die
+Katalogseite nicht zwischengespeichert werden darf, und alle Daten kommen mit
+„nicht zwischenspeichern"-Kennzeichnung. Trotzdem: nach der Installation und **nach jedem
+Artikelimport** einmal den Cache leeren. Findest du eine Ausschlussliste für einzelne
+Seiten, trag die Katalogseite dort ein.
+
+### Simply Gallery Block & Lightbox — nur beobachten
+
+Dieses Plugin legt sich auf Bilder und öffnet sie in einer Lightbox. Es kann sein, dass es
+auch die Fotos im Katalog anfasst. Das ist kein Schaden — sieh dir beim Testlauf einfach an,
+ob ein Klick auf ein Artikelfoto sich seltsam verhält. Wenn ja, sag Bescheid, dann schließe
+ich die Katalogbilder aus.
+
+### Statify, ACF, CPT UI, NS Cloner, Mitarbeiter
+
+Unkritisch. Das Plugin benutzt eigene Tabellen, eigene Einstellungsnamen, einen eigenen
+Kurzbefehl und ein Stylesheet, das nur innerhalb des Katalogs gilt.
+
+### WordPress 7.1.2 — vorher aktualisieren
+
+Im Dashboard steht ein Update an. Mach es **vor** der Installation des Katalogs, nicht
+danach. Ein Update mitten im Betrieb ist der unnötigere Zeitpunkt.
 
 ### Vorher: Sicherung anlegen
 
-Du hast **UpdraftPlus**. Mach einmal *Jetzt sichern* (Datenbank und Dateien), bevor du das
-Plugin installierst. Dauert ein paar Minuten und du kannst jeden Schritt zurücknehmen.
+Vor dem ersten Plugin-Upload eine Sicherung von Datenbank und Dateien machen — über dein
+Backup-Plugin oder beim Hoster. Dann lässt sich jeder Schritt zurücknehmen.
 
-### Elementor — die Katalogseite anders anlegen
+### Schreibrechte kurz prüfen
 
-Die Seite ist mit **Elementor** gebaut (Hello-Theme, Royal Addons, UAE). Der Kurzbefehl
-gehört deshalb nicht in einen Block, sondern:
-
-- **Ohne Elementor:** Seite anlegen, `[kikripp_katalog]` in den normalen Inhalt schreiben,
-  veröffentlichen — **nicht** auf „Mit Elementor bearbeiten" klicken. Das ist der einfachste
-  Weg und der, den ich empfehle.
-- **Mit Elementor:** Seite mit Elementor bearbeiten, links nach dem Widget **Shortcode**
-  suchen, auf die Seite ziehen und `[kikripp_katalog]` eintragen.
-
-Wähle in beiden Fällen ein **breites Seitenlayout** (Elementor: *Elementor Canvas* oder
-*Elementor Full Width*, sonst die Vorlage ohne Seitenleiste). Der Katalog zeigt vier Karten
-nebeneinander — in einer schmalen Spalte mit Seitenleiste wird es eng.
-
-### CookieYes — den Zugangs-Keks eintragen
-
-**CookieYes** kann Skripte blockieren, bis jemand zustimmt. Das Katalog-Skript ist im Plugin
-ausdrücklich als *notwendig* markiert, es sollte also durchlaufen. Zwei Dinge trag bitte
-nachträglich ein:
-
-1. Im CookieYes-Cookie-Verzeichnis den Keks **`kikripp_zugang`** als *notwendig* aufnehmen
-   (Zweck: „merkt sich die Anmeldung am Artikelkatalog", Dauer 30 Tage). Er ist technisch
-   erforderlich und braucht keine Zustimmung, muss aber aufgeführt sein.
-2. Ruf die Katalogseite in einem privaten Fenster auf und **klick den Banner nicht weg**.
-   Lädt der Katalog trotzdem? Wenn ja, ist alles gut. Wenn die Seite leer bleibt, sag mir
-   Bescheid — dann müssen wir das Skript in CookieYes von der Blockierliste nehmen.
-
-### Cache — nach dem Installieren einmal leeren
-
-Oben in der Leiste hast du **Cache leeren**. Drück das nach der Installation und nach jedem
-Artikelimport.
-
-Das Plugin sagt dem Cache selbst, dass die Katalogseite nicht zwischengespeichert werden
-darf, und alle Daten kommen mit „nicht zwischenspeichern"-Kennzeichnung. Trotzdem:
-**Falls du im Cache-Plugin eine Ausschlussliste findest, trag die Katalogseite dort ein.**
-Und wenn es eine Option zum *Zusammenfassen oder Verkleinern von JavaScript* gibt, nimm die
-Katalogseite auch davon aus. Das ist die häufigste Ursache, wenn so eine Seite plötzlich leer
-bleibt.
-
-### Yoast — die Seite auf „nicht indexieren"
-
-Das Plugin setzt die Angabe selbst und stimmt sich mit **Yoast** ab. Zur Sicherheit: In der
-Katalogseite unten im Yoast-Kasten → *Erweitert* → *Erlauben, dass Suchmaschinen diese Seite
-anzeigen?* auf **Nein** stellen. Dann ist es doppelt abgesichert.
-
-### Der Hinweis von Popup Maker — den nimm ernst
-
-In deinem Dashboard steht, dass **Popup Maker keine Dateien im Cache-Ordner anlegen kann**.
-Das kann ein Eigenleben dieses Plugins sein, es kann aber auch heißen, dass der Webspace
-teilweise **nicht beschreibbar** ist. Dann scheitern sowohl der Plugin-Upload als auch die
-Fotos.
-
-Deshalb der Reihe nach vorgehen:
+Bevor du Stunden mit dem Hochladen von Fotos verbringst, der Reihe nach:
 
 1. Plugin hochladen. Klappt das, ist `wp-content/plugins` beschreibbar.
 2. **Ein einzelnes Foto** in die Mediathek laden — `F-001.jpg` genügt. Klappt das, ist
@@ -195,14 +214,13 @@ Deshalb der Reihe nach vorgehen:
 3. Scheitert einer der beiden Schritte mit einer Rechte- oder Verzeichnismeldung, ist es ein
    Fall für den Hoster („Schreibrechte auf wp-content wiederherstellen").
 
-Teste das **bevor** du Stunden mit Fotos hochladen verbringst.
+### Noch offen: die vollständige Plugin-Liste
 
-### Was unkritisch ist
-
-**WPForms**, **Popup Maker**, **Announcer**, **Font Audit** und **Fonts Plugin** stören den
-Katalog nicht. Das Plugin benutzt eigene Tabellen, eigene Einstellungsnamen, einen eigenen
-Kurzbefehl und ein Stylesheet, das nur innerhalb des Katalogs gilt. Dass WPForms bei dir
-funktioniert, ist übrigens ein gutes Zeichen: dann verschickt die Seite Mails.
+Die Punkte oben stammen aus dem, was im Menü und in der oberen Leiste zu sehen ist. Schick
+mir bei Gelegenheit einen Auszug von **Plugins → Installierte Plugins** — dann sage ich dir
+verbindlich, ob noch etwas dem Katalog in die Quere kommt. Besonders relevant wären ein
+Cookie-Banner (blockiert manchmal Skripte, bis jemand zustimmt) und ein Wartungs- oder
+Coming-Soon-Plugin.
 
 ---
 
@@ -210,11 +228,11 @@ funktioniert, ist übrigens ein gutes Zeichen: dann verschickt die Seite Mails.
 
 ### „Plugins" steht gar nicht im linken Menü
 
-Auf schlabberschnuten.com solltest du den Punkt sehen. Fehlt er trotzdem: Bist du als
-**Administrator** angemeldet? Nur Administratoren sehen „Plugins". Ist die Seite eine
-Multisite, liegen Plugins in der **Netzwerkverwaltung** — oben in der schwarzen Leiste über
-„Meine Websites". Und manche Hostingpakete sperren das Installieren; dann fehlt auch der
-Knopf „Plugin hochladen" (Stichwort für die Hotline: `DISALLOW_FILE_MODS`).
+kikripp.de ist ein Netzwerk, deshalb steht „Plugins" im Menü der einzelnen Website nur zum
+Aktivieren — **installiert** wird ausschließlich in der **Netzwerkverwaltung** (oben in der
+schwarzen Leiste über „Meine Websites"). Fehlt der Punkt auch dort, sperrt das Hostingpaket
+das Installieren; dann fehlt auch der Knopf „Plugin hochladen" (Stichwort für die Hotline:
+`DISALLOW_FILE_MODS`).
 
 Ausweichweg: `kikripp-katalog.zip` auf dem Rechner entpacken und den Ordner
 `kikripp-katalog` über den Dateimanager des Hosters nach `wp-content/plugins/` legen. Danach
@@ -257,8 +275,9 @@ einfach noch einmal – das schadet nie.
 
 ### Die Mail an jennyp kommt nicht an
 
-Zuerst im Spam-Ordner schauen und die Absenderadresse auf die Whitelist setzen — sie kommt
-von schlabberschnuten.com, das kennt dein Postfach noch nicht.
+Zuerst im Spam-Ordner schauen und die Absenderadresse auf die Whitelist setzen. Absender und
+Empfänger liegen beide auf `kikripp.de`; manche Postfächer sortieren eine Mail, die scheinbar
+von einem selbst kommt, aus.
 
 Kommt sie auch dort nicht an, kann WordPress selbst keine Mails verschicken. Dann sag mir
 Bescheid, dann bauen wir den Versand über SMTP um. **In der Zwischenzeit gehen keine
@@ -303,16 +322,15 @@ Der Katalog kennt die Namen nicht.
 
 ## Wenn der Verkauf durch ist
 
-Damit auf der Hundeschul-Seite nichts zurückbleibt:
+Damit auf kikripp.de nichts zurückbleibt:
 
 1. Reservierungen als CSV exportieren und mir schicken — danach sind sie entbehrlich.
 2. **Artikelkatalog → Einstellungen → Testreservierungen löschen**, falls noch welche da sind.
 3. Die Katalogseite löschen.
-4. Das Plugin deaktivieren und löschen.
+4. Das Plugin auf der Website deaktivieren und in der Netzwerkverwaltung löschen.
 5. Die Fotos aus der Mediathek entfernen.
 6. Den Absatz aus der Datenschutzerklärung wieder herausnehmen.
-7. Den Knopf auf kikripp.de entfernen.
-8. Enddatum in die Aktennotiz (`U1`) eintragen und ablegen.
+7. Die Ausnahmen in Autoptimize wieder herausnehmen.
 
 ## Was wohin gehört
 
@@ -321,5 +339,3 @@ Kasse. Der **Webkatalog** führt allein Buch darüber, was reserviert und was be
 ohne Personendaten. Deine **Mails** sind das Kontaktarchiv. Das **Klinik-Angebot** ist nur
 noch ein Dokument zum Anschauen; reserviert wird ausschließlich im Katalog, sonst vergibst du
 dasselbe Stück zweimal.
-
-Und die Hundeschule? Die stellt Speicherplatz. Nichts weiter.

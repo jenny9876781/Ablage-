@@ -38,9 +38,8 @@ Was er nicht kann: Maße erkennen und Stückzahlen bei Stapeln sicher zählen �
 durch und überschreibt, was er anders sieht. Alle Preise sind netto; Firmen bekommen Nettopreise
 genannt, Privatleuten muss der Bruttopreis gezeigt werden.
 
-**Verkauft wird über den Webkatalog.** Auf kikripp.de steht ein Knopf, der dorthin führt;
-die Seite selbst liegt auf schlabberschnuten.com, weil dort die technischen Rechte vorhanden
-sind — Verkäuferin ist und bleibt die Kikripp GmbH. Interessenten bekommen einen Link, in dem
+**Verkauft wird über den Webkatalog.** Er liegt auf der eigenen Website der Gesellschaft,
+unter `www.kikripp.de/artikelkatalog`. Interessenten bekommen einen Link, in dem
 das Passwort schon steckt, suchen sich ihre Artikel aus und schicken eine Reservierung ab.
 Du bekommst sofort eine Mail an jennyp@kikripp.de, und der Artikel steht für alle anderen auf
 „reserviert" — sieben Tage lang, danach wird er von selbst wieder frei. **Trag Reservierungen

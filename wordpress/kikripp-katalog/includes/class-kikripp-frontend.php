@@ -12,6 +12,12 @@ class Kikripp_Frontend {
         // Zustimmungsbanner wie CookieYes blockieren fremde Skripte. Unser eigenes
         // ist technisch notwendig – das markieren wir ausdrücklich.
         add_filter('script_loader_tag', [__CLASS__, 'skript_notwendig'], 10, 2);
+        // Autoptimize fasst JavaScript und CSS aller Seiten zu Sammeldateien zusammen.
+        // Dabei ändert sich die Reihenfolge, und der Katalog bleibt leer. Statt die
+        // Nutzerin das in den Einstellungen eintragen zu lassen, tragen wir uns selbst
+        // in die Ausschlussliste ein – alle unsere Dateien heißen „kikripp…“.
+        add_filter('autoptimize_filter_js_exclude', [__CLASS__, 'nicht_zusammenfassen']);
+        add_filter('autoptimize_filter_css_exclude', [__CLASS__, 'nicht_zusammenfassen']);
         // Muss vor jeder Ausgabe laufen, damit das Passwort aus dem Link
         // sofort wieder aus der Adresse verschwindet.
         add_action('init', ['Kikripp_Zugang', 'link_einloesen']);
@@ -53,6 +59,20 @@ class Kikripp_Frontend {
         return $post && has_shortcode((string) $post->post_content, 'kikripp_katalog');
     }
 
+    /**
+     * Hängt „kikripp" an die Ausschlussliste von Autoptimize an.
+     *
+     * Die Liste ist eine kommagetrennte Zeichenkette. Was die Nutzerin dort selbst
+     * eingetragen hat, bleibt stehen; ein doppelter Eintrag wird vermieden.
+     */
+    public static function nicht_zusammenfassen($ausschluss) {
+        $liste = is_array($ausschluss) ? $ausschluss : explode(',', (string) $ausschluss);
+        $liste = array_map('trim', $liste);
+        if (!in_array('kikripp', $liste, true)) { $liste[] = 'kikripp'; }
+        $liste = array_values(array_filter($liste, static function ($e) { return $e !== ''; }));
+        return is_array($ausschluss) ? $liste : implode(', ', $liste);
+    }
+
     public static function skript_notwendig($tag, $handle) {
         if ($handle !== 'kikripp-katalog') { return $tag; }
         return str_replace('<script ', '<script data-cookieyes="cookieyes-necessary" ', $tag);
@@ -64,6 +84,9 @@ class Kikripp_Frontend {
         // Der Rahmen ist statisch, aber `zugang` hängt am Keks des Besuchers.
         // Ein Seiten-Cache würde den Zustand eines Fremden ausliefern.
         if (!defined('DONOTCACHEPAGE')) { define('DONOTCACHEPAGE', true); }
+        // W3 Total Cache und andere Cache-Plugins verkleinern und bündeln JavaScript
+        // ebenfalls. Diese Konstante schaltet das für die Katalogseite ab.
+        if (!defined('DONOTMINIFY')) { define('DONOTMINIFY', true); }
 
         wp_localize_script('kikripp-katalog', 'KIKRIPP', [
             'basis'   => esc_url_raw(rest_url(Kikripp_REST::NS)),

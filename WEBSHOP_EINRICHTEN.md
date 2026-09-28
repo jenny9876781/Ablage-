@@ -152,57 +152,95 @@ Zum Schluss: **Artikelkatalog → Einstellungen → Testreservierungen löschen*
 
 ## Was auf kikripp.de zu beachten ist
 
-Die Seite ist mit dem **Block-Editor** gebaut, nicht mit Elementor — das macht die
-Katalogseite einfacher als gedacht: Seite anlegen, Kurzbefehl hineinschreiben, fertig.
+Auf der Seite laufen **18 Plugins**, alle netzwerkweit aktiviert bis auf *Maintenance*.
+Ich habe die Liste durchgesehen. Das meiste ist unkritisch, und zwei Dinge, die sonst
+Handarbeit gewesen wären, erledigt das Katalog-Plugin inzwischen selbst.
 
-Was ich in deinem Dashboard sehe, und was daraus folgt:
+### Erledigt sich von allein — Autoptimize und die Verkleinerung
 
-### Autoptimize — die Katalogseite ausnehmen
+**Autoptimize** und die *Minify*-Funktion von **W3 Total Cache** fassen JavaScript und CSS
+aller Seiten zu Sammeldateien zusammen. Genau daran gehen solche Katalogseiten am häufigsten
+kaputt: die Seite lädt, bleibt aber leer.
 
-**Das ist der wichtigste Punkt.** Autoptimize fasst JavaScript und CSS aller Seiten zu
-gemeinsamen Dateien zusammen. Genau daran gehen Katalogseiten am häufigsten kaputt: die
-Seite lädt, bleibt aber leer, weil das Katalog-Skript im Sammelpaket steckt und dort in
-der falschen Reihenfolge ausgeführt wird.
+Das musst du **nicht** mehr von Hand eintragen. Das Plugin meldet sich bei Autoptimize selbst
+als Ausnahme an (alle seine Dateien heißen `kikripp…`) und setzt auf der Katalogseite die
+Kennzeichnung `DONOTMINIFY`, an die sich W3 Total Cache hält. Was du in Autoptimize schon
+eingetragen hast, bleibt dabei stehen.
 
-Geh auf **Einstellungen → Autoptimize → JavaScript-Optionen**, öffne *Erweiterte
-Einstellungen anzeigen* und trag unter **„Scripts ausschliessen von Autoptimize"** hinten
-mit Komma getrennt ein:
+### W3 Total Cache — Cache leeren nach jedem Import
 
-    kikripp
+Das Plugin sagt dem Cache, dass die Katalogseite nicht zwischengespeichert werden darf.
+Trotzdem: nach der Installation und **nach jedem Artikelimport** einmal oben in der Leiste
+*Performance → Purge All Caches*. Sonst siehst du alte Preise, obwohl die neuen schon drin
+sind.
 
-Dasselbe unter **CSS-Optionen → „CSS ausschliessen von Autoptimize"**. Danach oben
-**Cache leeren**. Alle Dateien des Katalogs tragen `kikripp` im Namen, ein Eintrag genügt
-also für beide.
+> **Beobachtung am Rande, unabhängig vom Katalog:** Autoptimize **und** W3 Total Cache machen
+> beide Minify. Zwei Plugins, die dasselbe tun, ist eine bekannt wacklige Kombination. Für den
+> Katalog ist das egal — er ist aus beiden ausgenommen. Wenn auf der Seite sonst irgendwann
+> etwas seltsam aussieht, ist das der erste Ort zum Nachsehen.
 
-### Performance / Cache — nach jedem Import leeren
+### Really Simple SSL — der erste Verdächtige, wenn der Katalog leer bleibt
 
-In der oberen Leiste steht **Performance**. Das Plugin sagt dem Cache selbst, dass die
-Katalogseite nicht zwischengespeichert werden darf, und alle Daten kommen mit
-„nicht zwischenspeichern"-Kennzeichnung. Trotzdem: nach der Installation und **nach jedem
-Artikelimport** einmal den Cache leeren. Findest du eine Ausschlussliste für einzelne
-Seiten, trag die Katalogseite dort ein.
+Really Simple SSL bringt Härtungsfunktionen mit, darunter Einschränkungen der **REST-
+Schnittstelle**. Der Katalog holt seine Artikel genau darüber, und zwar für Besucher, die
+**nicht** in WordPress angemeldet sind.
 
-### Simply Gallery Block & Lightbox — nur beobachten
+Ich kann von hier aus nicht sehen, welche Härtung bei dir eingeschaltet ist. Deshalb: Bleibt
+der Katalog im privaten Fenster leer, obwohl das Passwort stimmt, schau unter
+**Einstellungen → Really Simple SSL → Härtung** nach einem Punkt in Richtung *REST-API für
+abgemeldete Benutzer deaktivieren* und schalte ihn für den Test ab. Ändert sich nichts, sag
+mir Bescheid.
 
-Dieses Plugin legt sich auf Bilder und öffnet sie in einer Lightbox. Es kann sein, dass es
-auch die Fotos im Katalog anfasst. Das ist kein Schaden — sieh dir beim Testlauf einfach an,
-ob ein Klick auf ein Artikelfoto sich seltsam verhält. Wenn ja, sag Bescheid, dann schließe
-ich die Katalogbilder aus.
+### Maintenance — aus lassen
 
-### Statify, ACF, CPT UI, NS Cloner, Mitarbeiter
+Das Wartungs-Plugin ist **nicht aktiviert**, und das soll so bleiben, solange der Katalog
+läuft. Es würde die ganze Website für abgemeldete Besucher sperren, also auch den Katalog.
 
-Unkritisch. Das Plugin benutzt eigene Tabellen, eigene Einstellungsnamen, einen eigenen
-Kurzbefehl und ein Stylesheet, das nur innerhalb des Katalogs gilt.
+Dass auf kikripp.de trotzdem *Wartung* erscheint, liegt nur daran, dass diese Seite als
+Startseite eingestellt ist. Andere Seiten sind über ihre eigene Adresse ganz normal
+erreichbar — der Katalog also auch. Das ist genau die Situation, die wir brauchen: die
+Website wirkt nach außen ruhig, der Katalog ist über seinen Link trotzdem da.
 
-### WordPress 7.1.2 — vorher aktualisieren
+### XML Sitemap Generator — Katalogseite herausnehmen
 
-Im Dashboard steht ein Update an. Mach es **vor** der Installation des Katalogs, nicht
-danach. Ein Update mitten im Betrieb ist der unnötigere Zeitpunkt.
+Der Katalog trägt selbst ein „nicht indexieren", aber der Sitemap-Generator würde die Adresse
+trotzdem bei Google anmelden. Nimm die Katalogseite in den Einstellungen des Plugins von der
+Sitemap aus. Schlimm wäre es nicht — ohne Passwort sieht Google nur das Anmeldefeld —, aber
+sauberer ist es so.
 
-### Vorher: Sicherung anlegen
+### BackWPup — vorher einmal sichern
 
-Vor dem ersten Plugin-Upload eine Sicherung von Datenbank und Dateien machen — über dein
-Backup-Plugin oder beim Hoster. Dann lässt sich jeder Schritt zurücknehmen.
+Du hast BackWPup. Lass einen Durchgang mit **Datenbank und Dateien** laufen, bevor du das
+Plugin installierst. Dann lässt sich jeder Schritt zurücknehmen.
+
+### Bootstrap Blocks — nur anschauen
+
+Das Plugin lädt Bootstrap-Stile. Der Katalog bringt eigene mit, die nur innerhalb des Katalogs
+gelten; bei Knöpfen und Bildern kann sich aber trotzdem etwas überlagern. Sieh dir die fertige
+Seite einmal an. Sieht etwas schief aus, schick mir ein Bildschirmfoto, das ist schnell
+behoben.
+
+### EWWW Image Optimizer und Simply Gallery — unkritisch
+
+**EWWW** verkleinert Bilder beim Hochladen und kann sie verzögert laden. Die Artikelfotos
+setzt der Katalog erst nach dem Laden der Seite per JavaScript ein — daran kommt das
+verzögerte Laden nicht heran. Wichtig ist nur: **die Dateinamen dürfen sich nicht ändern**,
+der Katalog findet die Fotos darüber. EWWW benennt nichts um, das passt.
+
+**Simply Gallery Block & Lightbox** legt sich auf Bilder und öffnet sie groß. Es kann sein,
+dass es auch die Artikelfotos anfasst. Das ist kein Schaden — sieh beim Testlauf einfach, ob
+ein Klick auf ein Foto sich seltsam verhält.
+
+### Der Rest
+
+**ACF PRO**, **Custom Post Type UI**, **Multisite Post Duplicator**, **NS Cloner**,
+**Post Types Order**, **Statify** (beide Teile), **SVG Support** und **Timeline Block** stören
+den Katalog nicht. Er benutzt eigene Tabellen, eigene Einstellungsnamen, einen eigenen
+Kurzbefehl, einen eigenen REST-Namensraum und ein Stylesheet, das nur innerhalb des Katalogs
+gilt.
+
+**CookieYes und Yoast gibt es auf kikripp.de nicht.** Das Plugin bringt für beide
+Vorkehrungen mit; sie tun schlicht nichts, wenn das jeweilige Plugin fehlt.
 
 ### Schreibrechte kurz prüfen
 
@@ -214,13 +252,9 @@ Bevor du Stunden mit dem Hochladen von Fotos verbringst, der Reihe nach:
 3. Scheitert einer der beiden Schritte mit einer Rechte- oder Verzeichnismeldung, ist es ein
    Fall für den Hoster („Schreibrechte auf wp-content wiederherstellen").
 
-### Noch offen: die vollständige Plugin-Liste
+### WordPress 7.1.2 — vorher aktualisieren
 
-Die Punkte oben stammen aus dem, was im Menü und in der oberen Leiste zu sehen ist. Schick
-mir bei Gelegenheit einen Auszug von **Plugins → Installierte Plugins** — dann sage ich dir
-verbindlich, ob noch etwas dem Katalog in die Quere kommt. Besonders relevant wären ein
-Cookie-Banner (blockiert manchmal Skripte, bis jemand zustimmt) und ein Wartungs- oder
-Coming-Soon-Plugin.
+Im Dashboard steht ein Update an. Mach es **vor** der Installation des Katalogs, nicht danach.
 
 ---
 
@@ -287,18 +321,36 @@ sie und klick dann auf „notiert – Kontaktdaten löschen".
 
 ### Die Katalogseite bleibt leer
 
-Der Rahmen ist da, aber keine Artikel. Drei Ursachen, in dieser Reihenfolge prüfen:
+Der Rahmen ist da, aber keine Artikel. Auf kikripp.de in dieser Reihenfolge prüfen:
 
-1. **Cache.** Oben *Cache leeren*, Seite neu laden.
-2. **JavaScript zusammengefasst oder verkleinert.** Im Cache- oder Optimierungs-Plugin die
-   Katalogseite von der JavaScript-Optimierung ausnehmen.
-3. **CookieYes blockiert das Skript.** Im privaten Fenster prüfen: Lädt der Katalog, wenn du
-   im Banner auf *Alle akzeptieren* klickst, aber nicht ohne? Dann ist es CookieYes.
+1. **Cache.** *Performance → Purge All Caches*, Seite neu laden. Das ist mit Abstand die
+   häufigste Ursache.
+2. **Really Simple SSL sperrt die REST-Schnittstelle.** Der Katalog holt seine Artikel
+   darüber, und zwar als abgemeldeter Besucher. Unter **Einstellungen → Really Simple SSL →
+   Härtung** nach einem Punkt in Richtung *REST-API für abgemeldete Benutzer deaktivieren*
+   suchen und für den Test abschalten.
+3. **Minify.** Eigentlich abgedeckt — das Plugin nimmt sich bei Autoptimize und W3 Total Cache
+   selbst aus. Zur Sicherheit: in **Performance → Minify** die Funktion kurz abschalten und
+   neu laden. Ändert das etwas, sag mir Bescheid.
+
+**So findest du Punkt 2 in zehn Sekunden:** Ruf in einem privaten Fenster, ohne angemeldet
+zu sein, diese Adresse auf:
+
+    https://www.kikripp.de/wp-json/kikripp/v1/artikel
+
+Du bekommst dort **keine** Artikelliste, das ist richtig so — ohne Passwort antwortet der
+Katalog mit einer kurzen Sperrmeldung. Worauf es ankommt, ist **welche** Antwort kommt:
+
+| Was da steht | Was es bedeutet |
+|---|---|
+| `{"ok":false,"gesperrt":true}` | Die Schnittstelle ist offen, der Katalog antwortet. Ursache liegt woanders — weiter mit Punkt 3. |
+| Etwas mit `rest_` und „nicht berechtigt", „disabled" oder „forbidden" | Die REST-Schnittstelle ist gesperrt. Das ist Punkt 2. |
+| Eine WordPress-Fehlerseite oder gar nichts | Schick mir einen Bildschirmabzug davon. |
 
 ### Der Katalog sieht gequetscht aus
 
-Die Seite hat eine Seitenleiste oder ein schmales Layout. Seitenvorlage auf *Elementor
-Canvas*, *Full Width* oder die Vorlage ohne Seitenleiste umstellen.
+Die Seite hat eine Seitenleiste oder ein schmales Layout. Seitenvorlage auf eine breite
+Vorlage ohne Seitenleiste umstellen.
 
 ### Ich komme nicht weiter
 
@@ -330,7 +382,7 @@ Damit auf kikripp.de nichts zurückbleibt:
 4. Das Plugin auf der Website deaktivieren und in der Netzwerkverwaltung löschen.
 5. Die Fotos aus der Mediathek entfernen.
 6. Den Absatz aus der Datenschutzerklärung wieder herausnehmen.
-7. Die Ausnahmen in Autoptimize wieder herausnehmen.
+7. Den Cache einmal leeren (*Performance → Purge All Caches*).
 
 ## Was wohin gehört
 

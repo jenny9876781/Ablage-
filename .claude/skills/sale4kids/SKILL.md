@@ -438,24 +438,47 @@ Weiterleitung aus.
 
 ### Verträglichkeit mit der Umgebung auf kikripp.de
 
-Sichtbar sind dort **Autoptimize**, ein Performance-/Cache-Plugin, **Simply Gallery Block &
-Lightbox**, **Statify**, **ACF**, **CPT UI**, **NS Cloner** und der Block-Editor (kein
-Elementor). Die vollständige Plugin-Liste steht noch aus. Was das Plugin von sich aus tut:
+Dort laufen **18 Plugins**, alle netzwerkweit aktiviert außer *Maintenance* (aus, soll aus
+bleiben). Relevant sind vier davon:
+
+| Plugin | Warum es zählt |
+|---|---|
+| **Autoptimize 3.1.8** | bündelt JS und CSS aller Seiten. Das Plugin trägt sich über `autoptimize_filter_js_exclude` / `_css_exclude` **selbst** in die Ausschlussliste ein — keine Handarbeit in den Einstellungen mehr. |
+| **W3 Total Cache 2.4** | Seiten-Cache **und** Minify. `DONOTCACHEPAGE` und `DONOTMINIFY` werden auf der Katalogseite gesetzt, W3TC hält sich an beide. Cache trotzdem nach jedem Import leeren. |
+| **Really Simple SSL 7.0.8** | Härtungsfunktionen, darunter Einschränkungen der REST-Schnittstelle. **Erster Verdacht, wenn der Katalog leer bleibt** — die Artikel kommen über REST, und zwar für abgemeldete Besucher. Nicht aus dem Plugin heraus überschreiben, sondern die Nutzerin die Einstellung prüfen lassen. |
+| **Maintenance 4.07** | aus. Würde die ganze Website für Abgemeldete sperren. Dass *Wartung* erscheint, liegt nur daran, dass die Seite als Startseite gesetzt ist — andere Seiten sind über ihre Adresse erreichbar. |
+
+Unkritisch: ACF PRO, BackWPup (Sicherung vorher), Bootstrap Blocks (Stile können sich
+überlagern, nur anschauen), CPT UI, EWWW Image Optimizer (benennt nichts um; die Artikelfotos
+setzt der Katalog per JavaScript ein, verzögertes Laden greift dort nicht), Multisite Post
+Duplicator, NS Cloner, Post Types Order, Simply Gallery Block & Lightbox (beobachten),
+Statify, SVG Support, Timeline Block, XML Sitemap Generator (Katalogseite dort ausnehmen).
+
+**CookieYes und Yoast gibt es auf kikripp.de nicht**, ebenso wenig Elementor — die Seite ist
+mit dem Block-Editor gebaut. Was das Plugin von sich aus tut:
 
 | Maßnahme | Wogegen |
 |---|---|
 | `DONOTCACHEPAGE` auf der Katalogseite und bei `?kik=` plus `nocache_headers()` | ein Seiten-Cache würde den Zugangszustand eines Fremden ausliefern oder den Link-Einlöser gar nicht ausführen |
 | `wpseo_robots` und `wpseo_robots_array` gefiltert, eigenes `noindex` nur wenn Yoast fehlt | zwei robots-Angaben auf einer Seite sind unzuverlässig |
 | `data-cookieyes="cookieyes-necessary"` am eigenen Skript (`script_loader_tag`) | Zustimmungsbanner blockieren sonst das Skript und die Seite bleibt leer |
+| `autoptimize_filter_js_exclude` und `_css_exclude` um `kikripp` ergänzt | Autoptimize bündelt sonst unser Skript mit und der Katalog bleibt leer. Die Eintragungen der Nutzerin bleiben erhalten; sieben Tests in `test-logik.php` decken das ab |
+| `DONOTMINIFY` auf der Katalogseite | W3 Total Cache verkleinert sonst das Skript |
 | alles mit `kikripp_` benannt: Optionen, Tabellen, Hooks, Kurzbefehl, REST-Namensraum, Menü, CSS-Klasse | Namenskollisionen |
 
 Die Filter für **Yoast** und **CookieYes** bleiben drin, auch wenn auf kikripp.de weder das
 eine noch das andere zu sehen ist: sie tun nichts, wenn das Plugin fehlt, und kosten nichts.
 
 Was die Nutzerin selbst erledigen muss, steht in `A1` unter „Was auf kikripp.de zu beachten
-ist": **`kikripp` in Autoptimize bei JavaScript und CSS ausschließen** (der wichtigste
-Punkt — alle Dateien des Katalogs tragen `kikripp` im Namen), Cache nach jedem Import leeren,
-breite Seitenvorlage ohne Seitenleiste, WordPress vorher aktualisieren, Sicherung anlegen.
+ist": Cache nach jedem Import leeren, breite Seitenvorlage ohne Seitenleiste, Katalogseite aus
+der Sitemap nehmen, WordPress vorher aktualisieren, Sicherung mit BackWPup. Autoptimize und
+Minify erledigt das Plugin selbst.
+
+Bleibt der Katalog leer, gilt diese Reihenfolge (steht auch in `A1`): Cache — Really Simple
+SSL — Minify. Der schnelle Test auf den mittleren Punkt ist ein Aufruf von
+`/wp-json/kikripp/v1/artikel` im privaten Fenster: **`{"ok":false,"gesperrt":true}` ist die
+richtige Antwort** (ohne Passwort gibt es keine Artikel), eine `rest_…`-Fehlermeldung dagegen
+heißt, dass die Schnittstelle gesperrt ist.
 
 > Vor dem Hochladen von 350 Fotos steht in der Anleitung weiterhin: erst **ein** Foto
 > hochladen. Klappt das, ist `wp-content/uploads` beschreibbar. Das kostet eine Minute und
@@ -654,11 +677,11 @@ Zwei Sorten kommen laufend vor:
   beide auf `kikripp.de`; auch im Spam-Ordner nachsehen lassen.
 - **Blockierend: Impressum und Datenschutz stehen auf kikripp.de als Entwurf.** Beide müssen
   veröffentlicht sein, bevor ein Link hinausgeht. Der Katalog verlinkt sie im Anbieter-Block.
-- **Zu prüfen: Wartungsmodus.** Startseite von kikripp.de ist die Seite *Wartung*, alles
-  andere steht auf Entwurf. Sperrt ein Wartungs- oder Coming-Soon-Plugin Besucher aus, muss
-  die Katalogseite dort als Ausnahme eingetragen werden.
-- **Ausstehend von der Nutzerin:** die vollständige Plugin-Liste von kikripp.de
-  (Plugins → Installierte Plugins), die Maße und die überarbeitete Artikelliste der
+- **Wartungsmodus geklärt:** Das Plugin *Maintenance* ist **aus**. Dass kikripp.de eine
+  Wartungsseite zeigt, liegt nur an der Startseiten-Einstellung; andere Seiten sind über ihre
+  Adresse erreichbar. Der Katalog funktioniert also. *Maintenance* darf nicht eingeschaltet
+  werden, solange er läuft.
+- **Ausstehend von der Nutzerin:** die Maße und die überarbeitete Artikelliste der
   Kindergartenleitung.
 - **Rundgang läuft.** Türschilder, Erfassungsblätter und Erfassungsliste sind ausgeliefert
   und ausgedruckt. Zurück kommen `T3_Erfassungsliste.xlsx` mit Stückzahlen und die Fotos je

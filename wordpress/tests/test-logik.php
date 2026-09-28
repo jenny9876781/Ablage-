@@ -249,5 +249,29 @@ pruefe('leerer Name ergibt leeren Schluessel', schluessel(''), '');
 pruefe('genaue Datei ist als genau erkannt',  ist_genau('F-001.jpg'), true);
 pruefe('Datei mit Zusatz ist nicht genau',    ist_genau('F-001-1.jpg'), false);
 
+// -----------------------------------------------------------------------------
+// Autoptimize buendelt JavaScript und CSS aller Seiten. Landet unser Skript im
+// Sammelpaket, bleibt der Katalog leer. Das Plugin traegt sich selbst in die
+// Ausschlussliste ein - was die Nutzerin dort stehen hat, muss erhalten bleiben.
+// -----------------------------------------------------------------------------
+titel('Ausschluss aus der Sammeldatei von Autoptimize');
+require_once __DIR__ . '/../kikripp-katalog/includes/class-kikripp-frontend.php';
+$aus = ['Kikripp_Frontend', 'nicht_zusammenfassen'];
+
+pruefe('leere Liste ergibt genau unseren Eintrag',
+       $aus(''), 'kikripp');
+pruefe('vorhandene Eintraege bleiben stehen',
+       $aus('wp-includes/js/dist/, jquery.js'), 'wp-includes/js/dist/, jquery.js, kikripp');
+pruefe('kein zweiter Eintrag, wenn wir schon drin stehen',
+       $aus('jquery.js, kikripp'), 'jquery.js, kikripp');
+pruefe('Leerzeichen um die Kommas stoeren nicht',
+       $aus('  a.js ,  b.js  '), 'a.js, b.js, kikripp');
+pruefe('leere Zwischeneintraege fallen weg',
+       $aus('a.js,,b.js'), 'a.js, b.js, kikripp');
+pruefe('Autoptimize mit Feld statt Zeichenkette bekommt ein Feld zurueck',
+       $aus(['a.js']), ['a.js', 'kikripp']);
+pruefe('Feld ohne Doppelung',
+       $aus(['kikripp']), ['kikripp']);
+
 printf("\n== Ergebnis: %d Prüfungen, %d Fehler ==\n", $geprueft, $fehler);
 exit($fehler > 0 ? 1 : 0);

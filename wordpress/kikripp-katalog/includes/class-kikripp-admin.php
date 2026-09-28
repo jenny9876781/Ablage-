@@ -238,6 +238,22 @@ class Kikripp_Admin {
         if (!is_array($liste)) {
             self::zurueck('kikripp-import', 'Die Datei konnte nicht gelesen werden. Erwartet wird eine JSON-Datei.', true);
         }
+        $bericht = self::einspielen($liste);
+        self::zurueck('kikripp-import', self::import_meldung($bericht));
+    }
+
+    /**
+     * Spielt die Artikelliste ein. Der ganze Import steckt hier – ohne Formular,
+     * ohne Weiterleitung, ohne Ausgabe. Nur so kann der Kettentest genau den Code
+     * prüfen, der später auch in WordPress läuft.
+     *
+     * Gibt einen Bericht zurück: neu, geaendert, ohne_bild, fehlende_fotos,
+     * verschwunden, reserviert_entfernt.
+     */
+    public static function einspielen(array $liste) {
+        // Eine alte Bildkarte aus einem abgebrochenen Lauf wäre eine Stunde lang gültig
+        // und würde frisch hochgeladene Fotos übersehen. Deshalb hier neu aufbauen.
+        delete_transient('kikripp_bilder');
 
         global $wpdb;
         $neu = $geaendert = $ohne_bild = 0;
@@ -312,26 +328,39 @@ class Kikripp_Admin {
             if ($b && ($b['reserviert'] > 0 || $b['bezahlt'] > 0)) { $reserviert_entfernt[] = $weg; }
         }
 
-        $meldung = sprintf('Import abgeschlossen: %d neu, %d aktualisiert.', $neu, $geaendert);
-        if ($verschwunden) {
-            $meldung .= sprintf(' %d Artikel standen nicht mehr in der Datei und wurden aus dem '
-                              . 'Katalog genommen (%s).', count($verschwunden),
-                              implode(', ', array_slice($verschwunden, 0, 15)));
-        }
-        if ($ohne_bild > 0) {
-            $fehlende_fotos = array_values(array_unique($fehlende_fotos));
-            sort($fehlende_fotos);
-            $meldung .= sprintf(' %d Artikel ohne gefundenes Foto. Diese Bilder fehlen in der '
-                . 'Mediathek: %s%s', $ohne_bild,
-                implode(', ', array_slice($fehlende_fotos, 0, 25)),
-                count($fehlende_fotos) > 25 ? ' … und weitere' : '.');
-        }
-        if (!empty($reserviert_entfernt)) {
-            $meldung .= ' ACHTUNG: Diese Artikel wurden stillgelegt, haben aber noch Reservierungen: '
-                      . implode(', ', array_slice($reserviert_entfernt, 0, 15)) . '.';
-        }
+        $fehlende_fotos = array_values(array_unique($fehlende_fotos));
+        sort($fehlende_fotos);
         delete_transient('kikripp_bilder');
-        self::zurueck('kikripp-import', $meldung);
+
+        return [
+            'neu'                 => $neu,
+            'geaendert'           => $geaendert,
+            'ohne_bild'           => $ohne_bild,
+            'fehlende_fotos'      => $fehlende_fotos,
+            'verschwunden'        => $verschwunden,
+            'reserviert_entfernt' => array_values(array_unique($reserviert_entfernt)),
+        ];
+    }
+
+    /** Aus dem Bericht den Satz bauen, der nach dem Import oben auf der Seite steht. */
+    public static function import_meldung(array $b) {
+        $meldung = sprintf('Import abgeschlossen: %d neu, %d aktualisiert.', $b['neu'], $b['geaendert']);
+        if (!empty($b['verschwunden'])) {
+            $meldung .= sprintf(' %d Artikel standen nicht mehr in der Datei und wurden aus dem '
+                              . 'Katalog genommen (%s).', count($b['verschwunden']),
+                              implode(', ', array_slice($b['verschwunden'], 0, 15)));
+        }
+        if ($b['ohne_bild'] > 0) {
+            $meldung .= sprintf(' %d Artikel ohne gefundenes Foto. Diese Bilder fehlen in der '
+                . 'Mediathek: %s%s', $b['ohne_bild'],
+                implode(', ', array_slice($b['fehlende_fotos'], 0, 25)),
+                count($b['fehlende_fotos']) > 25 ? ' … und weitere' : '.');
+        }
+        if (!empty($b['reserviert_entfernt'])) {
+            $meldung .= ' ACHTUNG: Diese Artikel wurden stillgelegt, haben aber noch Reservierungen: '
+                      . implode(', ', array_slice($b['reserviert_entfernt'], 0, 15)) . '.';
+        }
+        return $meldung;
     }
 
     /** Foto in der Mediathek anhand des Dateinamens finden (F-001 -> Anhang). */
@@ -360,14 +389,19 @@ class Kikripp_Admin {
         $karte = get_transient('kikripp_bilder');
         if (!is_array($karte)) {
             $karte = [];
+            // Ohne 'fields' => 'ids' legt WordPress die Beitraege und ihre Zusatzfelder
+            // in zwei Abfragen in den Zwischenspeicher. Mit 'ids' waeren es stattdessen
+            // zwei Abfragen je Bild - bei tausend Bildern in der Mediathek der
+            // Unterschied zwischen einer Sekunde und einem Zeitueberschreitungsfehler.
             $anhaenge = get_posts([
                 'post_type'      => 'attachment',
                 'post_mime_type' => 'image',
                 'posts_per_page' => -1,
                 'post_status'    => 'inherit',
-                'fields'         => 'ids',
+                'no_found_rows'  => true,
             ]);
-            foreach ($anhaenge as $id) {
+            foreach ($anhaenge as $anhang) {
+                $id = $anhang->ID;
                 list($basis, $genau) = self::bild_schluessel(
                     (string) get_post_meta($id, '_wp_attached_file', true));
                 if ($basis === '') { continue; }

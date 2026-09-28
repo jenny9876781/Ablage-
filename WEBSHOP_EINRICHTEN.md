@@ -18,6 +18,42 @@ Stunden, das meiste davon ist Warten beim Hochladen der Fotos.
 > `jennyp@kikripp.de` und werden danach sofort aus der Datenbank gelöscht. Diese Mails sind
 > damit dein einziges Kontaktarchiv — **bitte nicht löschen.** Leg dir einen Ordner an.
 
+## 0. Fünf Minuten Vorarbeit, die zwei Stunden Ärger sparen
+
+Bitte diese fünf Punkte **vor** dem ersten Klick abhaken. Jeder einzelne davon würde dich
+sonst mitten im Aufbau erwischen.
+
+**a) Speicherplatz der Website prüfen — der wichtigste Punkt.**
+In einem Multisite-Netzwerk hat jede Website ein Platzkonto, standardmäßig **100 MB**. Die
+Fotos brauchen **68 MB**, und auf kikripp.de liegen schon Bilder der bestehenden Seite. Reicht
+das Konto nicht, bricht das Hochladen mittendrin ab mit einer Meldung über die
+Speicherplatzbegrenzung — und du weißt nicht, welche Bilder durch sind.
+
+Geh auf **Meine Websites → Netzwerkverwaltung → Einstellungen** und such den Abschnitt
+*Upload-Einstellungen*. Dort stehen zwei Zahlen:
+
+| Einstellung | Was sie sein muss |
+|---|---|
+| *Speicherplatz pro Website begrenzen* | entweder abschalten, oder auf mindestens **500 MB** setzen |
+| *Maximale Größe der Upload-Datei* | mindestens **1000 KB** (unser größtes Foto hat 623 KB) |
+
+Als Super-Admin darfst du das ändern. Wenn du unsicher bist: die Begrenzung ganz abschalten
+ist für eine Seite, die dir selbst gehört, unbedenklich.
+
+**b) WordPress aktualisieren.** Im Dashboard steht 7.1.2 an. Mach das jetzt, nicht später.
+
+**c) Sicherung anlegen.** Du hast BackWPup. Einmal *Datenbank und Dateien* durchlaufen lassen.
+
+**d) Impressum und Datenschutz veröffentlichen.** Beide stehen bei dir auf *Entwurf* und sind
+damit öffentlich nicht erreichbar. Der Katalog verlinkt sie unter jedem Angebot. Ohne sie darf
+kein Link hinausgehen.
+
+**e) Nichts am Wartungs-Plugin ändern.** *Maintenance* ist aus — das ist richtig so und muss
+so bleiben. Die Wartungsseite, die Besucher auf kikripp.de sehen, ist nur deine eingestellte
+Startseite; alle anderen Seiten sind über ihre eigene Adresse erreichbar.
+
+---
+
 ## 1. Plugin installieren
 
 Melde dich auf **www.kikripp.de/wp-admin** an. Weil kikripp.de ein Netzwerk ist, läuft die
@@ -32,30 +68,48 @@ Installation in zwei Schritten:
 
 In der linken Leiste erscheint danach der Menüpunkt **Artikelkatalog**.
 
+Dort steht sofort ein **gelber Hinweis, dass noch kein Passwort vergeben ist**. Das ist
+richtig so und kein Fehler — das Passwort kommt in Schritt 4. Bis dahin kommt niemand in den
+Katalog, auch du nicht.
+
 Warum nicht im Netzwerk aktivieren: der Katalog gehört auf eine Website, nicht auf alle.
 Eine Netzwerk-Aktivierung würde ihn auf jeder Seite des Netzwerks einschalten und liesse
 sich später nur wieder zentral abschalten.
 
 ## 2. Fotos in die Mediathek
 
-Entpacke `kikripp-fotos.zip` auf deinem Rechner – du bekommst einen Ordner `fotos` mit
-gut 400 Bildern (rund 80 MB). Geh in WordPress auf **Medien → Datei hinzufügen** und zieh
-die Bilder in das Feld — am besten in Paketen von hundert, nicht alle auf einmal. Das
+Entpacke `kikripp-fotos.zip` auf deinem Rechner. Du bekommst einen Ordner `fotos` mit
+genau **351 Bildern, zusammen 68 MB**. Geh in WordPress auf **Medien → Datei hinzufügen** und
+zieh die Bilder in das Feld — am besten in Paketen von hundert, nicht alle auf einmal. Das
 dauert; lass das Browserfenster offen, bis jedes Paket durch ist.
 
-Die genaue Zahl steht in der Meldung von `build_fotopaket.py`, das die Datei erzeugt.
+**So prüfst du, ob alles angekommen ist:** Geh auf **Medien → Mediathek** und schalte oben
+rechts auf die Listenansicht. Unten steht die Gesamtzahl der Einträge. Sie muss um 351
+gestiegen sein.
 
-Wichtig: Die Dateinamen dürfen sich nicht ändern. Das Plugin findet die Fotos über den
-Namen. Lade sie deshalb bitte nur einmal hoch – lädst du dasselbe Bild zweimal hoch,
-hängt WordPress eine `-1` an und der Katalog findet es trotzdem, aber es liegt doppelt
-auf dem Server.
+Und falls doch etwas fehlt: **das ist kein Problem und du musst nicht suchen.** Der Import im
+nächsten Schritt sagt dir die fehlenden Bilder beim Namen. Die lädst du dann einzeln nach und
+importierst noch einmal.
+
+Die Dateinamen dürfen sich nicht ändern — das Plugin findet die Fotos darüber. Lädst du
+versehentlich dasselbe Bild zweimal hoch, hängt WordPress eine `-1` an; der Katalog findet es
+trotzdem, es liegt dann nur doppelt auf dem Server.
 
 ## 3. Artikel importieren
 
 Geh auf **Artikelkatalog → Artikel importieren**, wähle `katalog_import.json` und klick
-auf Importieren. Danach steht dort, wie viele Artikel angelegt wurden und wie viele
-davon kein Foto gefunden haben. Steht dort eine Zahl über null, stimmt bei diesen Fotos
-etwas mit dem Dateinamen nicht.
+auf Importieren. Der Import dauert **ein paar Sekunden**, nicht Minuten.
+
+Danach steht oben eine Meldung. **So muss sie aussehen:**
+
+    Import abgeschlossen: 417 neu, 0 aktualisiert.
+
+Kein weiterer Satz dahinter — das heißt: jeder Artikel hat sein Foto gefunden. Im Katalog
+sichtbar sind davon **362**; die übrigen stehen bewusst auf „nicht im Katalog".
+
+Steht dahinter noch *„… Artikel ohne gefundenes Foto"*, nennt die Meldung die fehlenden
+Bilder beim Namen. Die lädst du in die Mediathek nach und importierst einfach noch einmal.
+Mehrfaches Importieren schadet nie.
 
 Diesen Schritt wiederholst du jedes Mal, wenn neue Artikel dazukommen oder Preise sich
 ändern: neue Datei erzeugen lassen, hochladen, fertig. Bestehende Artikel werden
@@ -69,29 +123,33 @@ Passwort nirgends in einer Datei steht.
 
 Geh auf **Artikelkatalog → Einstellungen** und arbeite die Seite von oben nach unten durch:
 
-| Feld | Was hineingehört |
+Die Tabelle steht in **derselben Reihenfolge wie das Formular** — du kannst sie einfach
+danebenlegen und abarbeiten. Fast alles ist schon vorausgefüllt; nur das Passwort fehlt.
+
+| Feld (in dieser Reihenfolge) | Was hineingehört |
 |---|---|
-| Katalog-Passwort | das vereinbarte Passwort, einmal eintragen |
-| Verkäuferin (Firma) | `Kikripp GmbH` — steht so im Katalog und im Mailbetreff |
+| Katalog-Passwort | das vereinbarte Passwort, einmal eintragen. **Das einzige leere Feld.** |
 | Reservierungen melden an | `jennyp@kikripp.de` |
-| Telefon | die Nummer der Kikripp GmbH |
-| **Impressum** | `https://www.kikripp.de/impressum/` — **die Seite muss veröffentlicht sein**, siehe unten |
-| **Datenschutzerklärung** | `https://www.kikripp.de/datenschutz/` — **ebenfalls veröffentlicht**, siehe unten |
-| Abholadresse | erscheint unter dem Katalog |
-| Hinweisband | Text über dem Katalog, zum Livegang leeren |
+| Hinweisband | Text über dem Katalog. Während des Testens z. B. „Testbetrieb"; zum Livegang leeren |
 | Reservierung gilt | 7 Tage |
 | Umsatzsteuer | 19 % |
+| Verkäuferin (Firma) | `Kikripp GmbH` — steht so im Katalog und im Mailbetreff |
+| Telefon | die Nummer der Kikripp GmbH |
+| **Impressum** | `https://www.kikripp.de/impressum/` — die Seite muss veröffentlicht sein |
+| **Datenschutzerklärung** | `https://www.kikripp.de/datenschutz/` — ebenfalls veröffentlicht |
+| Abholadresse | erscheint unter dem Katalog |
 | Rechtliche Hinweise | Verkaufsbedingungen, änderbar |
+| Vorschaubetrieb | **eingeschaltet lassen**, solange ihr testet |
 
-**Achtung, das ist der eine Punkt, der den Livegang aufhält:** Impressum und Datenschutz
-stehen auf kikripp.de zurzeit als **Entwurf**, sind also öffentlich nicht erreichbar. Ein
-Katalog, in dem Ware gegen Geld angeboten wird, braucht beides erreichbar — das Impressum
-nach § 5 DDG, die Datenschutzerklärung nach Art. 13 DSGVO, weil das Reservierungsformular
-Name, Mailadresse und Telefonnummer entgegennimmt. Beide Seiten also **veröffentlichen**,
-bevor der erste Link hinausgeht, und danach die Adressen hier einmal anklicken.
+Zu **Vorschaubetrieb**: Solange der Haken gesetzt ist, werden alle eingehenden Reservierungen
+als Testdaten markiert und lassen sich am Ende mit einem Klick gemeinsam löschen. Erst zum
+Livegang nimmst du ihn heraus.
 
-Lass **Vorschaubetrieb** eingeschaltet, solange ihr testet. Dann werden alle eingehenden
-Reservierungen als Testdaten markiert und lassen sich am Ende mit einem Klick löschen.
+Zu **Impressum und Datenschutz**: Das sind die beiden Adressen aus Punkt 0d. Klick sie hier
+einmal an, nachdem du die Seiten veröffentlicht hast — sie müssen sich öffnen. Der Katalog
+verlinkt sie unter jedem Angebot; das Impressum verlangt § 5 DDG, die Datenschutzerklärung
+Art. 13 DSGVO, weil das Reservierungsformular Name, Mailadresse und Telefonnummer
+entgegennimmt.
 
 Und füge noch den Absatz aus **`U2_Datenschutz_Absatz.docx`** in die Datenschutzerklärung
 von kikripp.de ein. Er beschreibt, was mit den Daten aus dem Reservierungsformular passiert.
@@ -111,12 +169,11 @@ schmalen Spalte wird es eng.
 Die Seite trägt automatisch ein „nicht indexieren" für Suchmaschinen und taucht nicht bei
 Google auf.
 
-**Der Wartungsmodus.** Auf kikripp.de ist zurzeit die Seite *Wartung* als Startseite gesetzt
-und alles andere steht auf Entwurf. Prüfe, ob ein Wartungs- oder Coming-Soon-Plugin die
-Website für Besucher sperrt. Wenn ja, muss die Katalogseite dort als **Ausnahme** eingetragen
-werden — sonst sehen die Interessenten die Wartungsseite statt des Katalogs. Am einfachsten
-prüfst du das, indem du den fertigen Link in einem privaten Browserfenster öffnest, in dem du
-nicht angemeldet bist. Genau das macht Schritt 6.
+**Zum Wartungsmodus — das ist geklärt und kein Problem.** Auf kikripp.de zeigt die Startseite
+*Wartung*, weil diese Seite als Startseite eingestellt ist. Das Plugin *Maintenance*, das die
+ganze Website sperren würde, ist **ausgeschaltet**. Andere Seiten sind deshalb über ihre eigene
+Adresse ganz normal erreichbar — die Katalogseite also auch. Nur: *Maintenance* bitte nicht
+einschalten, solange der Katalog läuft. Schritt 6 prüft das ohnehin mit.
 
 **Der Link mit Passwort.** Hängst du `?kik=DASPASSWORT` an die Adresse, öffnet sich der Katalog
 direkt — niemand muss etwas eintippen. Das Passwort verschwindet dabei sofort wieder aus der
@@ -125,8 +182,8 @@ Adresszeile. Diesen Link verschickst du an die Interessenten:
     https://www.kikripp.de/artikelkatalog/?kik=DASPASSWORT
 
 **Ein Knopf im Menü** ist möglich, aber nicht nötig: der Katalog ist ohnehin nur über den
-Link mit Passwort erreichbar. Solange kikripp.de im Wartungsmodus ist, würde ein Menüpunkt
-auch niemandem angezeigt.
+Link mit Passwort erreichbar, und solange die Startseite die Wartungsseite ist, findet ihn
+sowieso niemand von selbst.
 
 ## 6. Einmal selbst durchtesten
 
@@ -148,7 +205,22 @@ wir den Versand über SMTP um. Hier gibt es eine Besonderheit: Absender und Empf
 beide auf `kikripp.de`. Manche Postfächer sortieren eine Mail, die scheinbar von einem selbst
 kommt, in den Spam-Ordner. **Sieh beim ersten Test also auch dort nach.**
 
-Zum Schluss: **Artikelkatalog → Einstellungen → Testreservierungen löschen**.
+## 7. Livegang — die letzten fünf Handgriffe
+
+Erst wenn Schritt 6 sauber durchgelaufen ist. Der Reihe nach:
+
+1. **Artikelkatalog → Einstellungen → Testreservierungen löschen.** Damit sind alle Vorgänge
+   aus der Testphase weg und die Nummerierung beginnt bei den echten Interessenten.
+2. **Vorschaubetrieb ausschalten.** Ab jetzt sind eingehende Reservierungen echt.
+3. **Hinweisband leeren.** Der Testhinweis über dem Katalog verschwindet damit.
+4. **Cache leeren** (*Performance → Purge All Caches*).
+5. **Noch einmal im privaten Fenster ansehen.** Kein Testhinweis mehr, Preise stimmen,
+   alle Artikel da. Dann erst den Link verschicken.
+
+**Sicherheitsnetz:** Sollte an diesem Punkt doch etwas nicht stimmen, nimm einfach den
+Vorschaubetrieb wieder an und schreib mir. Der Katalog ist über den Link ohne Passwort für
+niemanden erreichbar — es kann dir also nichts „entwischen", solange du den Link nicht
+verschickt hast.
 
 ## Was auf kikripp.de zu beachten ist
 

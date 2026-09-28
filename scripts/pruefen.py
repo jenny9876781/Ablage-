@@ -180,6 +180,32 @@ for name, mindest in (("01_Artikelstamm_kikripp.xlsx", 20),
     elif os.path.getsize(pf) // 1024 < mindest: F(f"{name} ist auffällig klein")
     else: OK(f"{name} ({os.path.getsize(pf)//1024} KB)")
 
+print("\n== 4b. Zahlen in der Einrichtungsanleitung ==")
+# In der Anleitung stehen konkrete Zahlen, an denen die Nutzerin beim Aufbau ablesen
+# soll, ob alles geklappt hat ("Import abgeschlossen: 417 neu"). Veralten sie, schickt
+# die Anleitung sie auf eine Fehlersuche, die es gar nicht gibt. Das ist hier schon
+# einmal passiert – deshalb wird es jetzt geprüft.
+_a1 = os.path.join(BASIS, "WEBSHOP_EINRICHTEN.md")
+if not os.path.exists(_a1):
+    F("WEBSHOP_EINRICHTEN.md fehlt")
+else:
+    _text = open(_a1, encoding="utf-8").read()
+    _fotos = {a["Foto"].strip() for a in alle
+              if a["Foto"].strip() and (a.get("Im_Katalog") or "ja").lower() == "ja"
+              and (a.get("Aktiv") or "ja").lower() == "ja"}
+    _zip = os.path.join(AUSGABE, "kikripp-fotos.zip")
+    _mb = os.path.getsize(_zip) // 1024 // 1024 if os.path.exists(_zip) else 0
+    _sichtbar = len([a for a in alle
+                     if (a.get("Aktiv") or "ja").lower() == "ja"
+                     and (a.get("Im_Katalog") or "ja").lower() == "ja"])
+    for _was, _soll in (("Fotos", f"**{len(_fotos)} Bildern, zusammen {_mb} MB**"),
+                        ("Artikel beim Import", f"{len(alle)} neu, 0 aktualisiert"),
+                        ("im Katalog sichtbar", f"**{_sichtbar}**")):
+        if _soll in _text:
+            OK(f"Anleitung nennt die richtige Zahl: {_was}")
+        else:
+            F(f"Anleitung: Zahl für „{_was}“ stimmt nicht mehr – erwartet „{_soll}“")
+
 print("\n== 5. Summen ==")
 gesamt = sum(a["Positionswert"] for a in aktiv)
 print(f"  Gesamtwert netto  {eur(gesamt)}")

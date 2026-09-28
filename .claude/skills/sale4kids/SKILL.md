@@ -364,6 +364,17 @@ Fixierung ist **G3**: Bild, ArtNr, Raumcode, Raum, Bezeichnung, Menge bleiben st
 Detailspalten `Kategorie` bis `Maße` sind eine zugeklappte Gruppe, damit `Preis_netto` ohne
 langes Scrollen neben dem Bild steht; die Verkaufsspalten sind wie bisher zugeklappt.
 
+Zwei Prüfungen halten die **Anleitung** mit der Wirklichkeit im Gleichstand, weil beides schon
+einmal auseinandergelaufen ist:
+
+* `pruefen.py`, Abschnitt **4b**: die Zahlen in `WEBSHOP_EINRICHTEN.md` (Fotos, MB, „417 neu",
+  sichtbare Positionen) müssen zu den Daten passen. Die Nutzerin liest sie beim Aufbau als
+  Sollwert ab — veraltet schicken sie sie auf eine Fehlersuche, die es nicht gibt.
+* `pruefe_uebergabe.py`, Abschnitt **4**: jedes Feld der Einstellungsseite aus
+  `class-kikripp-admin.php` muss in der Anleitung vorkommen. Die Tabelle dort steht in
+  **derselben Reihenfolge wie das Formular** — das ist Absicht, die Nutzerin arbeitet sie
+  daneben ab.
+
 Nach jedem Umbau der Mappe **zwei Proben**: der Rundlauf (`rueckeinlesen.py`-Logik gegen die
 frisch gebaute Datei, erwartet 0 Abweichungen) und die Bildzuordnung (Prüfsumme des
 eingebetteten Bildes gegen die erwartete Miniatur, Zeile für Zeile). LibreOffice kann in
@@ -474,6 +485,12 @@ ist": Cache nach jedem Import leeren, breite Seitenvorlage ohne Seitenleiste, Ka
 der Sitemap nehmen, WordPress vorher aktualisieren, Sicherung mit BackWPup. Autoptimize und
 Minify erledigt das Plugin selbst.
 
+**Multisite-Speicherplatz.** Jede Website im Netzwerk hat ein Platzkonto, Standard 100 MB.
+Die Fotos brauchen 68 MB, und auf kikripp.de liegen schon Bilder. Reicht es nicht, bricht das
+Hochladen mittendrin ab. Steht als Punkt 0a in `A1`: Netzwerkverwaltung → Einstellungen →
+Upload-Einstellungen, Begrenzung abschalten oder auf mindestens 500 MB. Das größte Foto hat
+623 KB, die Einzeldateigrenze (Standard 1.500 KB) reicht also.
+
 Bleibt der Katalog leer, gilt diese Reihenfolge (steht auch in `A1`): Cache — Really Simple
 SSL — Minify. Der schnelle Test auf den mittleren Punkt ist ein Aufruf von
 `/wp-json/kikripp/v1/artikel` im privaten Fenster: **`{"ok":false,"gesperrt":true}` ist die
@@ -483,6 +500,25 @@ heißt, dass die Schnittstelle gesperrt ist.
 > Vor dem Hochladen von 350 Fotos steht in der Anleitung weiterhin: erst **ein** Foto
 > hochladen. Klappt das, ist `wp-content/uploads` beschreibbar. Das kostet eine Minute und
 > spart im Zweifel zwei Stunden.
+
+### Der Import — was geprüft ist
+
+`Kikripp_Admin::import()` macht nur noch das Formular-Drumherum. Der eigentliche Import steckt
+in **`Kikripp_Admin::einspielen(array $liste)`** und gibt einen Bericht zurück (neu, geaendert,
+ohne_bild, fehlende_fotos, verschwunden, reserviert_entfernt); `import_meldung()` baut daraus
+den Satz für die Nutzerin. **Der Kettentest ruft `einspielen()` direkt auf** — vorher hatte er
+die Importlogik nachgebaut, und eine Abweichung zwischen Test und Wirklichkeit wäre unsichtbar
+geblieben. Die Mediathek ist dort eine Attrappe aus den echten Fotonamen; geprüft werden auch
+die drei Fälle, die in der Praxis stolpern lassen: Foto zweimal hochgeladen (`-1`), `.JPG`
+statt `.jpg`, und ein fehlendes Foto (muss beim Namen genannt werden).
+
+`einspielen()` löscht die Bildkarte **am Anfang und am Ende**. Nur am Ende genügte nicht: nach
+einem abgebrochenen Lauf bliebe eine Stunde lang eine veraltete Karte liegen und frisch
+hochgeladene Fotos würden übersehen.
+
+Die Bildkarte holt die Anhänge **ohne** `'fields' => 'ids'`. WordPress legt dann Beiträge und
+Zusatzfelder in zwei Abfragen in den Zwischenspeicher; mit `ids` wären es zwei Abfragen je
+Bild. Gemessen: 417 Artikel gegen eine Mediathek mit 1.219 Bildern in **rund einer Sekunde**.
 
 ### Was es nicht mehr gibt
 

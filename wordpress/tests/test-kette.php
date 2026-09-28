@@ -12,33 +12,38 @@ $GLOBALS['optionen'] = ['kikripp_frist_tage' => 7, 'kikripp_vorschau' => 1];
 Kikripp_DB::tabellen_anlegen();
 global $wpdb;
 
-/** Spielt eine Importdatei ein – dieselbe Logik wie die Verwaltung. */
+// -----------------------------------------------------------------------------
+// Mediathek-Attrappe. Der Import sucht die Fotos ueber den Dateinamen. Damit der
+// Test denselben Weg geht wie WordPress spaeter, bauen wir eine Mediathek aus den
+// echten Fotonamen - einschliesslich der beiden Faelle, die in der Praxis stolpern
+// lassen: ein Bild zweimal hochgeladen (F-xxx-1.jpg) und ein fehlendes Bild.
+// -----------------------------------------------------------------------------
+$GLOBALS['mediathek'] = [];        // ID => Pfad in uploads
+function mediathek_fuellen(array $dateinamen) {
+    $GLOBALS['mediathek'] = [];
+    $id = 1000;
+    foreach ($dateinamen as $d) { $GLOBALS['mediathek'][$id++] = '2026/09/' . $d; }
+}
+function get_posts($args) {
+    $out = [];
+    foreach (array_keys($GLOBALS['mediathek']) as $id) { $out[] = (object) ['ID' => $id]; }
+    return $out;
+}
+function get_post_meta($id, $schluessel, $einzeln = false) {
+    return $GLOBALS['mediathek'][$id] ?? '';
+}
+function wp_get_attachment_url($id) {
+    return 'https://www.kikripp.de/wp-content/uploads/' . ($GLOBALS['mediathek'][$id] ?? '');
+}
+function check_admin_referer($a) { return true; }
+function wp_die($t) { throw new RuntimeException($t); }
+
+require $b . 'includes/class-kikripp-admin.php';
+
+/** Spielt eine Importdatei ein - ueber genau den Code, der auch in WordPress laeuft. */
 function importiere($pfad) {
-    global $wpdb;
-    $liste = json_decode(file_get_contents($pfad), true);
-    $gesehen = [];
-    foreach ($liste as $i => $a) {
-        if (empty($a['nr'])) { continue; }
-        $gesehen[] = $a['nr'];
-        $zeile = ['sortierung' => (int) $a['sortierung'], 'menge' => (int) $a['menge'],
-                  'preis_netto' => (float) $a['preis'], 'aktiv' => !empty($a['aktiv']) ? 1 : 0,
-                  'im_katalog' => !empty($a['im_katalog']) ? 1 : 0,
-                  'daten' => wp_json_encode(['nr' => $a['nr'], 'titel' => $a['titel'],
-                      'beschr' => $a['beschr'], 'kat' => $a['kat'], 'raum' => $a['raum'],
-                      'zustand' => $a['zustand'], 'masse' => $a['masse'], 'einheit' => $a['einheit'],
-                      'basis' => $a['basis'], 'versand' => $a['versand'], 'marke' => $a['marke'] ?? '', 'buendel' => $a['buendel'] ?? '',
-                      'mengenhinweis' => $a['mengenhinweis'] ?? '',
-                      'foto' => $a['foto'], 'bild' => '/fotos/' . $a['foto'] . '.jpg']),
-                  'aktualisiert' => current_time('mysql')];
-        if ($wpdb->get_var($wpdb->prepare('SELECT artnr FROM ' . Kikripp_DB::t_artikel()
-                . ' WHERE artnr = %s', $a['nr']))) {
-            $wpdb->update(Kikripp_DB::t_artikel(), $zeile, ['artnr' => $a['nr']]);
-        } else {
-            $zeile['artnr'] = $a['nr'];
-            $wpdb->insert(Kikripp_DB::t_artikel(), $zeile);
-        }
-    }
-    return Kikripp_DB::fehlende_stilllegen($gesehen);
+    $bericht = Kikripp_Admin::einspielen(json_decode(file_get_contents($pfad), true));
+    return $bericht['verschwunden'];
 }
 
 $fehler = 0;
@@ -55,9 +60,18 @@ function im_katalog($nr) {
 }
 
 echo "\n1. Erstimport\n";
-$erwartet = count(array_filter(json_decode(file_get_contents($IMPORT), true),
+$alle = json_decode(file_get_contents($IMPORT), true);
+$erwartet = count(array_filter($alle,
     function ($a) { return !empty($a['aktiv']) && !empty($a['im_katalog']); }));
-importiere($IMPORT);
+
+// Mediathek so fuellen, wie sie nach dem Hochladen aussieht: jedes Foto einmal.
+$fotos = array_values(array_unique(array_filter(array_column($alle, 'foto'))));
+mediathek_fuellen(array_map(function ($f) { return $f . '.jpg'; }, $fotos));
+
+$bericht = Kikripp_Admin::einspielen($alle);
+pruefe('Import meldet alle Artikel als neu', $bericht['neu'], count($alle));
+pruefe('kein Artikel ohne Foto', $bericht['ohne_bild'], 0);
+pruefe('keine fehlenden Bilder gemeldet', $bericht['fehlende_fotos'], []);
 $katalog = Kikripp_DB::katalog_artikel();
 pruefe('alle aktiven Artikel im Katalog', count($katalog), $erwartet);
 
@@ -113,6 +127,36 @@ pruefe('neuer Preis im Katalog', im_katalog($C)['preis'], 99.0);
 $pos = $wpdb->get_row($wpdb->prepare('SELECT preis_netto FROM ' . Kikripp_DB::t_position()
     . ' WHERE artnr = %s', $A), ARRAY_A);
 pruefe('alte Reservierung behält ihren Preis', (float) $pos['preis_netto'], $A_preis);
+
+echo "\n7. Fotos: doppelt hochgeladen, fehlend, Gross- und Kleinschreibung\n";
+// WordPress haengt beim zweiten Hochladen ein "-1" an. Der Import muss das Bild
+// trotzdem finden, sonst stehen nach einem zweiten Upload alle Artikel ohne Foto da.
+mediathek_fuellen(array_map(function ($f) { return $f . '-1.jpg'; }, $fotos));
+$bericht = Kikripp_Admin::einspielen($alle);
+pruefe('zweifach hochgeladene Fotos werden gefunden', $bericht['ohne_bild'], 0);
+
+// Grossbuchstaben in der Dateiendung sind bei Fotos vom Telefon ueblich.
+mediathek_fuellen(array_map(function ($f) { return strtolower($f) . '.JPG'; }, $fotos));
+$bericht = Kikripp_Admin::einspielen($alle);
+pruefe('Kleinschreibung und .JPG stoeren nicht', $bericht['ohne_bild'], 0);
+
+// Fehlt ein Foto, muss der Import es beim Namen nennen - sonst sucht die Nutzerin blind.
+$ohne = array_slice($fotos, 1);
+mediathek_fuellen(array_map(function ($f) { return $f . '.jpg'; }, $ohne));
+$bericht = Kikripp_Admin::einspielen($alle);
+$fehlt_erwartet = count(array_filter($alle, function ($a) use ($fotos) {
+    return ($a['foto'] ?? '') === $fotos[0]; }));
+pruefe('fehlendes Foto wird gezaehlt', $bericht['ohne_bild'], $fehlt_erwartet);
+pruefe('fehlendes Foto wird beim Namen genannt', $bericht['fehlende_fotos'], [$fotos[0]]);
+pruefe('die Meldung nennt die Mediathek',
+       strpos(Kikripp_Admin::import_meldung($bericht), 'fehlen in der Mediathek') !== false, true);
+
+// Zum Schluss wieder vollstaendig, damit nichts ohne Bild zurueckbleibt.
+mediathek_fuellen(array_map(function ($f) { return $f . '.jpg'; }, $fotos));
+Kikripp_Admin::einspielen($alle);
+pruefe('am Ende hat jeder sichtbare Artikel ein Bild',
+       count(array_filter(Kikripp_DB::katalog_artikel(),
+             function ($a) { return ($a['bild'] ?? '') === ''; })), 0);
 
 printf("\n== Kettentest: %d Fehler ==\n", $fehler);
 exit($fehler > 0 ? 1 : 0);

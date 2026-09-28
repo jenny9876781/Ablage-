@@ -173,11 +173,40 @@ def pruefe_import(vorhanden):
           f"– das sind die im Text genannten weiteren Ansichten")
 
 
+def pruefe_anleitung():
+    """Jedes Feld der Einstellungsseite muss in der Anleitung erklärt sein.
+
+    Die Nutzerin arbeitet die Seite mit der Anleitung daneben ab. Kommt ein Feld
+    dazu, das dort nicht steht, bleibt es leer und niemandem fällt es auf.
+    """
+    print("\n== 4. Einrichtungsanleitung ==")
+    php = os.path.join(BASIS, "wordpress", "kikripp-katalog", "includes",
+                       "class-kikripp-admin.php")
+    md = os.path.join(BASIS, "WEBSHOP_EINRICHTEN.md")
+    if not (os.path.exists(php) and os.path.exists(md)):
+        F("Anleitung oder Verwaltungsdatei fehlt")
+        return
+    quelle = open(php, encoding="utf-8").read()
+    # Nur der Abschnitt der Einstellungsseite, nicht die Reservierungstabelle.
+    anf = quelle.find("public static function seite_einstellungen")
+    ende = quelle.find("public static function", anf + 10)
+    abschnitt = quelle[anf:ende if ende > anf else len(quelle)]
+    felder = re.findall(r'<th scope="row">(?:<label[^>]*>)?([^<]+)', abschnitt)
+    felder = [f.strip() for f in felder if f.strip()]
+    text = open(md, encoding="utf-8").read()
+    fehlend = [f for f in felder if f not in text]
+    if fehlend:
+        F("diese Felder der Einstellungsseite fehlen in der Anleitung: " + ", ".join(fehlend))
+    else:
+        OK(f"alle {len(felder)} Felder der Einstellungsseite sind in der Anleitung erklärt")
+
+
 def main():
     print("== Übergabeprüfung: die drei Dateien für WordPress ==")
     pruefe_plugin()
     vorhanden = pruefe_fotos()
     pruefe_import(vorhanden)
+    pruefe_anleitung()
     print(f"\n== Ergebnis: {len(fehler)} Fehler, {len(hinweise)} Hinweise ==")
     return 1 if fehler else 0
 

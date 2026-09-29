@@ -277,6 +277,10 @@ foreach (['Frau Beispiel' => 'der Name',
           'erledigt – Kontaktdaten löschen' => 'der Löschknopf'] as $text => $was) {
     pruefe($was . ' steht auf der Seite', strpos($seite, $text) !== false, true);
 }
+// Die Nachricht hat eine eigene Zeile ueber die ganze Breite. Sie darf nicht zusaetzlich
+// in der Interessentenspalte stehen - am 29.09.2026 stand sie kurzzeitig doppelt da.
+pruefe('die Nachricht steht genau einmal da',
+       substr_count($seite, 'Samstag möglich?'), 1);
 
 titel('17b. Der Zähler am Menüpunkt ersetzt die Benachrichtigung');
 $GLOBALS['menue_titel'] = [];

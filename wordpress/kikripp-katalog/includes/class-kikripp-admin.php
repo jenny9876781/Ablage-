@@ -130,9 +130,6 @@ class Kikripp_Admin {
                     echo '<a href="tel:' . esc_attr(preg_replace('/[^0-9+]/', '', $v['telefon']))
                        . '">' . esc_html($v['telefon']) . '</a><br>';
                 }
-                if (!empty($v['nachricht'])) {
-                    echo '<span style="color:#555">' . esc_html($v['nachricht']) . '</span><br>';
-                }
                 echo '<a href="' . esc_url($loesch) . '" style="font-size:11px">'
                    . 'erledigt – Kontaktdaten löschen</a>';
                 if (!(int) $v['mail_versandt']) {

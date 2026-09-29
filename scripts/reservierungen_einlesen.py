@@ -7,7 +7,7 @@ Alle Reservierungen als CSV exportieren“ herunter. Übernommen werden je Artik
 Status, verkaufte Menge, Verkaufspreis und Verkaufsdatum. Rechnungsnummer, Zahlung,
 Zahlart und **Käufer** bleiben unberührt – die tragen Sie selbst ein, sobald die
 Rechnung aus DATEV vorliegt. Der Webkatalog speichert keine Namen; die stehen
-ausschließlich in den Benachrichtigungsmails an jennyp@kikripp.de.
+ausschließlich in den Benachrichtigungsmails an saldi4kids@outlook.com.
 
 Ohne --schreiben wird nur angezeigt, was sich ändern würde.
 """

@@ -8982,10 +8982,10 @@
   "marke": "Staufen",
   "buendel": "Bastelsets Staufen",
   "mengenhinweis": "",
-  "foto": "",
+  "foto": "F-572",
   "sortierung": 427,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "BA08-27",
@@ -9003,10 +9003,10 @@
   "marke": "Staufen",
   "buendel": "Bastelsets Staufen",
   "mengenhinweis": "",
-  "foto": "",
+  "foto": "F-571",
   "sortierung": 428,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "BA08-28",
@@ -9262,8 +9262,8 @@
  },
  {
   "nr": "BU09-04",
-  "titel": "Hobelbank Massivholz mit zwei Spannzangen",
-  "beschr": "Werkbank aus massivem Holz mit durchgehender Arbeitsplatte, Vorder- und Hinterzange mit Holzkurbeln und einer Reihe Bankhakenlöcher. Deutliche Gebrauchsspuren und Farbflecken von der Werkarbeit.",
+  "titel": "Hobelbank Massivholz, groß",
+  "beschr": "Große Hobelbank aus massivem Holz mit durchgehender Arbeitsplatte, Vorder- und Hinterzange mit Holzkurbeln und einer Reihe Bankhakenlöcher. Erwachsenenhöhe. Deutliche Gebrauchsspuren und Farbflecken von der Werkarbeit – funktionsfähig.",
   "kat": "Kita-Ausstattung",
   "raum": "Werkraum",
   "zustand": "gebraucht",
@@ -9275,16 +9275,16 @@
   "versand": "nur Abholung",
   "marke": "",
   "buendel": "",
-  "mengenhinweis": "",
+  "mengenhinweis": "Abbau und Transport durch den Käufer.",
   "foto": "F-544",
   "sortierung": 441,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "BU09-05",
-  "titel": "Werkzeugschrank Holz mit Werkzeug",
-  "beschr": "Wandschrank aus Birke-Multiplex mit zwei aufklappbaren Türen, Ablagehalterungen und zwei Schubladen, bestückt mit echtem Werkzeug in Kindergröße: Maulschlüssel, Hammer, Handsäge, Schraubzwinge, Zange, Feile und Kleinteile.",
+  "titel": "Werkzeugschrank für Kinder, mit Werkzeug",
+  "beschr": "Wandschrank aus Birke-Multiplex mit zwei aufklappbaren Türen, Halterungen für jedes Werkzeug und zwei Schubladen. Bestückt mit echtem Werkzeug in Kindergröße: Maulschlüssel, Hammer, Handsäge, Schraubzwinge, Zange, Feile und Kleinteile. Das Werkzeug gehört dazu.",
   "kat": "Kita-Ausstattung",
   "raum": "Werkraum",
   "zustand": "gebraucht",
@@ -9296,10 +9296,10 @@
   "versand": "nur Abholung",
   "marke": "",
   "buendel": "",
-  "mengenhinweis": "",
+  "mengenhinweis": "2 Schränke, jeweils einschließlich Werkzeug. Abgebildet sind beide.",
   "foto": "F-545",
   "sortierung": 442,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  }
 ]

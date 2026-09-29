@@ -56,7 +56,7 @@ if (empty($GLOBALS['optionen'])) {
     $GLOBALS['optionen'] = [
         'kikripp_passwort_hash' => wp_hash_password(getenv('KIK_TEST_PW') ?: 'test-passwort'),
         'kikripp_zugang_version' => 1,
-        'kikripp_mail_an' => 'jennyp@kikripp.de',
+        'kikripp_mail_an' => 'saldi4kids@outlook.com',
         'kikripp_hinweisband' => 'Vorschau – Artikel und Preise sind noch nicht vollständig.',
         'kikripp_frist_tage' => 7,
         'kikripp_vorschau' => 1,

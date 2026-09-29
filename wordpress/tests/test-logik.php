@@ -28,7 +28,7 @@ function titel($t) { echo "\n== $t ==\n"; }
 update_option('kikripp_frist_tage', 7);
 update_option('kikripp_ust_prozent', 19);
 update_option('kikripp_vorschau', 1);
-update_option('kikripp_mail_an', 'jennyp@kikripp.de');
+update_option('kikripp_mail_an', 'saldi4kids@outlook.com');
 update_option('kikripp_firma', 'Kikripp GmbH');
 Kikripp_DB::tabellen_anlegen();
 
@@ -122,7 +122,7 @@ $v6 = Kikripp_DB::reservieren(kontakt('Mailtest'), ['K-003' => 2]);
 Kikripp_Mail::reservierung($v6);
 pruefe('genau eine Mail, keine an den Interessenten', count($GLOBALS['mails']), 1);
 $m = $GLOBALS['mails'][0];
-pruefe('Empfänger ist die Kikripp-Adresse', $m['an'], 'jennyp@kikripp.de');
+pruefe('Empfänger ist die Kikripp-Adresse', $m['an'], 'saldi4kids@outlook.com');
 pruefe('Betreff nennt Firma und Vorgang',
        strpos($m['betreff'], '[Kikripp GmbH] Neue Reservierung #' . $v6) === 0, true);
 pruefe('Text nennt die Artikelnummer', strpos($m['text'], 'K-003') !== false, true);

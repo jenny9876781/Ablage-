@@ -41,7 +41,7 @@ genannt, Privatleuten muss der Bruttopreis gezeigt werden.
 **Verkauft wird über den Webkatalog.** Er liegt auf der eigenen Website der Gesellschaft,
 unter `www.kikripp.de/artikelkatalog`. Interessenten bekommen einen Link, in dem
 das Passwort schon steckt, suchen sich ihre Artikel aus und schicken eine Reservierung ab.
-Du bekommst sofort eine Mail an jennyp@kikripp.de, und der Artikel steht für alle anderen auf
+Du bekommst sofort eine Mail an saldi4kids@outlook.com, und der Artikel steht für alle anderen auf
 „reserviert" — sieben Tage lang, danach wird er von selbst wieder frei. **Trag Reservierungen
 bitte nicht zusätzlich von Hand in die Excel ein**, sonst ist derselbe Schrank am Ende zweimal
 vergeben.

@@ -39,7 +39,7 @@ register_activation_hook(__FILE__, function () {
     // Kikripp_Zugang::passwort_pruefen() niemanden durch. Das Passwort wird einmal
     // unter „Artikelkatalog → Einstellungen" gesetzt und steht in keiner Datei.
     add_option('kikripp_zugang_version', 1);
-    add_option('kikripp_mail_an', 'jennyp@kikripp.de');
+    add_option('kikripp_mail_an', 'saldi4kids@outlook.com');
     // Kein Vorschau-Hinweis: der Katalog geht als fertiger Stand online. Das Band bleibt
     // leer, bis es einen echten Hinweis zu geben gibt (Wunsch der Nutzerin, 29.09.2026).
     add_option('kikripp_hinweisband', '');

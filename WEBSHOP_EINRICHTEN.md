@@ -15,7 +15,7 @@ Stunden, das meiste davon ist Warten beim Hochladen der Fotos.
 
 > **Wichtig zum Verständnis:** Der Katalog speichert in WordPress **keine Namen,
 > keine Mailadressen, keine Telefonnummern**. Die gehen ausschließlich per Mail an
-> `jennyp@kikripp.de` und werden danach sofort aus der Datenbank gelöscht. Diese Mails sind
+> `saldi4kids@outlook.com` und werden danach sofort aus der Datenbank gelöscht. Diese Mails sind
 > damit dein einziges Kontaktarchiv — **bitte nicht löschen.** Leg dir einen Ordner an.
 
 ## 0. Fünf Minuten Vorarbeit, die zwei Stunden Ärger sparen
@@ -25,7 +25,7 @@ sonst mitten im Aufbau erwischen.
 
 **a) Speicherplatz der Website prüfen — der wichtigste Punkt.**
 In einem Multisite-Netzwerk hat jede Website ein Platzkonto, standardmäßig **100 MB**. Die
-Fotos brauchen **68 MB**, und auf kikripp.de liegen schon Bilder der bestehenden Seite. Reicht
+Fotos brauchen **70 MB**, und auf kikripp.de liegen schon Bilder der bestehenden Seite. Reicht
 das Konto nicht, bricht das Hochladen mittendrin ab mit einer Meldung über die
 Speicherplatzbegrenzung — und du weißt nicht, welche Bilder durch sind.
 
@@ -79,12 +79,12 @@ sich später nur wieder zentral abschalten.
 ## 2. Fotos in die Mediathek
 
 Entpacke `kikripp-fotos.zip` auf deinem Rechner. Du bekommst einen Ordner `fotos` mit
-genau **364 Bildern, zusammen 69 MB**. Geh in WordPress auf **Medien → Datei hinzufügen** und
+genau **368 Bildern, zusammen 70 MB**. Geh in WordPress auf **Medien → Datei hinzufügen** und
 zieh die Bilder in das Feld — am besten in Paketen von hundert, nicht alle auf einmal. Das
 dauert; lass das Browserfenster offen, bis jedes Paket durch ist.
 
 **So prüfst du, ob alles angekommen ist:** Geh auf **Medien → Mediathek** und schalte oben
-rechts auf die Listenansicht. Unten steht die Gesamtzahl der Einträge. Sie muss um 364
+rechts auf die Listenansicht. Unten steht die Gesamtzahl der Einträge. Sie muss um 368
 gestiegen sein.
 
 Und falls doch etwas fehlt: **das ist kein Problem und du musst nicht suchen.** Der Import im
@@ -105,7 +105,7 @@ Danach steht oben eine Meldung. **So muss sie aussehen:**
     Import abgeschlossen: 443 neu, 0 aktualisiert.
 
 Kein weiterer Satz dahinter — das heißt: jeder Artikel hat sein Foto gefunden. Im Katalog
-sichtbar sind davon **375**; die übrigen stehen bewusst auf „nicht im Katalog".
+sichtbar sind davon **379**; die übrigen stehen bewusst auf „nicht im Katalog".
 
 Steht dahinter noch *„… Artikel ohne gefundenes Foto"*, nennt die Meldung die fehlenden
 Bilder beim Namen. Die lädst du in die Mediathek nach und importierst einfach noch einmal.
@@ -129,7 +129,7 @@ danebenlegen und abarbeiten. Fast alles ist schon vorausgefüllt; nur das Passwo
 | Feld (in dieser Reihenfolge) | Was hineingehört |
 |---|---|
 | Katalog-Passwort | das vereinbarte Passwort, einmal eintragen. **Das einzige leere Feld.** |
-| Reservierungen melden an | `jennyp@kikripp.de` |
+| Reservierungen melden an | `saldi4kids@outlook.com` |
 | Hinweisband | Text über dem Katalog. Während des Testens z. B. „Testbetrieb"; zum Livegang leeren |
 | Reservierung gilt | 7 Tage |
 | Umsatzsteuer | 19 % |

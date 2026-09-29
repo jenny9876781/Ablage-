@@ -131,7 +131,7 @@ Voraussetzungen: `python3`, `openpyxl`, `Pillow`, `pillow-heif`, Chromium (für 
 Das WordPress-Plugin in `wordpress/kikripp-katalog/` bringt den Katalog ins Netz:
 Zugang über einen Link mit eingebautem Passwort (`?kik=…`, wird sofort aus der Adresse
 entfernt), Reservierung mit Mailbenachrichtigung an
-`jennyp@kikripp.de`, geteilter Reserviert-Status für alle Besucher, Teilmengen
+`saldi4kids@outlook.com`, geteilter Reserviert-Status für alle Besucher, Teilmengen
 („5 von 10 verfügbar"), sieben Tage Frist, Stornieren und Bezahltsetzen in der Verwaltung.
 
 Er läuft auf **www.kikripp.de/artikelkatalog** — der eigenen Website der Gesellschaft.

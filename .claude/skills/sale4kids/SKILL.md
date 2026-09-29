@@ -662,7 +662,31 @@ entschieden, die Klinik-Spalte aus dem Artikelstamm zu nehmen. Seitdem gilt:
   dann der Webkatalog**, und was die Klinik nimmt, muss vor dem Livegang auf
   `Im_Katalog = nein` stehen. Sonst wird dasselbe Stück zweimal angeboten.
 
-## 9. Offene Punkte (Stand 29.09.2026)
+## 9. Offene Punkte (Stand 29.09.2026, abends)
+
+- **Freigabestand für die Veröffentlichung:** 443 Positionen, **379 im Katalog**,
+  368 Fotos (70 MB), 84.513 € netto / 100.570 € brutto. Alle vier zuvor
+  zurückgehaltenen Positionen sind frei: `BA08-26` (F-572), `BA08-27` (F-571),
+  `BU09-04` Hobelbank, `BU09-05` Werkzeugschränke (2 Stück, Werkzeug inklusive,
+  Kindergröße).
+- **Benachrichtigungsadresse ist `saldi4kids@outlook.com`** (vorher jennyp@kikripp.de),
+  geändert in `design.csv`, in der Plugin-Vorgabe `kikripp_mail_an` und in allen
+  Anleitungen. **Das ist ein Risiko, das angesprochen werden muss:** Absender ist der
+  Webserver von kikripp.de, Empfänger ein Outlook-Postfach. Outlook filtert
+  Fremdabsender streng. Die Mails sind das **einzige** Kontaktarchiv — geht eine
+  verloren, ist der Interessent weg. Erste Testreservierung deshalb zwingend prüfen,
+  auch im Junk-Ordner, und die Absenderadresse freigeben. Scheitert es, SMTP nachrüsten.
+- **Noch nicht bestätigt:** die Preise von `BU09-04` (250 €) und `BU09-05` (180 € je
+  Schrank) sind meine Schätzwerte, als `OFFEN:` vermerkt.
+
+### Was am 29.09.2026 am Testserver nachgewiesen wurde
+
+Nicht nur die Testsuiten, sondern der echte Ablauf: Anmeldung über `?kik=`, Abruf der
+379 Artikel über die Schnittstelle (**keine sichtbare Position ohne Bild**), die zehn
+Staufen-Sets im Bündel, eine echte Reservierung über zwei Positionen. Die
+Benachrichtigung ging an `saldi4kids@outlook.com` mit Antwort-an auf den Interessenten,
+und in der Datenbank stand danach `kontakt_weg = 1` mit leeren Kontaktfeldern — die
+Löschung nach dem Versand greift also wirklich.
 
 - **Zweite Prüfrunde eingearbeitet** (Rücklauf 29.09.2026, Excel + Word-Notizen): 110
   Feldänderungen, 26 neue Artikel, 30 neue Fotos (F-541 bis F-570). Stand jetzt

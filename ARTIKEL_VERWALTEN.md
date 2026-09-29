@@ -154,7 +154,7 @@ ja das Passwort.
 
 **Die Benachrichtigungsmails sind dein Kontaktarchiv.** Der Katalog speichert keine Namen,
 Mailadressen oder Telefonnummern — die stehen ausschließlich in den Mails an
-jennyp@kikripp.de. Leg dir dafür einen Ordner an und lösche dort nichts.
+saldi4kids@outlook.com. Leg dir dafür einen Ordner an und lösche dort nichts.
 
 **Artikelnummern werden nie wiederverwendet.** Auch nicht die von entfallenen Positionen.
 Die Etiketten kleben physisch an den Sachen; eine zweitvergebene Nummer führt garantiert

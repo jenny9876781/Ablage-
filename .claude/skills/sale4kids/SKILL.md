@@ -698,129 +698,67 @@ der Verwaltungsseite stehen, der Menüpunkt muss die Zahl tragen, und nach dem L
 nichts mehr zu sehen sein. Die Attrappe legt ihre Helfer nur per `function_exists()` an —
 der Testserver bringt einige selbst mit und bricht sonst mit „Cannot redeclare" ab.
 
-## 9b. Offene Punkte (Stand 29.09.2026, abends)
+## 9b. Stand am 29.09.2026, abends — der Katalog ist online
 
-- **Freigabestand für die Veröffentlichung:** 443 Positionen, **379 im Katalog**,
-  368 Fotos (70 MB), 84.513 € netto / 100.570 € brutto. Alle vier zuvor
-  zurückgehaltenen Positionen sind frei: `BA08-26` (F-572), `BA08-27` (F-571),
-  `BU09-04` Hobelbank, `BU09-05` Werkzeugschränke (2 Stück, Werkzeug inklusive,
-  Kindergröße).
-- **Benachrichtigungsadresse ist `saldi4kids@outlook.com`** (vorher jennyp@kikripp.de),
-  geändert in `design.csv`, in der Plugin-Vorgabe `kikripp_mail_an` und in allen
-  Anleitungen. **Das ist ein Risiko, das angesprochen werden muss:** Absender ist der
-  Webserver von kikripp.de, Empfänger ein Outlook-Postfach. Outlook filtert
-  Fremdabsender streng. Die Mails sind das **einzige** Kontaktarchiv — geht eine
-  verloren, ist der Interessent weg. Erste Testreservierung deshalb zwingend prüfen,
-  auch im Junk-Ordner, und die Absenderadresse freigeben. Scheitert es, SMTP nachrüsten.
-- **Noch nicht bestätigt:** die Preise von `BU09-04` (250 €) und `BU09-05` (180 € je
-  Schrank) sind meine Schätzwerte, als `OFFEN:` vermerkt.
+**Der Webkatalog läuft.** Er wurde an diesem Tag gemeinsam mit der Nutzerin Schritt für
+Schritt in WordPress eingerichtet, sie hat nach jedem Schritt einen Bildschirmabzug
+geschickt. Technisch ist alles fertig; offen ist nur noch Inhalt.
 
-### Was am 29.09.2026 am Testserver nachgewiesen wurde
+### Was in WordPress steht
 
-Nicht nur die Testsuiten, sondern der echte Ablauf: Anmeldung über `?kik=`, Abruf der
-379 Artikel über die Schnittstelle (**keine sichtbare Position ohne Bild**), die zehn
-Staufen-Sets im Bündel, eine echte Reservierung über zwei Positionen. Die
-Benachrichtigung ging an `saldi4kids@outlook.com` mit Antwort-an auf den Interessenten,
-und in der Datenbank stand danach `kontakt_weg = 1` mit leeren Kontaktfeldern — die
-Löschung nach dem Versand greift also wirklich.
-
-- **Zweite Prüfrunde eingearbeitet** (Rücklauf 29.09.2026, Excel + Word-Notizen): 110
-  Feldänderungen, 26 neue Artikel, 30 neue Fotos (F-541 bis F-570). Stand jetzt
-  **443 Positionen, 375 im Katalog, 84.513 € netto**.
-- **Nummernkollision, die fast durchgerutscht wäre:** Die Nutzerin hatte `BA04-08` und
-  `BA04-09` für neue Artikel vergeben. Beide Nummern waren schon als zusammengefasste
-  Post-it-Nummern von `NU04-17` und `BA02-08` belegt. `pruefen.py` hat es gefangen, die
-  neuen Artikel sind jetzt `BA04-10` und `BA04-11`. **Vor jeder neuen Nummer prüfen, ob
-  sie in einem `Weitere_ArtNr` steht** — eine eigene Zeile allein genügt als Nachweis nicht.
-- **Auf Fotos gefundene Artikel ohne Notiz:** `BU09-04` (Hobelbank) und `BU09-05`
-  (Werkzeugschränke) tragen Post-its, standen aber in keiner Liste. Angelegt mit
-  `Im_Katalog = nein` und `OFFEN:`-Vermerk; Anzahl und Preis noch zu klären.
-- **`BA08-26` und `BA08-27`** warten auf ihr Foto. Die Nutzerin hat es zweimal als Bild in
-  den Chat gestellt — das erreicht das Dateisystem **nicht**. Es muss als Anhang kommen,
-  damit `prepare_fotos.py` eine F-Nummer vergeben kann.
-- **Positionen ohne Fotoverweis sind ein erlaubter Zustand.** Sie stehen auf
-  `Im_Katalog = nein`, bis das Foto da ist. Der Kettentest leitet seine Erwartung deshalb
-  aus den Daten ab und schreibt nicht 0 fest; die Zusage „jede **sichtbare** Position hat
-  ein Bild" gilt weiter und wird geprüft.
-- **Kein Vorschau-Hinweisband mehr** (Wunsch der Nutzerin): `kikripp_hinweisband` ist beim
-  Aktivieren leer. Der Katalog geht als fertiger Stand online.
-
-- **Prüfrunde 1 ist eingearbeitet** (Rücklauf vom 24.09.2026). Sachlich geändert hat die
-  Nutzerin: `NE01-10` Menge 2 → 3, `NU01-03` auf `entfällt`, `BA05-04` Preis 750 → 250 €,
-  Bezeichnung von `NU02-18` und `NU02-24` präzisiert. Redaktionell hat sie **alle
-  Mengenhinweise** durchgesehen und stark gekürzt — der Hinweis nennt jetzt nur noch das,
-  was Menge und Zustand nicht schon sagen. Das ist der gewollte Stand.
-- **Offen dazu:** bei rund 55 Positionen ist mit dem gekürzten Hinweis auch der Ausschluss
-  verschwunden („Der Inhalt gehört nicht dazu", „Bettwäsche gehört nicht dazu"). Das Foto
-  zeigt dort mehr, als verkauft wird. Vorschlag an die Nutzerin: **ein** allgemeiner Satz in
-  den Katalogbedingungen statt 55 Einzelhinweise. Noch nicht entschieden.
-- **Drei Beschreibungen** (`BA10-03`, `BA10-04`, `TE01-01`) wiederholen in der ersten Zeile
-  die Bezeichnung; die Nutzerin hat dort einen Zeilenumbruch gesetzt. Katalog und Muster-HTML
-  zeigen den Umbruch jetzt als `<br>`. Ob die Wiederholung raus soll, ist offen.
-
-- **Die Klinik hat abgesagt.** Damit fällt die Vorrangregel weg, alle Artikel gehen in den
-  Webkatalog, und `Kanal` ist bei allen Zeilen leer — er trägt erst den tatsächlichen
-  Verkaufsweg ein. Das Klinik-Angebot bleibt erzeugt, wird aber nicht weiter überarbeitet;
-  es soll später ein allgemeines Händlerangebot werden.
-- **Wellen:** Möbel und große Dekostücke zuerst (`Im_Katalog = ja`), Spielzeug und Konvolute
-  später (`nein`). Für die 88 Positionen der alten Klinikauswahl gilt die Trennung **nicht** —
-  die stehen alle im Katalog. Sie greift für die rund 900 noch zu erfassenden Artikel.
-
-### Offene Punkte stehen an der Ware, nicht in einer Merkliste
-
-Wartet eine Position noch auf etwas, beginnt ihre `Bemerkung` mit **`OFFEN:`**. `pruefen.py`
-listet diese Zeilen bei **jedem** Lauf einzeln auf, mit Artikelnummer und Text. Damit hängt
-nichts an einer handgepflegten Liste und nichts an meinem Gedächtnis: der Hinweis klebt an der
-Ware und verschwindet erst, wenn ihn jemand entfernt.
-
-Zwei Sorten kommen laufend vor:
-
-| Sorte | Vorgehen |
+| | |
 |---|---|
-| **`OFFEN: wächst noch`** | Derselbe Artikel steht in weiteren, noch nicht erfassten Räumen — Betten, Hochstühle, Kunststoffstühle. Die Position bleibt bei der bisher gezählten Menge stehen. **Am Ende des Rundgangs** auf die Gesamtzahl bringen und die Post-it-Nummern der anderen Räume in `Weitere_ArtNr`. |
-| **`OFFEN: buendeln am Schluss`** | Die Nutzerin will Sammlungen erst bilden, **wenn der Rundgang durch ist** — es kommt noch viel. Bis dahin nur vormerken, nicht schon Spalten füllen. Steht eine Gruppe erkennbar zusammen (Schwarzwald, Kindergarderoben, Spielküche und Kaufladen, Sitzbänke mit Stauraum), im Bericht erwähnen und weitergehen. |
-| **`OFFEN: NICHT VEROEFFENTLICHEN`** | `Im_Katalog = nein`, weil eine Angabe fehlt, die den Preis um eine Größenordnung verschiebt. Aktuell `NU02-18`: Form und Signaturplättchen sprechen für einen Vitra Eames Elephant (gebraucht 150–280 € je Stück) gegen 20–40 € für einen Nachbau. Erst nach der Nahaufnahme entscheiden, dann `ja`. Der kleinere schwarze wird dabei eine **eigene Position**, weil Vitra zwei Größen baut. |
+| Adresse | `www.kikripp.de/artikelkatalog` (Seite „Artikelkatalog", Block mit `[kikripp_katalog]`) |
+| Passwort | `2026sales4kids` — Link dazu: `…/artikelkatalog/?kik=2026sales4kids` |
+| Plugin | über die Netzwerkverwaltung installiert, **nur auf der Seite KIKRIPP** aktiviert |
+| Mediathek | **711 Elemente** (343 vorher + 368 Katalogfotos) |
+| Import | 443 Artikel, **379 im Katalog sichtbar**, jede sichtbare Position mit Bild |
+| Vorschaubetrieb | **an** — Testreservierungen sind markiert und am Ende löschbar |
+| Hinweisband | leer |
 
-> Die Nutzerin sammelt fehlende Fotos bewusst und liefert sie **in einem Zug am Ende** nach.
-> Nicht vorher drängen, aber auch nichts abschließen, solange `pruefen.py` noch `OFFEN:`-Zeilen
-> meldet.
-- **Die Adressfrage ist entschieden (28.09.2026): kikripp.de.** Die Nutzerin ist dort
-  Super-Admin; die Zwischenlösung über schlabberschnuten.com ist vom Tisch. Der Katalog
-  kommt auf `www.kikripp.de/artikelkatalog`, das Plugin über die Netzwerkverwaltung,
-  aktiviert nur auf der Seite KIKRIPP.
-- **Der Katalog ist noch nicht installiert.** Plugin, Fotos, Importdatei und `U2` liegen in
-  `ausgabe/`, die Anleitung ist `A1`. Nach der Einrichtung fragen, ob die
-  Benachrichtigungsmail angekommen ist — sonst muss SMTP dazu. Absender und Empfänger liegen
-  beide auf `kikripp.de`; auch im Spam-Ordner nachsehen lassen.
-- **Blockierend: Impressum und Datenschutz stehen auf kikripp.de als Entwurf.** Beide müssen
-  veröffentlicht sein, bevor ein Link hinausgeht. Der Katalog verlinkt sie im Anbieter-Block.
-- **Wartungsmodus geklärt:** Das Plugin *Maintenance* ist **aus**. Dass kikripp.de eine
-  Wartungsseite zeigt, liegt nur an der Startseiten-Einstellung; andere Seiten sind über ihre
-  Adresse erreichbar. Der Katalog funktioniert also. *Maintenance* darf nicht eingeschaltet
-  werden, solange er läuft.
-- **Ausstehend von der Nutzerin:** die Maße und die überarbeitete Artikelliste der
-  Kindergartenleitung.
-- **Rundgang läuft.** Türschilder, Erfassungsblätter und Erfassungsliste sind ausgeliefert
-  und ausgedruckt. Zurück kommen `T3_Erfassungsliste.xlsx` mit Stückzahlen und die Fotos je
-  Raum. Die Nummer auf dem Post-it im Foto ist maßgeblich.
-- **Sieben Positionen wurden inhaltlich umgewidmet** (Vitrine → Dekoration darin, Regal →
-  Rattankörbe, Tonkartonschrank → buntes Papier, Hängeleuchte → Pflanze, Wandspiegel →
-  Trachtenportrait, Pflanzkübel Beton → Plastik, Gartentisch → inkl. Stühle). Ihre Fotos
-  zeigen teils noch das nicht mehr verkaufte Möbel — beim Rundgang neu fotografieren.
-  Besonders `BA04-01`: das Foto zeigt vor allem die antike Vitrine, die nicht mitgeht.
-- **Drei Positionen mit offener Stückzahl:** `NE05-01`, `NU04-04`, `BA09-04` — nachzählen.
-- **Eine Annahme, nicht bestätigt:** Der alte Sammelraum „UG" mit fünf Positionen liegt bei
-  `BU04`. Die Aufnahmereihenfolge spricht dafür; sicher ist es nicht.
-- **Maße** fehlen bei allen Positionen; von der Nutzerin bewusst zurückgestellt.
-- **Anlagennummern und Anschaffungswerte** fehlen komplett (Anlagenabgang bei einer GmbH).
-  Anlagenverzeichnis beim Steuerberater erbitten.
-- **Versand:** Empfehlung steht — alles auf Abholung, Versand nur für Designstücke und nur
-  an Gewerbe, weil Versand an Verbraucher ein 14-tägiges Widerrufsrecht auslöst. Die Nutzerin
-  arbeitet die Spalte `Versand` selbst ein.
-- **Logo:** liegt nur als Bildschirmbild vor; Signet nachgebaut.
-- **Foto F-110** ist wegen zweier Teamfotos stark beschnitten.
-- **Rechtstexte, Aktennotiz und Datenschutz-Absatz** sind von mir formuliert, nicht
-  anwaltlich geprüft. Das steht auch in den Dokumenten selbst.
+**Die Speicherplatzbegrenzung des Netzwerks ist abgeschaltet** (Häkchen nicht gesetzt),
+maximale Uploadgröße 16.000 KB. Der Punkt, vor dem in `A1` gewarnt wird, ist hier also
+keiner.
+
+### Was die Nutzerin gerade macht
+
+Sie geht den Katalog durch und sammelt:
+
+* **Fehlende Artikel** — Positionen, zu denen es schon Fotos gibt, die aber nie in den
+  Artikelstamm gekommen sind. Kommt als Word mit Artikel und zugehöriger **F-Nummer**
+  (die liest sie in der Mediathek ab).
+* **Zustand und Beschreibungen** — Änderungen direkt in `01_Artikelstamm_kikripp.xlsx`.
+* Fotos, die nicht zum Artikel passen.
+
+Sie vergibt **keine Artikelnummern selbst**, sondern schreibt `RAUMCODE-NEU1`,
+`-NEU2` usw. Grund: `BA04-08` und `BA04-09` waren bereits als zusammengefasste
+Post-it-Nummern von `NU04-17` und `BA02-08` belegt, und das fiel erst bei `pruefen.py`
+auf. **Vor jeder neuen Nummer prüfen, ob sie in einem `Weitere_ArtNr` steht.**
+
+### Kleinigkeiten, die noch offen sind
+
+* **`Reservierungen melden an` steht auf `jennyp@kikripp.de`** — Rest vom Mailtest. Das
+  Feld ist zugleich die Adresse, die Interessenten im Anbieter-Block und in der
+  Bestätigung sehen. Muss zurück auf **`saldi4kids@outlook.com`**.
+* **Plugin-Aktualisierung liegt bereit** (doppelt angezeigte Nachricht behoben) — rein
+  kosmetisch, kann bei Gelegenheit eingespielt werden.
+* **Testreservierung #3 ist offen** und wird beim Livegang über *Einstellungen →
+  Testreservierungen löschen* entfernt.
+* **Preise von `BU09-04` (250 €) und `BU09-05` (180 € je Schrank)** sind Schätzwerte,
+  als `OFFEN:` vermerkt und von der Nutzerin nicht bestätigt.
+* **WordPress 7.1.2** steht noch aus, und die Katalogseite gehört aus der Sitemap des
+  XML Sitemap Generators genommen. Beides bewusst zurückgestellt.
+
+### Was noch kommt
+
+1. Die Nutzerin schickt Word und Excel → einlesen, neue Artikel anlegen, neue Fotos
+   aufnehmen, Importdatei und Arbeitsmappe neu erzeugen.
+2. Sie lädt die neuen Fotos hoch und importiert einmal.
+3. **Livegang:** Testreservierungen löschen · Vorschaubetrieb aus · Cache leeren ·
+   im privaten Fenster gegenlesen · **dann erst** den Link verschicken.
+
+**Solange der Link nicht verschickt ist, sieht den Katalog niemand.** Das ist der Satz,
+der die Nutzerin bei jedem Zwischenstand beruhigt — und er stimmt.
 
 ## 10. Was die Nutzerin nicht mag
 

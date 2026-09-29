@@ -9,8 +9,9 @@ der Katalog woanders liegt. Verkäuferin, Website und Impressum gehören derselb
 > Plugins lassen sich dort nur über die **Netzwerkverwaltung** installieren — deshalb geht
 > es nur als Super-Admin. Die einzelnen Schritte stehen unten.
 
-Du brauchst drei Dateien aus dem Ordner `ausgabe`: **kikripp-katalog.zip** (das Plugin),
-**kikripp-fotos.zip** (die Fotos) und **katalog_import.json** (die Artikel). Rechne mit zwei
+Du brauchst aus dem Ordner `ausgabe`: **kikripp-katalog.zip** (das Plugin), die drei
+Fotopakete **kikripp-fotos-1von3.zip** bis **-3von3.zip** und **katalog_import.json**
+(die Artikel). Rechne mit zwei
 Stunden, das meiste davon ist Warten beim Hochladen der Fotos.
 
 > **Wichtig zum Verständnis:** Der Katalog speichert in WordPress **keine Namen,
@@ -78,8 +79,9 @@ sich später nur wieder zentral abschalten.
 
 ## 2. Fotos in die Mediathek
 
-Entpacke `kikripp-fotos.zip` auf deinem Rechner. Du bekommst einen Ordner `fotos` mit
-genau **368 Bildern, zusammen 70 MB**. Geh in WordPress auf **Medien → Datei hinzufügen** und
+Du bekommst die Fotos in **drei Paketen** (`kikripp-fotos-1von3.zip` bis `-3von3.zip`),
+weil 70 MB auf einmal für den Versand zu viel sind. Entpacke sie auf deinem Rechner — alle
+drei in denselben Ordner `fotos`. Zusammen sind es genau **368 Bilder, 70 MB**. Geh in WordPress auf **Medien → Datei hinzufügen** und
 zieh die Bilder in das Feld — am besten in Paketen von hundert, nicht alle auf einmal. Das
 dauert; lass das Browserfenster offen, bis jedes Paket durch ist.
 

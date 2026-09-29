@@ -4,4 +4,5 @@ __pycache__/
 .DS_Store
 Thumbs.db
 ausgabe/kikripp-fotos.zip
+ausgabe/kikripp-fotos-*von*.zip
 ausgabe/.miniaturen/

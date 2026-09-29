@@ -198,13 +198,27 @@ else:
     _sichtbar = len([a for a in alle
                      if (a.get("Aktiv") or "ja").lower() == "ja"
                      and (a.get("Im_Katalog") or "ja").lower() == "ja"])
-    for _was, _soll in (("Fotos", f"**{len(_fotos)} Bildern, zusammen {_mb} MB**"),
+    # Zwei Stufen, weil eine allein nicht reicht: Stufe 1 prüft, dass die richtige Zahl
+    # überhaupt dasteht. Stufe 2 prüft, dass keine falsche MB-Angabe dasteht – sonst
+    # rutscht eine veraltete Zahl durch, solange die richtige irgendwo anders auftaucht.
+    for _was, _soll in (("Anzahl der Fotos", str(len(_fotos))),
+                        ("Größe des Fotopakets", f"{_mb} MB"),
                         ("Artikel beim Import", f"{len(alle)} neu, 0 aktualisiert"),
                         ("im Katalog sichtbar", f"**{_sichtbar}**")):
         if _soll in _text:
-            OK(f"Anleitung nennt die richtige Zahl: {_was}")
+            OK(f"Anleitung nennt die richtige Zahl: {_was} ({_soll})")
         else:
             F(f"Anleitung: Zahl für „{_was}“ stimmt nicht mehr – erwartet „{_soll}“")
+
+    # Erlaubt sind neben der Paketgröße nur die Zahlen, die etwas anderes bezeichnen:
+    # 100 MB ist das Standard-Platzkonto einer Multisite, 500 MB die Empfehlung dafür.
+    _erlaubt = {str(_mb), "100", "500"}
+    _fremd = sorted({m for m in re.findall(r"(\d+)\s*MB", _text)} - _erlaubt)
+    if _fremd:
+        F("Anleitung: unerklärte MB-Angabe(n) " + ", ".join(f"{m} MB" for m in _fremd)
+          + f" – die Fotopakete haben {_mb} MB")
+    else:
+        OK("keine veraltete MB-Angabe in der Anleitung")
 
 print("\n== 5. Summen ==")
 gesamt = sum(a["Positionswert"] for a in aktiv)

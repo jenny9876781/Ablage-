@@ -152,9 +152,11 @@ Excel ein. Der Katalog weiß dann nichts davon und vergibt denselben Schrank ein
 Wenn jemand telefonisch reserviert, leg ihm die Reservierung selbst im Katalog an — du hast
 ja das Passwort.
 
-**Die Benachrichtigungsmails sind dein Kontaktarchiv.** Der Katalog speichert keine Namen,
-Mailadressen oder Telefonnummern — die stehen ausschließlich in den Mails an
-saldi4kids@outlook.com. Leg dir dafür einen Ordner an und lösche dort nichts.
+**Die Reservierungen in WordPress sind dein Kontaktarchiv.** Der Webserver von kikripp.de
+verschickt keine Mails, deshalb kommt keine Benachrichtigung. Unter *Artikelkatalog →
+Reservierungen* stehen Name, Mailadresse und Telefonnummer; neben dem Menüpunkt zeigt eine
+Zahl, wie viele Vorgänge offen sind. **Einmal am Tag hineinschauen genügt.** Ist ein Vorgang
+abgewickelt, mit *„erledigt – Kontaktdaten löschen"* die Daten entfernen.
 
 **Artikelnummern werden nie wiederverwendet.** Auch nicht die von entfallenen Positionen.
 Die Etiketten kleben physisch an den Sachen; eine zweitvergebene Nummer führt garantiert

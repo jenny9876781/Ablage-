@@ -168,5 +168,21 @@ function wp_safe_redirect($ziel, $status = 302) {
     return true;
 }
 function esc_html($s) { return htmlspecialchars((string) $s, ENT_QUOTES); }
+// Der Testserver bringt einige dieser Helfer selbst mit - deshalb nur anlegen,
+// wenn sie fehlen. Sonst bricht der Server mit "Cannot redeclare function" ab.
+if (!function_exists('esc_url'))      { function esc_url($u) { return (string) $u; } }
+if (!function_exists('esc_url_raw'))  { function esc_url_raw($u) { return (string) $u; } }
+if (!function_exists('wp_nonce_url')) { function wp_nonce_url($u, $a = -1) { return $u . '&_wpnonce=test'; } }
+// Die Menuetitel werden mitgeschrieben, damit der Test die Zaehler-Blase pruefen kann.
+if (!function_exists('add_menu_page')) {
+    function add_menu_page($seite, $titel, $rechte, $slug, $fn = null, $icon = '', $pos = null) {
+        $GLOBALS['menue_titel'][] = $titel; return $slug;
+    }
+}
+if (!function_exists('add_submenu_page')) {
+    function add_submenu_page($eltern, $seite, $titel, $rechte, $slug, $fn = null) {
+        $GLOBALS['menue_titel'][] = $titel; return $slug;
+    }
+}
 function esc_attr($s) { return htmlspecialchars((string) $s, ENT_QUOTES); }
 function esc_textarea($s) { return htmlspecialchars((string) $s, ENT_QUOTES); }

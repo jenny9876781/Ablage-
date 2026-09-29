@@ -23,10 +23,27 @@ class Kikripp_Admin {
              esc_url(admin_url('admin.php?page=kikripp-einstellungen')));
     }
 
+    /**
+     * Zahl der offenen Reservierungen als Blase am Menuepunkt - wie bei Plugin-Updates.
+     *
+     * Der Webserver dieser Website verschickt keine Mails. Ohne diese Blase muesste die
+     * Nutzerin daran denken, jeden Tag in die Reservierungen zu schauen; mit ihr sieht
+     * sie es beim Einloggen. Das ersetzt die Benachrichtigungsmail.
+     */
+    private static function offene_blase() {
+        global $wpdb;
+        $n = (int) $wpdb->get_var("SELECT COUNT(*) FROM " . Kikripp_DB::t_vorgang()
+                                  . " WHERE status = 'offen'");
+        if ($n < 1) { return ''; }
+        return sprintf(' <span class="update-plugins count-%d"><span class="plugin-count">%d'
+                     . '</span></span>', $n, $n);
+    }
+
     public static function menue() {
-        add_menu_page('Artikelkatalog', 'Artikelkatalog', 'manage_options',
+        $blase = self::offene_blase();
+        add_menu_page('Artikelkatalog', 'Artikelkatalog' . $blase, 'manage_options',
             'kikripp-reservierungen', [__CLASS__, 'seite_reservierungen'], 'dashicons-cart', 26);
-        add_submenu_page('kikripp-reservierungen', 'Reservierungen', 'Reservierungen',
+        add_submenu_page('kikripp-reservierungen', 'Reservierungen', 'Reservierungen' . $blase,
             'manage_options', 'kikripp-reservierungen', [__CLASS__, 'seite_reservierungen']);
         add_submenu_page('kikripp-reservierungen', 'Artikel importieren', 'Artikel importieren',
             'manage_options', 'kikripp-import', [__CLASS__, 'seite_import']);
@@ -101,19 +118,30 @@ class Kikripp_Admin {
             $suche = sprintf('[%s] Neue Reservierung #%d',
                 get_option('kikripp_firma', 'Kikripp GmbH'), (int) $v['id']);
             echo '<td>';
-            if ((int) $v['kontakt_weg']) {
-                echo '<span style="color:#555">Kontaktdaten stehen in der Mail.</span><br>'
-                   . '<code style="font-size:11px">' . esc_html($suche) . '</code><br>'
-                   . '<span style="color:#777;font-size:11px">Diesen Text im Postfach suchen.</span>';
-            } elseif ($v['name'] !== '') {
+            if ($v['name'] !== '' || $v['email'] !== '' || $v['telefon'] !== '') {
                 $loesch = wp_nonce_url(admin_url('admin-post.php?action=kikripp_aktion&was=kontakt&id='
                     . (int) $v['id']), 'kikripp_aktion_' . $v['id']);
-                echo '<span style="color:#b32d2e"><strong>Mail nicht versandt</strong></span><br>'
-                   . '<strong>' . esc_html($v['name']) . '</strong><br>'
-                   . '<a href="mailto:' . esc_attr($v['email']) . '">' . esc_html($v['email']) . '</a><br>'
-                   . '<a href="tel:' . esc_attr(preg_replace('/[^0-9+]/', '', $v['telefon'])) . '">'
-                   . esc_html($v['telefon']) . '</a><br>'
-                   . '<a href="' . esc_url($loesch) . '" style="font-size:11px">notiert – Kontaktdaten löschen</a>';
+                echo '<strong>' . esc_html($v['name']) . '</strong><br>';
+                if ($v['email'] !== '') {
+                    echo '<a href="mailto:' . esc_attr($v['email']) . '">'
+                       . esc_html($v['email']) . '</a><br>';
+                }
+                if ($v['telefon'] !== '') {
+                    echo '<a href="tel:' . esc_attr(preg_replace('/[^0-9+]/', '', $v['telefon']))
+                       . '">' . esc_html($v['telefon']) . '</a><br>';
+                }
+                if (!empty($v['nachricht'])) {
+                    echo '<span style="color:#555">' . esc_html($v['nachricht']) . '</span><br>';
+                }
+                echo '<a href="' . esc_url($loesch) . '" style="font-size:11px">'
+                   . 'erledigt – Kontaktdaten löschen</a>';
+                if (!(int) $v['mail_versandt']) {
+                    echo '<br><span style="color:#777;font-size:11px">Keine Benachrichtigungsmail '
+                       . 'versandt – dieser Server verschickt keine.</span>';
+                }
+            } elseif ((int) $v['kontakt_weg']) {
+                echo '<span style="color:#777">Kontaktdaten gelöscht.</span><br>'
+                   . '<code style="font-size:11px">' . esc_html($suche) . '</code>';
             } else {
                 echo '<span style="color:#777">—</span>';
             }
@@ -484,7 +512,7 @@ class Kikripp_Admin {
 
         printf('<tr><th scope="row"><label for="k_ds">Datenschutzerklärung</label></th><td>'
              . '<input type="url" id="k_ds" name="datenschutz_url" class="large-text" value="%s">'
-             . '<p class="description">Ebenfalls prüfen.</p></td></tr>',
+             . '<p class="description">Ebenfalls veröffentlicht und erreichbar.</p></td></tr>',
              esc_attr(get_option('kikripp_datenschutz_url', '')));
 
         printf('<tr><th scope="row"><label for="k_abhol">Abholadresse</label></th><td>'

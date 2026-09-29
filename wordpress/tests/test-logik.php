@@ -131,17 +131,38 @@ pruefe('Text nennt Name und Telefon',
        strpos($m['text'], 'Mailtest') !== false && strpos($m['text'], '07721 123456') !== false, true);
 pruefe('Bestätigungsfunktion existiert nicht mehr',
        method_exists('Kikripp_Mail', 'bestaetigung'), false);
+// Ohne echte Absenderadresse verwerfen fremde Mailanbieter die Mail stillschweigend.
+$kopfzeilen = implode(' | ', (array) $m['kopf']);
+pruefe('Absender ist gesetzt und existiert',
+       strpos($kopfzeilen, 'From: Kikripp GmbH <saldi4kids@outlook.com>') !== false, true);
+pruefe('Antwort-an zeigt auf den Interessenten',
+       strpos($kopfzeilen, 'Reply-To: Mailtest <test@example.de>') !== false, true);
+pruefe('Text verweist auf die Verwaltung statt auf die Mail als einzigen Ort',
+       strpos($m['text'], 'auch in der Verwaltung') !== false, true);
 
-titel('11. Kontaktdaten verlassen die Datenbank');
+titel('11. Kontaktdaten bleiben, bis ein Mensch sie löscht');
+// Umgestellt am 29.09.2026: Der Webserver von kikripp.de verschickt keine Mails, meldet
+// aber Erfolg. Wuerden die Kontaktdaten daraufhin geloescht, waere jeder Interessent
+// unwiederbringlich verloren. Sie bleiben deshalb bis zum Loeschen durch die Nutzerin.
 $nach = Kikripp_DB::vorgang($v6);
-pruefe('Name gelöscht', $nach['name'], '');
-pruefe('E-Mail gelöscht', $nach['email'], '');
-pruefe('Telefon gelöscht', $nach['telefon'], '');
-pruefe('als gelöscht vermerkt', (int) $nach['kontakt_weg'], 1);
+pruefe('Name bleibt trotz erfolgreicher Mail', $nach['name'], 'Mailtest');
+pruefe('E-Mail bleibt', $nach['email'], 'test@example.de');
+pruefe('Telefon bleibt', $nach['telefon'], '07721 123456');
+pruefe('nicht als gelöscht vermerkt', (int) $nach['kontakt_weg'], 0);
+pruefe('Mailversand ist vermerkt', (int) $nach['mail_versandt'], 1);
 pruefe('Positionen sind noch da', count($nach['positionen']), 1);
 pruefe('Preis ist noch da', (float) $nach['positionen'][0]['preis_netto'], 50.0);
 pruefe('Reservierung wirkt weiter', katalog_nach('K-003')['frei'], 3);
 pruefe('keine IP gespeichert', array_key_exists('herkunft', $nach), false);
+// Der Loeschknopf je Vorgang ist jetzt der einzige Weg, die Daten wieder loszuwerden.
+Kikripp_DB::kontakt_loeschen($v6);
+$leer = Kikripp_DB::vorgang($v6);
+pruefe('von Hand gelöscht: Name weg', $leer['name'], '');
+pruefe('von Hand gelöscht: Mail weg', $leer['email'], '');
+pruefe('von Hand gelöscht: Telefon weg', $leer['telefon'], '');
+pruefe('als gelöscht vermerkt', (int) $leer['kontakt_weg'], 1);
+pruefe('die Positionen überleben das Löschen', count($leer['positionen']), 1);
+pruefe('die Reservierung wirkt auch danach weiter', katalog_nach('K-003')['frei'], 3);
 
 titel('11b. Scheitert die Mail, bleiben die Kontaktdaten als Netz');
 $GLOBALS['mail_geht'] = false;
@@ -154,7 +175,7 @@ pruefe('Mailfehler ist vermerkt', (int) $gespeichert['mail_versandt'], 0);
 pruefe('Kontaktdaten sind noch da', $gespeichert['name'], 'Mail kaputt');
 $offen = array_map('intval', Kikripp_DB::kontakte_offen());
 pruefe('Vorgang steht auf der Nachliste', in_array((int) $v7, $offen, true), true);
-pruefe('der versandte Vorgang steht nicht darauf', in_array((int) $v6, $offen, true), false);
+pruefe('der von Hand geleerte steht nicht darauf', in_array((int) $v6, $offen, true), false);
 Kikripp_DB::kontakt_loeschen($v7);
 pruefe('nach dem Löschen leer', Kikripp_DB::vorgang($v7)['name'], '');
 pruefe('und von der Nachliste verschwunden',
@@ -232,6 +253,51 @@ pruefe('ohne Keks kein Zugang', Kikripp_Zugang::hat_zugang(), false);
 // Fotos aus der Mediathek: Der Import findet ein Bild ueber den Dateinamen.
 // Ein falscher Schluessel bedeutet: kein einziger Artikel hat ein Bild.
 // -----------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
+// Die Verwaltungsseite ist seit dem 29.09.2026 der EINZIGE Weg, an die Kontaktdaten
+// zu kommen - der Webserver verschickt keine Mails. Bricht diese Anzeige, verliert
+// die Nutzerin Interessenten, ohne es zu merken. Deshalb wird sie geprueft.
+// -----------------------------------------------------------------------------
+titel('17. Die Kontaktdaten stehen auf der Verwaltungsseite');
+require_once __DIR__ . '/../kikripp-katalog/includes/class-kikripp-admin.php';
+$GLOBALS['ist_admin'] = true;
+update_option('kikripp_vorschau', 0);
+// Eigener Artikel, damit die Bestaende der vorherigen Abschnitte nicht hineinspielen.
+artikel_anlegen('Z-001', 3, 250.0, 'Hobelbank');
+$v8 = Kikripp_DB::reservieren(
+    ['name' => 'Frau Beispiel', 'email' => 'beispiel@example.org',
+     'telefon' => '07721 998877', 'wunschtermin' => '', 'nachricht' => 'Samstag möglich?'],
+    ['Z-001' => 1]);
+Kikripp_Mail::reservierung($v8);
+ob_start(); Kikripp_Admin::seite_reservierungen(); $seite = ob_get_clean();
+foreach (['Frau Beispiel' => 'der Name',
+          'beispiel@example.org' => 'die Mailadresse',
+          '07721 998877' => 'die Telefonnummer',
+          'Samstag möglich?' => 'die Nachricht',
+          'erledigt – Kontaktdaten löschen' => 'der Löschknopf'] as $text => $was) {
+    pruefe($was . ' steht auf der Seite', strpos($seite, $text) !== false, true);
+}
+
+titel('17b. Der Zähler am Menüpunkt ersetzt die Benachrichtigung');
+$GLOBALS['menue_titel'] = [];
+Kikripp_Admin::menue();
+$offene = count(array_filter(Kikripp_DB::vorgaenge(),
+    function ($v) { return $v['status'] === 'offen'; }));
+pruefe('es gibt offene Vorgänge zum Anzeigen', $offene > 0, true);
+pruefe('der Menüpunkt trägt die Zahl der offenen Vorgänge',
+       strpos($GLOBALS['menue_titel'][0], '>' . $offene . '<') !== false, true);
+pruefe('Import und Einstellungen tragen keine Zahl',
+       strpos($GLOBALS['menue_titel'][2] . $GLOBALS['menue_titel'][3], 'count-') === false, true);
+
+titel('17c. Nach dem Löschen ist nichts mehr zu sehen');
+Kikripp_DB::kontakt_loeschen($v8);
+ob_start(); Kikripp_Admin::seite_reservierungen(); $seite = ob_get_clean();
+pruefe('der Name ist weg', strpos($seite, 'Frau Beispiel') === false, true);
+pruefe('die Mailadresse ist weg', strpos($seite, 'beispiel@example.org') === false, true);
+pruefe('die Seite sagt, dass gelöscht wurde',
+       strpos($seite, 'Kontaktdaten gelöscht') !== false, true);
+pruefe('die Position bleibt sichtbar', strpos($seite, 'Z-001') !== false, true);
+
 titel('Zuordnung der Fotos aus der Mediathek');
 require_once __DIR__ . '/../kikripp-katalog/includes/class-kikripp-admin.php';
 function schluessel($n) { $r = Kikripp_Admin::bild_schluessel($n); return $r[0]; }

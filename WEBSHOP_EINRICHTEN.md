@@ -14,10 +14,15 @@ Fotopakete **kikripp-fotos-1von3.zip** bis **-3von3.zip** und **katalog_import.j
 (die Artikel). Rechne mit zwei
 Stunden, das meiste davon ist Warten beim Hochladen der Fotos.
 
-> **Wichtig zum Verständnis:** Der Katalog speichert in WordPress **keine Namen,
-> keine Mailadressen, keine Telefonnummern**. Die gehen ausschließlich per Mail an
-> `saldi4kids@outlook.com` und werden danach sofort aus der Datenbank gelöscht. Diese Mails sind
-> damit dein einziges Kontaktarchiv — **bitte nicht löschen.** Leg dir einen Ordner an.
+> **Wichtig zum Verständnis:** Der Webserver von kikripp.de verschickt **keine Mails** — das
+> ist beim Einrichten am 29.09.2026 geprüft und bestätigt worden. Die Reservierungen stehen
+> deshalb in WordPress unter **Artikelkatalog → Reservierungen**, mit Name, Mailadresse und
+> Telefonnummer. Neben dem Menüpunkt erscheint eine Zahl, sobald etwas offen ist — so siehst
+> du es beim Einloggen, ohne daran denken zu müssen. **Schau einmal am Tag hinein.**
+>
+> Ist ein Vorgang abgewickelt, klick bei der Reservierung auf *„erledigt – Kontaktdaten
+> löschen"*. Dann bleiben nur noch Artikelnummer, Menge und Preis stehen. So liegt nichts
+> länger herum als nötig — und genau so steht es auch in der Datenschutzerklärung.
 
 ## 0. Fünf Minuten Vorarbeit, die zwei Stunden Ärger sparen
 

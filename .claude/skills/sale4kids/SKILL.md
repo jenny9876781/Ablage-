@@ -662,7 +662,43 @@ entschieden, die Klinik-Spalte aus dem Artikelstamm zu nehmen. Seitdem gilt:
   dann der Webkatalog**, und was die Klinik nimmt, muss vor dem Livegang auf
   `Im_Katalog = nein` stehen. Sonst wird dasselbe Stück zweimal angeboten.
 
-## 9. Offene Punkte (Stand 29.09.2026, abends)
+## 9. Der Mailversand ist tot — und was daraus folgt
+
+**Am 29.09.2026 beim echten Einrichten festgestellt: der Webserver von kikripp.de
+verschickt keine Mails.** `wp_mail()` meldet Erfolg, die Mail verschwindet. Geprüft mit
+zwei Empfängern — `saldi4kids@outlook.com` und `jennyp@kikripp.de`, beide extern und
+domaineigen. Nichts kam an, auch nicht im Junk-Ordner. Ursache ist nicht die
+Absenderadresse allein: der Host liefert überhaupt nicht aus.
+
+**Die Reservierung stand danach ohne Kontaktdaten in der Verwaltung** — denn bis dahin
+löschte `Kikripp_Mail::reservierung()` die Kontaktdaten, sobald `wp_mail()` Erfolg
+meldete. Die Mail galt als der einzige Ort, an dem sie stehen. Damit wäre jeder
+Interessent unwiederbringlich verloren gewesen, ohne dass es jemand merkt.
+
+**Umgestellt:** Die Kontaktdaten **bleiben in der Datenbank**, bis ein Mensch auf
+*„erledigt – Kontaktdaten löschen"* klickt. Dazu:
+
+* Die Verwaltungsseite zeigt Name, Mailadresse, Telefon und Nachricht, anklickbar.
+* Der Menüpunkt trägt eine **Zähler-Blase** mit der Zahl der offenen Vorgänge (wie bei
+  Plugin-Updates). Das ersetzt die Benachrichtigungsmail: die Nutzerin sieht es beim
+  Einloggen, ohne daran denken zu müssen.
+* Die Mail wird weiter versucht und trägt jetzt einen echten **Absender**
+  (`From: <Firma> <kikripp_mail_an>`). Wird später SMTP nachgerüstet, läuft sie sofort.
+* `U2_Datenschutz_Absatz.docx` ist neu formuliert: Speicherung, Löschung nach Abwicklung,
+  keine Weitergabe. **Die Nutzerin musste den Absatz in der Datenschutzerklärung
+  ersetzen** — das gehört zu dieser Umstellung dazu und darf nicht vergessen werden.
+
+**Die ursprüngliche Nicht-Speicherung war eine Vorsichtsmaßnahme für fremden
+Speicherplatz.** Dieser Grund ist mit dem Umzug auf kikripp.de entfallen; Speicherung auf
+der eigenen Seite ist über Art. 6 Abs. 1 lit. b DSGVO gedeckt und völlig normal.
+**Nicht zurückbauen**, solange kein Mailversand existiert.
+
+Abschnitt 17, 17b und 17c in `test-logik.php` halten das fest: die Kontaktdaten müssen auf
+der Verwaltungsseite stehen, der Menüpunkt muss die Zahl tragen, und nach dem Löschen darf
+nichts mehr zu sehen sein. Die Attrappe legt ihre Helfer nur per `function_exists()` an —
+der Testserver bringt einige selbst mit und bricht sonst mit „Cannot redeclare" ab.
+
+## 9b. Offene Punkte (Stand 29.09.2026, abends)
 
 - **Freigabestand für die Veröffentlichung:** 443 Positionen, **379 im Katalog**,
   368 Fotos (70 MB), 84.513 € netto / 100.570 € brutto. Alle vier zuvor

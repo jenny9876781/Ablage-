@@ -47,8 +47,11 @@ bitte nicht zusätzlich von Hand in die Excel ein**, sonst ist derselbe Schrank 
 vergeben.
 
 Die Interessenten bekommen **keine Bestätigungsmail** — sie sehen die Bestätigung nur am
-Bildschirm. Du meldest dich persönlich. Und weil der Katalog keine Kontaktdaten speichert,
-sind **deine Benachrichtigungsmails das einzige Kontaktarchiv**: bitte aufbewahren.
+Bildschirm. Du meldest dich persönlich. Weil der Webserver keine Mails verschickt, bekommst
+auch du keine Benachrichtigung: **die Reservierungen stehen in WordPress** unter
+„Artikelkatalog → Reservierungen", mit Kontaktdaten und einer Zahl am Menüpunkt, sobald etwas
+offen ist. Einmal am Tag hineinschauen. Abgewickelte Vorgänge mit „erledigt – Kontaktdaten
+löschen" bereinigen.
 
 Ist bezahlt und abgeholt, setzt du den Vorgang in WordPress unter „Artikelkatalog →
 Reservierungen" auf **bezahlt**; der Artikel verschwindet dann aus dem Katalog. Holt jemand

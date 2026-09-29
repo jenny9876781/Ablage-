@@ -59,11 +59,17 @@ class Kikripp_Mail {
             '',
             'Verwalten: ' . admin_url('admin.php?page=kikripp-reservierungen'),
             '',
-            'Diese Mail ist der einzige Ort, an dem die Kontaktdaten stehen —',
-            'im Katalog werden sie nicht gespeichert. Bitte aufbewahren.',
+            'Die Kontaktdaten stehen auch in der Verwaltung unter Artikelkatalog →',
+            'Reservierungen. Bitte dort löschen, sobald der Vorgang abgewickelt ist.',
         ]);
 
+        // Ohne eigene Absenderadresse nimmt WordPress "wordpress@<domain>" - ein Postfach,
+        // das es nicht gibt. Fremde Mailanbieter verwerfen solche Mails gern stillschweigend.
+        // Als Absender dient deshalb die Adresse, an die gemeldet wird: die gibt es wirklich.
         $kopf = ['Content-Type: text/plain; charset=UTF-8'];
+        if (is_email($an)) {
+            $kopf[] = sprintf('From: %s <%s>', get_option('kikripp_firma', 'Kikripp GmbH'), $an);
+        }
         if (is_email($v['email'])) {
             $kopf[] = 'Reply-To: ' . $v['name'] . ' <' . $v['email'] . '>';
         }
@@ -72,12 +78,14 @@ class Kikripp_Mail {
         global $wpdb;
         $wpdb->update(Kikripp_DB::t_vorgang(), ['mail_versandt' => $ok ? 1 : 0], ['id' => (int) $vorgang_id]);
 
-        // Ist die Mail draußen, sind die Kontaktdaten dort aufgehoben und haben
-        // in der Datenbank nichts mehr zu suchen. Scheitert der Versand, bleiben
-        // sie liegen – sonst wäre der Kontakt endgültig verloren.
-        if ($ok) {
-            Kikripp_DB::kontakt_loeschen($vorgang_id);
-        }
+        // Die Kontaktdaten bleiben in der Datenbank, bis der Mensch sie löscht.
+        //
+        // Bis zum 29.09.2026 wurden sie nach erfolgreichem Versand sofort gelöscht - die
+        // Mail war dann der einzige Ort, an dem sie standen. Der Webserver von kikripp.de
+        // verschickt aber gar keine Mails: wp_mail() meldet Erfolg, die Mail verschwindet.
+        // Damit wäre jeder Interessent unwiederbringlich verloren gewesen. Gespeichert wird
+        // jetzt also bewusst - auf der eigenen Website der Gesellschaft, mit einem Absatz
+        // in der Datenschutzerklärung und einem Löschknopf je Vorgang.
         return $ok;
     }
 

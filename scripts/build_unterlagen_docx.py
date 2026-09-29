@@ -75,15 +75,20 @@ def datenschutz():
         f"(Telefon {TELEFON}, E-Mail {EMAIL}).",
         "Wenn Sie über den Katalog eine Reservierung abschicken, übermitteln Sie Ihren "
         "Namen bzw. Ihre Firma, Ihre E-Mail-Adresse, Ihre Telefonnummer und, sofern "
-        "angegeben, eine Nachricht. Diese Angaben werden ausschließlich per E-Mail an "
-        f"die für den Verkauf zuständige Stelle der {FIRMA} weitergeleitet und nicht "
-        f"auf dieser Website gespeichert. Sie "
+        "angegeben, eine Nachricht. Diese Angaben werden zusammen mit den von Ihnen "
+        "vorgemerkten Artikeln in der Datenbank dieser Website gespeichert, damit wir "
+        "Ihre Reservierung bearbeiten und Kontakt mit Ihnen aufnehmen können. Sie "
         "erhalten keine automatische Bestätigungsmail; die {0} nimmt persönlich "
         "Kontakt mit Ihnen auf.".format(FIRMA),
-        "In der Datenbank dieser Website verbleiben ausschließlich Angaben ohne "
-        "Personenbezug: Artikelnummer, Menge, Preis, Vorgangsnummer und die Frist, "
-        "bis zu der ein Artikel vorgemerkt ist. Ihre IP-Adresse wird im Zusammenhang "
-        "mit der Reservierung nicht gespeichert.",
+        "Ihre Kontaktdaten werden gelöscht, sobald der Vorgang abgewickelt ist – "
+        "spätestens, wenn der Artikelkatalog nach Abschluss der Betriebsauflösung "
+        "abgeschaltet wird. Danach verbleiben nur noch Angaben ohne Personenbezug: "
+        "Artikelnummer, Menge, Preis, Vorgangsnummer und die Frist, bis zu der ein "
+        "Artikel vorgemerkt war. Handelt es sich um einen Kaufvorgang, gelten die "
+        "steuerlichen Aufbewahrungsfristen. Ihre IP-Adresse wird im Zusammenhang mit "
+        "der Reservierung nicht gespeichert.",
+        "Eine Weitergabe an Dritte findet nicht statt. Der Katalog liegt auf der "
+        f"Website der {FIRMA}; es werden keine Daten an fremde Dienste übermittelt.",
         "Rechtsgrundlage der Verarbeitung ist Art. 6 Abs. 1 lit. b DSGVO "
         "(Durchführung vorvertraglicher Maßnahmen und Abwicklung des Kaufvertrags). "
         f"Ansprechpartnerin für Auskunft, Berichtigung und Löschung ist die {FIRMA} "

@@ -40,7 +40,9 @@ register_activation_hook(__FILE__, function () {
     // unter „Artikelkatalog → Einstellungen" gesetzt und steht in keiner Datei.
     add_option('kikripp_zugang_version', 1);
     add_option('kikripp_mail_an', 'jennyp@kikripp.de');
-    add_option('kikripp_hinweisband', 'Vorschau – Artikel und Preise sind noch nicht vollständig.');
+    // Kein Vorschau-Hinweis: der Katalog geht als fertiger Stand online. Das Band bleibt
+    // leer, bis es einen echten Hinweis zu geben gibt (Wunsch der Nutzerin, 29.09.2026).
+    add_option('kikripp_hinweisband', '');
     add_option('kikripp_frist_tage', 7);
     add_option('kikripp_vorschau', 1);
     add_option('kikripp_ust_prozent', 19);

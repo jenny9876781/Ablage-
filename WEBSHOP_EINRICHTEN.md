@@ -79,12 +79,12 @@ sich später nur wieder zentral abschalten.
 ## 2. Fotos in die Mediathek
 
 Entpacke `kikripp-fotos.zip` auf deinem Rechner. Du bekommst einen Ordner `fotos` mit
-genau **351 Bildern, zusammen 68 MB**. Geh in WordPress auf **Medien → Datei hinzufügen** und
+genau **364 Bildern, zusammen 69 MB**. Geh in WordPress auf **Medien → Datei hinzufügen** und
 zieh die Bilder in das Feld — am besten in Paketen von hundert, nicht alle auf einmal. Das
 dauert; lass das Browserfenster offen, bis jedes Paket durch ist.
 
 **So prüfst du, ob alles angekommen ist:** Geh auf **Medien → Mediathek** und schalte oben
-rechts auf die Listenansicht. Unten steht die Gesamtzahl der Einträge. Sie muss um 351
+rechts auf die Listenansicht. Unten steht die Gesamtzahl der Einträge. Sie muss um 364
 gestiegen sein.
 
 Und falls doch etwas fehlt: **das ist kein Problem und du musst nicht suchen.** Der Import im
@@ -102,10 +102,10 @@ auf Importieren. Der Import dauert **ein paar Sekunden**, nicht Minuten.
 
 Danach steht oben eine Meldung. **So muss sie aussehen:**
 
-    Import abgeschlossen: 417 neu, 0 aktualisiert.
+    Import abgeschlossen: 443 neu, 0 aktualisiert.
 
 Kein weiterer Satz dahinter — das heißt: jeder Artikel hat sein Foto gefunden. Im Katalog
-sichtbar sind davon **362**; die übrigen stehen bewusst auf „nicht im Katalog".
+sichtbar sind davon **375**; die übrigen stehen bewusst auf „nicht im Katalog".
 
 Steht dahinter noch *„… Artikel ohne gefundenes Foto"*, nennt die Meldung die fehlenden
 Bilder beim Namen. Die lädst du in die Mediathek nach und importierst einfach noch einmal.

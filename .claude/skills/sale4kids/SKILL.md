@@ -662,7 +662,28 @@ entschieden, die Klinik-Spalte aus dem Artikelstamm zu nehmen. Seitdem gilt:
   dann der Webkatalog**, und was die Klinik nimmt, muss vor dem Livegang auf
   `Im_Katalog = nein` stehen. Sonst wird dasselbe Stück zweimal angeboten.
 
-## 9. Offene Punkte (Stand 24.09.2026)
+## 9. Offene Punkte (Stand 29.09.2026)
+
+- **Zweite Prüfrunde eingearbeitet** (Rücklauf 29.09.2026, Excel + Word-Notizen): 110
+  Feldänderungen, 26 neue Artikel, 30 neue Fotos (F-541 bis F-570). Stand jetzt
+  **443 Positionen, 375 im Katalog, 84.513 € netto**.
+- **Nummernkollision, die fast durchgerutscht wäre:** Die Nutzerin hatte `BA04-08` und
+  `BA04-09` für neue Artikel vergeben. Beide Nummern waren schon als zusammengefasste
+  Post-it-Nummern von `NU04-17` und `BA02-08` belegt. `pruefen.py` hat es gefangen, die
+  neuen Artikel sind jetzt `BA04-10` und `BA04-11`. **Vor jeder neuen Nummer prüfen, ob
+  sie in einem `Weitere_ArtNr` steht** — eine eigene Zeile allein genügt als Nachweis nicht.
+- **Auf Fotos gefundene Artikel ohne Notiz:** `BU09-04` (Hobelbank) und `BU09-05`
+  (Werkzeugschränke) tragen Post-its, standen aber in keiner Liste. Angelegt mit
+  `Im_Katalog = nein` und `OFFEN:`-Vermerk; Anzahl und Preis noch zu klären.
+- **`BA08-26` und `BA08-27`** warten auf ihr Foto. Die Nutzerin hat es zweimal als Bild in
+  den Chat gestellt — das erreicht das Dateisystem **nicht**. Es muss als Anhang kommen,
+  damit `prepare_fotos.py` eine F-Nummer vergeben kann.
+- **Positionen ohne Fotoverweis sind ein erlaubter Zustand.** Sie stehen auf
+  `Im_Katalog = nein`, bis das Foto da ist. Der Kettentest leitet seine Erwartung deshalb
+  aus den Daten ab und schreibt nicht 0 fest; die Zusage „jede **sichtbare** Position hat
+  ein Bild" gilt weiter und wird geprüft.
+- **Kein Vorschau-Hinweisband mehr** (Wunsch der Nutzerin): `kikripp_hinweisband` ist beim
+  Aktivieren leer. Der Katalog geht als fertiger Stand online.
 
 - **Prüfrunde 1 ist eingearbeitet** (Rücklauf vom 24.09.2026). Sachlich geändert hat die
   Nutzerin: `NE01-10` Menge 2 → 3, `NU01-03` auf `entfällt`, `BA05-04` Preis 750 → 250 €,

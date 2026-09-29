@@ -68,10 +68,14 @@ $erwartet = count(array_filter($alle,
 $fotos = array_values(array_unique(array_filter(array_column($alle, 'foto'))));
 mediathek_fuellen(array_map(function ($f) { return $f . '.jpg'; }, $fotos));
 
+// Positionen ohne Fotoverweis sind erlaubt - sie stehen auf Im_Katalog = nein, bis das
+// Foto da ist. Der Test darf deshalb nicht 0 erwarten, sondern genau diese Anzahl.
+$ohne_verweis = count(array_filter($alle, function ($a) { return empty($a['foto']); }));
 $bericht = Kikripp_Admin::einspielen($alle);
 pruefe('Import meldet alle Artikel als neu', $bericht['neu'], count($alle));
-pruefe('kein Artikel ohne Foto', $bericht['ohne_bild'], 0);
-pruefe('keine fehlenden Bilder gemeldet', $bericht['fehlende_fotos'], []);
+pruefe('nur Positionen ohne Fotoverweis gelten als ohne Bild',
+       $bericht['ohne_bild'], $ohne_verweis);
+pruefe('keine fehlenden Bilddateien gemeldet', $bericht['fehlende_fotos'], []);
 $katalog = Kikripp_DB::katalog_artikel();
 pruefe('alle aktiven Artikel im Katalog', count($katalog), $erwartet);
 
@@ -133,12 +137,12 @@ echo "\n7. Fotos: doppelt hochgeladen, fehlend, Gross- und Kleinschreibung\n";
 // trotzdem finden, sonst stehen nach einem zweiten Upload alle Artikel ohne Foto da.
 mediathek_fuellen(array_map(function ($f) { return $f . '-1.jpg'; }, $fotos));
 $bericht = Kikripp_Admin::einspielen($alle);
-pruefe('zweifach hochgeladene Fotos werden gefunden', $bericht['ohne_bild'], 0);
+pruefe('zweifach hochgeladene Fotos werden gefunden', $bericht['ohne_bild'], $ohne_verweis);
 
 // Grossbuchstaben in der Dateiendung sind bei Fotos vom Telefon ueblich.
 mediathek_fuellen(array_map(function ($f) { return strtolower($f) . '.JPG'; }, $fotos));
 $bericht = Kikripp_Admin::einspielen($alle);
-pruefe('Kleinschreibung und .JPG stoeren nicht', $bericht['ohne_bild'], 0);
+pruefe('Kleinschreibung und .JPG stoeren nicht', $bericht['ohne_bild'], $ohne_verweis);
 
 // Fehlt ein Foto, muss der Import es beim Namen nennen - sonst sucht die Nutzerin blind.
 $ohne = array_slice($fotos, 1);
@@ -146,7 +150,7 @@ mediathek_fuellen(array_map(function ($f) { return $f . '.jpg'; }, $ohne));
 $bericht = Kikripp_Admin::einspielen($alle);
 $fehlt_erwartet = count(array_filter($alle, function ($a) use ($fotos) {
     return ($a['foto'] ?? '') === $fotos[0]; }));
-pruefe('fehlendes Foto wird gezaehlt', $bericht['ohne_bild'], $fehlt_erwartet);
+pruefe('fehlendes Foto wird gezaehlt', $bericht['ohne_bild'], $fehlt_erwartet + $ohne_verweis);
 pruefe('fehlendes Foto wird beim Namen genannt', $bericht['fehlende_fotos'], [$fotos[0]]);
 pruefe('die Meldung nennt die Mediathek',
        strpos(Kikripp_Admin::import_meldung($bericht), 'fehlen in der Mediathek') !== false, true);
@@ -154,7 +158,8 @@ pruefe('die Meldung nennt die Mediathek',
 // Zum Schluss wieder vollstaendig, damit nichts ohne Bild zurueckbleibt.
 mediathek_fuellen(array_map(function ($f) { return $f . '.jpg'; }, $fotos));
 Kikripp_Admin::einspielen($alle);
-pruefe('am Ende hat jeder sichtbare Artikel ein Bild',
+// Im Katalog sichtbar werden nur Positionen mit Bild - das ist die Zusage an die Kaeufer.
+pruefe('jeder im Katalog sichtbare Artikel hat ein Bild',
        count(array_filter(Kikripp_DB::katalog_artikel(),
              function ($a) { return ($a['bild'] ?? '') === ''; })), 0);
 

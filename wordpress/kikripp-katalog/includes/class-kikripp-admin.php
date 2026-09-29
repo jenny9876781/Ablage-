@@ -256,7 +256,7 @@ class Kikripp_Admin {
         delete_transient('kikripp_bilder');
 
         global $wpdb;
-        $neu = $geaendert = $ohne_bild = 0;
+        $neu = $geaendert = $ohne_bild = $ohne_bild_versteckt = 0;
         $fehlende_fotos = [];
         $reserviert_entfernt = [];
         $belegung = Kikripp_DB::belegung();
@@ -268,9 +268,17 @@ class Kikripp_Admin {
             $gesehen[] = $artnr;
 
             $bild = self::bild_url(isset($a['foto']) ? (string) $a['foto'] : '');
+            // Gemeldet wird nur, was im Katalog auch zu sehen ist. Gestrichene Positionen
+            // und die der zweiten Welle brauchen kein Foto in der Mediathek - sie als
+            // "fehlend" zu melden, schickt die Nutzerin auf eine Suche ohne Anlass.
+            $im_katalog = !empty($a['aktiv']) && !empty($a['im_katalog']);
             if ($bild === '') {
-                $ohne_bild++;
-                if (!empty($a['foto'])) { $fehlende_fotos[] = (string) $a['foto']; }
+                if ($im_katalog) {
+                    $ohne_bild++;
+                    if (!empty($a['foto'])) { $fehlende_fotos[] = (string) $a['foto']; }
+                } else {
+                    $ohne_bild_versteckt++;
+                }
             }
 
             $daten = [
@@ -336,6 +344,7 @@ class Kikripp_Admin {
             'neu'                 => $neu,
             'geaendert'           => $geaendert,
             'ohne_bild'           => $ohne_bild,
+            'ohne_bild_versteckt' => $ohne_bild_versteckt,
             'fehlende_fotos'      => $fehlende_fotos,
             'verschwunden'        => $verschwunden,
             'reserviert_entfernt' => array_values(array_unique($reserviert_entfernt)),
@@ -351,10 +360,17 @@ class Kikripp_Admin {
                               implode(', ', array_slice($b['verschwunden'], 0, 15)));
         }
         if ($b['ohne_bild'] > 0) {
-            $meldung .= sprintf(' %d Artikel ohne gefundenes Foto. Diese Bilder fehlen in der '
-                . 'Mediathek: %s%s', $b['ohne_bild'],
+            $meldung .= sprintf(' ACHTUNG: %d im Katalog sichtbare Artikel ohne gefundenes Foto. '
+                . 'Diese Bilder fehlen in der Mediathek: %s%s', $b['ohne_bild'],
                 implode(', ', array_slice($b['fehlende_fotos'], 0, 25)),
                 count($b['fehlende_fotos']) > 25 ? ' … und weitere' : '.');
+        } else {
+            $meldung .= ' Jeder im Katalog sichtbare Artikel hat sein Foto gefunden.';
+        }
+        if (!empty($b['ohne_bild_versteckt'])) {
+            $meldung .= sprintf(' (%d Positionen stehen nicht im Katalog und haben deshalb '
+                . 'kein Foto in der Mediathek – das ist so gewollt.)',
+                $b['ohne_bild_versteckt']);
         }
         if (!empty($b['reserviert_entfernt'])) {
             $meldung .= ' ACHTUNG: Diese Artikel wurden stillgelegt, haben aber noch Reservierungen: '

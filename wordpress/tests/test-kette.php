@@ -68,9 +68,11 @@ $erwartet = count(array_filter($alle,
 $fotos = array_values(array_unique(array_filter(array_column($alle, 'foto'))));
 mediathek_fuellen(array_map(function ($f) { return $f . '.jpg'; }, $fotos));
 
-// Positionen ohne Fotoverweis sind erlaubt - sie stehen auf Im_Katalog = nein, bis das
-// Foto da ist. Der Test darf deshalb nicht 0 erwarten, sondern genau diese Anzahl.
-$ohne_verweis = count(array_filter($alle, function ($a) { return empty($a['foto']); }));
+// Gemeldet wird nur, was im Katalog sichtbar ist. Eine Position ohne Fotoverweis, die
+// auf Im_Katalog = nein steht, ist kein Mangel - sie taucht in der Meldung nicht auf.
+$sichtbar_ohne_verweis = count(array_filter($alle, function ($a) {
+    return empty($a['foto']) && !empty($a['aktiv']) && !empty($a['im_katalog']); }));
+$ohne_verweis = $sichtbar_ohne_verweis;
 $bericht = Kikripp_Admin::einspielen($alle);
 pruefe('Import meldet alle Artikel als neu', $bericht['neu'], count($alle));
 pruefe('nur Positionen ohne Fotoverweis gelten als ohne Bild',
@@ -162,6 +164,36 @@ Kikripp_Admin::einspielen($alle);
 pruefe('jeder im Katalog sichtbare Artikel hat ein Bild',
        count(array_filter(Kikripp_DB::katalog_artikel(),
              function ($a) { return ($a['bild'] ?? '') === ''; })), 0);
+
+echo "\n8. Gestrichene Positionen loesen keinen Fehlalarm aus\n";
+// Der Fall, der am 29.09.2026 in WordPress fuer einen Schrecken gesorgt hat: das
+// Fotopaket enthaelt nur die Bilder sichtbarer Positionen. Gestrichene Positionen
+// zeigen auf Fotos, die nie hochgeladen wurden. Die Meldung darf sie nicht als
+// fehlend anprangern - sonst sucht die Nutzerin nach einem Fehler, den es nicht gibt.
+$sichtbare_fotos = [];
+foreach ($alle as $a) {
+    if (!empty($a['aktiv']) && !empty($a['im_katalog']) && !empty($a['foto'])) {
+        $sichtbare_fotos[$a['foto']] = true;
+    }
+}
+$nur_versteckt = [];
+foreach ($alle as $a) {
+    if (!empty($a['foto']) && !isset($sichtbare_fotos[$a['foto']])) {
+        $nur_versteckt[$a['foto']] = true;
+    }
+}
+mediathek_fuellen(array_map(function ($f) { return $f . '.jpg'; }, array_keys($sichtbare_fotos)));
+$bericht = Kikripp_Admin::einspielen($alle);
+pruefe('kein sichtbarer Artikel ohne Foto', $bericht['ohne_bild'], 0);
+pruefe('keine Bilddatei als fehlend angeprangert', $bericht['fehlende_fotos'], []);
+pruefe('die versteckten werden getrennt gezaehlt',
+       $bericht['ohne_bild_versteckt'] > 0, count($nur_versteckt) > 0);
+$m = Kikripp_Admin::import_meldung($bericht);
+pruefe('die Meldung bestaetigt die Fotos statt zu warnen',
+       strpos($m, 'hat sein Foto gefunden') !== false, true);
+pruefe('die Meldung enthaelt kein ACHTUNG', strpos($m, 'ACHTUNG') === false, true);
+pruefe('die Meldung erklaert die versteckten Positionen',
+       strpos($m, 'stehen nicht im Katalog') !== false, true);
 
 printf("\n== Kettentest: %d Fehler ==\n", $fehler);
 exit($fehler > 0 ? 1 : 0);

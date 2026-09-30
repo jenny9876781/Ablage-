@@ -662,13 +662,19 @@ entschieden, die Klinik-Spalte aus dem Artikelstamm zu nehmen. Seitdem gilt:
   dann der Webkatalog**, und was die Klinik nimmt, muss vor dem Livegang auf
   `Im_Katalog = nein` stehen. Sonst wird dasselbe Stück zweimal angeboten.
 
-## 9. Der Mailversand ist tot — und was daraus folgt
+## 9. Der Mailversand ist unzuverlässig — und was daraus folgt
 
-**Am 29.09.2026 beim echten Einrichten festgestellt: der Webserver von kikripp.de
-verschickt keine Mails.** `wp_mail()` meldet Erfolg, die Mail verschwindet. Geprüft mit
-zwei Empfängern — `saldi4kids@outlook.com` und `jennyp@kikripp.de`, beide extern und
-domaineigen. Nichts kam an, auch nicht im Junk-Ordner. Ursache ist nicht die
-Absenderadresse allein: der Host liefert überhaupt nicht aus.
+**Befund vom 29./30.09.2026.** Am ersten Abend kam bei keinem der beiden Empfänger etwas
+an, und ich hatte daraus geschlossen, der Server verschicke überhaupt nichts. **Das war
+falsch** — am nächsten Tag berichtete die Nutzerin, die Mails an `jennyp@kikripp.de`
+seien doch eingetroffen: **mit mehreren Stunden Verzögerung und im Spam-Ordner.** Bei
+`saldi4kids@outlook.com` kam weiterhin nichts an.
+
+Damit ist das Bild klar: Der Webserver verschickt im Namen von kikripp.de, ist dafür aber
+sehr wahrscheinlich **nicht im SPF-Eintrag der Domain hinterlegt**. Der eigene Mailserver
+nimmt die Mail misstrauisch an (Spam, verzögert), Microsoft verwirft sie stillschweigend.
+**Lehre daraus: bei Mailproblemen nicht nach einer Stunde urteilen.** Eine Warteschlange
+kann Stunden brauchen, und „nicht angekommen" heißt oft „noch nicht angekommen".
 
 **Die Reservierung stand danach ohne Kontaktdaten in der Verwaltung** — denn bis dahin
 löschte `Kikripp_Mail::reservierung()` die Kontaktdaten, sobald `wp_mail()` Erfolg
@@ -684,6 +690,14 @@ Interessent unwiederbringlich verloren gewesen, ohne dass es jemand merkt.
   Einloggen, ohne daran denken zu müssen.
 * Die Mail wird weiter versucht und trägt jetzt einen echten **Absender**
   (`From: <Firma> <kikripp_mail_an>`). Wird später SMTP nachgerüstet, läuft sie sofort.
+* **Zwei getrennte Adressen** (30.09.2026): `kikripp_mail_an` ist die *interne*
+  Meldeadresse — ein Postfach auf kikripp.de, weil nur dorthin überhaupt zugestellt wird.
+  `kikripp_kontakt_email` ist die Adresse, die **Interessenten sehen** (Anbieter-Block,
+  Bestätigung) — die des Verkaufs. Vorher war beides dasselbe Feld, und die Nutzerin
+  musste sich zwischen „Benachrichtigung kommt an" und „Käufer sehen die richtige
+  Adresse" entscheiden. `Kikripp_REST::kontakt_email()` fällt auf die Meldeadresse
+  zurück, wenn das neue Feld leer ist — bestehende Einrichtungen ändern sich dadurch
+  nicht.
 * `U2_Datenschutz_Absatz.docx` ist neu formuliert: Speicherung, Löschung nach Abwicklung,
   keine Weitergabe. **Die Nutzerin musste den Absatz in der Datenschutzerklärung
   ersetzen** — das gehört zu dieser Umstellung dazu und darf nicht vergessen werden.

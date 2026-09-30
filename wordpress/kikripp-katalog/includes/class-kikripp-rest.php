@@ -75,11 +75,25 @@ class Kikripp_REST {
                 'firma'       => (string) get_option('kikripp_firma', 'Kikripp GmbH'),
                 'adresse'     => (string) get_option('kikripp_abholadresse', ''),
                 'telefon'     => (string) get_option('kikripp_telefon', ''),
-                'email'       => (string) get_option('kikripp_mail_an', ''),
+                'email'       => self::kontakt_email(),
                 'impressum'   => (string) get_option('kikripp_impressum_url', ''),
                 'datenschutz' => (string) get_option('kikripp_datenschutz_url', ''),
             ],
         ]));
+    }
+
+    /**
+     * Die Adresse, die Interessenten sehen — im Anbieter-Block und in der Bestätigung.
+     *
+     * Bewusst getrennt von `kikripp_mail_an`: dorthin geht die interne Benachrichtigung,
+     * und das muss nicht dieselbe Adresse sein. Auf kikripp.de ist es das auch nicht —
+     * der Webserver stellt nur an die eigene Domain zu, geantwortet wird aber aus einem
+     * anderen Postfach. Ist das Feld leer, gilt weiter die Meldeadresse; so ändert sich
+     * für eine bestehende Einrichtung nichts, solange niemand etwas einträgt.
+     */
+    public static function kontakt_email() {
+        $eigen = trim((string) get_option('kikripp_kontakt_email', ''));
+        return $eigen !== '' ? $eigen : (string) get_option('kikripp_mail_an', '');
     }
 
     public static function reservierung($anfrage) {

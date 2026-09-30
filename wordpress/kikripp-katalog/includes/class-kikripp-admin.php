@@ -472,9 +472,18 @@ class Kikripp_Admin {
              . '<p class="description">Wird das Passwort geändert, müssen sich alle erneut anmelden.</p></td></tr>');
 
         printf('<tr><th scope="row"><label for="k_mail">Reservierungen melden an</label></th><td>'
-             . '<input type="email" id="k_mail" name="mail_an" class="regular-text" value="%s" required></td></tr>',
+             . '<input type="email" id="k_mail" name="mail_an" class="regular-text" value="%s" required>'
+             . '<p class="description">Interne Benachrichtigung. Sie erreicht Interessenten '
+             . 'nicht — dafür ist das Feld darunter da. Die Reservierungen stehen ohnehin '
+             . 'vollständig auf dieser Seite.</p></td></tr>',
              esc_attr(get_option('kikripp_mail_an', '')));
 
+        printf('<tr><th scope="row"><label for="k_kontakt">Kontaktadresse für Interessenten</label></th><td>'
+             . '<input type="email" id="k_kontakt" name="kontakt_email" class="regular-text" value="%s">'
+             . '<p class="description">Steht im Katalog unter dem Anbieter-Block und in der '
+             . 'Bestätigung nach der Reservierung. Bleibt das Feld leer, gilt die Adresse '
+             . 'von oben.</p></td></tr>',
+             esc_attr(get_option('kikripp_kontakt_email', '')));
         printf('<tr><th scope="row"><label for="k_band">Hinweisband</label></th><td>'
              . '<input type="text" id="k_band" name="hinweisband" class="large-text" value="%s">'
              . '<p class="description">Erscheint als Band über dem Katalog. Zum Livegang das Feld leeren.</p></td></tr>',
@@ -545,6 +554,8 @@ class Kikripp_Admin {
         $pw = isset($_POST['passwort']) ? trim(wp_unslash($_POST['passwort'])) : '';
         if ($pw !== '') { Kikripp_Zugang::passwort_setzen($pw); }
         update_option('kikripp_mail_an', sanitize_email(wp_unslash($_POST['mail_an'] ?? '')));
+        update_option('kikripp_kontakt_email',
+            sanitize_email(wp_unslash($_POST['kontakt_email'] ?? '')));
         update_option('kikripp_hinweisband', sanitize_text_field(wp_unslash($_POST['hinweisband'] ?? '')));
         update_option('kikripp_frist_tage', max(1, (int) ($_POST['frist_tage'] ?? 7)));
         update_option('kikripp_ust_prozent', (float) ($_POST['ust'] ?? 19));

@@ -130,13 +130,22 @@ Passwort nirgends in einer Datei steht.
 
 Geh auf **Artikelkatalog → Einstellungen** und arbeite die Seite von oben nach unten durch:
 
+> **Warum zwei Mailadressen?** Der Webserver von kikripp.de verschickt Mails nur
+> unzuverlässig — an ein Postfach auf der eigenen Domain kommen sie mit Stunden
+> Verzögerung und im Spam-Ordner an, an Outlook gar nicht. Deshalb ist die **interne
+> Meldeadresse** eine auf kikripp.de, während Interessenten die **Verkaufsadresse**
+> sehen. Verlass dich aber nicht auf die Mail: Die Reservierungen stehen vollständig
+> unter *Artikelkatalog → Reservierungen*, und eine Zahl am Menüpunkt zeigt dir, wenn
+> etwas offen ist.
+
 Die Tabelle steht in **derselben Reihenfolge wie das Formular** — du kannst sie einfach
 danebenlegen und abarbeiten. Fast alles ist schon vorausgefüllt; nur das Passwort fehlt.
 
 | Feld (in dieser Reihenfolge) | Was hineingehört |
 |---|---|
 | Katalog-Passwort | das vereinbarte Passwort, einmal eintragen. **Das einzige leere Feld.** |
-| Reservierungen melden an | `saldi4kids@outlook.com` |
+| Reservierungen melden an | `jennyp@kikripp.de` — **interne** Meldung. Auf kikripp.de kommt nur hier etwas an, und auch das verzögert und im Spam-Ordner |
+| Kontaktadresse für Interessenten | `saldi4kids@outlook.com` — diese Adresse **sehen die Käufer** im Anbieter-Block und in der Bestätigung |
 | Hinweisband | Text über dem Katalog. Während des Testens z. B. „Testbetrieb"; zum Livegang leeren |
 | Reservierung gilt | 7 Tage |
 | Umsatzsteuer | 19 % |

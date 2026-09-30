@@ -258,6 +258,33 @@ pruefe('ohne Keks kein Zugang', Kikripp_Zugang::hat_zugang(), false);
 // zu kommen - der Webserver verschickt keine Mails. Bricht diese Anzeige, verliert
 // die Nutzerin Interessenten, ohne es zu merken. Deshalb wird sie geprueft.
 // -----------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
+// Zwei Adressen, zwei Zwecke: intern gemeldet wird an ein Postfach, das der Webserver
+// wirklich erreicht; angezeigt bekommen Interessenten die Adresse des Verkaufs.
+// Wer das verwechselt, zeigt Kaeufern eine Adresse, die niemand liest.
+// -----------------------------------------------------------------------------
+titel('16b. Meldeadresse und Kontaktadresse sind getrennt');
+require_once __DIR__ . '/../kikripp-katalog/includes/class-kikripp-rest.php';
+update_option('kikripp_mail_an', 'jennyp@kikripp.de');
+update_option('kikripp_kontakt_email', 'saldi4kids@outlook.com');
+pruefe('Interessenten sehen die Verkaufsadresse',
+       Kikripp_REST::kontakt_email(), 'saldi4kids@outlook.com');
+$GLOBALS['mails'] = [];
+$v9 = Kikripp_DB::reservieren(kontakt('Trennungstest'), ['K-001' => 1]);
+Kikripp_Mail::reservierung($v9);
+pruefe('die Meldung geht an die interne Adresse',
+       $GLOBALS['mails'][0]['an'], 'jennyp@kikripp.de');
+pruefe('und traegt sie auch als Absender',
+       strpos(implode(' ', (array) $GLOBALS['mails'][0]['kopf']),
+              'From: Kikripp GmbH <jennyp@kikripp.de>') !== false, true);
+
+// Bleibt das neue Feld leer, darf sich fuer eine bestehende Einrichtung nichts aendern.
+update_option('kikripp_kontakt_email', '');
+pruefe('leeres Feld faellt auf die Meldeadresse zurueck',
+       Kikripp_REST::kontakt_email(), 'jennyp@kikripp.de');
+update_option('kikripp_kontakt_email', 'saldi4kids@outlook.com');
+update_option('kikripp_mail_an', 'saldi4kids@outlook.com');
+
 titel('17. Die Kontaktdaten stehen auf der Verwaltungsseite');
 require_once __DIR__ . '/../kikripp-katalog/includes/class-kikripp-admin.php';
 $GLOBALS['ist_admin'] = true;

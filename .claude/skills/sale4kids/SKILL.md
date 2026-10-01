@@ -712,11 +712,12 @@ der Verwaltungsseite stehen, der Menüpunkt muss die Zahl tragen, und nach dem L
 nichts mehr zu sehen sein. Die Attrappe legt ihre Helfer nur per `function_exists()` an —
 der Testserver bringt einige selbst mit und bricht sonst mit „Cannot redeclare" ab.
 
-## 9b. Stand am 29.09.2026, abends — der Katalog ist online
+## 9b. Stand am 01.10.2026 — der Katalog läuft, die Durchsicht ist fertig
 
-**Der Webkatalog läuft.** Er wurde an diesem Tag gemeinsam mit der Nutzerin Schritt für
-Schritt in WordPress eingerichtet, sie hat nach jedem Schritt einen Bildschirmabzug
-geschickt. Technisch ist alles fertig; offen ist nur noch Inhalt.
+**Der Webkatalog ist eingerichtet und funktioniert.** Er wurde am 29.09. gemeinsam mit der
+Nutzerin Schritt für Schritt in WordPress aufgebaut, sie hat nach jedem Schritt einen
+Bildschirmabzug geschickt. Am 30.09. und 01.10. kamen der getrennte Mailversand und die
+Google-Frage dazu. Technisch ist alles fertig; offen ist nur noch Inhalt.
 
 ### Was in WordPress steht
 
@@ -724,9 +725,11 @@ geschickt. Technisch ist alles fertig; offen ist nur noch Inhalt.
 |---|---|
 | Adresse | `www.kikripp.de/artikelkatalog` (Seite „Artikelkatalog", Block mit `[kikripp_katalog]`) |
 | Passwort | `2026sales4kids` — Link dazu: `…/artikelkatalog/?kik=2026sales4kids` |
-| Plugin | über die Netzwerkverwaltung installiert, **nur auf der Seite KIKRIPP** aktiviert |
+| Plugin | über die Netzwerkverwaltung installiert, **nur auf der Seite KIKRIPP** aktiviert; letzte Fassung eingespielt |
 | Mediathek | **711 Elemente** (343 vorher + 368 Katalogfotos) |
 | Import | 443 Artikel, **379 im Katalog sichtbar**, jede sichtbare Position mit Bild |
+| Reservierungen melden an | `jennyp@kikripp.de` — nur intern, erscheint nirgends öffentlich |
+| Kontaktadresse für Interessenten | `saldi4kids@outlook.com` — steht im Anbieter-Block und in der Bestätigung |
 | Vorschaubetrieb | **an** — Testreservierungen sind markiert und am Ende löschbar |
 | Hinweisband | leer |
 
@@ -734,28 +737,70 @@ geschickt. Technisch ist alles fertig; offen ist nur noch Inhalt.
 maximale Uploadgröße 16.000 KB. Der Punkt, vor dem in `A1` gewarnt wird, ist hier also
 keiner.
 
-### Was die Nutzerin gerade macht
+### Die beiden Mailadressen sind getrennt — und warum
 
-Sie geht den Katalog durch und sammelt:
+Der Mailversand über den kikripp.de-Webserver ist unzuverlässig (siehe Abschnitt 9). Am
+30.09. hat sich gezeigt: an `jennyp@kikripp.de` kommen die Meldungen an, aber **erst nach
+Stunden und im Spam-Ordner**; an `saldi4kids@outlook.com` kam nichts. Deshalb zwei Felder
+statt einem:
 
-* **Fehlende Artikel** — Positionen, zu denen es schon Fotos gibt, die aber nie in den
-  Artikelstamm gekommen sind. Kommt als Word mit Artikel und zugehöriger **F-Nummer**
-  (die liest sie in der Mediathek ab).
-* **Zustand und Beschreibungen** — Änderungen direkt in `01_Artikelstamm_kikripp.xlsx`.
-* Fotos, die nicht zum Artikel passen.
+* `kikripp_mail_an` → die Adresse, an die gemeldet wird. Gleiche Domain wie der Absender,
+  also die einzige, bei der die Mail überhaupt ankommt.
+* `kikripp_kontakt_email` → die Adresse, die Interessenten sehen. Leer gelassen fällt sie
+  auf `kikripp_mail_an` zurück, damit bestehende Installationen sich nicht ändern.
 
-Sie vergibt **keine Artikelnummern selbst**, sondern schreibt `RAUMCODE-NEU1`,
-`-NEU2` usw. Grund: `BA04-08` und `BA04-09` waren bereits als zusammengefasste
-Post-it-Nummern von `NU04-17` und `BA02-08` belegt, und das fiel erst bei `pruefen.py`
-auf. **Vor jeder neuen Nummer prüfen, ob sie in einem `Weitere_ArtNr` steht.**
+Die Nutzerin hat beide eingetragen und am 01.10. gemeldet: **„test hat funktioniert
+einwandfrei."** Verlass auf die Mail gibt es damit trotzdem nicht — deshalb gilt weiter:
+**die Kontaktdaten bleiben in der Datenbank**, bis ein Mensch sie löscht, und der Menüpunkt
+trägt die Zahl der offenen Reservierungen. Wer nur in WordPress nachsieht, verliert nichts.
+
+### Google sieht den Katalog nicht
+
+Die Katalogseite gibt `<meta name="robots" content="noindex, nofollow">` aus, und ohne
+Passwort steht kein einziger Artikel im Quelltext. Von `robots.txt` wurde abgeraten: die
+Datei ist öffentlich lesbar und würde die Adresse erst bekannt machen. Offen ist nur noch,
+die Seite aus dem **XML Sitemap Generator** zu nehmen — die Nutzerin war dabei, die beiden
+Unter-Sitemaps zu prüfen.
+
+Zur Frage, ob KI-Inhalte gekennzeichnet werden müssen: **nein.** Die einschlägige Regel
+(EU-KI-Verordnung Art. 50 Abs. 4) greift bei Texten von öffentlichem Interesse *ohne*
+menschliche Durchsicht — beides trifft hier nicht zu. Was zählt, ist die Richtigkeit der
+Angaben (§ 5 UWG), und dafür ist ihre Durchsicht der entscheidende Schritt. Kein
+Rechtsrat, so auch gesagt.
+
+### Was die Nutzerin geliefert hat — der nächste Arbeitsauftrag
+
+Sie hat die Durchsicht **abgeschlossen** und hält bereit:
+
+* ein **Word-Dokument** mit Änderungen und neuen Artikeln,
+* Änderungen in `01_Artikelstamm_kikripp.xlsx` (Zustand, Beschreibungen),
+* Fotos zu Positionen, die nie in den Artikelstamm gekommen sind — mit der **F-Nummer**,
+  die sie in der Mediathek abliest.
+
+Sie vergibt **keine Artikelnummern selbst**, sondern schreibt `RAUMCODE-NEU1`, `-NEU2` usw.
+Grund: `BA04-08` und `BA04-09` waren bereits als zusammengefasste Post-it-Nummern von
+`NU04-17` und `BA02-08` belegt, und das fiel erst bei `pruefen.py` auf. **Vor jeder neuen
+Nummer prüfen, ob sie in einem `Weitere_ArtNr` steht.**
+
+### Diese Arbeit gehört hierher, nicht zu claude.ai
+
+Am 01.10. hat die Nutzerin gefragt, ob sie die Einarbeitung an den normalen Claude
+außerhalb von Claude Code geben kann — als Skill — oder ob das alte Artifact ausgebaut
+werden soll. **Beides wurde abgeraten**, und sie hat zugestimmt:
+
+* Datenbasis, Fotoarchiv und die Nummernvergabe liegen hier. Außerhalb müssten sie aus
+  Uploads neu erfunden werden, bei jedem Durchgang wieder.
+* `pruefen.py` und die Testreihen laufen nur hier. Die Kollision `BA04-08/09` hat kein
+  Mensch gesehen, sondern das Skript.
+* Zwei Pflegeorte heißen zwei Bestände. Das fällt erst auf, wenn jemand etwas reserviert,
+  das es nicht mehr gibt.
+
+**Vorgehen stattdessen:** neuer Chat in Claude Code, Word, Excel und Fotos anhängen, „neue
+Artikel und Änderungen einarbeiten". Diese Arbeitsanweisung lädt sich dabei von selbst.
+Das Artifact `HdDGxJMQAWQ96Sy6z6Po4d` wird nicht weitergepflegt.
 
 ### Kleinigkeiten, die noch offen sind
 
-* **`Reservierungen melden an` steht auf `jennyp@kikripp.de`** — Rest vom Mailtest. Das
-  Feld ist zugleich die Adresse, die Interessenten im Anbieter-Block und in der
-  Bestätigung sehen. Muss zurück auf **`saldi4kids@outlook.com`**.
-* **Plugin-Aktualisierung liegt bereit** (doppelt angezeigte Nachricht behoben) — rein
-  kosmetisch, kann bei Gelegenheit eingespielt werden.
 * **Testreservierung #3 ist offen** und wird beim Livegang über *Einstellungen →
   Testreservierungen löschen* entfernt.
 * **Preise von `BU09-04` (250 €) und `BU09-05` (180 € je Schrank)** sind Schätzwerte,
@@ -765,9 +810,9 @@ auf. **Vor jeder neuen Nummer prüfen, ob sie in einem `Weitere_ArtNr` steht.**
 
 ### Was noch kommt
 
-1. Die Nutzerin schickt Word und Excel → einlesen, neue Artikel anlegen, neue Fotos
-   aufnehmen, Importdatei und Arbeitsmappe neu erzeugen.
-2. Sie lädt die neuen Fotos hoch und importiert einmal.
+1. Word und Excel einlesen, neue Artikel anlegen, neue Fotos aufnehmen, Importdatei und
+   Arbeitsmappe neu erzeugen.
+2. Die Nutzerin lädt die neuen Fotos hoch und importiert **einmal**.
 3. **Livegang:** Testreservierungen löschen · Vorschaubetrieb aus · Cache leeren ·
    im privaten Fenster gegenlesen · **dann erst** den Link verschicken.
 

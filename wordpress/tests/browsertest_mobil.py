@@ -67,11 +67,16 @@ with sync_playwright() as p:
     feld.fill("2")
     knopf.click()
     seite.wait_for_timeout(300)
-    leiste = seite.locator("#k-merk").first
+    # Seit 01.10.2026 steht die Leiste oben und bleibt beim Scrollen am oberen Rand stehen.
+    seite.mouse.wheel(0, 2500)
+    seite.wait_for_timeout(400)
+    leiste = seite.locator(".leiste").first
     lb = leiste.bounding_box()
-    pruefe("Leiste sitzt am unteren Rand", lb is not None and lb["y"] > 300, str(lb))
+    pruefe("Leiste bleibt beim Scrollen oben stehen", lb is not None and abs(lb["y"]) <= 2, str(lb))
     pruefe("Leiste nimmt hoechstens ein Drittel der Hoehe ein",
            lb is not None and lb["height"] <= 667 / 3, f"{lb['height']:.0f} px")
+    seite.mouse.wheel(0, -5000)
+    seite.wait_for_timeout(300)
 
     print("\n5) Formular in Telefonbreite")
     seite.locator("#k-anfragen").first.click()

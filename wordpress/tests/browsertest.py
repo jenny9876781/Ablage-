@@ -168,6 +168,21 @@ with sync_playwright() as p:
     pruefe("Stueck summiert ueber zwei Positionen", merk.startswith("3 Stück"), f"({merk!r})")
     seite.screenshot(path="/tmp/kikweb/t03-vorgemerkt.png")
 
+    # Wunsch 01.10.2026: Leiste oben statt unter der Liste, Fotos ganz statt beschnitten
+    lb = seite.locator(".leiste").bounding_box()
+    rb = seite.locator("#k-raster").bounding_box()
+    pruefe("Leiste steht oberhalb der Artikel", lb is not None and rb is not None and lb["y"] < rb["y"],
+           f"({lb}, {rb})")
+    seite.mouse.wheel(0, 3000)
+    seite.wait_for_timeout(400)
+    lb2 = seite.locator(".leiste").bounding_box()
+    pruefe("Leiste bleibt beim Scrollen oben sichtbar", lb2 is not None and abs(lb2["y"]) <= 2, f"({lb2})")
+    seite.mouse.wheel(0, -6000)
+    seite.wait_for_timeout(300)
+    passung = seite.evaluate("() => { const i = document.querySelector('.bild img');"
+                             " return i ? getComputedStyle(i).objectFit : null; }")
+    pruefe("Fotos werden ganz gezeigt (object-fit: contain)", passung == "contain", f"({passung!r})")
+
     print("\n5) Reservierung abschicken")
     seite.click("#k-anfragen")
     seite.wait_for_selector("#k-dlg", timeout=5000)

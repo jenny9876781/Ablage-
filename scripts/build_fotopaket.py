@@ -8,6 +8,9 @@ Arbeitsmaterial und bleiben im Ordner fotos/.
 
     python3 scripts/build_fotopaket.py              # ein Paket
     python3 scripts/build_fotopaket.py --teile 25   # zusaetzlich Teilpakete zu je 25 MB
+    python3 scripts/build_fotopaket.py --nachtrag alte_katalog_import.json
+                                                    # zusaetzlich nur die Fotos, die seit
+                                                    # dem letzten Import dazugekommen sind
 
 Die Teilpakete sind fuer den Versand: viele Wege (Mail, Chat) nehmen keine 70 MB an.
 Sie passen ausserdem zur Anleitung, die das Hochladen in Paketen empfiehlt. Die Fotos
@@ -51,6 +54,17 @@ def schreibe(ziel, namen):
     return os.path.getsize(ziel)
 
 
+def nachtrag(namen, alte_importdatei):
+    """Fotos, die die alte Importdatei noch nicht brauchte: genau das, was in der Mediathek
+    fehlt, wenn das letzte Paket vollstaendig hochgeladen wurde. So muss beim Nachpflegen
+    nicht alles erneut hoch - WordPress wuerde sonst jedes Bild doppelt anlegen (-1)."""
+    import json
+    with open(alte_importdatei, encoding="utf-8") as f:
+        alt = json.load(f)
+    schon_da = {a["foto"] for a in alt if a.get("foto") and a.get("aktiv") and a.get("im_katalog")}
+    return [n for n in namen if n not in schon_da]
+
+
 def main():
     namen = gebraucht()
     fehlt = [n for n in namen if not os.path.exists(os.path.join(FOTO_DIR, n + ".jpg"))]
@@ -59,6 +73,16 @@ def main():
     kb = schreibe(ZIEL, namen) // 1024
     print(f"geschrieben: {ZIEL}  ({len(namen)} Fotos, {kb//1024} MB)")
     print(f"             {namen[0]} bis {namen[-1]}")
+
+    if "--nachtrag" in sys.argv:
+        neu = nachtrag(namen, sys.argv[sys.argv.index("--nachtrag") + 1])
+        ziel = os.path.join(AUSGABE, "kikripp-fotos-nachtrag.zip")
+        if neu:
+            b = schreibe(ziel, neu)
+            print(f"geschrieben: {ziel}  ({len(neu)} Fotos, {b//1024//1024} MB, "
+                  f"{neu[0]} bis {neu[-1]})")
+        else:
+            print("Nachtrag: keine neuen Fotos seit dem letzten Import")
 
     if "--teile" in sys.argv:
         mb = int(sys.argv[sys.argv.index("--teile") + 1])

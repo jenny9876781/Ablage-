@@ -66,11 +66,13 @@
 .kikripp .zaehler b { color: var(--schwarz); }
 
 /* Karten */
-.kikripp .raster { display: grid; grid-template-columns: repeat(auto-fill, minmax(248px, 1fr)); gap: 16px; padding: 20px 0 130px; }
+.kikripp .raster { display: grid; grid-template-columns: repeat(auto-fill, minmax(248px, 1fr)); gap: 16px; padding: 20px 0 40px; }
 .kikripp .karte { background: var(--grund); border: 1px solid var(--linie); border-radius: 3px; overflow: hidden; display: flex; flex-direction: column; }
 .kikripp .karte.weg { opacity: .55; }
 .kikripp .bild { position: relative; height: 186px; background: var(--papier); overflow: hidden; }
-.kikripp .bild img { width: 100%; height: 186px; object-fit: cover; display: block; }
+/* contain statt cover: Hochformatfotos (Regale, Schraenke) werden ganz gezeigt statt auf
+   einen Querstreifen beschnitten. Der Rand bleibt papierfarben. */
+.kikripp .bild img { width: 100%; height: 186px; object-fit: contain; display: block; }
 .kikripp .kein-bild { height: 186px; display: flex; align-items: center; justify-content: center; color: #b9bcc2; font-size: 13px; }
 .kikripp .nr { position: absolute; left: 0; top: 0; background: var(--schwarz); color: #fff; font-size: 11px; font-weight: 600; padding: 3px 8px; letter-spacing: .04em; }
 .kikripp .badge { position: absolute; top: 8px; right: 8px; font-size: 10.5px; font-weight: 700; padding: 3px 9px; border-radius: 2px; letter-spacing: .03em; text-transform: uppercase; }
@@ -95,11 +97,17 @@
 .kikripp .mengen input { width: 86px; text-align: center; padding: 9px 6px; border: 1px solid var(--linie); border-radius: 3px; font: inherit; }
 .kikripp .mengen button { flex: 1; }
 
-/* Merkzettel */
-.kikripp .leiste { position: sticky; bottom: 0; background: var(--schwarz); color: #fff; padding: 14px; margin-top: 10px; z-index: 5; }
+/* Merkzettel: oben unter dem Kopf und beim Scrollen festgehalten, damit die Auswahl
+   immer im Blick ist (Wunsch 01.10.2026). Die WordPress-Werkzeugleiste angemeldeter
+   Nutzer wird ueber ihre CSS-Variable beruecksichtigt. */
+.kikripp .leiste { position: sticky; top: var(--wp-admin--admin-bar--height, 0px); background: var(--schwarz); color: #fff; padding: 12px 14px; margin-top: 10px; z-index: 5; }
 .kikripp .leiste .inner { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; max-width: 1200px; margin: 0 auto; }
 .kikripp .leiste .sum { flex: 1; font-size: 14px; color: #c9ccd1; }
 .kikripp .leiste .sum b { font-size: 18px; color: #fff; font-weight: 700; }
+/* Die leere Leiste traegt die Klasse "leer" - dieselbe wie der Hinweis "keine Treffer"
+   im Raster, der 60 px Innenabstand hat. Ohne diese Zeile wurde die Leiste oben zum
+   schwarzen Block. */
+.kikripp .leiste.leer { padding: 12px 14px; text-align: left; color: #fff; grid-column: auto; }
 
 /* Formular */
 .kikripp .dlg { border: 1px solid var(--linie); border-radius: 4px; padding: 22px; margin: 18px 0 30px; background: var(--grund); }
@@ -128,7 +136,7 @@
 .kikripp .feld small.hint { display: block; margin-top: 4px; font-size: 11.5px; color: var(--grau); }
 
 /* Rechtliche Hinweise */
-.kikripp .recht { border-top: 1px solid var(--linie); margin: 26px 0 90px; padding-top: 16px; font-size: 12.5px; line-height: 1.65; color: var(--grau); }
+.kikripp .recht { border-top: 1px solid var(--linie); margin: 26px 0 30px; padding-top: 16px; font-size: 12.5px; line-height: 1.65; color: var(--grau); }
 .kikripp .recht h4 { margin: 0 0 6px; font-size: 13px; font-weight: 700; color: var(--schwarz); text-transform: uppercase; letter-spacing: .06em; }
 .kikripp .recht p { margin: 0 0 6px; }
 /* Telefon: Auf 375 px fuellten Kopf, Filterzeile und Leiste zusammen den ganzen
@@ -137,6 +145,11 @@
    wenn wirklich etwas vorgemerkt ist. */
 @media (max-width: 560px) {
   .kikripp .leiste .sum { flex: 1 1 100%; }
+  /* Leiste steht oben fest: beide Knoepfe nebeneinander, damit sie nicht ein Viertel
+     des Bildschirms belegt */
+  .kikripp .leiste { padding: 10px 12px; }
+  .kikripp .leiste .inner { gap: 8px; }
+  .kikripp .leiste button { flex: 1 1 0; padding-left: 8px; padding-right: 8px; font-size: 13.5px; }
   .kikripp .leiste.leer { padding: 10px 14px; }
   .kikripp .leiste.leer button { display: none; }
   .kikripp .leiste.leer .sum { font-size: 13px; }

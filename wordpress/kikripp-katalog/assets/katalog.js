@@ -112,6 +112,11 @@
         'Abholung nach Terminvereinbarung · Preise inklusive ' + Math.round(UST * 100) + '&nbsp;% USt' +
         (IST_ADMIN ? ' · <a href="' + sicher(W.verwaltung) + '">Reservierungen verwalten</a>' : '') + '</p>' +
       '</div>' +
+      '<div class="leiste"><div class="inner">' +
+        '<div class="sum" id="k-merk"></div>' +
+        '<button class="sek" id="k-leeren">Auswahl leeren</button>' +
+        '<button id="k-anfragen">Reservierung abschicken</button>' +
+      '</div></div>' +
       '<div class="filter">' +
         '<div class="zeile">' +
           '<input type="search" id="k-q" placeholder="Suchen: Bezeichnung, Nummer, Beschreibung …">' +
@@ -128,12 +133,7 @@
         (RECHT ? '<h4>Rechtliche Hinweise</h4><p>' + sicher(RECHT) + '</p>' : '') +
         ((ABHOLUNG && ABHOLUNG !== ANBIETER.adresse)
           ? '<p>Abholung nach Terminvereinbarung: ' + sicher(ABHOLUNG) + '</p>' : '') +
-        '</div>' : '') +
-      '<div class="leiste"><div class="inner">' +
-        '<div class="sum" id="k-merk"></div>' +
-        '<button class="sek" id="k-leeren">Auswahl leeren</button>' +
-        '<button id="k-anfragen">Reservierung abschicken</button>' +
-      '</div></div>';
+        '</div>' : '');
 
     ['k-q', 'k-kat', 'k-raum', 'k-design', 'k-frei'].forEach(function (id) {
       el(id).addEventListener('input', render);

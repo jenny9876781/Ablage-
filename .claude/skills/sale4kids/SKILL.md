@@ -808,12 +808,48 @@ Das Artifact `HdDGxJMQAWQ96Sy6z6Po4d` wird nicht weitergepflegt.
 * **WordPress 7.1.2** steht noch aus, und die Katalogseite gehört aus der Sitemap des
   XML Sitemap Generators genommen. Beides bewusst zurückgestellt.
 
+### Durchsicht eingearbeitet (01.10.2026)
+
+Word-Dokument, überarbeitete Mappe und 61 Fotos sind eingearbeitet: 491 Zeilen, **419 im
+Katalog sichtbar**, Fotos bis F-628. Was dabei entschieden wurde und nicht wieder
+aufgerollt werden soll:
+
+* **BA04-10 und BA04-11 gehören den Bruder-CAT-Fahrzeugen** (Post-its). Stofftasche und
+  Stoffkorb, die bis dahin so hießen, sind auf **BA04-19 und BA04-20** umgezogen —
+  ausdrücklich so gewählt (Option B). Beim nächsten Import meldet WordPress BA04-10/11 als
+  „aktualisiert“ mit neuem Inhalt; das ist richtig.
+* **Truhe ist BE10-14** (Post-it), nicht BE10-13 wie im Word. BE10-13 bleibt unvergeben.
+* **Zusammenlegen bestehender Zeilen**: Gibt es die zweite Nummer schon als eigene Zeile,
+  darf sie nicht in `Weitere_ArtNr` (pruefen.py). Dann bekommt die Hauptzeile die
+  Gesamtmenge, die andere wird `Aktiv = entfällt` mit Verweis in der Bemerkung. So bei
+  NU02-09 (+ NU04-21, BU02-10), NE05-01 (+ NU04-03), TE02-17 (+ GA01-09).
+* **Geschirr** ist kein Konvolut mehr: NE02-05 (bunte Becher), NE02-06 (facettierte
+  Becher), NE02-07 (Teller), BU06-03 (rote Becher), Stückpreise 1 € / 1,50 €.
+* **Bruder** ist nur bei BA04-10, -11, -12, -14, -16, -17 belegt — Schäffer-Hoflader und
+  Claas Jaguar ausdrücklich **nicht**.
+* Das Werbefoto mit Kindern auf den Stokke-Kartons (F-588/F-589) bleibt unverpixelt —
+  Herstellerbild, Entscheidung der Nutzerin. Kinder aus dem Haus gilt weiter: nie.
+* F-618: Namensschilder an den Ablagefächern und Ordnerrücken unkenntlich. **Bei
+  Büromöbeln auf Beschriftungen achten**, nicht nur auf Personen.
+* F-612 (Detail Roller mit Aufkleber), F-613 und F-628 (Erfassungsblätter) sind Arbeitsfotos
+  und keinem Artikel zugeordnet.
+
+Plugin **1.1.0**: Reservierungsleiste oben und beim Scrollen fest, Fotos mit
+`object-fit: contain` statt beschnitten. Die Versionsnummer steuert das `?ver=` an CSS und
+JS — **bei jeder Änderung an den Assets hochzählen**, sonst liefern Browser und W3TC die
+alte Fassung aus. Die leere Leiste trägt die Klasse `leer`, die auch der Raster-Hinweis
+„keine Treffer“ nutzt (60 px Innenabstand) — deshalb die eigene Regel `.leiste.leer`.
+
+**Nachpflegen statt neu einrichten:** `build_fotopaket.py --nachtrag <alte katalog_import.json>`
+erzeugt `kikripp-fotos-nachtrag.zip` mit nur den Fotos, die seit dem letzten Import
+dazugekommen sind (die alte Importdatei kommt aus `git show <commit>:ausgabe/katalog_import.json`).
+Diesmal 58 Fotos, 15 MB. Erwartete Meldung beim Import: „48 neu, 443 aktualisiert. Jeder
+im Katalog sichtbare Artikel hat sein Foto gefunden.“
+
 ### Was noch kommt
 
-1. Word und Excel einlesen, neue Artikel anlegen, neue Fotos aufnehmen, Importdatei und
-   Arbeitsmappe neu erzeugen.
-2. Die Nutzerin lädt die neuen Fotos hoch und importiert **einmal**.
-3. **Livegang:** Testreservierungen löschen · Vorschaubetrieb aus · Cache leeren ·
+1. Die Nutzerin spielt Plugin 1.1.0 ein, lädt das Nachtragspaket hoch und importiert.
+2. **Livegang:** Testreservierungen löschen · Vorschaubetrieb aus · Cache leeren ·
    im privaten Fenster gegenlesen · **dann erst** den Link verschicken.
 
 **Solange der Link nicht verschickt ist, sieht den Katalog niemand.** Das ist der Satz,

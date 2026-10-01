@@ -31,7 +31,7 @@ sonst mitten im Aufbau erwischen.
 
 **a) Speicherplatz der Website prüfen — der wichtigste Punkt.**
 In einem Multisite-Netzwerk hat jede Website ein Platzkonto, standardmäßig **100 MB**. Die
-Fotos brauchen **70 MB**, und auf kikripp.de liegen schon Bilder der bestehenden Seite. Reicht
+Fotos brauchen **84 MB**, und auf kikripp.de liegen schon Bilder der bestehenden Seite. Reicht
 das Konto nicht, bricht das Hochladen mittendrin ab mit einer Meldung über die
 Speicherplatzbegrenzung — und du weißt nicht, welche Bilder durch sind.
 
@@ -84,14 +84,14 @@ sich später nur wieder zentral abschalten.
 
 ## 2. Fotos in die Mediathek
 
-Du bekommst die Fotos in **drei Paketen** (`kikripp-fotos-1von3.zip` bis `-3von3.zip`),
-weil 70 MB auf einmal für den Versand zu viel sind. Entpacke sie auf deinem Rechner — alle
-drei in denselben Ordner `fotos`. Zusammen sind es genau **368 Bilder, 70 MB**. Geh in WordPress auf **Medien → Datei hinzufügen** und
+Du bekommst die Fotos in **vier Paketen** (`kikripp-fotos-1von4.zip` bis `-4von4.zip`),
+weil 84 MB auf einmal für den Versand zu viel sind. Entpacke sie auf deinem Rechner — alle
+vier in denselben Ordner `fotos`. Zusammen sind es genau **415 Bilder, 84 MB**. Geh in WordPress auf **Medien → Datei hinzufügen** und
 zieh die Bilder in das Feld — am besten in Paketen von hundert, nicht alle auf einmal. Das
 dauert; lass das Browserfenster offen, bis jedes Paket durch ist.
 
 **So prüfst du, ob alles angekommen ist:** Geh auf **Medien → Mediathek** und schalte oben
-rechts auf die Listenansicht. Unten steht die Gesamtzahl der Einträge. Sie muss um 368
+rechts auf die Listenansicht. Unten steht die Gesamtzahl der Einträge. Sie muss um 415
 gestiegen sein.
 
 Und falls doch etwas fehlt: **das ist kein Problem und du musst nicht suchen.** Der Import im
@@ -109,10 +109,10 @@ auf Importieren. Der Import dauert **ein paar Sekunden**, nicht Minuten.
 
 Danach steht oben eine Meldung. **So muss sie aussehen:**
 
-    Import abgeschlossen: 443 neu, 0 aktualisiert.
+    Import abgeschlossen: 491 neu, 0 aktualisiert.
 
 Kein weiterer Satz dahinter — das heißt: jeder Artikel hat sein Foto gefunden. Im Katalog
-sichtbar sind davon **379**; die übrigen stehen bewusst auf „nicht im Katalog".
+sichtbar sind davon **419**; die übrigen stehen bewusst auf „nicht im Katalog".
 
 Steht dahinter noch *„… Artikel ohne gefundenes Foto"*, nennt die Meldung die fehlenden
 Bilder beim Namen. Die lädst du in die Mediathek nach und importierst einfach noch einmal.

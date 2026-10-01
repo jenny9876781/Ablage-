@@ -88,7 +88,8 @@ def main():
         mb = int(sys.argv[sys.argv.index("--teile") + 1])
         # Alte Teilpakete weg, sonst bleibt ein Rest liegen, wenn es weniger werden.
         for d in os.listdir(AUSGABE):
-            if d.startswith("kikripp-fotos-") and d.endswith(".zip"):
+            # nur die Teilpakete (…-2von4.zip), nicht das Nachtragspaket
+            if d.startswith("kikripp-fotos-") and "von" in d and d.endswith(".zip"):
                 os.remove(os.path.join(AUSGABE, d))
         pakete = teilpakete(namen, mb)
         summe = 0

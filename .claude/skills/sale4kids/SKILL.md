@@ -855,6 +855,63 @@ im Katalog sichtbare Artikel hat sein Foto gefunden.“
 **Solange der Link nicht verschickt ist, sieht den Katalog niemand.** Das ist der Satz,
 der die Nutzerin bei jedem Zwischenstand beruhigt — und er stimmt.
 
+## 9c. Offene Aufgaben (Stand 05.10.2026) — nichts davon ist gebaut
+
+Die Nutzerin will **eins nach dem anderen** und erst bauen, wenn sie es sagt. Diese Liste
+ist die Merkliste; erledigte Punkte hier abhaken, nicht löschen.
+
+**A. Daten zusammenführen (vorbereitet, nicht geschrieben)**
+- [ ] `01_Artikelstamm_kikripp_bearbeitet.xlsx` baut auf dem Stand **vor** dem 01.10. auf
+      (443 Zeilen). Nie direkt mit `rueckeinlesen.py` einlesen — nur die Differenz zu ihrer
+      Excel vom 01.10. übernehmen (Dreiwegevergleich, Skript im Scratchpad: `vgl.py`).
+      530 Änderungen, 4 Konflikte gelöst: BA10-03 „Alcantara, Alu … ohne Nackenkissen“,
+      BE10-12 „IKEA Galant“ mit korrigierten Maßen, NE01-02 **10 €**, Stoffkorb-Preis gehört
+      zu **BA04-20** (bearbeitet nutzt noch die alten Nummern BA04-10/-11).
+- [ ] Danach die NEU-Liste vom 05.10. (37 Änderungen: BU12–14-Preise, Geschirr als Sets,
+      Fackeln 1 Paket 20 €, BU14-05 Zuckerwatte entfällt).
+- [ ] BE10-04 und GA01-11 entfallen (bestätigt). Marke eintragen für WESCO, Wehrfritz,
+      IKEA (aus den Bezeichnungen); **XXXLutz nicht** (Möbelhaus).
+- [ ] Preisbasis per Regel: Preis < 200 € → Fix, ab 200 € → VHB.
+- [ ] Offen: Puky BU12-14 einzeln? Schneeschaufeln Käufertext auf 8? bunte Becher NE02-05
+      als Set?
+- [ ] Neue Fotos: BA08-40 (Werola Feinkrepp weiß, 2 Fotos), -41 (folia gelb), -42 (Marpa
+      Jansen glutrot), -43 (Marpa Jansen hellblau), -44 (Marpa Jansen grün), -45 (Islong
+      gelb). Packungen und Preise fehlen; BA08-38/-39 noch unbekannt.
+
+**B. Keine Umsatzsteuer (§ 4 Nr. 28 UStG)**
+- [ ] Preise in der Datenbasis sind Endpreise. Katalog: ein Preis, kein „inkl. USt“,
+      `kikripp_ust_prozent` = 0 bzw. Anzeige umbauen; Mail ohne „zzgl. USt“; Excel
+      (Verkaufsübersicht, DATEV-Blatt, Kasse) und `pruefen.py` ohne 19 %.
+- [ ] Vom Steuerberater bestätigen lassen: Verweis auf § 4 Nr. 23 oder Nr. 25 UStG.
+
+**C. Katalogtexte und Ablauf**
+- [ ] Rechtstext ersetzen (Text der Nutzerin vom 05.10.); Satz „ein Widerrufsrecht besteht
+      daher nicht“ muss raus, solange Bestellung und Zahlung aus der Ferne laufen.
+- [ ] Kasten „So läuft es ab“: 3 Werktage reserviert → Anruf → Besichtigung Do 8–11 (ab
+      100 €) → unterschriebene Bestellung → Rechnung per Mail → Überweisung → Abholung
+      Mo/Di 8–11, Demontage nach Vereinbarung Fr nachmittag / Sa vormittag, Werkzeug
+      mitbringen, Abholung bis spätestens 10.12.2026, Mindestbestellwert 50 €.
+- [ ] Versand entfällt ganz („Abholung durch den Käufer“).
+- [ ] Hinweisband: Großteil des Spielzeugs kommt im November. Wöchentliche Updates bis
+      Ende November.
+
+**D. Plugin**
+- [ ] Ohne Passwort zugänglich (Option „Passwortschutz aus“), Spamschutz fürs Formular.
+- [ ] Frist 3 **Werktage** statt 7 Tage.
+- [ ] Neuer Status „bestellt / Rechnung raus“, der nicht abläuft; Abholtermin am Vorgang.
+- [ ] Formular: Firma, Straße, PLZ, Ort (Rechnungsadresse), Besichtigung ja/nein,
+      Wunschuhrzeit Do VM, gewünschter Abholtermin; Mindestbestellwert 50 €.
+      `SCHEMA_VERSION` hochzählen; Test „kein Wunschtermin-Feld“ anpassen.
+- [ ] Verwaltung: Bestellung (Kaufvertrag) je Vorgang zum Drucken/Versenden erzeugen.
+- [ ] Ggf. Teilabholung (einzelne Positionen stornieren).
+
+**E. Unterlagen**
+- [ ] Bestellung/Kaufvertrag-Vorlage (gebrauchte Artikel, steuerfreie Lieferung,
+      gesonderte Vereinbarung zur Verjährung, ggf. Widerrufsbelehrung).
+- [ ] Datenschutz-Absatz U2 neu (jetzt Adresse und Termine gespeichert) — Nutzerin muss
+      ihn auf kikripp.de ersetzen. Impressum/Datenschutz müssen veröffentlicht sein.
+- [ ] Mail an die Interessenten mit Link — **erst nach dem Katalog**.
+
 ## 10. Was die Nutzerin nicht mag
 
 - **Keine `.md`-Dateien** — sie kann sie unter Windows nicht öffnen. Anleitungen immer als

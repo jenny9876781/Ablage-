@@ -871,23 +871,20 @@ ist die Merkliste; erledigte Punkte hier abhaken, nicht löschen.
 - Widerrufsrecht: Verzicht im Voraus ist bei Verbrauchern unwirksam. Offen, ob Privatkunden
   vor Ort unterschreiben und zahlen (dann kein Fernabsatz) oder Widerrufsbelehrung.
 
-**A. Daten zusammenführen (vorbereitet, nicht geschrieben)**
-- [ ] `01_Artikelstamm_kikripp_bearbeitet.xlsx` baut auf dem Stand **vor** dem 01.10. auf
-      (443 Zeilen). Nie direkt mit `rueckeinlesen.py` einlesen — nur die Differenz zu ihrer
-      Excel vom 01.10. übernehmen (Dreiwegevergleich, Skript im Scratchpad: `vgl.py`).
-      530 Änderungen, 4 Konflikte gelöst: BA10-03 „Alcantara, Alu … ohne Nackenkissen“,
-      BE10-12 „IKEA Galant“ mit korrigierten Maßen, NE01-02 **10 €**, Stoffkorb-Preis gehört
-      zu **BA04-20** (bearbeitet nutzt noch die alten Nummern BA04-10/-11).
-- [ ] Danach die NEU-Liste vom 05.10. (37 Änderungen: BU12–14-Preise, Geschirr als Sets,
-      Fackeln 1 Paket 20 €, BU14-05 Zuckerwatte entfällt).
-- [ ] BE10-04 und GA01-11 entfallen (bestätigt). Marke eintragen für WESCO, Wehrfritz,
-      IKEA (aus den Bezeichnungen); **XXXLutz nicht** (Möbelhaus).
-- [ ] Preisbasis per Regel: Preis < 200 € → Fix, ab 200 € → VHB.
-- [ ] Offen: Puky BU12-14 einzeln? Schneeschaufeln Käufertext auf 8? bunte Becher NE02-05
-      als Set?
-- [ ] Neue Fotos: BA08-40 (Werola Feinkrepp weiß, 2 Fotos), -41 (folia gelb), -42 (Marpa
-      Jansen glutrot), -43 (Marpa Jansen hellblau), -44 (Marpa Jansen grün), -45 (Islong
-      gelb). Packungen und Preise fehlen; BA08-38/-39 noch unbekannt.
+**A. Daten zusammenführen — ERLEDIGT 05.10.2026 (Schritt 1, nur Excel neu)**
+- [x] Bearbeitete Liste per Dreiwegevergleich (195 Änderungen ohne Preisbasis), NEU-Liste
+      (37), Entscheidungen, Marken IKEA/Wesco/Wehrfritz (22), Versand überall „nur Abholung“
+      (139), Preisregel < 200 € Fix (446 angepasst), Krepppapier BA08-40 bis -45 (F-629 bis
+      F-635). 497 Zeilen. Rundlauf Excel → CSV: 0 Abweichungen.
+- [ ] Nutzerin ergänzt Maße in der Excel (Spalte „Maße“) und schickt sie zurück → Ablauf B.
+- [ ] OFFEN-Preise bestätigen: NE02-05 (70 € Set), BA08-40 bis -45, BU09-04, BU09-05.
+- [ ] BA08-38/-39: unbekannt, ob noch etwas kommt.
+- [ ] `pruefen.py` meldet bis Schritt 2 drei erwartete Fehler (Zahlen in A1, weil Import und
+      Fotopaket noch nicht neu erzeugt sind) — mit Schritt 2 erledigen, nicht vergessen.
+- [ ] Rechtstext: Antwort „den langen“ heißt vermutlich, der lange Absatz (Vorsteuer) soll
+      **auch im Katalog** stehen — vor dem Bauen noch einmal kurz bestätigen lassen.
+- [ ] Nach Schritt 2 neues Fotopaket als Nachtrag (`--nachtrag` gegen die Importdatei von
+      Commit 7a913aa) — enthält dann auch F-629 bis F-635.
 
 **B. Keine Umsatzsteuer (§ 4 Nr. 28 UStG)**
 - [ ] Preise in der Datenbasis sind Endpreise. Katalog: ein Preis, kein „inkl. USt“,

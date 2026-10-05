@@ -860,6 +860,17 @@ der die Nutzerin bei jedem Zwischenstand beruhigt — und er stimmt.
 Die Nutzerin will **eins nach dem anderen** und erst bauen, wenn sie es sagt. Diese Liste
 ist die Merkliste; erledigte Punkte hier abhaken, nicht löschen.
 
+**Entscheidungen vom 05.10.2026 (Antworten der Nutzerin)**
+- § 4 Nr. 23 UStG ist richtig (vom Haus bestätigt). Impressum und Datenschutz sind veröffentlicht.
+- Neuer Status heißt nur **„bestellt“** (läuft nicht ab), mit Abholtermin.
+- Werktage = **Mo–Fr**. Wunschuhrzeit Do in halben Stunden, Abholtermin nur Mo/Di bis
+  10.12., Häkchen „Demontage nötig – Fr/Sa nach Vereinbarung“.
+- Besichtigung **ab 100 € Stückpreis** (Vorgabe des Chefs).
+- Nicht bis 10.12. abgeholte Ware geht **ohne Erstattung** in das Eigentum der Kikripp zurück.
+- Knopf **„Bestellung erstellen“** in der Verwaltung: ja. Unterschrift per Scan oder bei Abholung.
+- Widerrufsrecht: Verzicht im Voraus ist bei Verbrauchern unwirksam. Offen, ob Privatkunden
+  vor Ort unterschreiben und zahlen (dann kein Fernabsatz) oder Widerrufsbelehrung.
+
 **A. Daten zusammenführen (vorbereitet, nicht geschrieben)**
 - [ ] `01_Artikelstamm_kikripp_bearbeitet.xlsx` baut auf dem Stand **vor** dem 01.10. auf
       (443 Zeilen). Nie direkt mit `rueckeinlesen.py` einlesen — nur die Differenz zu ihrer

@@ -881,14 +881,15 @@ ist die Merkliste; erledigte Punkte hier abhaken, nicht löschen.
   offenen BU09) · BA08-38/-39 gibt es nicht · Krepppapier hat sie in ihrer Excel neu gestaltet
   (von dort übernehmen, meine Vorschläge verwerfen) · der lange Vorsteuer-Absatz kommt **auch
   in den Katalog**. Ihre Excel mit den Maßen war der Nachricht nicht angehängt.
-- [ ] Nutzerin ergänzt Maße in der Excel (Spalte „Maße“) und schickt sie zurück → Ablauf B.
-- [ ] OFFEN-Preise bestätigen: NE02-05 (70 € Set), BA08-40 bis -45, BU09-04, BU09-05.
-- [ ] BA08-38/-39: unbekannt, ob noch etwas kommt.
-- [ ] `pruefen.py` meldet bis Schritt 2 drei erwartete Fehler (Zahlen in A1, weil Import und
+- [x] Nutzerin ergänzt Maße in der Excel (Spalte „Maße“) und schickt sie zurück → Ablauf B.
+- [x] OFFEN-Preise bestätigen: NE02-05 (70 € Set), BA08-40 bis -45, BU09-04, BU09-05.
+- [x] BA08-38/-39: unbekannt, ob noch etwas kommt.
+- [x] `pruefen.py` meldet bis Schritt 2 drei erwartete Fehler (Zahlen in A1, weil Import und
       Fotopaket noch nicht neu erzeugt sind) — mit Schritt 2 erledigen, nicht vergessen.
-- [ ] Rechtstext: Antwort „den langen“ heißt vermutlich, der lange Absatz (Vorsteuer) soll
+- [x] Rechtstext: Antwort „den langen“ heißt vermutlich, der lange Absatz (Vorsteuer) soll
       **auch im Katalog** stehen — vor dem Bauen noch einmal kurz bestätigen lassen.
-- [ ] Nach Schritt 2 neues Fotopaket als Nachtrag (`--nachtrag` gegen die Importdatei von
+- [x] (alle Punkte oben bis 06.10. erledigt: Maße eingearbeitet, keine OFFEN-Preise mehr in der CSV, BA08-38/-39 gibt es nicht, Rechtstext lang bestätigt, Impressum/Datenschutz auf GmbH umgestellt)
+- [x] Nach Schritt 2 neues Fotopaket als Nachtrag (`--nachtrag` gegen die Importdatei von
       Commit 7a913aa) — enthält dann auch F-629 bis F-635.
 
 **B.–E. Katalog, Plugin 1.2.0, Excel, Unterlagen — GEBAUT 06.10.2026**
@@ -913,7 +914,7 @@ ist die Merkliste; erledigte Punkte hier abhaken, nicht löschen.
 - [x] Nachtrag-Fotopaket gegen den WordPress-Stand (Import von Commit 7a913aa + Nachtrag
       vom 01.10.): nur F-630 bis F-635. Erwartete Importmeldung: „6 neu, 491 aktualisiert“.
 - [x] BE10-04 bleibt draußen (bestätigt 06.10.).
-- [ ] **Impressum/Datenschutz zeigten die Kikripp Betriebsgesellschaft gGmbH** (insolvent),
+- [x] **Impressum/Datenschutz zeigten die Kikripp Betriebsgesellschaft gGmbH** (insolvent),
       nicht die Kikripp GmbH. Empfehlung: eigene Seiten „Impressum Artikelkatalog“ und
       „Datenschutz Artikelkatalog“ für die GmbH anlegen und in den Plugin-Einstellungen
       verlinken; die Seiten der gGmbH nicht überschreiben, solange nicht geklärt ist, wem

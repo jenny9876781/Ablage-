@@ -176,3 +176,15 @@
   .kikripp .zaehler { padding-top: 7px; }
 }
 @media (prefers-reduced-motion: reduce) { .kikripp * { animation: none !important; transition: none !important; } }
+
+/* Fußzeile der Website auf der Katalogseite ausblenden (Einstellung „Fußzeile ausblenden“).
+   Mehrere Schreibweisen, weil Themes die Fußzeile unterschiedlich auszeichnen: Block-Themes
+   als Template-Teil, klassische Themes als #colophon oder .site-footer. Der Katalog selbst
+   enthält kein <footer>-Element, er ist davon nicht betroffen. */
+body.kikripp-ohne-fusszeile footer.wp-block-template-part,
+body.kikripp-ohne-fusszeile .wp-site-blocks > footer,
+body.kikripp-ohne-fusszeile #colophon,
+body.kikripp-ohne-fusszeile .site-footer,
+body.kikripp-ohne-fusszeile #site-footer,
+body.kikripp-ohne-fusszeile #footer,
+body.kikripp-ohne-fusszeile > footer { display: none !important; }

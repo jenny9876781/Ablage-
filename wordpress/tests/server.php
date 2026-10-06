@@ -123,8 +123,9 @@ $zugang = Kikripp_Zugang::hat_zugang() ? 'true' : 'false';
 <title>Testseite Artikelkatalog</title>
 <link rel="stylesheet" href="/assets/katalog.css">
 <style>body{margin:0;font:15px system-ui;background:#fafafa}.huelle{max-width:1200px;margin:0 auto;padding:0 20px;background:#fff}</style>
-</head><body>
+</head><body class="<?php echo (int) get_option('kikripp_fusszeile_aus', 1) === 1 ? 'kikripp-ohne-fusszeile' : ''; ?>">
 <div class="huelle"><div id="kikripp-katalog" class="kikripp"></div></div>
+<footer class="wp-block-template-part" id="probe-fusszeile">©2024 by Probe-Betreiberin · Impressum · Datenschutz</footer>
 <script>window.KIKRIPP = {basis:'/wp-json/kikripp/v1', signet:'/assets/signet.svg', zugang:<?php echo $zugang; ?>, admin:false, verwaltung:'#'};</script>
 <script src="/assets/katalog.js"></script>
 </body></html>

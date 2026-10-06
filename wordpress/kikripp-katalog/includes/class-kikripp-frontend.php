@@ -7,6 +7,7 @@ class Kikripp_Frontend {
     public static function start() {
         add_shortcode('kikripp_katalog', [__CLASS__, 'ausgabe']);
         add_action('wp_head', [__CLASS__, 'kein_index']);
+        add_filter('body_class', [__CLASS__, 'body_klasse']);
         add_filter('wpseo_robots', [__CLASS__, 'yoast_robots']);
         add_filter('wpseo_robots_array', [__CLASS__, 'yoast_robots']);
         // Zustimmungsbanner wie CookieYes blockieren fremde Skripte. Unser eigenes
@@ -36,6 +37,18 @@ class Kikripp_Frontend {
         if (!self::yoast_aktiv()) {
             echo '<meta name="robots" content="noindex, nofollow">' . "\n";
         }
+    }
+
+    /**
+     * Kennzeichnet die Katalogseite am <body>. Daran hängt in katalog.css das Ausblenden
+     * der Fußzeile der Website: sie nennt die frühere Betreiberin, und Impressum und
+     * Datenschutz der Verkäuferin stehen ohnehin im Anbieter-Block unter dem Katalog.
+     */
+    public static function body_klasse($klassen) {
+        if (self::ist_katalogseite() && (int) get_option('kikripp_fusszeile_aus', 1) === 1) {
+            $klassen[] = 'kikripp-ohne-fusszeile';
+        }
+        return $klassen;
     }
 
     private static function yoast_aktiv() {

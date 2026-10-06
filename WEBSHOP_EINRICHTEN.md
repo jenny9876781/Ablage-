@@ -159,6 +159,7 @@ automatisch eingetragen; du prüfst sie nur.
 | **Datenschutzerklärung** | `https://www.kikripp.de/datenschutz/` — ebenfalls veröffentlicht |
 | Abholadresse | erscheint unter dem Katalog und auf der Bestellung |
 | Rechtliche Hinweise | die Kaufbedingungen mit dem Steuerabsatz; stehen unter dem Katalog und auf jeder Bestellung |
+| Fußzeile ausblenden | **an** — die Fußzeile der Website erscheint auf der Katalogseite nicht; Impressum und Datenschutz stehen im Anbieter-Block |
 | Vorschaubetrieb | **eingeschaltet lassen**, solange ihr testet |
 
 Zu **Vorschaubetrieb**: Solange der Haken gesetzt ist, werden alle eingehenden Reservierungen

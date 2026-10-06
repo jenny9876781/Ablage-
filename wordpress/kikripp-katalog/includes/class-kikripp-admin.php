@@ -750,6 +750,13 @@ class Kikripp_Admin {
              . 'Leerzeilen trennen Absätze. Leer lassen blendet den Block aus.</p></td></tr>',
              esc_textarea(get_option('kikripp_rechtstext', '')));
 
+        printf('<tr><th scope="row">Fußzeile ausblenden</th><td>'
+             . '<label><input type="checkbox" name="fusszeile_aus" value="1" %s> '
+             . 'Fußzeile der Website auf der Katalogseite nicht anzeigen</label>'
+             . '<p class="description">Impressum und Datenschutz stehen dann nur im Anbieter-Block unter dem Katalog. '
+             . 'Bleibt die Fußzeile trotzdem sichtbar, nutzt das Theme eine ungewöhnliche Auszeichnung – bitte melden.</p></td></tr>',
+             checked(1, (int) get_option('kikripp_fusszeile_aus', 1), false));
+
         printf('<tr><th scope="row">Vorschaubetrieb</th><td>'
              . '<label><input type="checkbox" name="vorschau" value="1" %s> '
              . 'Eingehende Reservierungen als Testdaten kennzeichnen</label>'
@@ -786,6 +793,7 @@ class Kikripp_Admin {
         update_option('kikripp_ust_prozent', (float) ($_POST['ust'] ?? 0));
         update_option('kikripp_steuerhinweis', sanitize_text_field(wp_unslash($_POST['steuerhinweis'] ?? '')));
         update_option('kikripp_vorschau', isset($_POST['vorschau']) ? 1 : 0);
+        update_option('kikripp_fusszeile_aus', isset($_POST['fusszeile_aus']) ? 1 : 0);
         update_option('kikripp_abholadresse', sanitize_text_field(wp_unslash($_POST['abholadresse'] ?? '')));
         update_option('kikripp_rechtstext', sanitize_textarea_field(wp_unslash($_POST['rechtstext'] ?? '')));
         update_option('kikripp_firma', sanitize_text_field(wp_unslash($_POST['firma'] ?? '')));

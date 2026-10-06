@@ -106,6 +106,8 @@ with sync_playwright() as p:
            seite.locator('.recht a[href*="impressum"]').count() == 1)
     pruefe("Datenschutz verlinkt",
            seite.locator('.recht a[href*="datenschutz"]').count() == 1)
+    pruefe("Fußzeile der Website ist auf der Katalogseite ausgeblendet",
+           seite.locator("#probe-fusszeile").count() == 1 and not seite.locator("#probe-fusszeile").is_visible())
     pruefe("Kopf nennt die Verkäuferin",
            "Ein Angebot der Kikripp GmbH" in seite.inner_text(".kopf"))
     seite.screenshot(path="/tmp/kikweb/t02-katalog.png")

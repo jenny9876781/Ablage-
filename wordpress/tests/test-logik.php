@@ -494,7 +494,8 @@ pruefe('Mindestbestellwert 50', get_option('kikripp_mindestwert'), 50);
 pruefe('Besichtigung ab 100', get_option('kikripp_besichtigung_ab'), 100);
 pruefe('Abholschluss 10.12.2026', get_option('kikripp_abholschluss'), '2026-12-10');
 pruefe('neuer Rechtstext mit § 4 Nr. 23', strpos(get_option('kikripp_rechtstext'), '§ 4 Nr. 23 UStG') !== false, true);
-pruefe('Ablauftext nennt die Abholzeiten', strpos(get_option('kikripp_ablauftext'), 'montags und dienstags von 08:00 bis 11:00 Uhr') !== false, true);
+pruefe('Ablauftext (Fließtext 1.2.2) nennt die Abholzeiten', strpos(get_option('kikripp_ablauftext'), 'montags und dienstags von 8 bis 11 Uhr') !== false, true);
+pruefe('Ablauftext sagt „melden wir uns“', strpos(get_option('kikripp_ablauftext'), 'melden wir uns') !== false, true);
 pruefe('Hinweisband angekündigt', strpos(get_option('kikripp_hinweisband'), 'Spielzeugs kommt im November') !== false, true);
 pruefe('Meldeadresse bleibt unangetastet', get_option('kikripp_mail_an'), 'jennyp@kikripp.de');
 update_option('kikripp_rechtstext', 'von Hand geändert');
@@ -528,6 +529,19 @@ pruefe('CSS blendet die Block-Theme-Fußzeile aus',
        strpos($css, 'body.kikripp-ohne-fusszeile footer.wp-block-template-part') !== false, true);
 pruefe('CSS deckt auch klassische Themes ab',
        strpos($css, 'body.kikripp-ohne-fusszeile #colophon') !== false, true);
+
+titel('29. Umstellung 1.2.0 → 1.2.2: kürzerer Ablauftext');
+update_option('kikripp_plugin_version', '1.2.0');
+update_option('kikripp_ablauftext', str_replace("\n", "\r\n", kikripp_ablauf_120()));   // so speichert ein Formular
+kikripp_umstellen();
+pruefe('alter Text wird durch den Fließtext ersetzt', get_option('kikripp_ablauftext'), kikripp_ablauf_122());
+pruefe('Stand steht auf 1.2.2', get_option('kikripp_plugin_version'), '1.2.2');
+update_option('kikripp_plugin_version', '1.2.0');
+update_option('kikripp_ablauftext', 'Eigener Text der Nutzerin');
+update_option('kikripp_ust_prozent', 7);
+kikripp_umstellen();
+pruefe('eigener Ablauftext bleibt', get_option('kikripp_ablauftext'), 'Eigener Text der Nutzerin');
+pruefe('1.2.2 fasst sonst nichts an', get_option('kikripp_ust_prozent'), 7);
 
 printf("\n== Ergebnis: %d Prüfungen, %d Fehler ==\n", $geprueft, $fehler);
 exit($fehler > 0 ? 1 : 0);

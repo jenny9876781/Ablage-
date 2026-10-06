@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Kikripp Artikelkatalog
  * Description: Artikelkatalog mit Reservierung für die Betriebsauflösung der Kikripp GmbH. Artikel werden importiert, Reservierungen im Backend verwaltet.
- * Version:     1.2.1
+ * Version:     1.2.2
  * Author:      Kikripp GmbH
  * Text Domain: kikripp-katalog
  * Requires at least: 5.8
@@ -13,7 +13,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-define('KIKRIPP_VERSION', '1.2.1');
+define('KIKRIPP_VERSION', '1.2.2');
 define('KIKRIPP_PFAD', plugin_dir_path(__FILE__));
 define('KIKRIPP_URL', plugin_dir_url(__FILE__));
 
@@ -72,11 +72,27 @@ register_activation_hook(__FILE__, function () {
  */
 function kikripp_umstellen() {
     $stand = (string) get_option('kikripp_plugin_version', '1.0.0');
-    if (version_compare($stand, '1.2.0', '>=')) { return; }
+    if (version_compare($stand, '1.2.0', '>=')) {
+        kikripp_umstellen_122($stand);
+        return;
+    }
     foreach (kikripp_vorgaben_120() as $name => $wert) { update_option($name, $wert); }
     if (trim((string) get_option('kikripp_hinweisband', '')) === '') {
         update_option('kikripp_hinweisband', 'Ein Großteil unseres Spielzeugs kommt im November dazu – '
             . 'schauen Sie gern wieder vorbei. Der Katalog wird wöchentlich aktualisiert.');
     }
-    update_option('kikripp_plugin_version', '1.2.0');
+    update_option('kikripp_plugin_version', '1.2.2');
+}
+
+/**
+ * 1.2.2: kürzerer Ablauftext als Fließtext. Ersetzt wird nur, wenn noch der Text von 1.2.0
+ * drinsteht – was die Nutzerin selbst geändert hat, bleibt.
+ */
+function kikripp_umstellen_122($stand) {
+    if (version_compare($stand, '1.2.2', '>=')) { return; }
+    $jetzt = str_replace("\r", '', (string) get_option('kikripp_ablauftext', ''));
+    if (trim($jetzt) === trim(kikripp_ablauf_120())) {
+        update_option('kikripp_ablauftext', kikripp_ablauf_122());
+    }
+    update_option('kikripp_plugin_version', '1.2.2');
 }

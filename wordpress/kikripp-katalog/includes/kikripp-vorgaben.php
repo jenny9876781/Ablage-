@@ -15,15 +15,7 @@ function kikripp_vorgaben_120() {
         'kikripp_mindestwert'      => 50,
         'kikripp_besichtigung_ab'  => 100,
         'kikripp_abholschluss'     => '2026-12-10',
-        'kikripp_ablauftext'       => implode("\n", [
-            'Die Artikel bleiben 3 Werktage für Sie reserviert. Nach Eingang Ihrer Reservierung rufen wir Sie an.',
-            'Mindestbestellwert: 50,00 €.',
-            'Artikel ab 100,00 € können Sie gern vorab besichtigen: donnerstags von 08:00 bis 11:00 Uhr nach Vereinbarung.',
-            'Eine Reservierung ist noch kein Kaufvertrag. Der Kaufvertrag kommt mit Ihrer unterschriebenen Bestellung zustande.',
-            'Unternehmen erhalten die Rechnung per E-Mail und überweisen vorab auf das angegebene Konto. Privatpersonen unterschreiben die Bestellung bei der Besichtigung oder Abholung und überweisen vor Ort vor der Übergabe. Abgeholt wird in jedem Fall erst nach Zahlungseingang.',
-            'Abholzeiten: montags und dienstags von 08:00 bis 11:00 Uhr. Demontage und Abholung nach Vereinbarung auch Freitagnachmittag oder Samstagvormittag. Bitte bringen Sie Werkzeug mit.',
-            'Abholung bis spätestens 10.12.2026. Nicht abgeholte Ware geht ohne Erstattung in unser Eigentum zurück.',
-        ]),
+        'kikripp_ablauftext'       => kikripp_ablauf_122(),
         'kikripp_rechtstext'       => implode("\n\n", [
             'Gebrauchte Artikel aus Betriebsauflösung. Besichtigung und Funktionsprüfung vor Kauf ausdrücklich erwünscht. '
             . 'Verkauf im vorhandenen Zustand. Abholung durch den Käufer. Gewährleistung gegenüber Unternehmern ausgeschlossen. '
@@ -35,4 +27,29 @@ function kikripp_vorgaben_120() {
             . 'und nicht ausgewiesen.',
         ]),
     ];
+}
+
+/** Ablauf als Fließtext (Fassung 1.2.2, Wunsch 06.10.2026: kürzer, „melden wir uns“). */
+function kikripp_ablauf_122() {
+    return 'Ihre Auswahl bleibt 3 Werktage reserviert, nach Eingang melden wir uns bei Ihnen. '
+        . 'Mindestbestellwert 50 €. Artikel ab 100 € können Sie donnerstags von 8 bis 11 Uhr nach '
+        . 'Vereinbarung besichtigen. Der Kaufvertrag kommt mit der unterschriebenen Bestellung zustande. '
+        . 'Bezahlt wird per Überweisung vor der Abholung – Unternehmen nach Rechnung, Privatpersonen vor '
+        . 'Ort bei der Übergabe. Abholung montags und dienstags von 8 bis 11 Uhr, Demontage nach '
+        . 'Vereinbarung auch freitagnachmittags oder samstagvormittags (bitte Werkzeug mitbringen). '
+        . 'Abholung spätestens bis 10.12.2026, danach geht nicht abgeholte Ware ohne Erstattung in unser '
+        . 'Eigentum zurück.';
+}
+
+/** Der Ablauftext, den Fassung 1.2.0 eingetragen hat – nur um ihn beim Umstellen wiederzuerkennen. */
+function kikripp_ablauf_120() {
+    return implode("\n", [
+            'Die Artikel bleiben 3 Werktage für Sie reserviert. Nach Eingang Ihrer Reservierung rufen wir Sie an.',
+            'Mindestbestellwert: 50,00 €.',
+            'Artikel ab 100,00 € können Sie gern vorab besichtigen: donnerstags von 08:00 bis 11:00 Uhr nach Vereinbarung.',
+            'Eine Reservierung ist noch kein Kaufvertrag. Der Kaufvertrag kommt mit Ihrer unterschriebenen Bestellung zustande.',
+            'Unternehmen erhalten die Rechnung per E-Mail und überweisen vorab auf das angegebene Konto. Privatpersonen unterschreiben die Bestellung bei der Besichtigung oder Abholung und überweisen vor Ort vor der Übergabe. Abgeholt wird in jedem Fall erst nach Zahlungseingang.',
+            'Abholzeiten: montags und dienstags von 08:00 bis 11:00 Uhr. Demontage und Abholung nach Vereinbarung auch Freitagnachmittag oder Samstagvormittag. Bitte bringen Sie Werkzeug mit.',
+            'Abholung bis spätestens 10.12.2026. Nicht abgeholte Ware geht ohne Erstattung in unser Eigentum zurück.',
+        ]);
 }

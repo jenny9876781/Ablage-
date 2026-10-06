@@ -49,7 +49,7 @@
 .kikripp .marke { display: flex; align-items: center; gap: 11px; }
 .kikripp .marke img { width: 46px; }
 .kikripp .marke .wort { font-weight: 800; letter-spacing: .11em; font-size: 22px; }
-.kikripp .kopf h2 { font-size: 16px; font-weight: 600; margin: 14px 0 2px; }
+.kikripp .kopf h2 { font-size: 20px; font-weight: 700; margin: 4px 0 4px; }
 .kikripp .kopf p { margin: 0; color: var(--grau); font-size: 13.5px; }
 
 .kikripp .filter { border-bottom: 1px solid var(--linie); padding: 13px 0 11px; }
@@ -188,3 +188,62 @@ body.kikripp-ohne-fusszeile .site-footer,
 body.kikripp-ohne-fusszeile #site-footer,
 body.kikripp-ohne-fusszeile #footer,
 body.kikripp-ohne-fusszeile > footer { display: none !important; }
+
+/* ---- Fassung 1.2.2 (Wunsch 06.10.2026) ---------------------------------------------- */
+/* Ankündigung: vorher klein und schwarz, wurde übersehen */
+.kikripp .band { background: var(--rot); color: #fff; font-weight: 700; font-size: 15px; padding: 12px 16px; line-height: 1.4; }
+.kikripp .ablauf p { margin: 8px 0 2px; line-height: 1.55; }
+
+/* Die Leiste: Merkliste aufklappen */
+.kikripp .leiste #k-merk { cursor: pointer; }
+.kikripp .leiste .liste-knopf { text-decoration: underline; font-size: 13px; color: #fff; white-space: nowrap; }
+.kikripp .merkliste { max-width: 1200px; margin: 10px auto 0; background: #262626; border-radius: 3px; padding: 6px 10px; max-height: 50vh; overflow-y: auto; }
+.kikripp .merkliste .zeile { display: flex; gap: 10px; align-items: center; padding: 6px 0; border-bottom: 1px solid #3a3a3a; font-size: 13px; }
+.kikripp .merkliste .zeile:last-child { border-bottom: 0; }
+.kikripp .merkliste .zeile span { flex: 1; color: #ddd; min-width: 0; }
+.kikripp .merkliste .zeile b { color: #fff; white-space: nowrap; }
+.kikripp .merkliste input { width: 64px; padding: 6px; border: 1px solid #555; border-radius: 3px; background: #fff; color: #1a1a1a; text-align: center; }
+.kikripp .merkliste .weg { background: transparent; border: 1px solid #555; color: #fff; width: 32px; height: 32px; padding: 0; font-size: 18px; line-height: 1; }
+.kikripp .merkliste .weg:hover { background: #3a3a3a; }
+
+/* Vorgemerkte Artikel bleiben auf der Karte erkennbar */
+.kikripp .mengen button.drin { background: var(--schwarz); }
+.kikripp .mengen button.drin:hover { background: #333; }
+.kikripp .bild img[data-gross] { cursor: zoom-in; }
+.kikripp .hint-bes { font-size: 12.5px; color: var(--grau); margin: -4px 0 12px; }
+
+/* Formular und Bestätigung als Fenster über dem Katalog */
+html.kik-offen { overflow: hidden; }
+.kikripp .kik-fenster { position: fixed; inset: 0; background: rgba(26, 26, 26, .55); z-index: 100000; overflow-y: auto; padding: 32px 16px; }
+.kikripp .kik-fenster-box { position: relative; max-width: 720px; margin: 0 auto; background: #fff; border-radius: 4px; box-shadow: 0 12px 40px rgba(0,0,0,.25); }
+.kikripp .kik-fenster .dlg { margin: 0; border: 0; }
+.kikripp .kik-fenster .meldung { margin: 0; padding: 22px; }
+.kikripp .kik-zu { position: absolute; top: 6px; right: 6px; width: 40px; height: 40px; padding: 0; background: transparent; color: var(--schwarz); font-size: 28px; line-height: 1; z-index: 2; }
+.kikripp .kik-zu:hover { background: var(--papier); }
+.kikripp .knoepfe-beleg { margin: 14px 0 0; display: flex; gap: 8px; flex-wrap: wrap; }
+
+/* Foto groß */
+.kikripp .kik-gross { position: fixed; inset: 0; background: rgba(0, 0, 0, .86); z-index: 100001; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; padding: 16px; cursor: zoom-out; }
+.kikripp .kik-gross img { max-width: 94vw; max-height: 84vh; object-fit: contain; }
+.kikripp .kik-gross span { color: #fff; font-size: 13px; text-align: center; }
+
+/* Nach oben */
+.kikripp .nach-oben { position: fixed; right: 16px; bottom: 16px; width: 46px; height: 46px; padding: 0; border-radius: 50%; background: var(--schwarz); color: #fff; font-size: 22px; z-index: 50; box-shadow: 0 4px 14px rgba(0,0,0,.25); }
+
+/* Das hidden-Attribut muss gegen die display-Angaben oben gewinnen */
+.kikripp .kik-fenster[hidden], .kikripp .kik-gross[hidden], .kikripp .nach-oben[hidden], .kikripp .merkliste[hidden] { display: none !important; }
+
+@media (max-width: 560px) {
+  .kikripp .kik-fenster { padding: 0; }
+  .kikripp .kik-fenster-box { border-radius: 0; min-height: 100%; }
+  .kikripp .kik-fenster .dlg { padding: 18px 16px; }
+}
+
+/* Bestätigung drucken: nur das Fenster aufs Papier */
+@media print {
+  html.kik-offen body * { visibility: hidden; }
+  html.kik-offen .kik-fenster, html.kik-offen .kik-fenster * { visibility: visible; }
+  html.kik-offen .kik-fenster { position: absolute; inset: 0; background: #fff; overflow: visible; padding: 0; }
+  html.kik-offen .kik-fenster-box { box-shadow: none; }
+  .kikripp .kik-zu, .kikripp .knoepfe-beleg { display: none !important; }
+}

@@ -108,6 +108,13 @@ with sync_playwright() as p:
            seite.locator('.recht a[href*="datenschutz"]').count() == 1)
     pruefe("Fußzeile der Website ist auf der Katalogseite ausgeblendet",
            seite.locator("#probe-fusszeile").count() == 1 and not seite.locator("#probe-fusszeile").is_visible())
+    pruefe("kein Hut und kein Schriftzug KIKRIPP im Kopf", seite.locator(".kopf img").count() == 0
+           and "KIKRIPP" not in seite.inner_text(".kopf"))
+    band_farbe = seite.evaluate("() => getComputedStyle(document.querySelector('.band')).backgroundColor")
+    band_fett = seite.evaluate("() => getComputedStyle(document.querySelector('.band')).fontWeight")
+    pruefe("Ankündigung rot hinterlegt und fett", band_farbe == "rgb(200, 16, 46)" and int(band_fett) >= 700,
+           f"({band_farbe}, {band_fett})")
+    pruefe("Ablauf als Fließtext", seite.locator(".ablauf p").count() == 1 and seite.locator(".ablauf li").count() == 0)
     pruefe("Kopf nennt die Verkäuferin",
            "Ein Angebot der Kikripp GmbH" in seite.inner_text(".kopf"))
     seite.screenshot(path="/tmp/kikweb/t02-katalog.png")
@@ -159,6 +166,20 @@ with sync_playwright() as p:
     pruefe("Stueck summiert ueber zwei Positionen", merk.startswith("3 Stück"), f"({merk!r})")
     seite.screenshot(path="/tmp/kikweb/t03-vorgemerkt.png")
 
+    print("\n4a) Merkliste und Knöpfe")
+    knopf_text = seite.locator(f'button[data-res="{nr}"]').inner_text()
+    pruefe("Knopf zeigt die Vormerkung dauerhaft", knopf_text == "✓ vorgemerkt (2)", f"({knopf_text!r})")
+    seite.click("#k-merk"); seite.wait_for_timeout(300)
+    pruefe("Merkliste klappt auf", seite.locator("#k-liste").is_visible() and seite.locator("#k-liste .zeile").count() == 2)
+    seite.locator(f'#k-liste button[data-weg="{nr2}"]').click(); seite.wait_for_timeout(300)
+    pruefe("Artikel einzeln entfernt", seite.locator("#k-liste .zeile").count() == 1
+           and seite.inner_text("#k-merk").startswith("2 Stück"), f"({seite.inner_text('#k-merk')!r})")
+    pruefe("Knopf des entfernten Artikels zurückgesetzt", seite.locator(f'button[data-res="{nr2}"]').inner_text() == "reservieren")
+    seite.locator(f'input[data-menge="{nr2}"]').fill("1"); seite.locator(f'button[data-res="{nr2}"]').click()
+    seite.wait_for_timeout(300)
+    seite.click("#k-merk"); seite.wait_for_timeout(200)
+    pruefe("Merkliste wieder zu", not seite.locator("#k-liste").is_visible())
+
     # Wunsch 01.10.2026: Leiste oben statt unter der Liste, Fotos ganz statt beschnitten
     lb = seite.locator(".leiste").bounding_box()
     rb = seite.locator("#k-raster").bounding_box()
@@ -195,12 +216,16 @@ with sync_playwright() as p:
     pruefe("mit genug Wert wieder freigegeben", not seite.locator("#k-anfragen").is_disabled())
 
     print("\n5) Reservierung abschicken")
+    seite.evaluate("window.scrollTo(0, 2500)"); seite.wait_for_timeout(300)
+    vorher_y = seite.evaluate("window.scrollY")
     seite.click("#k-anfragen")
     seite.wait_for_selector("#k-dlg", timeout=5000)
     dlg = seite.inner_text("#k-dlg")
+    pruefe("Formular öffnet als Fenster, die Seite springt nicht", seite.locator("#k-fenster").is_visible()
+           and abs(seite.evaluate("window.scrollY") - vorher_y) < 5, f"(vorher {vorher_y}, nachher {seite.evaluate('window.scrollY')})")
     pruefe("Formular zeigt Stueck gesamt", "3 Stück gesamt" in dlg, f"({dlg[:300]!r})")
     pruefe("Frist genannt", "3 Werktage" in dlg, f"({dlg[:200]!r})")
-    pruefe("Anruf angekündigt", "rufen wir Sie an" in dlg)
+    pruefe("„melden wir uns“ statt Anruf", "melden wir uns" in dlg and "rufen wir" not in dlg)
     pruefe("Datenschutzhinweis", seite.locator(".datenschutz").count() == 1)
     pruefe("Hinweis: noch kein Kaufvertrag", "noch kein Kaufvertrag" in dlg, f"({dlg[:400]!r})")
     pruefe("Hinweis: keine Bestätigungsmail",
@@ -253,7 +278,7 @@ with sync_playwright() as p:
     seite.click("#k-senden")
     seite.wait_for_selector(".meldung.gut", timeout=15000)
     erfolg = seite.inner_text(".meldung.gut")
-    pruefe("Erfolgsmeldung", "Vielen Dank" in erfolg and "rufen Sie" in erfolg,
+    pruefe("Erfolgsmeldung", "Vielen Dank" in erfolg and "melden uns" in erfolg,
            f"({erfolg[:200]!r})")
     beleg = seite.inner_text(".beleg")
     pruefe("Beleg zeigt Vorgangsnummer", "Vorgangsnummer" in beleg, f"({beleg[:200]!r})")
@@ -265,6 +290,40 @@ with sync_playwright() as p:
            "test@example.org" in beleg and "07721 123456" in beleg, f"({beleg!r})")
     pruefe("Hinweis auf Bildschirmfoto", "Bildschirmfoto" in erfolg)
     pruefe("Leiste zurueckgesetzt", "Noch nichts vorgemerkt" in seite.inner_text("#k-merk"))
+    pruefe("Knopf zum Drucken der Bestätigung", seite.locator("#k-drucken").count() == 1)
+    seite.click("#k-fertig"); seite.wait_for_timeout(300)
+    pruefe("Schließen führt zurück an dieselbe Stelle", not seite.locator("#k-fenster").is_visible()
+           and abs(seite.evaluate("window.scrollY") - vorher_y) < 5)
+    pruefe("Knopf „nach oben“ nach langem Scrollen", seite.locator("#k-oben").is_visible())
+
+    print("\n5b) Foto groß, Sortierung, Besichtigungshinweis")
+    seite.evaluate("window.scrollTo(0, 0)"); seite.wait_for_timeout(300)
+    seite.locator(".karte .bild img").first.click(); seite.wait_for_timeout(300)
+    pruefe("Foto öffnet groß", seite.locator("#k-gross").is_visible())
+    seite.keyboard.press("Escape"); seite.wait_for_timeout(200)
+    pruefe("Esc schließt das Foto", not seite.locator("#k-gross").is_visible())
+    seite.select_option("#k-sort", "ab"); seite.wait_for_timeout(400)
+    erste_nr = seite.locator(".karte .nr").first.inner_text()
+    sichtbar = [preise[n] for n in preise if n in set(seite.locator(".karte .nr").all_inner_texts())]
+    pruefe("Preis absteigend: teuerster Artikel zuerst", preise.get(erste_nr, 0) == max(sichtbar),
+           f"({erste_nr}, {preise.get(erste_nr)} von max {max(sichtbar)})")
+    seite.select_option("#k-sort", "auf"); seite.wait_for_timeout(400)
+    pruefe("Preis aufsteigend: günstigster zuerst",
+           preise.get(seite.locator(".karte .nr").first.inner_text(), 99) == min(sichtbar))
+    seite.select_option("#k-sort", ""); seite.wait_for_timeout(300)
+    # ein Artikel zwischen 50 und 100 €: erreicht den Mindestbestellwert, aber keine Besichtigung
+    mittel = [n for n, p in preise.items() if 50 <= p < 100]
+    seite.fill("#k-q", "")
+    for n in mittel:
+        if seite.locator(f'input[data-menge="{n}"]').count():
+            seite.locator(f'input[data-menge="{n}"]').fill("1")
+            seite.locator(f'button[data-res="{n}"]').click(); break
+    seite.wait_for_timeout(300)
+    seite.click("#k-anfragen"); seite.wait_for_timeout(500)
+    pruefe("unter 100 € pro Artikel: Hinweis statt Besichtigungsfrage",
+           seite.locator("#k-bes").count() == 0 and "ab 100,00" in seite.inner_text("#k-dlg"))
+    seite.keyboard.press("Escape"); seite.wait_for_timeout(200)
+    seite.click("#k-leeren")
     seite.screenshot(path="/tmp/kikweb/t04-erfolg.png")
 
     print("\n6) Bestand nach der Reservierung")

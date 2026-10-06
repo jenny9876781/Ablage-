@@ -932,6 +932,14 @@ ist die Merkliste; erledigte Punkte hier abhaken, nicht löschen.
       (Design → Editor → Muster → Template-Teile → Footer). Bleibt die Fußzeile im Katalog
       sichtbar, hat das Theme eine andere Auszeichnung – Bildschirmfoto/Quelltext anfordern.
 
+- [x] Plugin 1.2.2 (06.10.): Ankündigungsband rot und fett · Ablauf als Fließtext
+      (`kikripp_ablauf_122()`, ersetzt beim Umstellen nur den unveränderten 1.2.0-Text) ·
+      „melden wir uns“ statt „rufen an“ · Hut und Schriftzug KIKRIPP aus dem Kopf entfernt ·
+      Formular und Bestätigung als **Fenster** über dem Katalog (vorher Sprung ans Seitenende) ·
+      Hinweis „Besichtigung ab 100 €“ bei günstigeren Artikeln · Merkliste aufklappbar mit Menge
+      und × · Knopf „✓ vorgemerkt (n)“ dauerhaft · Foto groß per Klick · Sortierung nach Preis ·
+      „Bestätigung drucken“ · Knopf „nach oben“. Tests: 189 Logik, 83 Browser, 16 mobil.
+
 > Abschnitt 8 beschreibt noch den Passwortbetrieb. Seit 1.2.0 gilt: frei zugänglich,
 > `?kik=` wirkt nur bei eingeschaltetem Schutz. Die Regeln dort (Cache, noindex, keine
 > Fremdskripte) gelten unverändert.

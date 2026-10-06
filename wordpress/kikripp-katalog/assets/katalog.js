@@ -136,7 +136,6 @@
     wurzel.innerHTML =
       (HINWEIS ? '<div class="band">' + sicher(HINWEIS) + '</div>' : '') +
       '<div class="kopf">' +
-        '<div class="marke"><img src="' + sicher(W.signet) + '" alt=""><span class="wort">KIKRIPP</span></div>' +
         '<h2>Artikelkatalog aus der Betriebsauflösung</h2>' +
         '<p>' + (ANBIETER.firma ? 'Ein Angebot der ' + sicher(ANBIETER.firma) + ' · ' : '') +
         'Abholung durch den Käufer · ' +
@@ -148,19 +147,26 @@
         '<div class="sum" id="k-merk"></div>' +
         '<button class="sek" id="k-leeren">Auswahl leeren</button>' +
         '<button id="k-anfragen">Reservierung abschicken</button>' +
-      '</div></div>' +
+      '</div><div class="merkliste" id="k-liste" hidden></div></div>' +
       '<div class="filter">' +
         '<div class="zeile">' +
           '<input type="search" id="k-q" placeholder="Suchen: Bezeichnung, Nummer, Beschreibung …">' +
           '<select id="k-kat"><option value="">Alle Kategorien</option>' + optionen(kats) + '</select>' +
           '<select id="k-raum"><option value="">Alle Räume</option>' + optionen(raeume) + '</select>' +
+          '<select id="k-sort" aria-label="Sortierung"><option value="">Sortierung: Standard</option>' +
+            '<option value="auf">Preis aufsteigend</option><option value="ab">Preis absteigend</option></select>' +
           '<label class="chk"><input type="checkbox" id="k-design"> nur Markenware</label>' +
           '<label class="chk"><input type="checkbox" id="k-frei" checked> nur verfügbare</label>' +
         '</div>' +
         '<div class="zaehler" id="k-zaehler"></div>' +
       '</div>' +
       '<div class="raster" id="k-raster"></div>' +
-      '<div id="k-formular"></div>' +
+      // Formular und Bestätigung öffnen sich als Fenster über dem Katalog. Vorher stand das
+      // Formular unter allen Artikeln, und die Seite sprang beim Öffnen ganz nach unten.
+      '<div class="kik-fenster" id="k-fenster" hidden><div class="kik-fenster-box" role="dialog" aria-modal="true">' +
+        '<button class="kik-zu" id="k-zu" aria-label="Schließen">×</button><div id="k-formular"></div></div></div>' +
+      '<div class="kik-gross" id="k-gross" hidden><img alt=""><span></span></div>' +
+      '<button class="nach-oben" id="k-oben" aria-label="Nach oben" hidden>↑</button>' +
       ((RECHT || ANBIETER.firma) ? '<div class="recht">' + anbieterBlock() +
         (RECHT ? '<h4>Kaufbedingungen</h4>' + RECHT.split(/\n\s*\n/).map(function (t) {
           return '<p>' + absatz(t.trim()) + '</p>'; }).join('') : '') +
@@ -168,15 +174,43 @@
           ? '<p>Abholung nach Terminvereinbarung: ' + sicher(ABHOLUNG) + '</p>' : '') +
         '</div>' : '');
 
-    ['k-q', 'k-kat', 'k-raum', 'k-design', 'k-frei'].forEach(function (id) {
+    ['k-q', 'k-kat', 'k-raum', 'k-sort', 'k-design', 'k-frei'].forEach(function (id) {
       el(id).addEventListener('input', render);
     });
     el('k-leeren').addEventListener('click', function () {
-      merk = {}; render(); leiste();
+      merk = {}; listeOffen = false; leiste(); knoepfe();
     });
     el('k-anfragen').addEventListener('click', formular);
+    el('k-merk').addEventListener('click', function () {
+      if (!auswahl().length) { return; }
+      listeOffen = !listeOffen; leiste();
+    });
+    el('k-zu').addEventListener('click', schliessen);
+    el('k-fenster').addEventListener('click', function (e) { if (e.target === this) { schliessen(); } });
+    el('k-gross').addEventListener('click', function () { this.hidden = true; });
+    el('k-oben').addEventListener('click', function () {
+      wurzel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+    window.addEventListener('scroll', function () {
+      var k = el('k-oben'); if (k) { k.hidden = window.scrollY < 900; }
+    }, { passive: true });
     leiste();
   }
+
+  var listeOffen = false;
+
+  function schliessen() {
+    el('k-fenster').hidden = true;
+    document.documentElement.classList.remove('kik-offen');
+    el('k-formular').innerHTML = '';
+  }
+
+  // Esc schließt Fenster und Großbild
+  document.addEventListener('keydown', function (e) {
+    if (e.key !== 'Escape') { return; }
+    if (el('k-gross') && !el('k-gross').hidden) { el('k-gross').hidden = true; return; }
+    if (el('k-fenster') && !el('k-fenster').hidden) { schliessen(); }
+  });
 
   /* „So läuft es ab“: jede Zeile aus den Einstellungen wird ein Punkt. Auf dem Telefon
      zugeklappt, damit die Artikel nicht erst nach einem Bildschirm Text beginnen. */
@@ -184,8 +218,8 @@
     var punkte = String(ABLAUF).split(/\r?\n/).map(function (t) { return t.trim(); }).filter(Boolean);
     if (!punkte.length) { return ''; }
     var offen = window.matchMedia && window.matchMedia('(min-width: 561px)').matches;
-    return '<details class="ablauf"' + (offen ? ' open' : '') + '><summary>So läuft es ab</summary><ul>' +
-      punkte.map(function (t) { return '<li>' + sicher(t) + '</li>'; }).join('') + '</ul></details>';
+    return '<details class="ablauf"' + (offen ? ' open' : '') + '><summary>So läuft es ab</summary>' +
+      '<p>' + sicher(punkte.join(' ')) + '</p></details>';
   }
 
   /* Anbieterkennzeichnung. Der Katalog liegt auf fremdem Speicherplatz — es muss
@@ -225,6 +259,10 @@
         && (!kat || a.kat === kat) && (!raum || a.raum === raum)
         && (!nurFrei || a.frei > 0) && (!nurDesign || !!a.marke);
     });
+    var sort = el('k-sort') ? el('k-sort').value : '';
+    if (sort) {
+      liste = liste.slice().sort(function (x, y) { return sort === 'auf' ? x.preis - y.preis : y.preis - x.preis; });
+    }
     el('k-zaehler').innerHTML = '<b>' + liste.length + '</b> von ' + ARTIKEL.length + ' Positionen';
     el('k-raster').innerHTML = liste.length
       ? liste.map(karte).join('')
@@ -234,7 +272,7 @@
   function karte(a) {
     var frei = a.frei > 0;
     var bild = a.bild
-      ? '<img src="' + sicher(a.bild) + '" alt="' + sicher(a.titel) + '" loading="lazy">'
+      ? '<img src="' + sicher(a.bild) + '" alt="' + sicher(a.titel) + '" loading="lazy" data-gross="' + sicher(a.nr) + '" title="Zum Vergrößern klicken">'
       : '<div class="kein-bild">kein Foto</div>';
     var abzeichen = frei
       ? '<span class="badge frei">verfügbar</span>'
@@ -251,7 +289,7 @@
       ? '<div class="mengen">' +
           '<input type="number" min="1" max="' + a.frei + '" step="1" value="' + (merk[a.nr] || 1) + '" ' +
           'id="m-' + sicher(a.nr) + '" data-menge="' + sicher(a.nr) + '" aria-label="Stückzahl ' + sicher(a.nr) + '">' +
-          '<button data-res="' + sicher(a.nr) + '">reservieren</button>' +
+          '<button data-res="' + sicher(a.nr) + '"' + (merk[a.nr] ? ' class="drin"' : '') + '>' + knopfText(a.nr) + '</button>' +
         '</div>'
       : '';
     return '<div class="karte' + (frei ? '' : ' weg') + '">' +
@@ -273,6 +311,30 @@
         ' · je ' + sicher(a.einheit) + '</small></div>' +
       auswahl + '</div></div>';
   }
+
+  function knopfText(nr) {
+    return merk[nr] ? '✓ vorgemerkt (' + merk[nr] + ')' : 'reservieren';
+  }
+  /** Knöpfe der Karten an die Merkliste angleichen, ohne die Liste neu aufzubauen. */
+  function knoepfe() {
+    Array.prototype.forEach.call(wurzel.querySelectorAll('button[data-res]'), function (k) {
+      var nr = k.getAttribute('data-res');
+      k.textContent = knopfText(nr);
+      k.className = merk[nr] ? 'drin' : '';
+    });
+  }
+
+  // Foto groß anzeigen
+  document.addEventListener('click', function (e) {
+    var nr = e.target && e.target.dataset && e.target.dataset.gross;
+    if (!nr) { return; }
+    var a = ARTIKEL.filter(function (x) { return x.nr === nr; })[0];
+    if (!a || !a.bild) { return; }
+    var g = el('k-gross');
+    g.querySelector('img').src = a.bild;
+    g.querySelector('span').textContent = a.nr + ' · ' + a.titel + ' – zum Schließen klicken';
+    g.hidden = false;
+  });
 
   // Eingabefeld: hart auf die verfügbare Menge begrenzen
   document.addEventListener('input', function (e) {
@@ -297,8 +359,7 @@
     if (n > a.frei) { n = a.frei; if (feld) { feld.value = n; } }
     merk[nr] = n;
     leiste();
-    e.target.textContent = 'vorgemerkt ✓';
-    setTimeout(function () { e.target.textContent = 'reservieren'; }, 1200);
+    knoepfe();
   });
 
   // ------------------------------------------------------------------ Leiste
@@ -326,7 +387,36 @@
     // Ohne Auswahl braucht die Leiste auf dem Telefon keine Knoepfe (siehe katalog.css).
     var l = wurzel.querySelector('.leiste');
     if (l) { l.className = stueck ? 'leiste' : 'leiste leer'; }
+    if (!stueck) { listeOffen = false; }
+    if (stueck) {
+      el('k-merk').innerHTML += ' <span class="liste-knopf">' + (listeOffen ? 'Liste schließen ▴' : 'Liste ansehen ▾') + '</span>';
+    }
+    var liste = el('k-liste');
+    liste.hidden = !listeOffen;
+    liste.innerHTML = listeOffen ? w.map(function (p) {
+      return '<div class="zeile"><span>' + sicher(p.a.nr) + ' · ' + sicher(p.a.titel) + '</span>' +
+        '<input type="number" min="1" max="' + p.a.frei + '" value="' + p.menge + '" data-liste="' + sicher(p.a.nr) + '" aria-label="Stückzahl">' +
+        '<b>' + eur(brutto(p.menge * p.a.preis)) + '</b>' +
+        '<button class="weg" data-weg="' + sicher(p.a.nr) + '" aria-label="Entfernen">×</button></div>';
+    }).join('') : '';
   }
+
+  // Merkliste: Menge ändern oder Artikel entfernen
+  document.addEventListener('change', function (e) {
+    var nr = e.target && e.target.dataset && e.target.dataset.liste;
+    if (!nr) { return; }
+    var a = ARTIKEL.filter(function (x) { return x.nr === nr; })[0];
+    var n = parseInt(e.target.value, 10);
+    if (!a || isNaN(n) || n < 1) { n = 1; }
+    merk[nr] = Math.min(n, a ? a.frei : n);
+    leiste(); knoepfe();
+  });
+  document.addEventListener('click', function (e) {
+    var nr = e.target && e.target.dataset && e.target.dataset.weg;
+    if (!nr) { return; }
+    delete merk[nr];
+    leiste(); knoepfe();
+  });
 
   // ------------------------------------------------------------------ Formular
 
@@ -353,7 +443,7 @@
       '<div class="dlg" id="k-dlg">' +
       '<h3>Reservierung abschicken</h3>' +
       '<p class="s">Die Artikel bleiben ' + FRIST + ' Werktage für Sie reserviert. Nach Eingang Ihrer Reservierung ' +
-      'rufen wir Sie an. Eine Reservierung ist noch kein Kaufvertrag – dieser kommt mit Ihrer unterschriebenen ' +
+      'melden wir uns bei Ihnen. Eine Reservierung ist noch kein Kaufvertrag – dieser kommt mit Ihrer unterschriebenen ' +
       'Bestellung zustande. Sie können die Reservierung jederzeit formlos zurücknehmen.</p>' +
       '<div class="pos">' + zeilen +
         '<div style="border-top:1px solid #dcdcdc;margin-top:8px;padding-top:8px">' +
@@ -366,13 +456,13 @@
       '<div><label for="k-ort">Ort *</label><input id="k-ort" autocomplete="address-level2" required></div></div>' +
       '<div class="feld"><label for="k-mail">E-Mail *</label><input id="k-mail" type="email" autocomplete="email" required></div>' +
       '<div class="feld"><label for="k-tel">Telefon *</label><input id="k-tel" type="tel" autocomplete="tel" required>' +
-      '<small class="hint">Wir rufen Sie nach der Reservierung an – bitte unbedingt angeben.</small></div>' +
+      '<small class="hint">Wir melden uns nach der Reservierung – bitte unbedingt angeben.</small></div>' +
       (mitBesichtigung
         ? '<div class="feld"><label class="chk2"><input type="checkbox" id="k-bes"> Ich möchte die Artikel vorab besichtigen ' +
           '(donnerstags 08:00–11:00 Uhr)</label>' +
           '<div class="zwei" id="k-bes-wahl" hidden><div>' + auswahlFeld('k-bes-tag', donnerstage, 'Donnerstag wählen') + '</div>' +
           '<div>' + auswahlFeld('k-bes-zeit', BES_ZEITEN.map(function (z) { return [z, z + ' Uhr']; }), 'Uhrzeit wählen') + '</div></div></div>'
-        : '') +
+        : (BES_AB > 0 ? '<p class="hint-bes">Eine Besichtigung bieten wir für Artikel ab ' + eur(BES_AB) + ' an.</p>' : '')) +
       '<div class="feld"><label for="k-abhol">Gewünschter Abholtermin *</label>' +
         auswahlFeld('k-abhol', abholtage, 'Montag oder Dienstag wählen') +
         '<small class="hint">Abholung montags und dienstags 08:00–11:00 Uhr' +
@@ -393,12 +483,15 @@
       '</div>';
 
     formularSeit = Date.now();
+    el('k-fenster').hidden = false;
+    document.documentElement.classList.add('kik-offen');
+    el('k-fenster').scrollTop = 0;
     if (el('k-bes')) {
       el('k-bes').addEventListener('change', function () { el('k-bes-wahl').hidden = !this.checked; });
     }
-    el('k-abbrechen').addEventListener('click', function () { el('k-formular').innerHTML = ''; });
+    el('k-abbrechen').addEventListener('click', schliessen);
     el('k-senden').addEventListener('click', senden);
-    el('k-dlg').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    var erstes = el('k-name'); if (erstes) { erstes.focus({ preventScroll: true }); }
   }
 
   var letzteAuswahl = [];
@@ -461,7 +554,7 @@
           var k = a.daten.kontakt || {};
           el('k-formular').innerHTML =
             '<div class="meldung gut"><strong>Vielen Dank – Ihre Reservierung ist eingegangen.</strong><br>' +
-            'Wir rufen Sie in den nächsten Tagen an.' +
+            'Wir melden uns in den nächsten Tagen bei Ihnen.' +
             '<div class="beleg">' +
               '<div class="zeile"><span>Vorgangsnummer</span><b>' + a.daten.vorgang + '</b></div>' +
               (a.daten.bis ? '<div class="zeile"><span>Reserviert bis</span><b>' + datumText(a.daten.bis) + '</b></div>' : '') +
@@ -483,11 +576,16 @@
             (a.daten.mail ? '' : '<p class="s" style="margin:8px 0 0"><em>Ihre Reservierung ist ' +
             'gespeichert. Sollten wir uns nicht innerhalb von zwei Werktagen melden, ' +
             'kontaktieren Sie uns bitte noch einmal.</em></p>') +
+            '<p class="knoepfe-beleg"><button id="k-drucken">Bestätigung drucken / als PDF speichern</button> ' +
+            '<button class="sek" style="color:#1a1a1a;border-color:#dcdcdc" id="k-fertig">Schließen</button></p>' +
             '</div>';
+          el('k-drucken').addEventListener('click', function () { window.print(); });
+          el('k-fertig').addEventListener('click', schliessen);
           ARTIKEL = a.daten.artikel || ARTIKEL;
           merk = {};
+          listeOffen = false;
           render(); leiste();
-          el('k-formular').scrollIntoView({ behavior: 'smooth', block: 'center' });
+          el('k-fenster').scrollTop = 0;
           return;
         }
         if (a.status === 401) { zeigeSperre('Bitte melden Sie sich erneut an.'); return; }

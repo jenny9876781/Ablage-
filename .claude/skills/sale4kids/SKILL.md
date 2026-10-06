@@ -931,6 +931,12 @@ ist die Merkliste; erledigte Punkte hier abhaken, nicht löschen.
       bestellt + Abholtermin → Bestellung erstellen → bezahlt; nach Abwicklung Kontaktdaten
       löschen. Wöchentliche Updates bis Ende November, Spielzeug im November.
 - [ ] Zurückgestellt: WordPress-Update, Katalogseite aus der XML-Sitemap nehmen.
+- [x] Social Media (06.10.): `scripts/build_social.py` → `ausgabe/social/` (5 Storys 1080×1920,
+      Vorankündigung Spielzeug, Feed-Beitrag 1080×1350, Rot #C8102E, Archivo Black + Inter aus
+      `assets/schriften`, ohne Logo, Story oben 230/unten 300 px frei). Begleittexte als Word
+      `S1_Begleittexte_Posten.docx`. Canva-Vorlagen mit KI-Platzhalterfotos (Story DAHXPfo7Bgc, Feed DAHXPfJ7FxE) –
+      Upload zu Canva ist aus dem Container gesperrt (403), die Nutzerin tauscht die Fotos selbst
+      (`Fotos_fuer_Canva.zip`). Platzhalterfotos dürfen nie so gepostet werden.
 
 - [x] Plugin 1.2.1 (06.10.): Einstellung „Fußzeile ausblenden“ (Standard an) – Body-Klasse
       `kikripp-ohne-fusszeile` nur auf der Katalogseite, CSS für Block-Themes

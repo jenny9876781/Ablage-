@@ -925,6 +925,13 @@ ist die Merkliste; erledigte Punkte hier abhaken, nicht löschen.
 - [ ] Livegang: Plugin ersetzen → Einstellungen prüfen → 6 Fotos → Import → U2 ersetzen →
       Cache leeren → Testreservierungen löschen → Vorschaubetrieb aus → privat gegenlesen.
 
+- [x] Plugin 1.2.1 (06.10.): Einstellung „Fußzeile ausblenden“ (Standard an) – Body-Klasse
+      `kikripp-ohne-fusszeile` nur auf der Katalogseite, CSS für Block-Themes
+      (`footer.wp-block-template-part`) und klassische Themes (`#colophon`, `.site-footer`).
+      Die Nutzerin stellt außerdem die Fußzeile der ganzen Website auf die GmbH um
+      (Design → Editor → Muster → Template-Teile → Footer). Bleibt die Fußzeile im Katalog
+      sichtbar, hat das Theme eine andere Auszeichnung – Bildschirmfoto/Quelltext anfordern.
+
 > Abschnitt 8 beschreibt noch den Passwortbetrieb. Seit 1.2.0 gilt: frei zugänglich,
 > `?kik=` wirkt nur bei eingeschaltetem Schutz. Die Regeln dort (Cache, noindex, keine
 > Fremdskripte) gelten unverändert.

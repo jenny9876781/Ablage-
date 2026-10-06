@@ -503,5 +503,31 @@ kikripp_umstellen();
 pruefe('zweiter Lauf überschreibt nichts', get_option('kikripp_rechtstext'), 'von Hand geändert');
 pruefe('eigenes Hinweisband bleibt', get_option('kikripp_hinweisband'), 'eigener Text');
 
+titel('28. Fußzeile der Website auf der Katalogseite ausblenden');
+if (!function_exists('is_singular')) { function is_singular() { return true; } }
+if (!function_exists('get_post')) {
+    function get_post() { return (object) ['post_content' => $GLOBALS['seiteninhalt'] ?? '']; }
+}
+if (!function_exists('has_shortcode')) {
+    function has_shortcode($inhalt, $kurz) { return strpos((string) $inhalt, '[' . $kurz) !== false; }
+}
+$GLOBALS['seiteninhalt'] = '<!-- wp:shortcode -->[kikripp_katalog]<!-- /wp:shortcode -->';
+unset($GLOBALS['optionen']['kikripp_fusszeile_aus']);
+pruefe('Katalogseite bekommt die Klasse (Vorgabe: an)',
+       in_array('kikripp-ohne-fusszeile', Kikripp_Frontend::body_klasse(['page']), true), true);
+pruefe('vorhandene Klassen bleiben', in_array('page', Kikripp_Frontend::body_klasse(['page']), true), true);
+update_option('kikripp_fusszeile_aus', 0);
+pruefe('ausgeschaltet: keine Klasse',
+       in_array('kikripp-ohne-fusszeile', Kikripp_Frontend::body_klasse(['page']), true), false);
+update_option('kikripp_fusszeile_aus', 1);
+$GLOBALS['seiteninhalt'] = 'Impressum der Kikripp GmbH';
+pruefe('andere Seiten behalten ihre Fußzeile',
+       in_array('kikripp-ohne-fusszeile', Kikripp_Frontend::body_klasse(['page']), true), false);
+$css = file_get_contents(__DIR__ . '/../kikripp-katalog/assets/katalog.css');
+pruefe('CSS blendet die Block-Theme-Fußzeile aus',
+       strpos($css, 'body.kikripp-ohne-fusszeile footer.wp-block-template-part') !== false, true);
+pruefe('CSS deckt auch klassische Themes ab',
+       strpos($css, 'body.kikripp-ohne-fusszeile #colophon') !== false, true);
+
 printf("\n== Ergebnis: %d Prüfungen, %d Fehler ==\n", $geprueft, $fehler);
 exit($fehler > 0 ? 1 : 0);

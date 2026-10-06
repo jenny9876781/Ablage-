@@ -1,6 +1,6 @@
 ---
 name: sale4kids
-description: "Arbeitsablauf für die Auflösung und den Verkauf des Inventars der Kikripp GmbH (Kinderkrippe Villingen-Schwenningen). Auslösen bei dem Stichwort 'sale4kids', beim Hochladen neuer Artikelfotos (HEIC/JPG aus dem Haus), bei Rückgabe einer überarbeiteten Datei 01_Artikelstamm_kikripp.xlsx, bei einem Reservierungs-Export aus WordPress, bei Arbeiten am WordPress-Plugin kikripp-katalog, oder bei Bitten wie 'neue Artikel aufnehmen', 'Angebot für die Klinik aktualisieren', 'Katalog neu erzeugen', 'Webshop aktualisieren', 'Preise eingearbeitet', 'Fotos sind da', 'Reservierungen einlesen'. Nicht verwenden für andere Verkaufs- oder Inventarprojekte."
+description: "Arbeitsablauf für die Auflösung und den Verkauf des Inventars der Kikripp GmbH (Kinderkrippe Villingen-Schwenningen). Auslösen bei den Stichworten 'ergänzen und ändern' und 'sale4kids', beim Hochladen neuer Artikelfotos (HEIC/JPG aus dem Haus), bei Rückgabe einer überarbeiteten Datei 01_Artikelstamm_kikripp.xlsx, bei einem Reservierungs-Export aus WordPress, bei Arbeiten am WordPress-Plugin kikripp-katalog, oder bei Bitten wie 'neue Artikel aufnehmen', 'Angebot für die Klinik aktualisieren', 'Katalog neu erzeugen', 'Webshop aktualisieren', 'Preise eingearbeitet', 'Fotos sind da', 'Reservierungen einlesen'. Nicht verwenden für andere Verkaufs- oder Inventarprojekte."
 ---
 
 # sale4kids — Inventarauflösung Kikripp GmbH
@@ -11,6 +11,64 @@ Betrieb auf und verkauft das gesamte Inventar. Erster Interessent ist Mediclin K
 
 **Grundprinzip: `daten/artikel_kikripp.csv` ist die einzige Quelle der Wahrheit.** Alle
 Ausgabedateien werden daraus erzeugt und sind jederzeit wegwerfbar. Die Datenbasis nie umgehen.
+
+---
+
+## 0. Stichwort „ergänzen und ändern“ — so läuft ein neuer Chat ab
+
+Schreibt die Nutzerin **„ergänzen und ändern“**, will sie neue Artikel aufnehmen und/oder
+bestehende im Webkatalog ändern (Preise, Texte, Mengen, Fotos, Artikel raus). Der Katalog ist
+**seit 06.10.2026 live** – jede Änderung landet bei echten Interessenten.
+
+**Ihre Arbeitsweise (ausdrücklich gewünscht, nicht abweichen):**
+1. **Erst lesen, dann fragen, dann einmal bauen.** Alle Anhänge auslesen (Excel, Word,
+   Fotos, Post-it-Fotos), alle Unklarheiten in **einer** nummerierten Fragenliste stellen.
+   Nicht bauen, bevor sie geantwortet hat.
+2. **Fotos kommen oft in mehreren Nachrichten.** Warten, bis sie „alle Fotos hochgeladen“
+   (o. ä.) schreibt – dann erst bauen, damit nur **einmal** gebaut wird.
+3. **Widersprechen**, wenn etwas schiefläuft oder nicht zusammenpasst. Kurz, mit Empfehlung.
+4. Antworten kurz, auf Deutsch, Word/Excel statt md/pdf, Schritt-für-Schritt-Anleitungen knapp.
+
+**Was sie typischerweise liefert und was damit passiert:**
+
+| Lieferung | Ablauf |
+|---|---|
+| bearbeitete `01_Artikelstamm_kikripp.xlsx` (oder eine Liste „NEU“) | Ablauf B – **Probelauf/Dreiwegevergleich** gegen die CSV und gegen den letzten ausgelieferten Stand, nie blind `rueckeinlesen.py` (siehe 9c, Fehler vom 05.10.) |
+| Word mit Änderungswünschen | von Hand in `daten/artikel_kikripp.csv` übernehmen, jede Änderung im Bericht nennen |
+| Fotos (HEIC/JPG) | Ablauf A – aufbereiten, **Personen/Namensschilder prüfen**, Artikel anlegen, Preis schätzen und als `OFFEN:` markieren |
+| Neue Artikel ohne Nummer | Sie schreibt `RAUMCODE-NEU1` usw.; Nummern vergebe ich fortlaufend im Raum |
+
+**Feste Regeln für die Daten (Entscheidungen bis 06.10.2026):**
+- Preisbasis: **unter 200 € „Fix“, ab 200 € „VHB“**. Versand immer **„nur Abholung“**.
+- **Keine Umsatzsteuer** (§ 4 Nr. 28 UStG) – Preise sind Endpreise.
+- Neue Artikel gehen **sofort in den Katalog**, wenn nichts anderes gesagt wird.
+- Zusammenlegen bestehender Zeilen: Hauptzeile bekommt Gesamtmenge, die andere `entfällt`.
+- Kinder aus dem Haus nie erkennbar; Beschriftungen/Namensschilder unkenntlich machen.
+
+**Bauen und ausliefern (Ablauf C, dann Nachtrag):**
+1. **Vor** dem Neuerzeugen die zuletzt ausgelieferte Importdatei sichern:
+   `git show HEAD:ausgabe/katalog_import.json > <scratchpad>/alt_import.json`
+2. Ablauf C laufen lassen (Excel, `build_katalog_import.py`, `pruefen.py` mit 0 Fehlern).
+3. Fotopaket **nur als Nachtrag**: `python3 scripts/build_fotopaket.py --nachtrag <alt_import.json>`
+   → `ausgabe/kikripp-fotos-nachtrag.zip` (nur neue/geänderte Fotos).
+4. Zahlen in `WEBSHOP_EINRICHTEN.md` nachziehen, falls `pruefen.py` (4b) meckert.
+5. Plugin nur anfassen, wenn sie es will; dann Version hochzählen, alle Tests laufen lassen
+   (`test-logik.php`, `test-kette.php`, `browsertest.py`, `browsertest_mobil.py`) und
+   `wordpress/paketieren.sh`.
+6. Schicken: `01_Artikelstamm_kikripp.xlsx`, `katalog_import.json`,
+   `kikripp-fotos-nachtrag.zip` (falls neue Fotos). Bericht: neu / geändert / entfallen,
+   offene Preise, was noch fehlt, **erwartete Importmeldung** („x neu, y aktualisiert“).
+
+**Ihre Schritte in WordPress (immer so mitgeben):**
+1. Nachtrags-Zip entpacken → **Medien → Datei hinzufügen** → alle Fotos hineinziehen.
+2. **Artikelkatalog → Artikel importieren** → `katalog_import.json` → Importieren.
+   Die Meldung mit der erwarteten vergleichen.
+3. **Performance → Purge All Caches**, Katalog im privaten Fenster prüfen.
+
+**Am Ende jedes Chats:** committen und pushen. **Neue Chats starten vom Standardbranch** des
+Repos – die Arbeit muss dort ankommen (Branch in den Standardbranch übernehmen, mit
+Zustimmung der Nutzerin), sonst fehlt dem nächsten Chat der Stand. Die Merkliste in
+Abschnitt 9c weiterführen.
 
 ---
 

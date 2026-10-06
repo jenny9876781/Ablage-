@@ -370,5 +370,138 @@ pruefe('Autoptimize mit Feld statt Zeichenkette bekommt ein Feld zurueck',
 pruefe('Feld ohne Doppelung',
        $aus(['kikripp']), ['kikripp']);
 
+titel('20. Reservierung gilt 3 Werktage (Mo–Fr)');
+update_option('kikripp_frist_werktage', 3);
+pruefe('Freitag + 3 Werktage = Mittwoch', Kikripp_DB::ablauf_nach_werktagen('2026-10-09 15:00:00', 3), '2026-10-14 23:59:59');
+pruefe('Montag + 3 Werktage = Donnerstag', Kikripp_DB::ablauf_nach_werktagen('2026-10-12 08:00:00', 3), '2026-10-15 23:59:59');
+pruefe('Samstag + 3 Werktage = Mittwoch', Kikripp_DB::ablauf_nach_werktagen('2026-10-10 10:00:00', 3), '2026-10-14 23:59:59');
+artikel_anlegen('W-001', 4, 120.0, 'Sofa');
+artikel_anlegen('W-002', 6, 30.0, 'Stuhl');
+$vw = Kikripp_DB::reservieren(array_merge(kontakt('Werktag GmbH'), [
+    'firma' => 'Werktag GmbH', 'strasse' => 'Hauptstr. 1', 'plz' => '78048', 'ort' => 'VS',
+    'besichtigung' => '2026-10-15 09:00', 'abholwunsch' => '2026-10-19', 'demontage' => true]),
+    ['W-001' => 1, 'W-002' => 4]);
+$gw = Kikripp_DB::vorgang($vw);
+pruefe('Ablauf steht auf dem errechneten Werktag',
+       $gw['ablauf'], Kikripp_DB::ablauf_nach_werktagen(current_time('mysql'), 3));
+pruefe('Firma gespeichert', $gw['firma'], 'Werktag GmbH');
+pruefe('Anschrift gespeichert', $gw['strasse'] . '|' . $gw['plz'] . '|' . $gw['ort'], 'Hauptstr. 1|78048|VS');
+pruefe('Besichtigung gespeichert', $gw['besichtigung'], '2026-10-15 09:00');
+pruefe('Abholwunsch gespeichert', $gw['abholwunsch'], '2026-10-19');
+pruefe('Demontage vermerkt', (int) $gw['demontage'], 1);
+pruefe('Besichtigung lesbar', Kikripp_Mail::besichtigung_text($gw), 'Do 15.10.2026, 09:00 Uhr');
+pruefe('Abholwunsch lesbar mit Demontage', strpos(Kikripp_Mail::abholung_text($gw), 'Mo 19.10.2026; Demontage') === 0, true);
+
+titel('21. Status „bestellt“ läuft nicht ab');
+Kikripp_DB::vorgang_status($vw, 'bestellt');
+$wpdb->update(Kikripp_DB::t_vorgang(), ['ablauf' => gmdate('Y-m-d H:i:s', time() - 86400)], ['id' => $vw]);
+pruefe('bestellter Vorgang hält die Ware trotz abgelaufener Frist', katalog_nach('W-002')['frei'], 2);
+pruefe('Positionen bleiben reserviert', Kikripp_DB::vorgang($vw)['positionen'][0]['status'], 'reserviert');
+Kikripp_DB::vorgang_status($vw, 'offen');
+pruefe('zurück auf reserviert: abgelaufene Frist gibt frei', katalog_nach('W-002')['frei'], 6);
+Kikripp_DB::vorgang_verlaengern($vw);
+pruefe('verlängern reserviert wieder', katalog_nach('W-002')['frei'], 2);
+
+titel('22. Teilabholung: einzelne Position stornieren');
+Kikripp_DB::vorgang_status($vw, 'bestellt');
+$pos = Kikripp_DB::vorgang($vw)['positionen'];
+$rest = Kikripp_DB::position_stornieren($vw, $pos[1]['id']);
+pruefe('eine Position bleibt', $rest, 1);
+pruefe('stornierte Position ist wieder frei', katalog_nach('W-002')['frei'], 6);
+pruefe('die andere bleibt reserviert', katalog_nach('W-001')['frei'], 3);
+pruefe('Vorgang bleibt bestellt', Kikripp_DB::vorgang($vw)['status'], 'bestellt');
+Kikripp_DB::vorgang_status($vw, 'bezahlt');
+$nach = Kikripp_DB::vorgang($vw)['positionen'];
+pruefe('bezahlt: die übrige Position ist bezahlt', $nach[0]['status'], 'bezahlt');
+pruefe('bezahlt: die stornierte bleibt storniert', $nach[1]['status'], 'storniert');
+pruefe('bezahlter Artikel verlässt den Katalog anteilig', katalog_nach('W-001')['menge'], 3);
+$vt = Kikripp_DB::reservieren(kontakt('Teil'), ['W-002' => 1]);
+pruefe('letzte Position storniert: nichts bleibt', Kikripp_DB::position_stornieren($vt, Kikripp_DB::vorgang($vt)['positionen'][0]['id']), 0);
+pruefe('… und der Vorgang ist storniert', Kikripp_DB::vorgang($vt)['status'], 'storniert');
+
+titel('23. Kontaktdaten löschen nimmt auch die Anschrift mit');
+Kikripp_DB::kontakt_loeschen($vw);
+$weg = Kikripp_DB::vorgang($vw);
+pruefe('Firma weg', $weg['firma'], '');
+pruefe('Straße weg', $weg['strasse'], '');
+pruefe('Ort weg', $weg['ort'], '');
+
+titel('24. Mail ohne Umsatzsteuer');
+update_option('kikripp_ust_prozent', 0);
+$GLOBALS['mails'] = [];
+$vm = Kikripp_DB::reservieren(array_merge(kontakt('Steuerfrei'), ['firma' => 'Kita Sonnenschein',
+    'strasse' => 'Weg 2', 'plz' => '78050', 'ort' => 'VS', 'abholwunsch' => '2026-10-20']), ['W-002' => 2]);
+Kikripp_Mail::reservierung($vm);
+$t = $GLOBALS['mails'][0]['text'];
+pruefe('Summe als umsatzsteuerfrei ausgewiesen', strpos($t, '60,00 € (umsatzsteuerfrei)') !== false, true);
+pruefe('keine USt-Zeile', strpos($t, 'USt:') === false && strpos($t, 'brutto') === false, true);
+pruefe('keine „netto“-Angabe an den Positionen', strpos($t, 'netto') === false, true);
+pruefe('Firma und Anschrift in der Mail', strpos($t, 'Kita Sonnenschein') !== false && strpos($t, 'Weg 2, 78050 VS') !== false, true);
+pruefe('Abholwunsch in der Mail', strpos($t, 'Di 20.10.2026') !== false, true);
+
+titel('25. Bestellung erstellen');
+update_option('kikripp_rechtstext', "Gebrauchte Artikel.\n\nSteuerfreie Lieferung gemäß § 4 Nr. 28 UStG.");
+update_option('kikripp_abholschluss', '2026-12-10');
+$GLOBALS['ist_admin'] = true;
+$hu = Kikripp_Admin::bestellung_html($vm, 'unternehmen');
+$hp = Kikripp_Admin::bestellung_html($vm, 'privat');
+pruefe('Unternehmen: Gewährleistung ausgeschlossen', strpos($hu, 'Gewährleistung für Sach- und Rechtsmängel ist ausgeschlossen') !== false, true);
+pruefe('Unternehmen: keine Verjährungsklausel', strpos($hu, 'ein Jahr ab Übergabe') === false, true);
+pruefe('Privat: gesonderte Verjährungsvereinbarung', strpos($hp, 'Gesonderte Vereinbarung zur Verjährung') !== false
+       && strpos($hp, 'ein Jahr ab Übergabe') !== false, true);
+pruefe('Privat: eigene Unterschrift für die Klausel', substr_count($hp, 'Unterschrift Käufer'), 2);
+pruefe('Privat: Unterschrift vor Ort, Zahlung vor Übergabe', strpos($hp, 'vor Ort unterschrieben') !== false, true);
+pruefe('Unternehmen: Rechnung per Mail, Zahlung vorab', strpos($hu, 'per E-Mail versandt') !== false, true);
+pruefe('Steuerhinweis steht drauf', strpos($hu, '§ 4 Nr. 28 UStG') !== false, true);
+pruefe('Gesamtbetrag umsatzsteuerfrei', strpos($hu, '(umsatzsteuerfrei)') !== false && strpos($hu, '60,00 €') !== false, true);
+pruefe('Abholschluss und Eigentumsrückfall', strpos($hu, '10.12.2026') !== false && strpos($hu, 'ohne Erstattung') !== false, true);
+pruefe('Käuferanschrift steht drauf', strpos($hu, 'Kita Sonnenschein') !== false && strpos($hu, '78050 VS') !== false, true);
+$vs = Kikripp_DB::reservieren(kontakt('Storno-Test'), ['W-002' => 1, 'W-001' => 1]);
+Kikripp_DB::position_stornieren($vs, Kikripp_DB::vorgang($vs)['positionen'][0]['id']);
+$hs = Kikripp_Admin::bestellung_html($vs, 'unternehmen');
+pruefe('stornierte Position fehlt auf der Bestellung', strpos($hs, '>W-002<') === false && strpos($hs, '>W-001<') !== false, true);
+$GLOBALS['ist_admin'] = false;
+
+titel('26. Passwortschutz abschaltbar');
+unset($_COOKIE[Kikripp_Zugang::KEKS]);
+update_option('kikripp_passwortschutz', 1);
+pruefe('mit Schutz und ohne Keks kein Zugang', Kikripp_Zugang::hat_zugang(), false);
+update_option('kikripp_passwortschutz', 0);
+pruefe('ohne Schutz Zugang für alle', Kikripp_Zugang::hat_zugang(), true);
+
+titel('27. Umstellung einer bestehenden Einrichtung auf 1.2.0');
+if (!defined('ABSPATH')) { define('ABSPATH', __DIR__ . '/'); }
+foreach (['plugin_dir_path' => function ($f) { return dirname($f) . '/'; },
+          'plugin_dir_url' => function ($f) { return '/'; }] as $n => $fn) {
+    if (!function_exists($n)) { eval('function ' . $n . '($f) { return ' . ($n === 'plugin_dir_path' ? 'dirname($f) . "/"' : '"/"') . '; }'); }
+}
+foreach (['register_activation_hook', 'add_action', 'add_filter', 'add_shortcode'] as $n) {
+    if (!function_exists($n)) { eval('function ' . $n . '(...$a) { return true; }'); }
+}
+foreach (['kikripp_plugin_version', 'kikripp_passwortschutz', 'kikripp_frist_werktage', 'kikripp_ablauftext'] as $o) {
+    unset($GLOBALS['optionen'][$o]);
+}
+update_option('kikripp_ust_prozent', 19);
+update_option('kikripp_rechtstext', 'alter Text inklusive Umsatzsteuer');
+update_option('kikripp_hinweisband', '');
+update_option('kikripp_mail_an', 'jennyp@kikripp.de');
+require_once __DIR__ . '/../kikripp-katalog/kikripp-katalog.php';
+kikripp_umstellen();
+pruefe('Umsatzsteuer auf 0', get_option('kikripp_ust_prozent'), 0);
+pruefe('Passwortschutz aus', get_option('kikripp_passwortschutz'), 0);
+pruefe('3 Werktage', get_option('kikripp_frist_werktage'), 3);
+pruefe('Mindestbestellwert 50', get_option('kikripp_mindestwert'), 50);
+pruefe('Besichtigung ab 100', get_option('kikripp_besichtigung_ab'), 100);
+pruefe('Abholschluss 10.12.2026', get_option('kikripp_abholschluss'), '2026-12-10');
+pruefe('neuer Rechtstext mit § 4 Nr. 23', strpos(get_option('kikripp_rechtstext'), '§ 4 Nr. 23 UStG') !== false, true);
+pruefe('Ablauftext nennt die Abholzeiten', strpos(get_option('kikripp_ablauftext'), 'montags und dienstags von 08:00 bis 11:00 Uhr') !== false, true);
+pruefe('Hinweisband angekündigt', strpos(get_option('kikripp_hinweisband'), 'Spielzeugs kommt im November') !== false, true);
+pruefe('Meldeadresse bleibt unangetastet', get_option('kikripp_mail_an'), 'jennyp@kikripp.de');
+update_option('kikripp_rechtstext', 'von Hand geändert');
+update_option('kikripp_hinweisband', 'eigener Text');
+kikripp_umstellen();
+pruefe('zweiter Lauf überschreibt nichts', get_option('kikripp_rechtstext'), 'von Hand geändert');
+pruefe('eigenes Hinweisband bleibt', get_option('kikripp_hinweisband'), 'eigener Text');
+
 printf("\n== Ergebnis: %d Prüfungen, %d Fehler ==\n", $geprueft, $fehler);
 exit($fehler > 0 ? 1 : 0);

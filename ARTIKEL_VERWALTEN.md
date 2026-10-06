@@ -67,8 +67,8 @@ zeigt `F-002` gleich zwei Positionen. Sag mir in dem Fall Bescheid, ich sehe nac
 
 ## Preise ändern
 
-Spalte `Preis_netto` in der Artikelstammliste, immer **netto**. Den Bruttopreis rechnet der
-Katalog selbst und zeigt ihn groß an, netto steht klein darunter.
+Spalte `Preis_netto` in der Artikelstammliste. Seit Oktober 2026 ist das der **Endpreis**:
+die Lieferung ist steuerfrei (§ 4 Nr. 28 UStG), der Katalog schlägt nichts auf.
 
 Beim nächsten Import gilt der neue Preis für alle, die ab dann reservieren. **Schon
 bestehende Reservierungen behalten ihren alten Preis** — sonst würde sich ein Vorgang
@@ -135,9 +135,12 @@ Das machst du direkt in WordPress, nicht in der Excel:
 
 | Wann | Wo | Was |
 |---|---|---|
-| Ware ist abgeholt und bezahlt | Artikelkatalog → Reservierungen | auf **bezahlt** setzen — der Artikel verschwindet aus dem Katalog |
+| Nach dem Anruf: Käufer will | Artikelkatalog → Reservierungen | auf **bestellt** setzen — läuft dann nicht mehr ab |
+| Bestellung zum Unterschreiben | dieselbe Seite | **Bestellung erstellen** → Unternehmen oder Privatperson |
+| Zahlung ist eingegangen | dieselbe Seite | auf **bezahlt** setzen — der Artikel verschwindet aus dem Katalog |
+| Jemand nimmt nur einen Teil | dieselbe Seite | die übrigen Positionen einzeln **stornieren** |
 | Jemand springt ab | dieselbe Seite | **stornieren** — die Ware ist sofort wieder frei |
-| Jemand braucht länger | dieselbe Seite | **Frist verlängern** — sieben Tage obendrauf |
+| Jemand braucht länger | dieselbe Seite | **Frist verlängern** — 3 Werktage obendrauf |
 | Vorschauphase vorbei | Einstellungen | Haken *Vorschaubetrieb* raus, dann Testreservierungen löschen |
 | Hinweisband soll weg | Einstellungen | Feld *Hinweisband* leeren |
 

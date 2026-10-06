@@ -7,8 +7,11 @@
   var wurzel = document.getElementById('kikripp-katalog');
   if (!wurzel) { return; }
 
-  var ARTIKEL = [], UST = 0.19, HINWEIS = '', FRIST = 7, IST_ADMIN = false;
-  var RECHT = '', ABHOLUNG = '', ANBIETER = {};
+  var ARTIKEL = [], UST = 0.19, HINWEIS = '', FRIST = 3, IST_ADMIN = false;
+  var RECHT = '', ABHOLUNG = '', ANBIETER = {}, STEUER = '', ABLAUF = '';
+  var MINDEST = 0, BES_AB = 0, SCHLUSS = '', HEUTE = '';
+  var BES_ZEITEN = ['08:00', '08:30', '09:00', '09:30', '10:00', '10:30'];
+  var formularSeit = 0;
   var merk = {};                       // ArtNr -> gewünschte Stückzahl
 
   function eur(v) {
@@ -23,6 +26,27 @@
   // auch als Umbruch ankommen. Erst maskieren, dann umwandeln - nie umgekehrt.
   function absatz(s) { return sicher(s).replace(/\r?\n/g, '<br>'); }
   function el(id) { return document.getElementById(id); }
+  function brutto(p) { return p * (1 + UST); }
+
+  // Datumsrechnung immer in UTC und ab dem Serverdatum - die Uhr des Besuchers kann falsch gehen.
+  function tag(iso) { return new Date(iso + 'T12:00:00Z'); }
+  function iso(d) { return d.toISOString().slice(0, 10); }
+  var WOCHENTAG = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'];
+  function datumText(isoDatum) {
+    var d = tag(isoDatum);
+    return WOCHENTAG[d.getUTCDay()] + ', ' + ('0' + d.getUTCDate()).slice(-2) + '.' +
+           ('0' + (d.getUTCMonth() + 1)).slice(-2) + '.' + d.getUTCFullYear();
+  }
+  /** Alle Tage mit den gewünschten Wochentagen ab morgen bis zum Abholschluss. */
+  function tage(wochentage) {
+    var aus = [];
+    if (!HEUTE) { return aus; }
+    var d = tag(HEUTE), ende = SCHLUSS ? tag(SCHLUSS) : new Date(d.getTime() + 70 * 864e5);
+    for (d = new Date(d.getTime() + 864e5); d <= ende && aus.length < 40; d = new Date(d.getTime() + 864e5)) {
+      if (wochentage.indexOf(d.getUTCDay()) >= 0) { aus.push(iso(d)); }
+    }
+    return aus;
+  }
 
   function hole(pfad, optionen) {
     return fetch(W.basis + pfad, Object.assign({
@@ -76,9 +100,15 @@
       if (a.status === 401 || (a.daten && a.daten.gesperrt)) { zeigeSperre(''); return; }
       if (!a.daten || !a.daten.ok) { throw new Error('unerwartete Antwort'); }
       ARTIKEL = a.daten.artikel || [];
-      UST = a.daten.ust || 0.19;
+      UST = typeof a.daten.ust === 'number' ? a.daten.ust : 0.19;   // 0 = steuerfrei, nicht „fehlt“
+      STEUER = a.daten.steuer || '';
+      ABLAUF = a.daten.ablauf || '';
+      MINDEST = a.daten.mindestwert || 0;
+      BES_AB = a.daten.besichtigung_ab || 0;
+      SCHLUSS = a.daten.abholschluss || '';
+      HEUTE = a.daten.heute || iso(new Date());
       HINWEIS = a.daten.hinweis || '';
-      FRIST = a.daten.frist || 7;
+      FRIST = a.daten.frist || 3;
       IST_ADMIN = !!a.daten.admin;
       RECHT = a.daten.recht || '';
       ABHOLUNG = a.daten.abholung || '';
@@ -109,9 +139,11 @@
         '<div class="marke"><img src="' + sicher(W.signet) + '" alt=""><span class="wort">KIKRIPP</span></div>' +
         '<h2>Artikelkatalog aus der Betriebsauflösung</h2>' +
         '<p>' + (ANBIETER.firma ? 'Ein Angebot der ' + sicher(ANBIETER.firma) + ' · ' : '') +
-        'Abholung nach Terminvereinbarung · Preise inklusive ' + Math.round(UST * 100) + '&nbsp;% USt' +
+        'Abholung durch den Käufer · ' +
+        (UST > 0 ? 'Preise inklusive ' + Math.round(UST * 100) + '&nbsp;% USt' : 'Endpreise, umsatzsteuerfrei') +
         (IST_ADMIN ? ' · <a href="' + sicher(W.verwaltung) + '">Reservierungen verwalten</a>' : '') + '</p>' +
       '</div>' +
+      ablaufKasten() +
       '<div class="leiste"><div class="inner">' +
         '<div class="sum" id="k-merk"></div>' +
         '<button class="sek" id="k-leeren">Auswahl leeren</button>' +
@@ -130,7 +162,8 @@
       '<div class="raster" id="k-raster"></div>' +
       '<div id="k-formular"></div>' +
       ((RECHT || ANBIETER.firma) ? '<div class="recht">' + anbieterBlock() +
-        (RECHT ? '<h4>Rechtliche Hinweise</h4><p>' + sicher(RECHT) + '</p>' : '') +
+        (RECHT ? '<h4>Kaufbedingungen</h4>' + RECHT.split(/\n\s*\n/).map(function (t) {
+          return '<p>' + absatz(t.trim()) + '</p>'; }).join('') : '') +
         ((ABHOLUNG && ABHOLUNG !== ANBIETER.adresse)
           ? '<p>Abholung nach Terminvereinbarung: ' + sicher(ABHOLUNG) + '</p>' : '') +
         '</div>' : '');
@@ -143,6 +176,16 @@
     });
     el('k-anfragen').addEventListener('click', formular);
     leiste();
+  }
+
+  /* „So läuft es ab“: jede Zeile aus den Einstellungen wird ein Punkt. Auf dem Telefon
+     zugeklappt, damit die Artikel nicht erst nach einem Bildschirm Text beginnen. */
+  function ablaufKasten() {
+    var punkte = String(ABLAUF).split(/\r?\n/).map(function (t) { return t.trim(); }).filter(Boolean);
+    if (!punkte.length) { return ''; }
+    var offen = window.matchMedia && window.matchMedia('(min-width: 561px)').matches;
+    return '<details class="ablauf"' + (offen ? ' open' : '') + '><summary>So läuft es ab</summary><ul>' +
+      punkte.map(function (t) { return '<li>' + sicher(t) + '</li>'; }).join('') + '</ul></details>';
   }
 
   /* Anbieterkennzeichnung. Der Katalog liegt auf fremdem Speicherplatz — es muss
@@ -203,7 +246,6 @@
           ? a.frei + ' von ' + a.menge + ' ' + a.einheit + ' verfügbar'
           : a.menge + ' ' + a.einheit + ' verfügbar');
     var knapp = (a.reserviert > 0 && a.frei > 0) ? ' class="knapp"' : '';
-    var brutto = a.preis * (1 + UST);
     var vhb = a.basis === 'VHB' ? '<span class="vhb">VHB</span>' : '';
     var auswahl = frei
       ? '<div class="mengen">' +
@@ -223,11 +265,12 @@
         '<span' + knapp + '>' + mengeText + '</span>' +
         (a.masse ? '<span>' + sicher(a.masse) + '</span>' : '') +
         '<span>' + sicher(a.raum) + '</span>' +
-        '<span>' + sicher(a.versand) + '</span>' +
+        (BES_AB > 0 && a.preis >= BES_AB ? '<span class="bes">Besichtigung möglich</span>' : '') +
         (a.buendel ? '<span class="bnd">Sammlung ' + sicher(a.buendel) + '</span>' : '') +
       '</div>' +
-      '<div class="preis"><b>' + eur(brutto) + vhb + '</b>' +
-        '<small>inkl. USt · netto ' + eur(a.preis) + ' je ' + sicher(a.einheit) + '</small></div>' +
+      '<div class="preis"><b>' + eur(brutto(a.preis)) + vhb + '</b>' +
+        '<small>' + (UST > 0 ? 'inkl. USt · netto ' + eur(a.preis) : sicher(STEUER || 'Endpreis')) +
+        ' · je ' + sicher(a.einheit) + '</small></div>' +
       auswahl + '</div></div>';
   }
 
@@ -271,10 +314,15 @@
     var w = auswahl();
     var stueck = 0, netto = 0;
     w.forEach(function (p) { stueck += p.menge; netto += p.menge * p.a.preis; });
+    var fehlt = MINDEST > 0 ? MINDEST - brutto(netto) : 0;
     el('k-merk').innerHTML = stueck
-      ? stueck + ' Stück vorgemerkt · <b>' + eur(netto * (1 + UST)) + '</b> <span style="opacity:.8">inkl. USt</span>'
-      : 'Noch nichts vorgemerkt – Stückzahl eintragen und auf „reservieren“ klicken.';
-    el('k-anfragen').disabled = stueck === 0;
+      ? stueck + ' Stück vorgemerkt · <b>' + eur(brutto(netto)) + '</b>' +
+        (UST > 0 ? ' <span style="opacity:.8">inkl. USt</span>' : '') +
+        (fehlt > 0.004 ? '<br><span class="mindest">Mindestbestellwert ' + eur(MINDEST) +
+          ' – es fehlen noch ' + eur(fehlt) + '</span>' : '')
+      : 'Noch nichts vorgemerkt – Stückzahl eintragen und auf „reservieren“ klicken.' +
+        (MINDEST > 0 ? ' Mindestbestellwert ' + eur(MINDEST) + '.' : '');
+    el('k-anfragen').disabled = stueck === 0 || fehlt > 0.004;
     // Ohne Auswahl braucht die Leiste auf dem Telefon keine Knoepfe (siehe katalog.css).
     var l = wurzel.querySelector('.leiste');
     if (l) { l.className = stueck ? 'leiste' : 'leiste leer'; }
@@ -282,41 +330,72 @@
 
   // ------------------------------------------------------------------ Formular
 
+  function auswahlFeld(id, liste, leer) {
+    return '<select id="' + id + '"><option value="">' + sicher(leer) + '</option>' +
+      liste.map(function (w) { return '<option value="' + sicher(w[0]) + '">' + sicher(w[1]) + '</option>'; }).join('') +
+      '</select>';
+  }
+
   function formular() {
     var w = auswahl();
     if (!w.length) { return; }
-    var netto = 0, stueck = 0;
+    var netto = 0, stueck = 0, teuerster = 0;
     var zeilen = w.map(function (p) {
-      netto += p.menge * p.a.preis; stueck += p.menge;
+      netto += p.menge * p.a.preis; stueck += p.menge; teuerster = Math.max(teuerster, p.a.preis);
       return '<div><span>' + p.menge + ' × ' + sicher(p.a.nr) + ' ' + sicher(p.a.titel) + '</span>' +
-             '<span>' + eur(p.menge * p.a.preis * (1 + UST)) + '</span></div>';
+             '<span>' + eur(brutto(p.menge * p.a.preis)) + '</span></div>';
     }).join('');
+    var mitBesichtigung = BES_AB > 0 && teuerster >= BES_AB;
+    var donnerstage = tage([4]).map(function (d) { return [d, datumText(d)]; });
+    var abholtage = tage([1, 2]).map(function (d) { return [d, datumText(d)]; });
 
     el('k-formular').innerHTML =
       '<div class="dlg" id="k-dlg">' +
       '<h3>Reservierung abschicken</h3>' +
-      '<p class="s">Wir melden uns schnellstmöglich bei Ihnen, um einen Abholtermin abzustimmen. ' +
-      'Die Artikel bleiben ' + FRIST + ' Tage für Sie vorgemerkt. Bezahlt wird bei Abholung bzw. per Rechnung. ' +
-      'Mit der Reservierung kommt noch kein Kaufvertrag zustande – dieser wird bei der Abholung vor Ort ' +
-      'geschlossen. Sie können die Reservierung jederzeit formlos zurücknehmen.</p>' +
+      '<p class="s">Die Artikel bleiben ' + FRIST + ' Werktage für Sie reserviert. Nach Eingang Ihrer Reservierung ' +
+      'rufen wir Sie an. Eine Reservierung ist noch kein Kaufvertrag – dieser kommt mit Ihrer unterschriebenen ' +
+      'Bestellung zustande. Sie können die Reservierung jederzeit formlos zurücknehmen.</p>' +
       '<div class="pos">' + zeilen +
         '<div style="border-top:1px solid #dcdcdc;margin-top:8px;padding-top:8px">' +
-        '<b>' + stueck + ' Stück gesamt</b><b>' + eur(netto * (1 + UST)) + ' inkl. USt</b></div></div>' +
-      '<div class="feld"><label for="k-name">Name / Firma *</label><input id="k-name" required></div>' +
-      '<div class="feld"><label for="k-mail">E-Mail *</label><input id="k-mail" type="email" required></div>' +
-      '<div class="feld"><label for="k-tel">Telefon *</label><input id="k-tel" type="tel" required>' +
-      '<small class="hint">Wir melden uns telefonisch – bitte unbedingt angeben.</small></div>' +
+        '<b>' + stueck + ' Stück gesamt</b><b>' + eur(brutto(netto)) + (UST > 0 ? ' inkl. USt' : '') + '</b></div></div>' +
+      '<div class="feld"><label for="k-name">Name *</label><input id="k-name" autocomplete="name" required></div>' +
+      '<div class="feld"><label for="k-firma">Firma / Einrichtung</label><input id="k-firma" autocomplete="organization">' +
+      '<small class="hint">Leer lassen, wenn Sie als Privatperson kaufen.</small></div>' +
+      '<div class="feld"><label for="k-strasse">Straße und Hausnummer *</label><input id="k-strasse" autocomplete="street-address" required></div>' +
+      '<div class="feld zwei"><div><label for="k-plz">PLZ *</label><input id="k-plz" inputmode="numeric" autocomplete="postal-code" maxlength="5" required></div>' +
+      '<div><label for="k-ort">Ort *</label><input id="k-ort" autocomplete="address-level2" required></div></div>' +
+      '<div class="feld"><label for="k-mail">E-Mail *</label><input id="k-mail" type="email" autocomplete="email" required></div>' +
+      '<div class="feld"><label for="k-tel">Telefon *</label><input id="k-tel" type="tel" autocomplete="tel" required>' +
+      '<small class="hint">Wir rufen Sie nach der Reservierung an – bitte unbedingt angeben.</small></div>' +
+      (mitBesichtigung
+        ? '<div class="feld"><label class="chk2"><input type="checkbox" id="k-bes"> Ich möchte die Artikel vorab besichtigen ' +
+          '(donnerstags 08:00–11:00 Uhr)</label>' +
+          '<div class="zwei" id="k-bes-wahl" hidden><div>' + auswahlFeld('k-bes-tag', donnerstage, 'Donnerstag wählen') + '</div>' +
+          '<div>' + auswahlFeld('k-bes-zeit', BES_ZEITEN.map(function (z) { return [z, z + ' Uhr']; }), 'Uhrzeit wählen') + '</div></div></div>'
+        : '') +
+      '<div class="feld"><label for="k-abhol">Gewünschter Abholtermin *</label>' +
+        auswahlFeld('k-abhol', abholtage, 'Montag oder Dienstag wählen') +
+        '<small class="hint">Abholung montags und dienstags 08:00–11:00 Uhr' +
+        (SCHLUSS ? ', spätestens ' + datumText(SCHLUSS).slice(4) : '') + '. Abgeholt wird nach Zahlungseingang.</small>' +
+        '<label class="chk2"><input type="checkbox" id="k-demontage"> Demontage nötig – Termin Freitagnachmittag ' +
+        'oder Samstagvormittag nach Vereinbarung</label></div>' +
       '<div class="feld"><label for="k-text">Nachricht (optional)</label><textarea id="k-text" rows="2"></textarea></div>' +
-      '<p class="datenschutz">Ihre Angaben werden ausschließlich zur Abwicklung dieser Reservierung ' +
-      'verwendet. Sie werden nicht in dieser Website gespeichert, sondern gehen per E-Mail an ' +
-      (ANBIETER.firma ? sicher(ANBIETER.firma) : 'den Anbieter') + ' und werden nach Abschluss des ' +
-      'Verkaufs gelöscht. <strong>Sie erhalten keine Bestätigungsmail</strong> – bitte machen Sie ' +
-      'im nächsten Schritt ein Bildschirmfoto.</p>' +
+      // Unsichtbares Feld gegen Formular-Roboter. Menschen sehen es nicht und lassen es leer.
+      '<div class="hp" aria-hidden="true"><label for="k-webseite">Webseite</label>' +
+      '<input id="k-webseite" tabindex="-1" autocomplete="off"></div>' +
+      '<p class="datenschutz">Ihre Angaben verwenden wir ausschließlich zur Abwicklung dieser Reservierung und für ' +
+      'Bestellung und Rechnung. Sie werden auf dieser Website gespeichert und nach Abschluss des Verkaufs gelöscht; ' +
+      'Rechnungsdaten bewahren wir so lange auf, wie es das Gesetz verlangt. ' +
+      '<strong>Sie erhalten keine Bestätigungsmail</strong> – bitte machen Sie im nächsten Schritt ein Bildschirmfoto.</p>' +
       '<div id="k-meldung"></div>' +
       '<button id="k-senden">Reservierung verbindlich abschicken</button> ' +
       '<button class="sek" style="color:#1a1a1a;border-color:#dcdcdc" id="k-abbrechen">Abbrechen</button>' +
       '</div>';
 
+    formularSeit = Date.now();
+    if (el('k-bes')) {
+      el('k-bes').addEventListener('change', function () { el('k-bes-wahl').hidden = !this.checked; });
+    }
     el('k-abbrechen').addEventListener('click', function () { el('k-formular').innerHTML = ''; });
     el('k-senden').addEventListener('click', senden);
     el('k-dlg').scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -324,21 +403,16 @@
 
   var letzteAuswahl = [];
 
-  function fristDatum(tage) {
-    var d = new Date();
-    d.setDate(d.getDate() + (parseInt(tage, 10) || 7));
-    return d.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' });
-  }
 
   function beleg_positionen() {
     var netto = 0, stueck = 0;
     var zeilen = letzteAuswahl.map(function (p) {
       netto += p.menge * p.preis; stueck += p.menge;
       return '<div class="zeile"><span>' + p.menge + ' × ' + sicher(p.nr) + ' ' +
-             sicher(p.titel) + '</span><b>' + eur(p.menge * p.preis * (1 + UST)) + '</b></div>';
+             sicher(p.titel) + '</span><b>' + eur(brutto(p.menge * p.preis)) + '</b></div>';
     }).join('');
     return zeilen + '<div class="zeile summe"><span>' + stueck + ' Stück gesamt</span><b>' +
-           eur(netto * (1 + UST)) + ' inkl. USt</b></div>';
+           eur(brutto(netto)) + (UST > 0 ? ' inkl. USt' : '') + '</b></div>';
   }
 
   function senden() {
@@ -346,19 +420,34 @@
     letzteAuswahl = auswahl().map(function (p) {
       return { nr: p.a.nr, titel: p.a.titel, preis: p.a.preis, menge: p.menge };
     });
+    function wert(id) { return el(id) ? el(id).value.trim() : ''; }
+    var besichtigung = !!(el('k-bes') && el('k-bes').checked);
     var nutzlast = {
-      name: el('k-name').value.trim(),
-      email: el('k-mail').value.trim(),
-      telefon: el('k-tel').value.trim(),
-      nachricht: el('k-text').value.trim(),
+      name: wert('k-name'), firma: wert('k-firma'), strasse: wert('k-strasse'),
+      plz: wert('k-plz'), ort: wert('k-ort'),
+      email: wert('k-mail'), telefon: wert('k-tel'), nachricht: wert('k-text'),
+      besichtigung: besichtigung, besichtigung_tag: wert('k-bes-tag'), besichtigung_zeit: wert('k-bes-zeit'),
+      abholwunsch: wert('k-abhol'), demontage: !!(el('k-demontage') && el('k-demontage').checked),
+      webseite: wert('k-webseite'), dauer: Date.now() - formularSeit,
       artikel: merk
     };
-    if (!nutzlast.name) { meldung.innerHTML = '<div class="meldung schlecht">Bitte geben Sie Ihren Namen oder Ihre Firma an.</div>'; return; }
-    if (!nutzlast.email) { meldung.innerHTML = '<div class="meldung schlecht">Bitte geben Sie eine E-Mail-Adresse an.</div>'; return; }
+    function fehler(t) { meldung.innerHTML = '<div class="meldung schlecht">' + t + '</div>'; }
+    if (!nutzlast.name) { fehler('Bitte geben Sie Ihren Namen an.'); return; }
+    if (!nutzlast.strasse || !nutzlast.ort || !/^\d{4,5}$/.test(nutzlast.plz)) {
+      fehler('Bitte geben Sie Ihre vollständige Anschrift an (Straße, Postleitzahl, Ort) – sie wird für die Rechnung gebraucht.');
+      return;
+    }
+    if (!nutzlast.email) { fehler('Bitte geben Sie eine E-Mail-Adresse an.'); return; }
     if (nutzlast.telefon.replace(/\D/g, '').length < 6) {
-      meldung.innerHTML = '<div class="meldung schlecht">Bitte geben Sie eine Telefonnummer an, ' +
-        'unter der wir Sie erreichen. Sie erhalten keine Bestätigungsmail – ohne Telefonnummer ' +
-        'können wir uns nicht bei Ihnen melden.</div>';
+      fehler('Bitte geben Sie eine Telefonnummer an, unter der wir Sie erreichen. Wir rufen Sie nach der ' +
+        'Reservierung an.');
+      return;
+    }
+    if (besichtigung && (!nutzlast.besichtigung_tag || !nutzlast.besichtigung_zeit)) {
+      fehler('Bitte wählen Sie für die Besichtigung einen Donnerstag und eine Uhrzeit.'); return;
+    }
+    if (!nutzlast.abholwunsch && !nutzlast.demontage) {
+      fehler('Bitte wählen Sie einen Wunschtermin für die Abholung oder kreuzen Sie an, dass eine Demontage nötig ist.');
       return;
     }
 
@@ -372,11 +461,16 @@
           var k = a.daten.kontakt || {};
           el('k-formular').innerHTML =
             '<div class="meldung gut"><strong>Vielen Dank – Ihre Reservierung ist eingegangen.</strong><br>' +
-            'Wir melden uns schnellstmöglich bei Ihnen.' +
+            'Wir rufen Sie in den nächsten Tagen an.' +
             '<div class="beleg">' +
               '<div class="zeile"><span>Vorgangsnummer</span><b>' + a.daten.vorgang + '</b></div>' +
-              '<div class="zeile"><span>Reserviert bis</span><b>' + fristDatum(a.daten.frist || FRIST) + '</b></div>' +
+              (a.daten.bis ? '<div class="zeile"><span>Reserviert bis</span><b>' + datumText(a.daten.bis) + '</b></div>' : '') +
               beleg_positionen() +
+              (nutzlast.besichtigung ? '<div class="zeile"><span>Besichtigung gewünscht</span><b>' +
+                datumText(nutzlast.besichtigung_tag) + ', ' + sicher(nutzlast.besichtigung_zeit) + ' Uhr</b></div>' : '') +
+              '<div class="zeile"><span>Abholung gewünscht</span><b>' +
+                (nutzlast.abholwunsch ? datumText(nutzlast.abholwunsch) : '') +
+                (nutzlast.demontage ? (nutzlast.abholwunsch ? ' · ' : '') + 'Demontage nach Vereinbarung' : '') + '</b></div>' +
               (k.email || k.telefon
                 ? '<div class="zeile"><span>Wir erreichen Sie unter</span><b>' +
                   [k.email, k.telefon].filter(Boolean).map(sicher).join(' · ') + '</b></div>'

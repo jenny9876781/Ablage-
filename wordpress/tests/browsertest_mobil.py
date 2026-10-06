@@ -64,6 +64,20 @@ with sync_playwright() as p:
                eb is not None and eb["x"] >= 0 and eb["x"] + eb["width"] <= breite[1] + 1, str(eb))
 
     print("\n4) Merkleiste verdeckt den Inhalt nicht dauerhaft")
+    # Einen Artikel nehmen, bei dem zwei Stück den Mindestbestellwert von 50 € erreichen –
+    # sonst bleibt „Reservierung abschicken“ in Schritt 5 gesperrt.
+    import json, os
+    with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "../../ausgabe/katalog_import.json"),
+              encoding="utf-8") as f:
+        preise = {a["nr"]: a["preis"] for a in json.load(f)}
+    felder = seite.locator(".karte input[data-menge]")
+    for i in range(felder.count()):
+        nr = felder.nth(i).get_attribute("data-menge")
+        if int(felder.nth(i).get_attribute("max") or 0) >= 2 and preise.get(nr, 0) >= 25:
+            feld = felder.nth(i)
+            knopf = seite.locator(f'button[data-res="{nr}"]')
+            break
+    feld.scroll_into_view_if_needed()
     feld.fill("2")
     knopf.click()
     seite.wait_for_timeout(300)

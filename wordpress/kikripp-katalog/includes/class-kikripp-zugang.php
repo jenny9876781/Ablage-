@@ -92,8 +92,14 @@ class Kikripp_Zugang {
         unset($_COOKIE[self::KEKS]);
     }
 
-    /** Angemeldete Redakteure kommen immer rein, alle anderen über den Keks. */
+    /** Ab Fassung 1.2.0 ist der Katalog frei zugänglich; das Passwort lässt sich wieder einschalten. */
+    public static function passwortschutz() {
+        return (int) get_option('kikripp_passwortschutz', 1) === 1;
+    }
+
+    /** Angemeldete Redakteure kommen immer rein, alle anderen über den Keks – oder ohne Schutz alle. */
     public static function hat_zugang() {
+        if (!self::passwortschutz()) { return true; }
         if (current_user_can('edit_posts')) { return true; }
         $keks = isset($_COOKIE[self::KEKS]) ? (string) $_COOKIE[self::KEKS] : '';
         return $keks !== '' && hash_equals(self::marke(), $keks);

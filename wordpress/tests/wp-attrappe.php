@@ -186,3 +186,17 @@ if (!function_exists('add_submenu_page')) {
 }
 function esc_attr($s) { return htmlspecialchars((string) $s, ENT_QUOTES); }
 function esc_textarea($s) { return htmlspecialchars((string) $s, ENT_QUOTES); }
+// Fuer die Verwaltungsseite ab Fassung 1.2.0 (Abholtermin-Formular, Aktionslinks).
+if (!function_exists('add_query_arg')) {
+    function add_query_arg($args, $url = '') {
+        $trenner = strpos((string) $url, '?') === false ? '?' : '&';
+        return $url . $trenner . http_build_query(array_filter((array) $args, function ($w) { return $w !== null; }));
+    }
+}
+if (!function_exists('wp_nonce_field')) {
+    function wp_nonce_field($aktion = -1, $name = '_wpnonce', $referer = true, $ausgeben = true) {
+        $feld = '<input type="hidden" name="' . $name . '" value="test">';
+        if ($ausgeben) { echo $feld; }
+        return $feld;
+    }
+}

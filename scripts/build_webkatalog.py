@@ -163,7 +163,7 @@ RUMPF = """
 <header><div class="wrap">
   <div class="marke">__SIGNET__<span class="wort">KIKRIPP</span></div>
   <h1>Artikelkatalog aus der Betriebsauflösung</h1>
-  <p>Abholung nach Terminvereinbarung · Preise netto zzgl. __USTP__&nbsp;% USt · rot markiert = Markenware, die Marke steht am Bild</p>
+  <p>Abholung durch den Käufer · Endpreise, umsatzsteuerfrei (§ 4 Nr. 28 UStG) · rot markiert = Markenware, die Marke steht am Bild</p>
 </div></header>
 
 <div class="filter"><div class="wrap">
@@ -228,7 +228,7 @@ function render(){
     (!k || a.kat === k) && (!r || a.raum === r) &&
     (!nur || a.status === 'verfügbar') && (!nurD || !!a.marke));
   const wert = liste.reduce((s,a)=>s+a.preis*a.menge,0);
-  $('zaehler').innerHTML = `<b>${liste.length}</b> von ${ARTIKEL.length} Positionen · Listenwert ${eur(wert)} netto`;
+  $('zaehler').innerHTML = `<b>${liste.length}</b> von ${ARTIKEL.length} Positionen · Listenwert ${eur(wert)}`;
   $('raster').innerHTML = liste.length ? liste.map(karte).join('')
     : `<div class="leer">__SIGNET__<div>Keine Artikel gefunden – bitte Filter anpassen.</div></div>`;
 }
@@ -248,16 +248,16 @@ function karte(a){
     <div class="txt"><h3>${a.titel}</h3><p class="b">${br(a.beschr)}</p>
       ${a.hinweis ? `<p class="hw">${br(a.hinweis)}</p>` : ''}
       <div class="meta"><span>${a.zustand}</span><span>${a.menge} ${a.einheit}</span>
-        ${masse}<span>${a.raum}</span><span>${a.versand}</span>${bnd}</div>
+        ${masse}<span>${a.raum}</span>${bnd}</div>
       <div class="preis"><b>${eur(a.preis)}</b>${a.basis==='VHB'?'<span class="vhb">VHB</span>':''}
-        <small>netto je ${a.einheit} · ${eur(a.preis*(1+UST))} brutto</small></div>
+        <small>Endpreis je ${a.einheit} · umsatzsteuerfrei</small></div>
       ${kauf}</div></div>`;
 }
 function leiste(){
   const keys=Object.keys(merk);
   const sum=keys.reduce((s,nr)=>s+merk[nr]*ARTIKEL.find(a=>a.nr===nr).preis,0);
   $('merk').innerHTML = keys.length
-    ? `${keys.length} Position(en) vorgemerkt · <b>${eur(sum)}</b> netto &nbsp;(${eur(sum*(1+UST))} brutto)`
+    ? `${keys.length} Position(en) vorgemerkt · <b>${eur(sum)}</b>`
     : 'Noch nichts vorgemerkt – tragen Sie bei den gewünschten Artikeln eine Menge ein.';
 }
 document.addEventListener('input', e => {
@@ -286,7 +286,7 @@ function start(){
       const a=ARTIKEL.find(x=>x.nr===nr);
       return `<div><span>${merk[nr]} × ${a.nr} ${a.titel}</span><span>${eur(merk[nr]*a.preis)}</span></div>`;
     }).join('') + `<div style="border-top:1px solid var(--linie);margin-top:8px;padding-top:8px">
-      <b>Summe netto</b><b>${eur(sum)}</b></div>`;
+      <b>Summe</b><b>${eur(sum)}</b></div>`;
     $('dlg').showModal();
   });
   render(); leiste();

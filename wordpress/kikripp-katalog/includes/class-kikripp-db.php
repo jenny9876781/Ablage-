@@ -9,7 +9,7 @@ if (!defined('ABSPATH')) { exit; }
  */
 class Kikripp_DB {
 
-    const SCHEMA_VERSION = 3;
+    const SCHEMA_VERSION = 4;
 
     public static function t_artikel()  { global $wpdb; return $wpdb->prefix . 'kikripp_artikel'; }
     public static function t_vorgang()  { global $wpdb; return $wpdb->prefix . 'kikripp_vorgang'; }
@@ -39,6 +39,14 @@ class Kikripp_DB {
             email VARCHAR(190) NOT NULL DEFAULT '',
             telefon VARCHAR(80) NOT NULL DEFAULT '',
             nachricht TEXT NULL,
+            firma VARCHAR(190) NOT NULL DEFAULT '',
+            strasse VARCHAR(190) NOT NULL DEFAULT '',
+            plz VARCHAR(10) NOT NULL DEFAULT '',
+            ort VARCHAR(120) NOT NULL DEFAULT '',
+            besichtigung VARCHAR(40) NOT NULL DEFAULT '',
+            abholwunsch VARCHAR(20) NOT NULL DEFAULT '',
+            demontage TINYINT(1) NOT NULL DEFAULT 0,
+            abholtermin VARCHAR(80) NOT NULL DEFAULT '',
             erstellt DATETIME NOT NULL,
             ablauf DATETIME NOT NULL,
             status VARCHAR(20) NOT NULL DEFAULT 'offen',
@@ -85,8 +93,10 @@ class Kikripp_DB {
         }
         $sql = "SELECT p.artnr,
                        SUM(CASE WHEN p.status = 'bezahlt' THEN p.menge ELSE 0 END) AS bezahlt,
-                       SUM(CASE WHEN p.status = 'reserviert' AND v.status = 'offen'
-                                     AND v.ablauf > %s THEN p.menge ELSE 0 END) AS reserviert
+                       SUM(CASE WHEN p.status = 'reserviert'
+                                     AND ((v.status = 'offen' AND v.ablauf > %s)
+                                          OR v.status = 'bestellt')
+                                THEN p.menge ELSE 0 END) AS reserviert
                 FROM $p p INNER JOIN $v v ON v.id = p.vorgang_id
                 WHERE 1=1 $wo
                 GROUP BY p.artnr";
@@ -153,9 +163,8 @@ class Kikripp_DB {
         if (empty($wunsch)) {
             return new WP_Error('leer', 'Es wurden keine Artikel ausgewählt.');
         }
-        $frist = max(1, (int) get_option('kikripp_frist_tage', 7));
         $jetzt = current_time('mysql');
-        $ablauf = gmdate('Y-m-d H:i:s', strtotime($jetzt) + $frist * DAY_IN_SECONDS);
+        $ablauf = self::ablauf_nach_werktagen($jetzt, self::frist_werktage());
 
         $wpdb->query('START TRANSACTION');
         try {
@@ -197,6 +206,13 @@ class Kikripp_DB {
                 'email'        => $kontakt['email'],
                 'telefon'      => $kontakt['telefon'],
                 'nachricht'    => $kontakt['nachricht'],
+                'firma'        => (string) ($kontakt['firma'] ?? ''),
+                'strasse'      => (string) ($kontakt['strasse'] ?? ''),
+                'plz'          => (string) ($kontakt['plz'] ?? ''),
+                'ort'          => (string) ($kontakt['ort'] ?? ''),
+                'besichtigung' => (string) ($kontakt['besichtigung'] ?? ''),
+                'abholwunsch'  => (string) ($kontakt['abholwunsch'] ?? ''),
+                'demontage'    => !empty($kontakt['demontage']) ? 1 : 0,
                 'erstellt'     => $jetzt,
                 'ablauf'       => $ablauf,
                 'status'       => 'offen',
@@ -282,6 +298,7 @@ class Kikripp_DB {
         global $wpdb;
         return (bool) $wpdb->update(self::t_vorgang(), [
             'name' => '', 'email' => '', 'telefon' => '', 'nachricht' => '',
+            'firma' => '', 'strasse' => '', 'plz' => '', 'ort' => '',
             'kontakt_weg' => 1,
         ], ['id' => (int) $id]);
     }
@@ -293,10 +310,18 @@ class Kikripp_DB {
                                 WHERE kontakt_weg = 0 AND name <> \'\'');
     }
 
-    /** Vorgang auf bezahlt/storniert setzen oder die Frist verlängern. */
+    /**
+     * Vorgang auf bestellt/bezahlt/storniert setzen.
+     *
+     * „bestellt“ heißt: der Käufer hat nach dem Anruf zugesagt, die Bestellung ist
+     * unterwegs. Ab dann läuft die Reservierung nicht mehr ab – zwischen Anruf,
+     * Unterschrift, Rechnung und Zahlungseingang vergehen oft mehr als drei Werktage.
+     * Einzeln stornierte Positionen bleiben storniert, was auch immer mit dem Vorgang
+     * danach geschieht.
+     */
     public static function vorgang_status($id, $status) {
         global $wpdb;
-        if (!in_array($status, ['offen', 'bezahlt', 'storniert'], true)) { return false; }
+        if (!in_array($status, ['offen', 'bestellt', 'bezahlt', 'storniert'], true)) { return false; }
         $wpdb->update(self::t_vorgang(), ['status' => $status], ['id' => (int) $id]);
         $pos_status = $status === 'bezahlt' ? 'bezahlt' : ($status === 'storniert' ? 'storniert' : 'reserviert');
         $felder = ['status' => $pos_status];
@@ -307,14 +332,67 @@ class Kikripp_DB {
         } else {
             $felder['bezahlt_am'] = null;
         }
-        $wpdb->update(self::t_position(), $felder, ['vorgang_id' => (int) $id]);
+        // Ohne NULL über prepare(): das würde zu '' und ist in MySQL kein gültiges Datum.
+        if ($felder['bezahlt_am'] === null) {
+            $wpdb->query($wpdb->prepare(
+                'UPDATE ' . self::t_position() . " SET status = %s, bezahlt_am = NULL
+                  WHERE vorgang_id = %d AND status <> 'storniert'", $felder['status'], (int) $id));
+        } else {
+            $wpdb->query($wpdb->prepare(
+                'UPDATE ' . self::t_position() . " SET status = %s, bezahlt_am = %s
+                  WHERE vorgang_id = %d AND status <> 'storniert'",
+                $felder['status'], $felder['bezahlt_am'], (int) $id));
+        }
         return true;
+    }
+
+    /**
+     * Eine einzelne Position stornieren – für Teilabholungen. Wer von zehn reservierten
+     * Stühlen nur sechs nimmt, bekommt die übrigen vier zurück in den Katalog.
+     * Sind danach alle Positionen storniert, wird der ganze Vorgang storniert.
+     */
+    public static function position_stornieren($vorgang_id, $position_id) {
+        global $wpdb;
+        $wpdb->update(self::t_position(), ['status' => 'storniert', 'bezahlt_am' => null],
+            ['id' => (int) $position_id, 'vorgang_id' => (int) $vorgang_id]);
+        $rest = (int) $wpdb->get_var($wpdb->prepare(
+            'SELECT COUNT(*) FROM ' . self::t_position() . " WHERE vorgang_id = %d AND status <> 'storniert'",
+            (int) $vorgang_id));
+        if ($rest === 0) {
+            $wpdb->update(self::t_vorgang(), ['status' => 'storniert'], ['id' => (int) $vorgang_id]);
+        }
+        return $rest;
+    }
+
+    /** Vereinbarten Abholtermin am Vorgang vermerken (freier Text, z. B. „Di 13.10., 9 Uhr“). */
+    public static function abholtermin_setzen($id, $termin) {
+        global $wpdb;
+        return $wpdb->update(self::t_vorgang(), ['abholtermin' => (string) $termin], ['id' => (int) $id]);
+    }
+
+    public static function frist_werktage() {
+        return max(1, (int) get_option('kikripp_frist_werktage', 3));
+    }
+
+    /**
+     * Ende der Reservierung: n Werktage (Montag bis Freitag) nach dem Eingang, jeweils
+     * bis zum Ende des letzten Tages. Eingang Freitag 15 Uhr, drei Werktage → Mittwoch 23:59.
+     * Feiertage zählen mit; das sind im Verkaufszeitraum Oktober bis Dezember in
+     * Baden-Württemberg nur Allerheiligen, und der fällt 2026 auf einen Sonntag.
+     */
+    public static function ablauf_nach_werktagen($start, $werktage) {
+        $t = strtotime(substr((string) $start, 0, 10) . ' 12:00:00 UTC');
+        $gezaehlt = 0;
+        while ($gezaehlt < max(1, (int) $werktage)) {
+            $t += DAY_IN_SECONDS;
+            if ((int) gmdate('N', $t) <= 5) { $gezaehlt++; }
+        }
+        return gmdate('Y-m-d', $t) . ' 23:59:59';
     }
 
     public static function vorgang_verlaengern($id) {
         global $wpdb;
-        $frist = max(1, (int) get_option('kikripp_frist_tage', 7));
-        $neu = gmdate('Y-m-d H:i:s', strtotime(current_time('mysql')) + $frist * DAY_IN_SECONDS);
+        $neu = self::ablauf_nach_werktagen(current_time('mysql'), self::frist_werktage());
         return (bool) $wpdb->update(self::t_vorgang(),
             ['ablauf' => $neu, 'status' => 'offen'], ['id' => (int) $id]);
     }

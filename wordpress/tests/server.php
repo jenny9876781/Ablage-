@@ -34,6 +34,7 @@ function plugin_dir_url($f) { return '/'; }
 define('KIKRIPP_VERSION', 'test');
 define('KIKRIPP_URL', '/');
 $basis = __DIR__ . '/../kikripp-katalog/';
+require $basis . 'includes/kikripp-vorgaben.php';
 require $basis . 'includes/class-kikripp-db.php';
 require $basis . 'includes/class-kikripp-zugang.php';
 require $basis . 'includes/class-kikripp-mail.php';
@@ -53,21 +54,21 @@ if (file_exists($zustand)) {
     $GLOBALS['optionen'] = json_decode(file_get_contents($zustand), true) ?: [];
 }
 if (empty($GLOBALS['optionen'])) {
-    $GLOBALS['optionen'] = [
+    // Stand wie auf kikripp.de nach der Umstellung auf 1.2.0: frei zugänglich, keine USt,
+    // 3 Werktage. Mit KIK_TEST_SCHUTZ=1 läuft der Server mit Passwortschutz wie früher.
+    $GLOBALS['optionen'] = array_merge(kikripp_vorgaben_120(), [
         'kikripp_passwort_hash' => wp_hash_password(getenv('KIK_TEST_PW') ?: 'test-passwort'),
+        'kikripp_passwortschutz' => getenv('KIK_TEST_SCHUTZ') ? 1 : 0,
         'kikripp_zugang_version' => 1,
         'kikripp_mail_an' => 'saldi4kids@outlook.com',
-        'kikripp_hinweisband' => 'Vorschau – Artikel und Preise sind noch nicht vollständig.',
-        'kikripp_frist_tage' => 7,
+        'kikripp_hinweisband' => 'Ein Großteil unseres Spielzeugs kommt im November dazu – schauen Sie gern wieder vorbei. Der Katalog wird wöchentlich aktualisiert.',
         'kikripp_vorschau' => 1,
-        'kikripp_ust_prozent' => 19,
         'kikripp_firma' => 'Kikripp GmbH',
         'kikripp_telefon' => '07725 5179702',
         'kikripp_impressum_url' => 'https://www.kikripp.de/impressum/',
         'kikripp_datenschutz_url' => 'https://www.kikripp.de/datenschutz/',
         'kikripp_abholadresse' => 'Kikripp GmbH, Hermann-Schwer-Str. 1, 78048 Villingen-Schwenningen',
-        'kikripp_rechtstext' => 'Alle Artikel stammen aus der Auflösung unseres Kindergartens und sind gebraucht. Sie werden verkauft wie besichtigt; Abbildungen zeigen den tatsächlichen Zustand. Preise verstehen sich inklusive der gesetzlichen Umsatzsteuer. Eine Reservierung ist noch kein Kaufvertrag – dieser kommt erst bei der Abholung vor Ort zustande, ein Widerrufsrecht besteht daher nicht. Gegenüber Unternehmern ist die Gewährleistung ausgeschlossen; gegenüber Verbrauchern verjähren Ansprüche wegen Mängeln bei gebrauchten Sachen nach einem Jahr.',
-    ];
+    ]);
     file_put_contents($zustand, json_encode($GLOBALS['optionen']));
 }
 

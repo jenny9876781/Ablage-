@@ -41,36 +41,12 @@ with sync_playwright() as p:
     seite.on("console", lambda m: konsole.append(f"{m.type}: {m.text}"))
     seite.on("pageerror", lambda e: konsole.append(f"pageerror: {e}"))
 
-    print("\n0) Zugang über das Passwort im Link")
-    seite.goto(BASIS + "?kik=falsch", wait_until="networkidle")
-    pruefe("falscher Link öffnet nichts", seite.locator("#k-pw").count() == 1)
-    pruefe("auch dort ist das Passwort weg", "kik=" not in seite.url, f"({seite.url})")
-
-    seite.goto(BASIS + "?kik=" + PW, wait_until="networkidle")
-    seite.wait_for_selector(".karte", timeout=20000)
-    pruefe("Link öffnet den Katalog direkt", seite.locator(".karte").count() > 50)
-    pruefe("Passwort steht nicht mehr in der Adresse", "kik=" not in seite.url, f"({seite.url})")
-    pruefe("keine Sperrseite", seite.locator("#k-pw").count() == 0)
-    s.clear_cookies()
-
-    print("\n1) Anmeldung")
+    print("\n0) Katalog ohne Passwort (ab Fassung 1.2.0)")
     seite.goto(BASIS, wait_until="networkidle")
-    pruefe("Sperrseite sichtbar", seite.locator("#k-pw").is_visible())
-    pruefe("Katalog noch nicht geladen", seite.locator(".karte").count() == 0)
-    seite.screenshot(path="/tmp/kikweb/t01-sperre.png")
-
-    seite.fill("#k-pw", "falsches-passwort")
-    seite.click("#k-auf")
-    seite.wait_for_timeout(900)
-    pruefe("Fehlermeldung bei falschem Passwort",
-           "falsch" in seite.inner_text("#k-fehler").lower(),
-           f"({seite.inner_text('#k-fehler')!r})")
-    pruefe("kein Katalog trotz Fehlversuch", seite.locator(".karte").count() == 0)
-
-    seite.fill("#k-pw", PW)
-    seite.click("#k-auf")
     seite.wait_for_selector(".karte", timeout=20000)
     seite.wait_for_timeout(800)
+    pruefe("keine Sperrseite", seite.locator("#k-pw").count() == 0)
+    pruefe("Katalog lädt direkt", seite.locator(".karte").count() > 50)
 
     print("\n2) Katalogaufbau")
     karten = seite.locator(".karte").count()
@@ -104,14 +80,25 @@ with sync_playwright() as p:
     pruefe("Zustand beschriftet", "Zustand:" in erste, f"({erste[:160]!r})")
     pruefe("kein Listenwert", "Listenwert" not in alles)
     pruefe("keine Rot-Erklaerung", "rot markiert" not in alles.lower())
-    pruefe("Brutto prominent, netto klein", "inkl. USt · netto" in erste, f"({erste[:200]!r})")
+    pruefe("ein Preis, umsatzsteuerfrei", "umsatzsteuerfrei" in erste and "netto" not in erste
+           and "inkl. USt" not in erste, f"({erste[:200]!r})")
+    pruefe("Kopf: Endpreise, Abholung durch den Käufer",
+           "Endpreise, umsatzsteuerfrei" in seite.inner_text(".kopf")
+           and "Abholung durch den Käufer" in seite.inner_text(".kopf"))
+    ablauf = seite.inner_text(".ablauf") if seite.locator(".ablauf").count() else ""
+    pruefe("Kasten „So läuft es ab“", "3 Werktage" in ablauf and "Mindestbestellwert" in ablauf
+           and "10.12.2026" in ablauf, f"({ablauf[:200]!r})")
+    pruefe("kein Versandhinweis mehr", "Versand möglich" not in alles)
+    pruefe("Besichtigung möglich an teuren Artikeln", seite.locator(".meta .bes").count() > 10,
+           f"({seite.locator('.meta .bes').count()})")
     pruefe("Knopf heisst reservieren",
            seite.locator("button[data-res]").count() > 50,
            f"({seite.locator('button[data-res]').count()})")
     pruefe("Hinweisband sichtbar", seite.locator(".band").count() == 1)
     recht = seite.inner_text(".recht") if seite.locator(".recht").count() else ""
-    pruefe("Rechtshinweis vorhanden", "Gewährleistung" in recht and "Widerrufsrecht" in recht,
-           f"({recht[:160]!r})")
+    pruefe("Kaufbedingungen vorhanden", "Gewährleistung" in recht and "§ 4 Nr. 28 UStG" in recht
+           and "§ 4 Nr. 23 UStG" in recht, f"({recht[:160]!r})")
+    pruefe("kein Satz mehr zum Widerrufsrecht", "Widerrufsrecht" not in recht)
     pruefe("Abholadresse genannt", "Hermann-Schwer-Str. 1" in recht)
     pruefe("Anbieter benannt",
            "anbieter" in recht.lower() and "Kikripp GmbH" in recht, f"({recht[:200]!r})")
@@ -124,11 +111,13 @@ with sync_playwright() as p:
     seite.screenshot(path="/tmp/kikweb/t02-katalog.png")
 
     print("\n3) Menge und Knopf")
+    with open(os.path.join(hier, "../../ausgabe/katalog_import.json"), encoding="utf-8") as f:
+        preise = {a["nr"]: a["preis"] for a in json.load(f)}
     felder = seite.locator("input[data-menge]")
     ziel = None
     for i in range(felder.count()):
         f = felder.nth(i)
-        if int(f.get_attribute("max") or 0) >= 4:
+        if int(f.get_attribute("max") or 0) >= 4 and preise.get(f.get_attribute("data-menge"), 0) >= 25:
             ziel = f; break
     pruefe("Artikel mit Menge >= 4 gefunden", ziel is not None)
     nr = ziel.get_attribute("data-menge")
@@ -183,18 +172,49 @@ with sync_playwright() as p:
                              " return i ? getComputedStyle(i).objectFit : null; }")
     pruefe("Fotos werden ganz gezeigt (object-fit: contain)", passung == "contain", f"({passung!r})")
 
+    # Mindestbestellwert: ein billiger Einzelartikel allein reicht nicht
+    print("\n4b) Mindestbestellwert")
+    billig = [n for n, p in preise.items() if 0 < p < 10]
+    probe = None
+    for i in range(felder.count()):
+        f = felder.nth(i)
+        if f.get_attribute("data-menge") in billig and f.get_attribute("data-menge") not in (nr, nr2):
+            probe = f.get_attribute("data-menge"); break
+    seite.locator("#k-leeren").click(); seite.wait_for_timeout(200)
+    seite.locator(f'input[data-menge="{probe}"]').fill("1")
+    seite.locator(f'button[data-res="{probe}"]').click(); seite.wait_for_timeout(300)
+    pruefe("Hinweis auf den Mindestbestellwert", "Mindestbestellwert" in seite.inner_text("#k-merk"),
+           f"({seite.inner_text('#k-merk')!r})")
+    pruefe("Abschicken gesperrt unter 50 €", seite.locator("#k-anfragen").is_disabled())
+    seite.locator("#k-leeren").click(); seite.wait_for_timeout(200)
+    ziel.fill("2"); seite.locator(f'button[data-res="{nr}"]').click()
+    seite.locator(f'input[data-menge="{nr2}"]').fill("1"); seite.locator(f'button[data-res="{nr2}"]').click()
+    seite.wait_for_timeout(300)
+    pruefe("mit genug Wert wieder freigegeben", not seite.locator("#k-anfragen").is_disabled())
+
     print("\n5) Reservierung abschicken")
     seite.click("#k-anfragen")
     seite.wait_for_selector("#k-dlg", timeout=5000)
     dlg = seite.inner_text("#k-dlg")
     pruefe("Formular zeigt Stueck gesamt", "3 Stück gesamt" in dlg, f"({dlg[:300]!r})")
-    pruefe("Frist genannt", "7 Tage" in dlg)
+    pruefe("Frist genannt", "3 Werktage" in dlg, f"({dlg[:200]!r})")
+    pruefe("Anruf angekündigt", "rufen wir Sie an" in dlg)
     pruefe("Datenschutzhinweis", seite.locator(".datenschutz").count() == 1)
     pruefe("Hinweis: noch kein Kaufvertrag", "noch kein Kaufvertrag" in dlg, f"({dlg[:400]!r})")
     pruefe("Hinweis: keine Bestätigungsmail",
            "keine Bestätigungsmail" in seite.inner_text(".datenschutz"),
            f"({seite.inner_text('.datenschutz')!r})")
-    pruefe("kein Wunschtermin-Feld mehr", seite.locator("#k-termin").count() == 0)
+    abhol = [t.strip() for t in seite.locator("#k-abhol option").all_inner_texts()[1:]]
+    pruefe("Abholtermine nur montags und dienstags", abhol and all(t[:3] in ("Mo,", "Di,") for t in abhol),
+           f"({abhol[:4]})")
+    pruefe("letzter Abholtag ist der 10.12.2026 oder früher",
+           abhol and abhol[-1][-4:] == "2026" and tuple(map(int, abhol[-1][4:9].split(".")[::-1])) <= (12, 10),
+           f"({abhol[-1:] })")
+    pruefe("Adressfelder vorhanden", all(seite.locator(i).count() == 1
+           for i in ("#k-firma", "#k-strasse", "#k-plz", "#k-ort")))
+    pruefe("Demontage ankreuzbar", seite.locator("#k-demontage").count() == 1)
+    hp = seite.locator("#k-webseite").bounding_box()
+    pruefe("unsichtbares Feld gegen Roboter liegt außerhalb des Bildes", hp is not None and hp["x"] < 0, f"({hp})")
     pruefe("Telefon ist als Pflichtfeld markiert",
            "Telefon *" in dlg and seite.locator("#k-tel[required]").count() == 1)
 
@@ -203,8 +223,14 @@ with sync_playwright() as p:
     pruefe("Pflichtfeld Name geprueft", "Namen" in seite.inner_text("#k-meldung"),
            f"({seite.inner_text('#k-meldung')!r})")
 
-    seite.fill("#k-name", "Testkaeufer Muster GmbH")
+    seite.fill("#k-name", "Testkaeufer Muster")
+    seite.fill("#k-firma", "Muster GmbH")
     seite.fill("#k-mail", "test@example.org")
+    seite.click("#k-senden")
+    seite.wait_for_timeout(500)
+    pruefe("ohne Anschrift wird nicht abgeschickt",
+           "Anschrift" in seite.inner_text("#k-meldung"), f"({seite.inner_text('#k-meldung')!r})")
+    seite.fill("#k-strasse", "Hauptstraße 5"); seite.fill("#k-plz", "78048"); seite.fill("#k-ort", "Villingen")
     seite.click("#k-senden")
     seite.wait_for_timeout(500)
     pruefe("ohne Telefon wird nicht abgeschickt",
@@ -212,16 +238,26 @@ with sync_playwright() as p:
            f"({seite.inner_text('#k-meldung')!r})")
 
     seite.fill("#k-tel", "07721 123456")
+    seite.click("#k-senden")
+    seite.wait_for_timeout(500)
+    pruefe("ohne Abholtermin wird nicht abgeschickt",
+           "Abholung" in seite.inner_text("#k-meldung"), f"({seite.inner_text('#k-meldung')!r})")
+    seite.select_option("#k-abhol", index=1)
+    if seite.locator("#k-bes").count():
+        seite.check("#k-bes")
+        seite.select_option("#k-bes-tag", index=1); seite.select_option("#k-bes-zeit", "09:00")
     seite.fill("#k-text", "Automatischer Testlauf")
+    seite.wait_for_timeout(3200)        # Mindestzeit gegen Formular-Roboter
     seite.click("#k-senden")
     seite.wait_for_selector(".meldung.gut", timeout=15000)
     erfolg = seite.inner_text(".meldung.gut")
-    pruefe("Erfolgsmeldung", "Vielen Dank" in erfolg and "schnellstmöglich" in erfolg,
+    pruefe("Erfolgsmeldung", "Vielen Dank" in erfolg and "rufen Sie" in erfolg,
            f"({erfolg[:200]!r})")
     beleg = seite.inner_text(".beleg")
     pruefe("Beleg zeigt Vorgangsnummer", "Vorgangsnummer" in beleg, f"({beleg[:200]!r})")
-    pruefe("Beleg zeigt das Fristdatum",
-           re.search(r"Reserviert bis\s+\d{2}\.\d{2}\.\d{4}", beleg) is not None, f"({beleg!r})")
+    pruefe("Beleg zeigt das Fristdatum (Werktag)",
+           re.search(r"Reserviert bis\s+(Mo|Di|Mi|Do|Fr), \d{2}\.\d{2}\.\d{4}", beleg) is not None, f"({beleg!r})")
+    pruefe("Beleg zeigt den Abholwunsch", "Abholung gewünscht" in beleg, f"({beleg!r})")
     pruefe("Beleg zeigt die Positionen", "3 Stück gesamt" in beleg, f"({beleg!r})")
     pruefe("Beleg zeigt die Kontaktdaten zum Gegenlesen",
            "test@example.org" in beleg and "07721 123456" in beleg, f"({beleg!r})")
@@ -233,7 +269,7 @@ with sync_playwright() as p:
     seite.reload(wait_until="networkidle")
     seite.wait_for_selector(".karte", timeout=20000)
     seite.wait_for_timeout(600)
-    pruefe("Anmeldung bleibt bestehen (Cookie)", seite.locator("#k-pw").count() == 0)
+    pruefe("nach dem Neuladen keine Sperrseite", seite.locator("#k-pw").count() == 0)
 
     seite.fill("#k-q", nr); seite.wait_for_timeout(400)
     k1 = seite.locator(".karte").first.inner_text()

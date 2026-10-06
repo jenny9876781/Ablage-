@@ -891,39 +891,35 @@ ist die Merkliste; erledigte Punkte hier abhaken, nicht löschen.
 - [ ] Nach Schritt 2 neues Fotopaket als Nachtrag (`--nachtrag` gegen die Importdatei von
       Commit 7a913aa) — enthält dann auch F-629 bis F-635.
 
-**B. Keine Umsatzsteuer (§ 4 Nr. 28 UStG)**
-- [ ] Preise in der Datenbasis sind Endpreise. Katalog: ein Preis, kein „inkl. USt“,
-      `kikripp_ust_prozent` = 0 bzw. Anzeige umbauen; Mail ohne „zzgl. USt“; Excel
-      (Verkaufsübersicht, DATEV-Blatt, Kasse) und `pruefen.py` ohne 19 %.
-- [ ] Vom Steuerberater bestätigen lassen: Verweis auf § 4 Nr. 23 oder Nr. 25 UStG.
+**B.–E. Katalog, Plugin 1.2.0, Excel, Unterlagen — GEBAUT 06.10.2026**
+- [x] Keine USt: `design.csv` USt 0, Excel-Beschriftungen ohne netto/brutto (Formelzeilen
+      unverändert, damit `pruefen.py` sie findet), Katalog ein Preis + Steuerhinweis, Mail
+      „(umsatzsteuerfrei)“, Bestellung ohne USt-Ausweis.
+- [x] Plugin 1.2.0: Passwortschutz abschaltbar (aus), noindex bleibt; 3 Werktage Mo–Fr
+      (`Kikripp_DB::ablauf_nach_werktagen`); Status **bestellt** läuft nicht ab;
+      Teilabholung (`position_stornieren`); Abholtermin am Vorgang; Formular mit Firma,
+      Anschrift, Besichtigung (Do, halbstündlich, nur bei Artikel ≥ 100 €), Abholwunsch
+      (nur Mo/Di bis 10.12.), Demontage-Häkchen; Mindestbestellwert 50 € (Server rechnet mit
+      Datenbankpreisen); Spamschutz (unsichtbares Feld `webseite`, Mindestdauer 3 s,
+      5 Reservierungen/Stunde je IP-Prüfsumme); Kasten „So läuft es ab“; Schild
+      „Besichtigung möglich“; Knopf **Bestellung erstellen** (Unternehmen/Privatperson,
+      Privat mit gesonderter Verjährungsklausel und zweiter Unterschrift).
+- [x] Vorgaben in `includes/kikripp-vorgaben.php`; `kikripp_umstellen()` setzt sie beim
+      ersten Laden nach dem Ersetzen **einmal** (Merker `kikripp_plugin_version`),
+      Hinweisband nur, wenn leer. `SCHEMA_VERSION` 4. Testserver läuft jetzt ohne Passwort
+      (`KIK_TEST_SCHUTZ=1` für den alten Modus).
+- [x] U2 Datenschutz-Absatz neu (Anschrift, Termine, IP-Prüfsumme 1 h) — **Nutzerin muss ihn
+      auf kikripp.de ersetzen**.
+- [x] Nachtrag-Fotopaket gegen den WordPress-Stand (Import von Commit 7a913aa + Nachtrag
+      vom 01.10.): nur F-630 bis F-635. Erwartete Importmeldung: „6 neu, 491 aktualisiert“.
+- [ ] Offen: BE10-04 hat in NEU1 Maße bekommen, steht aber auf „entfällt“ — nachfragen.
+- [ ] **Nächster Schritt: Mail an die Interessenten mit dem Link** (erst nach dem Livegang).
+- [ ] Livegang: Plugin ersetzen → Einstellungen prüfen → 6 Fotos → Import → U2 ersetzen →
+      Cache leeren → Testreservierungen löschen → Vorschaubetrieb aus → privat gegenlesen.
 
-**C. Katalogtexte und Ablauf**
-- [ ] Rechtstext ersetzen (Text der Nutzerin vom 05.10.); Satz „ein Widerrufsrecht besteht
-      daher nicht“ muss raus, solange Bestellung und Zahlung aus der Ferne laufen.
-- [ ] Kasten „So läuft es ab“: 3 Werktage reserviert → Anruf → Besichtigung Do 8–11 (ab
-      100 €) → unterschriebene Bestellung → Rechnung per Mail → Überweisung → Abholung
-      Mo/Di 8–11, Demontage nach Vereinbarung Fr nachmittag / Sa vormittag, Werkzeug
-      mitbringen, Abholung bis spätestens 10.12.2026, Mindestbestellwert 50 €.
-- [ ] Versand entfällt ganz („Abholung durch den Käufer“).
-- [ ] Hinweisband: Großteil des Spielzeugs kommt im November. Wöchentliche Updates bis
-      Ende November.
-
-**D. Plugin**
-- [ ] Ohne Passwort zugänglich (Option „Passwortschutz aus“), Spamschutz fürs Formular.
-- [ ] Frist 3 **Werktage** statt 7 Tage.
-- [ ] Neuer Status „bestellt / Rechnung raus“, der nicht abläuft; Abholtermin am Vorgang.
-- [ ] Formular: Firma, Straße, PLZ, Ort (Rechnungsadresse), Besichtigung ja/nein,
-      Wunschuhrzeit Do VM, gewünschter Abholtermin; Mindestbestellwert 50 €.
-      `SCHEMA_VERSION` hochzählen; Test „kein Wunschtermin-Feld“ anpassen.
-- [ ] Verwaltung: Bestellung (Kaufvertrag) je Vorgang zum Drucken/Versenden erzeugen.
-- [ ] Ggf. Teilabholung (einzelne Positionen stornieren).
-
-**E. Unterlagen**
-- [ ] Bestellung/Kaufvertrag-Vorlage (gebrauchte Artikel, steuerfreie Lieferung,
-      gesonderte Vereinbarung zur Verjährung, ggf. Widerrufsbelehrung).
-- [ ] Datenschutz-Absatz U2 neu (jetzt Adresse und Termine gespeichert) — Nutzerin muss
-      ihn auf kikripp.de ersetzen. Impressum/Datenschutz müssen veröffentlicht sein.
-- [ ] Mail an die Interessenten mit Link — **erst nach dem Katalog**.
+> Abschnitt 8 beschreibt noch den Passwortbetrieb. Seit 1.2.0 gilt: frei zugänglich,
+> `?kik=` wirkt nur bei eingeschaltetem Schutz. Die Regeln dort (Cache, noindex, keine
+> Fremdskripte) gelten unverändert.
 
 ## 10. Was die Nutzerin nicht mag
 

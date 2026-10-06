@@ -31,7 +31,7 @@ sonst mitten im Aufbau erwischen.
 
 **a) Speicherplatz der Website prüfen — der wichtigste Punkt.**
 In einem Multisite-Netzwerk hat jede Website ein Platzkonto, standardmäßig **100 MB**. Die
-Fotos brauchen **84 MB**, und auf kikripp.de liegen schon Bilder der bestehenden Seite. Reicht
+Fotos brauchen **83 MB**, und auf kikripp.de liegen schon Bilder der bestehenden Seite. Reicht
 das Konto nicht, bricht das Hochladen mittendrin ab mit einer Meldung über die
 Speicherplatzbegrenzung — und du weißt nicht, welche Bilder durch sind.
 
@@ -74,9 +74,7 @@ Installation in zwei Schritten:
 
 In der linken Leiste erscheint danach der Menüpunkt **Artikelkatalog**.
 
-Dort steht sofort ein **gelber Hinweis, dass noch kein Passwort vergeben ist**. Das ist
-richtig so und kein Fehler — das Passwort kommt in Schritt 4. Bis dahin kommt niemand in den
-Katalog, auch du nicht.
+Ein Passwort braucht es seit Fassung 1.2.0 nicht mehr — der Katalog ist frei zugänglich.
 
 Warum nicht im Netzwerk aktivieren: der Katalog gehört auf eine Website, nicht auf alle.
 Eine Netzwerk-Aktivierung würde ihn auf jeder Seite des Netzwerks einschalten und liesse
@@ -85,13 +83,13 @@ sich später nur wieder zentral abschalten.
 ## 2. Fotos in die Mediathek
 
 Du bekommst die Fotos in **vier Paketen** (`kikripp-fotos-1von4.zip` bis `-4von4.zip`),
-weil 84 MB auf einmal für den Versand zu viel sind. Entpacke sie auf deinem Rechner — alle
-vier in denselben Ordner `fotos`. Zusammen sind es genau **415 Bilder, 84 MB**. Geh in WordPress auf **Medien → Datei hinzufügen** und
+weil 83 MB auf einmal für den Versand zu viel sind. Entpacke sie auf deinem Rechner — alle
+vier in denselben Ordner `fotos`. Zusammen sind es genau **412 Bilder, 83 MB**. Geh in WordPress auf **Medien → Datei hinzufügen** und
 zieh die Bilder in das Feld — am besten in Paketen von hundert, nicht alle auf einmal. Das
 dauert; lass das Browserfenster offen, bis jedes Paket durch ist.
 
 **So prüfst du, ob alles angekommen ist:** Geh auf **Medien → Mediathek** und schalte oben
-rechts auf die Listenansicht. Unten steht die Gesamtzahl der Einträge. Sie muss um 415
+rechts auf die Listenansicht. Unten steht die Gesamtzahl der Einträge. Sie muss um 412
 gestiegen sein.
 
 Und falls doch etwas fehlt: **das ist kein Problem und du musst nicht suchen.** Der Import im
@@ -109,10 +107,10 @@ auf Importieren. Der Import dauert **ein paar Sekunden**, nicht Minuten.
 
 Danach steht oben eine Meldung. **So muss sie aussehen:**
 
-    Import abgeschlossen: 491 neu, 0 aktualisiert.
+    Import abgeschlossen: 497 neu, 0 aktualisiert.
 
 Kein weiterer Satz dahinter — das heißt: jeder Artikel hat sein Foto gefunden. Im Katalog
-sichtbar sind davon **419**; die übrigen stehen bewusst auf „nicht im Katalog".
+sichtbar sind davon **415**; die übrigen stehen bewusst auf „nicht im Katalog".
 
 Steht dahinter noch *„… Artikel ohne gefundenes Foto"*, nennt die Meldung die fehlenden
 Bilder beim Namen. Die lädst du in die Mediathek nach und importierst einfach noch einmal.
@@ -124,9 +122,8 @@ aktualisiert, neue kommen dazu, und Reservierungen bleiben erhalten.
 
 ## 4. Einstellungen prüfen
 
-Nach dem Aktivieren erscheint oben ein gelber Hinweis: es ist noch **kein Passwort vergeben**,
-und ohne Passwort kommt niemand in den Katalog — auch du nicht. Das ist Absicht, damit das
-Passwort nirgends in einer Datei steht.
+Seit Fassung 1.2.0 (Oktober 2026) ist der Katalog **ohne Passwort** erreichbar. Bei Google
+erscheint er trotzdem nicht: die Seite trägt „noindex“, und ohne den Link findet ihn niemand.
 
 Geh auf **Artikelkatalog → Einstellungen** und arbeite die Seite von oben nach unten durch:
 
@@ -139,22 +136,29 @@ Geh auf **Artikelkatalog → Einstellungen** und arbeite die Seite von oben nach
 > etwas offen ist.
 
 Die Tabelle steht in **derselben Reihenfolge wie das Formular** — du kannst sie einfach
-danebenlegen und abarbeiten. Fast alles ist schon vorausgefüllt; nur das Passwort fehlt.
+danebenlegen und abarbeiten. Beim Einspielen von Fassung 1.2.0 werden die Verkaufsregeln
+automatisch eingetragen; du prüfst sie nur.
 
 | Feld (in dieser Reihenfolge) | Was hineingehört |
 |---|---|
-| Katalog-Passwort | das vereinbarte Passwort, einmal eintragen. **Das einzige leere Feld.** |
+| Passwortschutz | **aus** — der Katalog ist frei zugänglich |
+| Katalog-Passwort | leer lassen; gilt nur, wenn der Passwortschutz wieder eingeschaltet wird |
 | Reservierungen melden an | `jennyp@kikripp.de` — **interne** Meldung. Auf kikripp.de kommt nur hier etwas an, und auch das verzögert und im Spam-Ordner |
 | Kontaktadresse für Interessenten | `saldi4kids@outlook.com` — diese Adresse **sehen die Käufer** im Anbieter-Block und in der Bestätigung |
-| Hinweisband | Text über dem Katalog. Während des Testens z. B. „Testbetrieb"; zum Livegang leeren |
-| Reservierung gilt | 7 Tage |
-| Umsatzsteuer | 19 % |
-| Verkäuferin (Firma) | `Kikripp GmbH` — steht so im Katalog und im Mailbetreff |
+| Hinweisband | Text über dem Katalog, derzeit die Ankündigung zum Spielzeug im November |
+| Reservierung gilt | 3 Werktage (Montag bis Freitag) |
+| Mindestbestellwert | 50 € |
+| Besichtigung ab | 100 € Stückpreis |
+| Abholung bis | 10.12.2026 |
+| So läuft es ab | der Kasten über den Artikeln; jede Zeile ein Punkt |
+| Umsatzsteuer | 0 % — steuerfreie Lieferung |
+| Steuerhinweis | „Endpreise · umsatzsteuerfrei gemäß § 4 Nr. 28 UStG“ |
+| Verkäuferin (Firma) | `Kikripp GmbH` — steht so im Katalog, im Mailbetreff und auf der Bestellung |
 | Telefon | die Nummer der Kikripp GmbH |
 | **Impressum** | `https://www.kikripp.de/impressum/` — die Seite muss veröffentlicht sein |
 | **Datenschutzerklärung** | `https://www.kikripp.de/datenschutz/` — ebenfalls veröffentlicht |
-| Abholadresse | erscheint unter dem Katalog |
-| Rechtliche Hinweise | Verkaufsbedingungen, änderbar |
+| Abholadresse | erscheint unter dem Katalog und auf der Bestellung |
+| Rechtliche Hinweise | die Kaufbedingungen mit dem Steuerabsatz; stehen unter dem Katalog und auf jeder Bestellung |
 | Vorschaubetrieb | **eingeschaltet lassen**, solange ihr testet |
 
 Zu **Vorschaubetrieb**: Solange der Haken gesetzt ist, werden alle eingehenden Reservierungen
@@ -164,7 +168,7 @@ Livegang nimmst du ihn heraus.
 Zu **Impressum und Datenschutz**: Das sind die beiden Adressen aus Punkt 0d. Klick sie hier
 einmal an, nachdem du die Seiten veröffentlicht hast — sie müssen sich öffnen. Der Katalog
 verlinkt sie unter jedem Angebot; das Impressum verlangt § 5 DDG, die Datenschutzerklärung
-Art. 13 DSGVO, weil das Reservierungsformular Name, Mailadresse und Telefonnummer
+Art. 13 DSGVO, weil das Reservierungsformular Name, Anschrift, Mailadresse und Telefonnummer
 entgegennimmt.
 
 Und füge noch den Absatz aus **`U2_Datenschutz_Absatz.docx`** in die Datenschutzerklärung
@@ -191,19 +195,16 @@ ganze Website sperren würde, ist **ausgeschaltet**. Andere Seiten sind deshalb 
 Adresse ganz normal erreichbar — die Katalogseite also auch. Nur: *Maintenance* bitte nicht
 einschalten, solange der Katalog läuft. Schritt 6 prüft das ohnehin mit.
 
-**Der Link mit Passwort.** Hängst du `?kik=DASPASSWORT` an die Adresse, öffnet sich der Katalog
-direkt — niemand muss etwas eintippen. Das Passwort verschwindet dabei sofort wieder aus der
-Adresszeile. Diesen Link verschickst du an die Interessenten:
+**Der Link.** Diesen Link verschickst du an die Interessenten — ohne Passwort:
 
-    https://www.kikripp.de/artikelkatalog/?kik=DASPASSWORT
+    https://www.kikripp.de/artikelkatalog/
 
-**Ein Knopf im Menü** ist möglich, aber nicht nötig: der Katalog ist ohnehin nur über den
-Link mit Passwort erreichbar, und solange die Startseite die Wartungsseite ist, findet ihn
-sowieso niemand von selbst.
+**Ein Knopf im Menü** ist möglich, aber nicht nötig: Bei Google erscheint der Katalog nicht,
+und solange die Startseite die Wartungsseite ist, findet ihn niemand von selbst.
 
 ## 6. Einmal selbst durchtesten
 
-Ruf den Link mit Passwort in einem privaten Browserfenster auf. Der Katalog sollte sich
+Ruf den Link in einem privaten Browserfenster auf. Der Katalog sollte sich
 **ohne Passwortabfrage** öffnen. Merk dir zwei Artikel vor und schick eine Reservierung ab.
 
 Du solltest danach sehen:
@@ -293,8 +294,9 @@ Website wirkt nach außen ruhig, der Katalog ist über seinen Link trotzdem da.
 
 Der Katalog trägt selbst ein „nicht indexieren", aber der Sitemap-Generator würde die Adresse
 trotzdem bei Google anmelden. Nimm die Katalogseite in den Einstellungen des Plugins von der
-Sitemap aus. Schlimm wäre es nicht — ohne Passwort sieht Google nur das Anmeldefeld —, aber
-sauberer ist es so.
+Sitemap aus. Seit der Katalog ohne Passwort erreichbar ist, ist das wichtiger als vorher:
+das „nicht indexieren“ hält Google zwar aus den Suchergebnissen, die Sitemap würde die
+Adresse aber trotzdem melden.
 
 ### BackWPup — vorher einmal sichern
 
@@ -362,6 +364,8 @@ steht es unter *Installierte Plugins* und muss nur aktiviert werden.
 
 ### Der Link mit `?kik=…` öffnet den Katalog nicht
 
+Gilt nur, wenn der Passwortschutz wieder eingeschaltet ist.
+
 - **Passwort stimmt nicht.** Groß- und Kleinschreibung zählt. Prüf es unter
   *Artikelkatalog → Einstellungen*, indem du es neu setzt.
 - **Zu viele Fehlversuche.** Nach zehn falschen Versuchen macht die Bremse 15 Minuten zu.
@@ -426,12 +430,14 @@ zu sein, diese Adresse auf:
 
     https://www.kikripp.de/wp-json/kikripp/v1/artikel
 
-Du bekommst dort **keine** Artikelliste, das ist richtig so — ohne Passwort antwortet der
-Katalog mit einer kurzen Sperrmeldung. Worauf es ankommt, ist **welche** Antwort kommt:
+Ohne Passwortschutz bekommst du dort die Artikelliste (beginnt mit `{"ok":true`) — dann
+ist die Schnittstelle offen und die Ursache liegt woanders. Ist der Passwortschutz
+eingeschaltet, kommt stattdessen eine kurze Sperrmeldung. Worauf es ankommt, ist **welche**
+Antwort kommt:
 
 | Was da steht | Was es bedeutet |
 |---|---|
-| `{"ok":false,"gesperrt":true}` | Die Schnittstelle ist offen, der Katalog antwortet. Ursache liegt woanders — weiter mit Punkt 3. |
+| `{"ok":true,…` oder `{"ok":false,"gesperrt":true}` | Die Schnittstelle ist offen, der Katalog antwortet. Ursache liegt woanders — weiter mit Punkt 3. |
 | Etwas mit `rest_` und „nicht berechtigt", „disabled" oder „forbidden" | Die REST-Schnittstelle ist gesperrt. Das ist Punkt 2. |
 | Eine WordPress-Fehlerseite oder gar nichts | Schick mir einen Bildschirmabzug davon. |
 
@@ -449,11 +455,18 @@ Browserzeile steht. Damit sehe ich in der Regel sofort, woran es liegt.
 
 ## Im laufenden Betrieb
 
-Unter **Artikelkatalog → Reservierungen** siehst du alle Vorgänge mit Ablaufdatum — ohne
-Namen, dafür mit dem Suchbegriff für dein Postfach. Dort setzt du einen Vorgang auf
-*bezahlt* (dann verschwinden die Artikel aus dem Katalog), *stornierst* ihn (dann werden sie
-wieder frei) oder *verlängerst die Frist* um weitere sieben Tage. Abgelaufene Reservierungen
-geben die Ware von selbst wieder frei, du musst nichts tun.
+Unter **Artikelkatalog → Reservierungen** siehst du alle Vorgänge mit Kontaktdaten, Anschrift,
+Besichtigungs- und Abholwunsch. Der Ablauf:
+
+1. **reserviert** — läuft nach 3 Werktagen von selbst ab. Du rufst an.
+2. **bestellt** — nach dem Anruf anklicken. Ab dann läuft die Reservierung nicht mehr ab.
+3. **Bestellung erstellen** — *Unternehmen* oder *Privatperson* wählen, drucken oder als PDF
+   speichern, unterschreiben lassen (Unternehmen per Scan, Privatpersonen vor Ort).
+4. Rechnung aus DATEV, Abholtermin im Feld daneben eintragen.
+5. **bezahlt** — nach Zahlungseingang. Die Artikel verschwinden aus dem Katalog.
+
+Nimmt jemand nur einen Teil, stornierst du die übrigen Positionen einzeln — sie sind sofort
+wieder im Katalog. *Frist verlängern* gibt weitere 3 Werktage.
 
 Für die Buchhaltung exportierst du die Reservierungen als CSV und schickst sie mir. Ich
 trage Menge, Preis und Verkaufsdatum in den Artikelstamm ein. **Den Käufernamen trägst du

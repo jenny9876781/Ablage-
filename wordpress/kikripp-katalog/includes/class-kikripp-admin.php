@@ -10,12 +10,15 @@ class Kikripp_Admin {
         add_action('admin_post_kikripp_import', [__CLASS__, 'import']);
         add_action('admin_post_kikripp_einstellungen', [__CLASS__, 'einstellungen_speichern']);
         add_action('admin_post_kikripp_export', [__CLASS__, 'export']);
+        add_action('admin_post_kikripp_termin', [__CLASS__, 'termin_speichern']);
+        add_action('admin_post_kikripp_bestellung', [__CLASS__, 'bestellung']);
         add_action('admin_notices', [__CLASS__, 'hinweis_passwort']);
     }
 
     /** Ohne Passwort bleibt der Katalog für alle zu – das muss auffallen. */
     public static function hinweis_passwort() {
         if (!current_user_can('manage_options')) { return; }
+        if (!Kikripp_Zugang::passwortschutz()) { return; }
         if (get_option('kikripp_passwort_hash')) { return; }
         printf('<div class="notice notice-warning"><p><strong>Artikelkatalog:</strong> '
              . 'Es ist noch kein Passwort vergeben – der Katalog ist deshalb für alle gesperrt. '
@@ -71,6 +74,21 @@ class Kikripp_Admin {
 
     // ---------------------------------------------------------------- Reservierungen
 
+    /** Statusbezeichnung für die Liste. */
+    private static function status_text($v, $jetzt) {
+        if ($v['status'] === 'offen') {
+            return strtotime($v['ablauf']) < $jetzt
+                ? '<span style="color:#b32d2e">abgelaufen</span>' : 'reserviert';
+        }
+        if ($v['status'] === 'bestellt') { return '<strong>bestellt</strong>'; }
+        return esc_html($v['status']);
+    }
+
+    private static function aktion_url($was, $id, $extra = []) {
+        return wp_nonce_url(add_query_arg(array_merge(['action' => 'kikripp_aktion', 'was' => $was,
+            'id' => (int) $id], $extra), admin_url('admin-post.php')), 'kikripp_aktion_' . (int) $id);
+    }
+
     public static function seite_reservierungen() {
         if (!current_user_can('manage_options')) { return; }
         $vorgaenge = Kikripp_DB::vorgaenge();
@@ -78,13 +96,17 @@ class Kikripp_Admin {
         echo '<div class="wrap"><h1>Reservierungen</h1>';
         self::hinweis();
 
-        $offen = $bezahlt = 0;
+        $zahl = ['offen' => 0, 'bestellt' => 0, 'bezahlt' => 0];
         foreach ($vorgaenge as $v) {
-            if ($v['status'] === 'offen') { $offen++; }
-            if ($v['status'] === 'bezahlt') { $bezahlt++; }
+            if (isset($zahl[$v['status']])) { $zahl[$v['status']]++; }
         }
-        printf('<p>%d Vorgänge insgesamt · %d offen · %d bezahlt</p>',
-            count($vorgaenge), $offen, $bezahlt);
+        printf('<p>%d Vorgänge insgesamt · %d reserviert · %d bestellt · %d bezahlt</p>',
+            count($vorgaenge), $zahl['offen'], $zahl['bestellt'], $zahl['bezahlt']);
+        echo '<p style="color:#555;max-width:900px">Ablauf: <strong>reserviert</strong> (läuft nach '
+           . Kikripp_DB::frist_werktage() . ' Werktagen ab) → nach dem Anruf <strong>bestellt</strong> '
+           . '(läuft nicht mehr ab) → <strong>Bestellung erstellen</strong>, unterschreiben lassen, Rechnung aus '
+           . 'DATEV → nach Zahlungseingang <strong>bezahlt</strong> (die Artikel verschwinden aus dem Katalog). '
+           . 'Nimmt jemand nur einen Teil, die übrigen Positionen einzeln stornieren.</p>';
 
         echo '<p><a href="' . esc_url(wp_nonce_url(admin_url('admin-post.php?action=kikripp_export'), 'kikripp_export')) . '" class="button">Alle Reservierungen als CSV exportieren</a></p>';
 
@@ -95,33 +117,41 @@ class Kikripp_Admin {
 
         echo '<table class="widefat striped"><thead><tr>'
            . '<th>Nr.</th><th>Eingegangen</th><th>Interessent</th><th>Positionen</th>'
-           . '<th>Summe netto</th><th>Status</th><th>Frist</th><th>Aktion</th>'
+           . '<th>Summe</th><th>Status</th><th>Termine</th><th>Aktion</th>'
            . '</tr></thead><tbody>';
 
         foreach ($vorgaenge as $v) {
             $summe = 0;
             $posten = [];
+            $offen_oder_bestellt = in_array($v['status'], ['offen', 'bestellt'], true);
             foreach ($v['positionen'] as $p) {
+                $zeile = sprintf('%d × %s', (int) $p['menge'], esc_html($p['artnr']));
+                if ($p['status'] === 'storniert') {
+                    $posten[] = '<s style="color:#999">' . $zeile . '</s>';
+                    continue;
+                }
                 $summe += (float) $p['preis_netto'] * (int) $p['menge'];
-                $posten[] = sprintf('%d × %s', (int) $p['menge'], esc_html($p['artnr']));
+                if ($offen_oder_bestellt && count($v['positionen']) > 1) {
+                    $zeile .= ' <a href="' . esc_url(self::aktion_url('pos', $v['id'], ['pid' => (int) $p['id']]))
+                            . '" style="font-size:11px" onclick="return confirm(\'Nur diese Position stornieren?\')">'
+                            . 'stornieren</a>';
+                }
+                $posten[] = $zeile;
             }
-            $abgelaufen = $v['status'] === 'offen' && strtotime($v['ablauf']) < $jetzt;
-            $status_text = $v['status'] === 'offen'
-                ? ($abgelaufen ? '<span style="color:#b32d2e">abgelaufen</span>' : 'offen')
-                : esc_html($v['status']);
 
             echo '<tr>';
             echo '<td>#' . (int) $v['id'] . ($v['testdaten'] ? ' <em>(Test)</em>' : '') . '</td>';
             echo '<td>' . esc_html(mysql2date('d.m.Y H:i', $v['erstellt'])) . '</td>';
-            // Die Kontaktdaten stehen nach erfolgreichem Mailversand nur noch in der
-            // Mail. Hier erscheint deshalb der Suchbegriff fürs Postfach.
             $suche = sprintf('[%s] Neue Reservierung #%d',
                 get_option('kikripp_firma', 'Kikripp GmbH'), (int) $v['id']);
             echo '<td>';
             if ($v['name'] !== '' || $v['email'] !== '' || $v['telefon'] !== '') {
-                $loesch = wp_nonce_url(admin_url('admin-post.php?action=kikripp_aktion&was=kontakt&id='
-                    . (int) $v['id']), 'kikripp_aktion_' . $v['id']);
+                $loesch = self::aktion_url('kontakt', $v['id']);
                 echo '<strong>' . esc_html($v['name']) . '</strong><br>';
+                if (trim((string) ($v['firma'] ?? '')) !== '') { echo esc_html($v['firma']) . '<br>'; }
+                if (trim((string) ($v['strasse'] ?? '')) !== '') {
+                    echo esc_html($v['strasse']) . ', ' . esc_html(trim($v['plz'] . ' ' . $v['ort'])) . '<br>';
+                }
                 if ($v['email'] !== '') {
                     echo '<a href="mailto:' . esc_attr($v['email']) . '">'
                        . esc_html($v['email']) . '</a><br>';
@@ -145,19 +175,44 @@ class Kikripp_Admin {
             echo '</td>';
             echo '<td>' . implode('<br>', $posten) . '</td>';
             echo '<td>' . esc_html(Kikripp_Mail::eur($summe)) . '</td>';
-            echo '<td>' . $status_text . '</td>';
-            echo '<td>' . esc_html(mysql2date('d.m.Y', $v['ablauf'])) . '</td>';
+            echo '<td>' . self::status_text($v, $jetzt);
+            if ($v['status'] === 'offen') {
+                echo '<br><span style="font-size:11px;color:#555">bis ' . esc_html(mysql2date('d.m.Y', $v['ablauf'])) . '</span>';
+            }
+            echo '</td>';
+
+            echo '<td style="font-size:12px">Besichtigung: ' . esc_html(Kikripp_Mail::besichtigung_text($v))
+               . '<br>Abholwunsch: ' . esc_html(Kikripp_Mail::abholung_text($v));
+            echo '<form method="post" action="' . esc_url(admin_url('admin-post.php')) . '" style="margin-top:6px">'
+               . wp_nonce_field('kikripp_termin_' . (int) $v['id'], '_wpnonce', true, false)
+               . '<input type="hidden" name="action" value="kikripp_termin">'
+               . '<input type="hidden" name="id" value="' . (int) $v['id'] . '">'
+               . '<input type="text" name="termin" value="' . esc_attr((string) ($v['abholtermin'] ?? '')) . '" '
+               . 'placeholder="vereinbarter Abholtermin" style="width:150px;font-size:12px"> '
+               . '<button class="button button-small">speichern</button></form>';
+            echo '</td>';
+
             echo '<td>';
-            foreach ([
-                'bezahlt'    => 'bezahlt',
-                'storniert'  => 'stornieren',
-                'verlaengern'=> 'Frist verlängern',
-                'loeschen'   => 'löschen',
-            ] as $was => $beschriftung) {
-                $url = wp_nonce_url(admin_url('admin-post.php?action=kikripp_aktion&was=' . $was . '&id=' . (int) $v['id']), 'kikripp_aktion_' . $v['id']);
+            $aktionen = [];
+            if ($v['status'] === 'offen') { $aktionen['bestellt'] = 'bestellt'; }
+            if ($offen_oder_bestellt) {
+                $aktionen['bezahlt'] = 'bezahlt';
+                $aktionen['storniert'] = 'stornieren';
+            }
+            if ($v['status'] === 'offen') { $aktionen['verlaengern'] = 'Frist verlängern'; }
+            $aktionen['loeschen'] = 'löschen';
+            foreach ($aktionen as $was => $beschriftung) {
                 $stil = $was === 'loeschen' ? ' style="color:#b32d2e"' : '';
                 $frage = $was === 'loeschen' ? ' onclick="return confirm(\'Diesen Vorgang wirklich löschen?\')"' : '';
-                echo '<a href="' . esc_url($url) . '"' . $stil . $frage . '>' . esc_html($beschriftung) . '</a><br>';
+                echo '<a href="' . esc_url(self::aktion_url($was, $v['id'])) . '"' . $stil . $frage . '>'
+                   . esc_html($beschriftung) . '</a><br>';
+            }
+            if ($v['status'] !== 'storniert') {
+                $b = wp_nonce_url(admin_url('admin-post.php?action=kikripp_bestellung&id=' . (int) $v['id']),
+                    'kikripp_bestellung_' . (int) $v['id']);
+                echo '<span style="font-size:11px;color:#555">Bestellung erstellen:</span><br>'
+                   . '<a href="' . esc_url($b . '&art=unternehmen') . '" target="_blank">Unternehmen</a> · '
+                   . '<a href="' . esc_url($b . '&art=privat') . '" target="_blank">Privatperson</a>';
             }
             echo '</td></tr>';
 
@@ -167,6 +222,14 @@ class Kikripp_Admin {
             }
         }
         echo '</tbody></table></div>';
+    }
+
+    public static function termin_speichern() {
+        if (!current_user_can('manage_options')) { wp_die('Keine Berechtigung.'); }
+        $id = (int) ($_POST['id'] ?? 0);
+        check_admin_referer('kikripp_termin_' . $id);
+        Kikripp_DB::abholtermin_setzen($id, sanitize_text_field(wp_unslash($_POST['termin'] ?? '')));
+        self::zurueck('kikripp-reservierungen', sprintf('Abholtermin für Vorgang #%d gespeichert.', $id));
     }
 
     public static function aktion() {
@@ -179,6 +242,14 @@ class Kikripp_Admin {
             case 'testdaten':
                 $anzahl = Kikripp_DB::testdaten_loeschen();
                 self::zurueck('kikripp-einstellungen', sprintf('%d Testreservierungen wurden gelöscht.', $anzahl));
+            case 'bestellt':
+                Kikripp_DB::vorgang_status($id, 'bestellt');
+                self::zurueck('kikripp-reservierungen', sprintf('Vorgang #%d ist bestellt. Die Reservierung läuft nicht mehr ab.', $id));
+            case 'pos':
+                $rest = Kikripp_DB::position_stornieren($id, (int) ($_GET['pid'] ?? 0));
+                self::zurueck('kikripp-reservierungen', $rest > 0
+                    ? sprintf('Die Position wurde storniert und ist wieder im Katalog. Vorgang #%d läuft mit %d Position(en) weiter.', $id, $rest)
+                    : sprintf('Die letzte Position wurde storniert – Vorgang #%d ist damit storniert.', $id));
             case 'bezahlt':
                 Kikripp_DB::vorgang_status($id, 'bezahlt');
                 self::zurueck('kikripp-reservierungen', sprintf('Vorgang #%d ist als bezahlt vermerkt. Die Artikel erscheinen nicht mehr im Katalog.', $id));
@@ -199,6 +270,115 @@ class Kikripp_Admin {
         self::zurueck('kikripp-reservierungen', 'Unbekannte Aktion.', true);
     }
 
+    // ---------------------------------------------------------------- Bestellung
+
+    /**
+     * Druckfertige Bestellung (Kaufvertrag) zu einem Vorgang.
+     *
+     * Zwei Fassungen, weil das Recht es verlangt: Gegenüber Unternehmen ist die
+     * Gewährleistung ausgeschlossen. Gegenüber Privatpersonen darf die Verjährung bei
+     * gebrauchten Sachen nur auf ein Jahr verkürzt werden, wenn das gesondert vereinbart
+     * wird – deshalb ein eigener Kasten mit eigener Unterschrift. Privatpersonen
+     * unterschreiben vor Ort (Besichtigung oder Abholung); dann ist es kein Fernabsatz.
+     */
+    public static function bestellung() {
+        if (!current_user_can('manage_options')) { wp_die('Keine Berechtigung.'); }
+        $id = (int) ($_GET['id'] ?? 0);
+        check_admin_referer('kikripp_bestellung_' . $id);
+        echo self::bestellung_html($id, sanitize_key($_GET['art'] ?? 'unternehmen'));
+        exit;
+    }
+
+    public static function bestellung_html($id, $art) {
+        $v = Kikripp_DB::vorgang($id);
+        if (!$v) { return 'Vorgang nicht gefunden.'; }
+        $privat = $art === 'privat';
+        $e = function ($t) { return esc_html((string) $t); };
+        $firma = (string) get_option('kikripp_firma', 'Kikripp GmbH');
+        $ust = (float) get_option('kikripp_ust_prozent', 0) / 100;
+        $schluss = (string) get_option('kikripp_abholschluss', '');
+        $schluss_text = $schluss ? gmdate('d.m.Y', strtotime($schluss . ' 12:00:00 UTC')) : '';
+
+        $zeilen = ''; $summe = 0.0;
+        foreach ($v['positionen'] as $p) {
+            if ($p['status'] === 'storniert') { continue; }
+            $d = json_decode((string) $p['daten'], true);
+            $titel = is_array($d) && !empty($d['titel']) ? $d['titel'] : $p['artnr'];
+            $einheit = is_array($d) && !empty($d['einheit']) ? $d['einheit'] : 'Stück';
+            $wert = (float) $p['preis_netto'] * (int) $p['menge'];
+            $summe += $wert;
+            $zeilen .= '<tr><td>' . $e($p['artnr']) . '</td><td>' . $e($titel) . '</td><td class="r">'
+                . (int) $p['menge'] . ' ' . $e($einheit) . '</td><td class="r">' . $e(Kikripp_Mail::eur($p['preis_netto']))
+                . '</td><td class="r">' . $e(Kikripp_Mail::eur($wert)) . '</td></tr>';
+        }
+        $summenzeile = $ust > 0
+            ? '<tr class="s"><td colspan="4">Summe netto</td><td class="r">' . $e(Kikripp_Mail::eur($summe)) . '</td></tr>'
+              . '<tr class="s"><td colspan="4">zzgl. Umsatzsteuer</td><td class="r">' . $e(Kikripp_Mail::eur($summe * $ust)) . '</td></tr>'
+              . '<tr class="s"><td colspan="4"><b>Gesamtbetrag</b></td><td class="r"><b>' . $e(Kikripp_Mail::eur($summe * (1 + $ust))) . '</b></td></tr>'
+            : '<tr class="s"><td colspan="4"><b>Gesamtbetrag</b> (umsatzsteuerfrei)</td><td class="r"><b>'
+              . $e(Kikripp_Mail::eur($summe)) . '</b></td></tr>';
+
+        $anschrift = array_filter([
+            trim((string) ($v['firma'] ?? '')), trim((string) $v['name']),
+            trim((string) ($v['strasse'] ?? '')), trim(($v['plz'] ?? '') . ' ' . ($v['ort'] ?? '')),
+        ]);
+        $kontakt = array_filter([trim((string) $v['email']), trim((string) $v['telefon'])]);
+        $bedingungen = '';
+        foreach (preg_split('/\n\s*\n/', trim((string) get_option('kikripp_rechtstext', ''))) as $absatz) {
+            if (trim($absatz) !== '') { $bedingungen .= '<p>' . $e(trim($absatz)) . '</p>'; }
+        }
+        $zahlung = $privat
+            ? 'Die Bestellung wird vor Ort unterschrieben. Die Zahlung erfolgt vor der Übergabe per Überweisung; '
+              . 'die Ware wird erst nach Zahlung ausgehändigt.'
+            : 'Die Rechnung wird per E-Mail versandt. Der Betrag ist vorab auf das in der Rechnung angegebene Konto '
+              . 'zu überweisen; abgeholt wird erst nach Zahlungseingang.';
+        $gewaehr = $privat
+            ? '<div class="kasten"><b>Gesonderte Vereinbarung zur Verjährung</b>'
+              . '<p>Der Käufer ist Verbraucher. Es handelt sich um gebrauchte Sachen. Die Verjährungsfrist für '
+              . 'Mängelansprüche wird abweichend von der gesetzlichen Frist auf <b>ein Jahr ab Übergabe</b> verkürzt. '
+              . 'Der Käufer wurde vor Abgabe seiner Vertragserklärung gesondert auf diese Verkürzung hingewiesen.</p>'
+              . '<p>☐ Ich bin mit der Verkürzung der Verjährungsfrist auf ein Jahr einverstanden.</p>'
+              . '<div class="unterschrift"><span>Ort, Datum</span><span>Unterschrift Käufer</span></div></div>'
+            : '<div class="kasten"><b>Gewährleistung</b><p>Der Käufer ist Unternehmer. Die Gewährleistung für '
+              . 'Sach- und Rechtsmängel ist ausgeschlossen.</p></div>';
+
+        $termine = [];
+        if (trim((string) ($v['abholtermin'] ?? '')) !== '') { $termine[] = 'Vereinbarter Abholtermin: ' . $v['abholtermin']; }
+        elseif (Kikripp_Mail::abholung_text($v) !== '—') { $termine[] = 'Abholwunsch: ' . Kikripp_Mail::abholung_text($v); }
+        if (Kikripp_Mail::besichtigung_text($v) !== 'nein') { $termine[] = 'Besichtigung: ' . Kikripp_Mail::besichtigung_text($v); }
+
+        return '<!doctype html><html lang="de"><head><meta charset="utf-8"><title>Bestellung ' . (int) $id . '</title>'
+            . '<style>body{font:13px/1.45 Arial,Helvetica,sans-serif;color:#1a1a1a;max-width:780px;margin:24px auto;padding:0 20px}'
+            . 'h1{font-size:20px;margin:18px 0 2px}.kopf{display:flex;justify-content:space-between;border-bottom:3px solid #C8102E;padding-bottom:10px}'
+            . '.klein{color:#555;font-size:12px}table{width:100%;border-collapse:collapse;margin:14px 0}th,td{padding:5px 6px;border-bottom:1px solid #ddd;text-align:left;vertical-align:top}'
+            . 'th{background:#F7F5F2;font-size:12px}.r{text-align:right;white-space:nowrap}tr.s td{border-bottom:0}'
+            . '.kasten{border:1px solid #bbb;padding:10px 12px;margin:14px 0}.unterschrift{display:flex;gap:40px;margin-top:34px}'
+            . '.unterschrift span{flex:1;border-top:1px solid #1a1a1a;padding-top:4px;font-size:12px;color:#555}'
+            . '.knopf{background:#C8102E;color:#fff;border:0;padding:9px 16px;font-size:14px;cursor:pointer;border-radius:3px}'
+            . '@media print{.knopf,.nicht-drucken{display:none}body{margin:0}}</style></head><body>'
+            . '<p class="nicht-drucken"><button class="knopf" onclick="window.print()">Drucken / als PDF speichern</button> '
+            . '<span class="klein">Fassung: ' . ($privat ? 'Privatperson' : 'Unternehmen') . '</span></p>'
+            . '<div class="kopf"><div><b>' . $e($firma) . '</b><br><span class="klein">' . $e(get_option('kikripp_abholadresse', ''))
+            . '<br>Telefon ' . $e(get_option('kikripp_telefon', '')) . ' · ' . $e(Kikripp_REST::kontakt_email()) . '</span></div>'
+            . '<div class="klein" style="text-align:right">Vorgang ' . (int) $id . '<br>' . $e(gmdate('d.m.Y', current_time('timestamp'))) . '</div></div>'
+            . '<h1>Bestellung (Kaufvertrag) Nr. ' . (int) $id . '</h1>'
+            . '<p class="klein">Gebrauchte Artikel aus Betriebsauflösung</p>'
+            . '<table><tr><th style="width:50%">Käufer (' . ($privat ? 'Privatperson' : 'Unternehmen') . ')</th><th>Kontakt</th></tr>'
+            . '<tr><td>' . implode('<br>', array_map($e, $anschrift)) . '</td><td>' . implode('<br>', array_map($e, $kontakt)) . '</td></tr></table>'
+            . '<table><tr><th>Art.-Nr.</th><th>Bezeichnung</th><th class="r">Menge</th><th class="r">Einzelpreis</th><th class="r">Gesamt</th></tr>'
+            . $zeilen . $summenzeile . '</table>'
+            . ($termine ? '<p>' . implode('<br>', array_map($e, $termine)) . '</p>' : '')
+            . '<p><b>Zahlung:</b> ' . $e($zahlung) . '</p>'
+            . '<p><b>Abholung:</b> durch den Käufer, montags und dienstags von 08:00 bis 11:00 Uhr; Demontage nach '
+            . 'Vereinbarung auch Freitagnachmittag oder Samstagvormittag. Werkzeug ist mitzubringen.'
+            . ($schluss_text ? ' Die Ware ist bis spätestens <b>' . $e($schluss_text) . '</b> abzuholen. Nicht abgeholte Ware geht '
+              . 'ohne Erstattung in das Eigentum der ' . $e($firma) . ' zurück.' : '') . '</p>'
+            . $gewaehr
+            . '<div class="klein"><b>Kaufbedingungen</b>' . $bedingungen . '</div>'
+            . '<div class="unterschrift"><span>Ort, Datum</span><span>Unterschrift Käufer</span><span>' . $e($firma) . '</span></div>'
+            . '</body></html>';
+    }
+
     public static function export() {
         if (!current_user_can('manage_options')) { wp_die('Keine Berechtigung.'); }
         check_admin_referer('kikripp_export');
@@ -209,7 +389,8 @@ class Kikripp_Admin {
         fwrite($aus, "\xEF\xBB\xBF");   // BOM, damit Excel die Umlaute erkennt
         fputcsv($aus, ['Vorgang', 'Eingegangen', 'Ablauf', 'Status', 'Name', 'Email', 'Telefon',
                        'Mailsuche', 'Nachricht', 'ArtNr', 'Menge', 'Preis_netto', 'Positionsstatus',
-                       'Bezahlt_am'], ';');
+                       'Bezahlt_am', 'Firma', 'Strasse', 'PLZ', 'Ort', 'Besichtigung', 'Abholwunsch',
+                       'Abholtermin'], ';');
         $firma = get_option('kikripp_firma', 'Kikripp GmbH');
         foreach ($vorgaenge as $v) {
             foreach ($v['positionen'] as $p) {
@@ -220,6 +401,9 @@ class Kikripp_Admin {
                     $p['artnr'], $p['menge'],
                     number_format((float) $p['preis_netto'], 2, ',', '.'), $p['status'],
                     $p['bezahlt_am'] ?? '',
+                    $v['firma'] ?? '', $v['strasse'] ?? '', $v['plz'] ?? '', $v['ort'] ?? '',
+                    Kikripp_Mail::besichtigung_text($v), Kikripp_Mail::abholung_text($v),
+                    $v['abholtermin'] ?? '',
                 ], ';');
             }
         }
@@ -467,9 +651,16 @@ class Kikripp_Admin {
         echo '<input type="hidden" name="action" value="kikripp_einstellungen">';
         echo '<table class="form-table"><tbody>';
 
+        printf('<tr><th scope="row">Passwortschutz</th><td>'
+             . '<label><input type="checkbox" name="passwortschutz" value="1" %s> '
+             . 'Katalog nur mit Passwort öffnen</label>'
+             . '<p class="description">Seit Oktober 2026 ausgeschaltet: der Katalog ist frei zugänglich, '
+             . 'erscheint aber nicht bei Google.</p></td></tr>',
+             checked(1, (int) get_option('kikripp_passwortschutz', 1), false));
+
         printf('<tr><th scope="row"><label for="k_pw">Katalog-Passwort</label></th><td>'
              . '<input type="text" id="k_pw" name="passwort" class="regular-text" placeholder="leer lassen = unverändert">'
-             . '<p class="description">Wird das Passwort geändert, müssen sich alle erneut anmelden.</p></td></tr>');
+             . '<p class="description">Gilt nur bei eingeschaltetem Passwortschutz. Wird das Passwort geändert, müssen sich alle erneut anmelden.</p></td></tr>');
 
         printf('<tr><th scope="row"><label for="k_mail">Reservierungen melden an</label></th><td>'
              . '<input type="email" id="k_mail" name="mail_an" class="regular-text" value="%s" required>'
@@ -490,19 +681,46 @@ class Kikripp_Admin {
              esc_attr(get_option('kikripp_hinweisband', '')));
 
         printf('<tr><th scope="row"><label for="k_frist">Reservierung gilt</label></th><td>'
-             . '<input type="number" id="k_frist" name="frist_tage" min="1" max="90" value="%d" class="small-text"> Tage'
-             . '<p class="description">Danach wird der Artikel automatisch wieder frei, sofern er nicht auf bezahlt steht.</p></td></tr>',
-             (int) get_option('kikripp_frist_tage', 7));
+             . '<input type="number" id="k_frist" name="frist_werktage" min="1" max="30" value="%d" class="small-text"> Werktage (Mo–Fr)'
+             . '<p class="description">Danach wird der Artikel automatisch wieder frei – außer der Vorgang steht auf '
+             . '„bestellt“ oder „bezahlt“.</p></td></tr>',
+             Kikripp_DB::frist_werktage());
+
+        printf('<tr><th scope="row"><label for="k_mindest">Mindestbestellwert</label></th><td>'
+             . '<input type="number" id="k_mindest" name="mindestwert" min="0" step="1" value="%s" class="small-text"> €'
+             . '<p class="description">Darunter lässt sich die Reservierung nicht abschicken. 0 = kein Mindestwert.</p></td></tr>',
+             esc_attr(get_option('kikripp_mindestwert', 0)));
+
+        printf('<tr><th scope="row"><label for="k_besicht">Besichtigung ab</label></th><td>'
+             . '<input type="number" id="k_besicht" name="besichtigung_ab" min="0" step="1" value="%s" class="small-text"> € Stückpreis'
+             . '<p class="description">Artikel ab diesem Preis tragen im Katalog „Besichtigung möglich“, und das '
+             . 'Formular fragt nach einem Besichtigungstermin am Donnerstagvormittag.</p></td></tr>',
+             esc_attr(get_option('kikripp_besichtigung_ab', 0)));
+
+        printf('<tr><th scope="row"><label for="k_schluss">Abholung bis</label></th><td>'
+             . '<input type="date" id="k_schluss" name="abholschluss" value="%s">'
+             . '<p class="description">Letzter Abholtag. Das Formular bietet nur Montage und Dienstage bis dahin an.</p></td></tr>',
+             esc_attr(get_option('kikripp_abholschluss', '')));
+
+        printf('<tr><th scope="row"><label for="k_ablauf">So läuft es ab</label></th><td>'
+             . '<textarea id="k_ablauf" name="ablauftext" class="large-text" rows="7">%s</textarea>'
+             . '<p class="description">Erscheint als Kasten über den Artikeln. Jede Zeile wird ein Punkt.</p></td></tr>',
+             esc_textarea(get_option('kikripp_ablauftext', '')));
 
         printf('<tr><th scope="row"><label for="k_ust">Umsatzsteuer</label></th><td>'
-             . '<input type="number" id="k_ust" name="ust" min="0" max="30" step="0.1" value="%s" class="small-text"> %%</td></tr>',
+             . '<input type="number" id="k_ust" name="ust" min="0" max="30" step="0.1" value="%s" class="small-text"> %%'
+             . '<p class="description">0 = steuerfreie Lieferung (§ 4 Nr. 28 UStG): der Katalog zeigt dann nur einen Preis.</p></td></tr>',
              esc_attr(get_option('kikripp_ust_prozent', 19)));
+
+        printf('<tr><th scope="row"><label for="k_steuer">Steuerhinweis</label></th><td>'
+             . '<input type="text" id="k_steuer" name="steuerhinweis" class="large-text" value="%s">'
+             . '<p class="description">Steht unter jedem Preis, wenn die Umsatzsteuer auf 0 steht.</p></td></tr>',
+             esc_attr(get_option('kikripp_steuerhinweis', '')));
 
         printf('<tr><th scope="row"><label for="k_firma">Verkäuferin (Firma)</label></th><td>'
              . '<input type="text" id="k_firma" name="firma" class="regular-text" value="%s" required>'
-             . '<p class="description">Erscheint im Katalog, im Mailbetreff und im Anbieter-Block. '
-             . 'Bewusst hier und nicht der Name dieser Website – der Katalog läuft auf fremdem '
-             . 'Speicherplatz.</p></td></tr>',
+             . '<p class="description">Erscheint im Katalog, im Mailbetreff, im Anbieter-Block und auf der '
+             . 'Bestellung. Bewusst hier und nicht der Name der Website.</p></td></tr>',
              esc_attr(get_option('kikripp_firma', '')));
 
         printf('<tr><th scope="row"><label for="k_tel">Telefon</label></th><td>'
@@ -528,7 +746,8 @@ class Kikripp_Admin {
 
         printf('<tr><th scope="row"><label for="k_recht">Rechtliche Hinweise</label></th><td>'
              . '<textarea id="k_recht" name="rechtstext" class="large-text" rows="5">%s</textarea>'
-             . '<p class="description">Erscheint unter dem Katalog. Leer lassen blendet den Block aus.</p></td></tr>',
+             . '<p class="description">Erscheint unter dem Katalog als „Kaufbedingungen“ und auf jeder Bestellung. '
+             . 'Leerzeilen trennen Absätze. Leer lassen blendet den Block aus.</p></td></tr>',
              esc_textarea(get_option('kikripp_rechtstext', '')));
 
         printf('<tr><th scope="row">Vorschaubetrieb</th><td>'
@@ -557,8 +776,15 @@ class Kikripp_Admin {
         update_option('kikripp_kontakt_email',
             sanitize_email(wp_unslash($_POST['kontakt_email'] ?? '')));
         update_option('kikripp_hinweisband', sanitize_text_field(wp_unslash($_POST['hinweisband'] ?? '')));
-        update_option('kikripp_frist_tage', max(1, (int) ($_POST['frist_tage'] ?? 7)));
-        update_option('kikripp_ust_prozent', (float) ($_POST['ust'] ?? 19));
+        update_option('kikripp_passwortschutz', isset($_POST['passwortschutz']) ? 1 : 0);
+        update_option('kikripp_frist_werktage', max(1, (int) ($_POST['frist_werktage'] ?? 3)));
+        update_option('kikripp_mindestwert', max(0, (float) ($_POST['mindestwert'] ?? 0)));
+        update_option('kikripp_besichtigung_ab', max(0, (float) ($_POST['besichtigung_ab'] ?? 0)));
+        $schluss = sanitize_text_field(wp_unslash($_POST['abholschluss'] ?? ''));
+        update_option('kikripp_abholschluss', preg_match('/^\d{4}-\d{2}-\d{2}$/', $schluss) ? $schluss : '');
+        update_option('kikripp_ablauftext', sanitize_textarea_field(wp_unslash($_POST['ablauftext'] ?? '')));
+        update_option('kikripp_ust_prozent', (float) ($_POST['ust'] ?? 0));
+        update_option('kikripp_steuerhinweis', sanitize_text_field(wp_unslash($_POST['steuerhinweis'] ?? '')));
         update_option('kikripp_vorschau', isset($_POST['vorschau']) ? 1 : 0);
         update_option('kikripp_abholadresse', sanitize_text_field(wp_unslash($_POST['abholadresse'] ?? '')));
         update_option('kikripp_rechtstext', sanitize_textarea_field(wp_unslash($_POST['rechtstext'] ?? '')));

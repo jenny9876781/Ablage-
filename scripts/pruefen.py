@@ -223,8 +223,11 @@ else:
 print("\n== 5. Summen ==")
 gesamt = sum(a["Positionswert"] for a in aktiv)
 print(f"  Gesamtwert netto  {eur(gesamt)}")
-print(f"  zzgl. {int(USt_SATZ*100)} % USt    {eur(gesamt*USt_SATZ)}")
-print(f"  brutto            {eur(gesamt*(1+USt_SATZ))}")
+if USt_SATZ:
+    print(f"  zzgl. {int(USt_SATZ*100)} % USt    {eur(gesamt*USt_SATZ)}")
+    print(f"  brutto            {eur(gesamt*(1+USt_SATZ))}")
+else:
+    print("  keine USt         steuerfreie Lieferung (§ 4 Nr. 28 UStG)")
 print(f"  Paketpreis netto  {eur(gesamt*(1-PAKETRABATT))}  (−{int(PAKETRABATT*100)} %)")
 for k in ("A", "B", "C"):
     t = [a for a in aktiv if a["Wertklasse"] == k]

@@ -159,9 +159,10 @@ TEXTE = [
     ("  Ein Artikel verkauft", "Status auf „verkauft“, Verkaufspreis, Verkaufte Menge, Käufer und Datum eintragen. Der Rest rechnet sich."),
     ("  Reservierung", "Status auf „reserviert“, Name und Abholtermin eintragen. Ohne Abholtermin keine Reservierung – sonst blockiert die Ware."),
     ("  Restmenge", "Rechnet sich aus Menge minus verkaufter Menge. Nicht überschreiben."),
-    ("  Preise", "Immer netto pro Einheit. Firmen bekommen Nettopreise, Privatpersonen müssen den Bruttopreis sehen (Preisangabenverordnung)."),
+    ("  Preise", "Endpreis pro Einheit. Die Spalte heißt weiter Preis_netto, es wird aber keine Umsatzsteuer aufgeschlagen: steuerfreie Lieferung gemäß § 4 Nr. 28 UStG." if USt_SATZ == 0
+     else "Immer netto pro Einheit. Firmen bekommen Nettopreise, Privatpersonen müssen den Bruttopreis sehen (Preisangabenverordnung)."),
     ("  Wertklasse", "A = Wertträger, einzeln vermarkten · B = Einzelposition im Katalog · C = Kleinteil, geht in den Verkaufstag."),
-    ("  Barzahlung", "Immer zusätzlich im Blatt „Kasse“ erfassen. Die Rechnung mit dem Vermerk „bar erhalten“ allein genügt bei einer GmbH nicht."),
+    ("  Barzahlung", "Seit Oktober 2026 wird nur überwiesen. Falls doch einmal bar bezahlt wird: zusätzlich im Blatt „Kasse“ erfassen."),
     ("  Anlagennummer", "Wenn bekannt eintragen – der Steuerberater braucht sie für den Anlagenabgang."),
     ("", ""),
     ("Hinweise zu den Preisen", "Alle Preise in dieser Datei sind Schätzwerte auf Basis der Fotos. Sie sind zur Überarbeitung gedacht."),
@@ -322,17 +323,22 @@ r = kpi(r, "davon reserviert", f'=COUNTIF({A("Status")},"reserviert")', "0")
 r = kpi(r, "davon teilverkauft", f'=COUNTIF({A("Status")},"teilverkauft")', "0")
 r = kpi(r, "davon verkauft", f'=COUNTIF({A("Status")},"verkauft")', "0")
 r = kpi(r, "Einheiten noch im Bestand", f'=SUM({A("Restmenge")})', "0")
-r = kpi(r, "Restbestand zu Wunschpreisen (netto)", f'=SUM({A("Positionswert_netto")})', EUR, fett=True)
+r = kpi(r, "Restbestand zu Wunschpreisen" + ("" if USt_SATZ == 0 else " (netto)"), f'=SUM({A("Positionswert_netto")})', EUR, fett=True)
 
 titel(12, "Erlöse")
 r = 13
 r = kpi(r, "Verkaufte Einheiten", f'=SUM({A("Verkauft_Menge")})', "0")
-r = kpi(r, "Umsatz netto", f'=SUMPRODUCT({A("Verkauft_Menge")},{A("Verkaufspreis_netto")})', EUR)
-r = kpi(r, f"zzgl. Umsatzsteuer {int(USt_SATZ*100)} %", f"=B14*{USt_SATZ}", EUR)
-r = kpi(r, "Umsatz brutto", "=B14+B15", EUR, fett=True)
-r = kpi(r, "davon bereits bezahlt (netto)",
+# Steuerfrei (§ 4 Nr. 28 UStG): dieselben Zeilen, damit die Formelbezüge stehen bleiben,
+# aber ohne „netto/brutto“ – es gibt nur einen Preis.
+STFREI = USt_SATZ == 0
+r = kpi(r, "Umsatz" if STFREI else "Umsatz netto",
+        f'=SUMPRODUCT({A("Verkauft_Menge")},{A("Verkaufspreis_netto")})', EUR)
+r = kpi(r, "Umsatzsteuer: keine (steuerfrei, § 4 Nr. 28 UStG)" if STFREI
+        else f"zzgl. Umsatzsteuer {int(USt_SATZ*100)} %", f"=B14*{USt_SATZ}", EUR)
+r = kpi(r, "Umsatz gesamt" if STFREI else "Umsatz brutto", "=B14+B15", EUR, fett=True)
+r = kpi(r, "davon bereits bezahlt" if STFREI else "davon bereits bezahlt (netto)",
         f'=SUMPRODUCT(({A("Zahlung")}="bezahlt")*{A("Verkauft_Menge")}*{A("Verkaufspreis_netto")})', EUR)
-r = kpi(r, "noch offen (netto)", "=B14-B17", EUR)
+r = kpi(r, "noch offen" if STFREI else "noch offen (netto)", "=B14-B17", EUR)
 
 titel(20, "To-do")
 r = 21
@@ -384,13 +390,18 @@ block(nz, "Nach Verkaufskanal", "Kanal",
 # =============================================================================
 re_ = wb.create_sheet("Rechnungen (DATEV)")
 RE_SP = [("lfd.", 6), ("Käufer / Firma", 30), ("Anschrift", 38), ("Artikel (ArtNr)", 26),
-         ("Leistungsdatum", 14), ("Netto", 13), ("USt 19 %", 13), ("Brutto", 13),
+         ("Leistungsdatum", 14), ("Betrag" if USt_SATZ == 0 else "Netto", 13),
+         ("USt" if USt_SATZ == 0 else f"USt {int(USt_SATZ*100)} %", 13),
+         ("Gesamt" if USt_SATZ == 0 else "Brutto", 13),
          ("Zahlart", 13), ("DATEV-Rechnungsnr", 18), ("geschrieben am", 14), ("bezahlt am", 13)]
 re_["A1"] = "Rechnungen – Abtippliste für DATEV Auftragswesen"
 re_["A1"].font = Font(name=FONT, size=14, bold=True, color=DUNKEL)
 re_.merge_cells("A2:L2")
 re_["A2"] = ("Die Spalten stehen in der Reihenfolge der DATEV-Erfassungsmaske. Ausdrucken, abarbeiten, "
-             "die DATEV-Rechnungsnummer hier und im Artikelstamm eintragen. USt und Brutto rechnen sich selbst. "
+             "die DATEV-Rechnungsnummer hier und im Artikelstamm eintragen. "
+             + ("Steuerfreie Lieferung gemäß § 4 Nr. 28 UStG – auf jeder Rechnung „gebrauchte Artikel“ und den "
+                "Steuerhinweis angeben, keine Umsatzsteuer ausweisen. " if USt_SATZ == 0
+                else "USt und Brutto rechnen sich selbst. ") +
              "Die Rechnung selbst wird ausschließlich in DATEV erstellt – es gibt bewusst kein zweites Rechnungsdokument.")
 re_["A2"].font = Font(name=FONT, size=9, italic=True, color=SCHWARZ)
 re_["A2"].fill = PatternFill("solid", fgColor=PAPIER)
@@ -431,8 +442,11 @@ re_.page_setup.fitToWidth = 1
 # Blatt 5: Kasse
 # =============================================================================
 ka = wb.create_sheet("Kasse")
-KA_SP = [("Datum", 13), ("Beleg-Nr", 12), ("Vorgang / Käufer", 42), ("Einnahme brutto", 16),
-         ("davon USt 19 %", 16), ("netto", 14), ("Ausgabe brutto", 15), ("Kassenbestand", 16)]
+KA_SP = [("Datum", 13), ("Beleg-Nr", 12), ("Vorgang / Käufer", 42),
+         ("Einnahme" if USt_SATZ == 0 else "Einnahme brutto", 16),
+         ("USt (steuerfrei)" if USt_SATZ == 0 else f"davon USt {int(USt_SATZ*100)} %", 16),
+         ("Betrag" if USt_SATZ == 0 else "netto", 14),
+         ("Ausgabe" if USt_SATZ == 0 else "Ausgabe brutto", 15), ("Kassenbestand", 16)]
 ka["A1"] = "Kassenbuch Barverkäufe"
 ka["A1"].font = Font(name=FONT, size=14, bold=True, color=DUNKEL)
 ka.merge_cells("A2:H2")

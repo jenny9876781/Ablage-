@@ -13,7 +13,7 @@ class Kikripp_Mail {
             $titel = is_array($daten) && !empty($daten['titel']) ? $daten['titel'] : $p['artnr'];
             $wert = (float) $p['preis_netto'] * (int) $p['menge'];
             $summe += $wert;
-            $zeilen[] = sprintf('%d × %s  %s — %s netto',
+            $zeilen[] = sprintf('%d × %s  %s — %s',
                 (int) $p['menge'], $p['artnr'], $titel, self::eur($wert));
         }
         return [$zeilen, $summe];
@@ -38,8 +38,14 @@ class Kikripp_Mail {
             'Eingegangen:  ' . mysql2date('d.m.Y H:i', $v['erstellt']) . ' Uhr',
             'Reserviert bis: ' . mysql2date('d.m.Y', $v['ablauf']),
             '',
-            'Name / Firma:',
+            'Name:',
             $v['name'],
+            '',
+            'Firma:',
+            trim((string) ($v['firma'] ?? '')) !== '' ? $v['firma'] : '—',
+            '',
+            'Rechnungsanschrift:',
+            trim(($v['strasse'] ?? '') . ', ' . ($v['plz'] ?? '') . ' ' . ($v['ort'] ?? ''), ', '),
             '',
             'E-Mail:',
             $v['email'],
@@ -47,15 +53,24 @@ class Kikripp_Mail {
             'Telefon:',
             $v['telefon'] !== '' ? $v['telefon'] : '—',
             '',
+            'Besichtigung gewünscht:',
+            self::besichtigung_text($v),
+            '',
+            'Abholung gewünscht:',
+            self::abholung_text($v),
+            '',
             'Nachricht:',
             trim((string) $v['nachricht']) !== '' ? $v['nachricht'] : '—',
             '',
             str_repeat('-', 60),
             implode("\n", $zeilen),
             str_repeat('-', 60),
-            'Summe netto:  ' . self::eur($summe),
-            sprintf('zzgl. %d %% USt: %s', (int) get_option('kikripp_ust_prozent', 19), self::eur($summe * $ust)),
-            'Summe brutto: ' . self::eur($summe * (1 + $ust)),
+            $ust > 0
+                ? implode("\n", ['Summe netto:  ' . self::eur($summe),
+                    sprintf('zzgl. %s %% USt: %s', rtrim(rtrim(number_format($ust * 100, 1, ',', ''), '0'), ','),
+                        self::eur($summe * $ust)),
+                    'Summe brutto: ' . self::eur($summe * (1 + $ust))])
+                : 'Summe:        ' . self::eur($summe) . ' (umsatzsteuerfrei)',
             '',
             'Verwalten: ' . admin_url('admin.php?page=kikripp-reservierungen'),
             '',
@@ -87,6 +102,26 @@ class Kikripp_Mail {
         // jetzt also bewusst - auf der eigenen Website der Gesellschaft, mit einem Absatz
         // in der Datenschutzerklärung und einem Löschknopf je Vorgang.
         return $ok;
+    }
+
+    /** „Do 08.10.2026, 09:00 Uhr“ oder „nein“. */
+    public static function besichtigung_text($v) {
+        $b = trim((string) ($v['besichtigung'] ?? ''));
+        if ($b === '') { return 'nein'; }
+        $t = strtotime(substr($b, 0, 10) . ' 12:00:00 UTC');
+        return 'Do ' . gmdate('d.m.Y', $t) . ', ' . substr($b, 11) . ' Uhr';
+    }
+
+    /** „Mo 12.10.2026“, ergänzt um den Demontagehinweis. */
+    public static function abholung_text($v) {
+        $teile = [];
+        $w = trim((string) ($v['abholwunsch'] ?? ''));
+        if ($w !== '') {
+            $t = strtotime($w . ' 12:00:00 UTC');
+            $teile[] = ['', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'][(int) gmdate('N', $t)] . ' ' . gmdate('d.m.Y', $t);
+        }
+        if (!empty($v['demontage'])) { $teile[] = 'Demontage nötig – Termin Fr nachmittag / Sa vormittag nach Vereinbarung'; }
+        return $teile ? implode('; ', $teile) : '—';
     }
 
     public static function eur($v) {

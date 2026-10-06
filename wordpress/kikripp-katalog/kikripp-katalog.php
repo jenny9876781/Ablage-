@@ -1,8 +1,8 @@
 <?php
 /**
  * Plugin Name: Kikripp Artikelkatalog
- * Description: Passwortgeschützter Artikelkatalog mit Reservierung für die Betriebsauflösung der Kikripp GmbH. Artikel werden importiert, Reservierungen im Backend verwaltet.
- * Version:     1.1.0
+ * Description: Artikelkatalog mit Reservierung für die Betriebsauflösung der Kikripp GmbH. Artikel werden importiert, Reservierungen im Backend verwaltet.
+ * Version:     1.2.0
  * Author:      Kikripp GmbH
  * Text Domain: kikripp-katalog
  * Requires at least: 5.8
@@ -13,10 +13,11 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-define('KIKRIPP_VERSION', '1.1.0');
+define('KIKRIPP_VERSION', '1.2.0');
 define('KIKRIPP_PFAD', plugin_dir_path(__FILE__));
 define('KIKRIPP_URL', plugin_dir_url(__FILE__));
 
+require_once KIKRIPP_PFAD . 'includes/kikripp-vorgaben.php';
 require_once KIKRIPP_PFAD . 'includes/class-kikripp-db.php';
 require_once KIKRIPP_PFAD . 'includes/class-kikripp-zugang.php';
 require_once KIKRIPP_PFAD . 'includes/class-kikripp-mail.php';
@@ -28,6 +29,7 @@ register_activation_hook(__FILE__, ['Kikripp_DB', 'tabellen_anlegen']);
 
 add_action('plugins_loaded', function () {
     Kikripp_DB::pruefe_version();
+    kikripp_umstellen();
     Kikripp_REST::start();
     Kikripp_Admin::start();
     Kikripp_Frontend::start();
@@ -47,9 +49,7 @@ register_activation_hook(__FILE__, function () {
     // Kein Vorschau-Hinweis: der Katalog geht als fertiger Stand online. Das Band bleibt
     // leer, bis es einen echten Hinweis zu geben gibt (Wunsch der Nutzerin, 29.09.2026).
     add_option('kikripp_hinweisband', '');
-    add_option('kikripp_frist_tage', 7);
     add_option('kikripp_vorschau', 1);
-    add_option('kikripp_ust_prozent', 19);
     add_option('kikripp_abholadresse', 'Kikripp GmbH, Hermann-Schwer-Str. 1, 78048 Villingen-Schwenningen');
     add_option('kikripp_firma', 'Kikripp GmbH');
     add_option('kikripp_telefon', '07725 5179702');
@@ -58,5 +58,25 @@ register_activation_hook(__FILE__, function () {
     // und der Anbieter-Block unter dem Katalog zeigt ins Leere.
     add_option('kikripp_impressum_url', 'https://www.kikripp.de/impressum/');
     add_option('kikripp_datenschutz_url', 'https://www.kikripp.de/datenschutz/');
-    add_option('kikripp_rechtstext', 'Alle Artikel stammen aus der Auflösung unseres Kindergartens und sind gebraucht. Sie werden verkauft wie besichtigt; Abbildungen zeigen den tatsächlichen Zustand. Preise verstehen sich inklusive der gesetzlichen Umsatzsteuer. Eine Reservierung ist noch kein Kaufvertrag – dieser kommt erst bei der Abholung vor Ort zustande, ein Widerrufsrecht besteht daher nicht. Gegenüber Unternehmern ist die Gewährleistung ausgeschlossen; gegenüber Verbrauchern verjähren Ansprüche wegen Mängeln bei gebrauchten Sachen nach einem Jahr.');
+    foreach (kikripp_vorgaben_120() as $name => $wert) { add_option($name, $wert); }
+    add_option('kikripp_plugin_version', KIKRIPP_VERSION);
 });
+
+/**
+ * Einmalige Umstellung einer bestehenden Einrichtung auf die Fassung 1.2.0.
+ *
+ * Beim Ersetzen des Plugins läuft der Aktivierungshaken nicht – die neuen Vorgaben
+ * kämen sonst nie an, und der Katalog zeigte weiter Preise mit 19 % USt und den alten
+ * Rechtstext. Was die Nutzerin danach in den Einstellungen ändert, bleibt: die
+ * Umstellung läuft genau einmal. Das Hinweisband wird nur gefüllt, wenn es leer ist.
+ */
+function kikripp_umstellen() {
+    $stand = (string) get_option('kikripp_plugin_version', '1.0.0');
+    if (version_compare($stand, '1.2.0', '>=')) { return; }
+    foreach (kikripp_vorgaben_120() as $name => $wert) { update_option($name, $wert); }
+    if (trim((string) get_option('kikripp_hinweisband', '')) === '') {
+        update_option('kikripp_hinweisband', 'Ein Großteil unseres Spielzeugs kommt im November dazu – '
+            . 'schauen Sie gern wieder vorbei. Der Katalog wird wöchentlich aktualisiert.');
+    }
+    update_option('kikripp_plugin_version', '1.2.0');
+}

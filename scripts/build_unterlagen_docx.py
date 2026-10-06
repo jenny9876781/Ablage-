@@ -69,28 +69,33 @@ def datenschutz():
     p(d, "Artikelkatalog der " + FIRMA, groesse=12, fett=True, vor=4, nach=6)
     for satz in [
         f"Im Zuge der Betriebsauflösung stellen wir auf dieser Website vorübergehend "
-        f"einen passwortgeschützten Artikelkatalog bereit, über den vorhandenes Inventar "
-        f"verkauft wird. Verantwortlich für das Angebot und für die Verarbeitung der "
-        f"dabei anfallenden Daten ist die {FIRMA}, {STRASSE}, {PLZ_ORT} "
-        f"(Telefon {TELEFON}, E-Mail {EMAIL}).",
+        f"einen Artikelkatalog bereit, über den vorhandenes Inventar verkauft wird. "
+        f"Verantwortlich für das Angebot und für die Verarbeitung der dabei anfallenden "
+        f"Daten ist die {FIRMA}, {STRASSE}, {PLZ_ORT} (Telefon {TELEFON}, E-Mail {EMAIL}).",
         "Wenn Sie über den Katalog eine Reservierung abschicken, übermitteln Sie Ihren "
-        "Namen bzw. Ihre Firma, Ihre E-Mail-Adresse, Ihre Telefonnummer und, sofern "
-        "angegeben, eine Nachricht. Diese Angaben werden zusammen mit den von Ihnen "
-        "vorgemerkten Artikeln in der Datenbank dieser Website gespeichert, damit wir "
-        "Ihre Reservierung bearbeiten und Kontakt mit Ihnen aufnehmen können. Sie "
-        "erhalten keine automatische Bestätigungsmail; die {0} nimmt persönlich "
-        "Kontakt mit Ihnen auf.".format(FIRMA),
-        "Ihre Kontaktdaten werden gelöscht, sobald der Vorgang abgewickelt ist – "
-        "spätestens, wenn der Artikelkatalog nach Abschluss der Betriebsauflösung "
-        "abgeschaltet wird. Danach verbleiben nur noch Angaben ohne Personenbezug: "
-        "Artikelnummer, Menge, Preis, Vorgangsnummer und die Frist, bis zu der ein "
-        "Artikel vorgemerkt war. Handelt es sich um einen Kaufvorgang, gelten die "
-        "steuerlichen Aufbewahrungsfristen. Ihre IP-Adresse wird im Zusammenhang mit "
-        "der Reservierung nicht gespeichert.",
+        "Namen, gegebenenfalls Ihre Firma, Ihre Rechnungsanschrift (Straße, Postleitzahl, "
+        "Ort), Ihre E-Mail-Adresse, Ihre Telefonnummer, Ihren Wunschtermin für Abholung "
+        "und gegebenenfalls Besichtigung sowie, sofern angegeben, eine Nachricht. Diese "
+        "Angaben werden zusammen mit den von Ihnen vorgemerkten Artikeln in der Datenbank "
+        "dieser Website gespeichert, damit wir Ihre Reservierung bearbeiten, Sie anrufen "
+        "und Bestellung und Rechnung erstellen können. Sie erhalten keine automatische "
+        "Bestätigungsmail; die {0} nimmt persönlich Kontakt mit Ihnen auf.".format(FIRMA),
+        "Ihre Kontaktdaten werden in der Datenbank gelöscht, sobald der Vorgang abgewickelt "
+        "ist – spätestens, wenn der Artikelkatalog nach Abschluss der Betriebsauflösung "
+        "abgeschaltet wird. Danach verbleiben dort nur noch Angaben ohne Personenbezug: "
+        "Artikelnummer, Menge, Preis und Vorgangsnummer. Kommt ein Kauf zustande, "
+        "bewahren wir Bestellung und Rechnung im Rahmen der gesetzlichen "
+        "Aufbewahrungsfristen auf.",
+        "Zum Schutz vor automatisierten Einträgen wird eine Prüfsumme Ihrer IP-Adresse "
+        "für höchstens eine Stunde vorübergehend gespeichert, um die Zahl der "
+        "Reservierungen je Anschluss zu begrenzen. Am Vorgang selbst wird Ihre "
+        "IP-Adresse nicht gespeichert.",
         "Eine Weitergabe an Dritte findet nicht statt. Der Katalog liegt auf der "
         f"Website der {FIRMA}; es werden keine Daten an fremde Dienste übermittelt.",
         "Rechtsgrundlage der Verarbeitung ist Art. 6 Abs. 1 lit. b DSGVO "
-        "(Durchführung vorvertraglicher Maßnahmen und Abwicklung des Kaufvertrags). "
+        "(Durchführung vorvertraglicher Maßnahmen und Abwicklung des Kaufvertrags), "
+        "für die Aufbewahrung von Rechnungen Art. 6 Abs. 1 lit. c DSGVO und für den "
+        "Schutz vor automatisierten Einträgen Art. 6 Abs. 1 lit. f DSGVO. "
         f"Ansprechpartnerin für Auskunft, Berichtigung und Löschung ist die {FIRMA} "
         f"unter {EMAIL}.",
     ]:

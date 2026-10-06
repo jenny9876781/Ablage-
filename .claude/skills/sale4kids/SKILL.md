@@ -918,6 +918,9 @@ ist die Merkliste; erledigte Punkte hier abhaken, nicht löschen.
       „Datenschutz Artikelkatalog“ für die GmbH anlegen und in den Plugin-Einstellungen
       verlinken; die Seiten der gGmbH nicht überschreiben, solange nicht geklärt ist, wem
       Website/Domain gehört (Insolvenzmasse?). Geschäftsführung und HRB der GmbH fehlen.
+      → **Entscheidung 06.10.: die GmbH zahlt den Webspace, die bestehenden Seiten werden auf
+      die Kikripp GmbH umgestellt; „gGmbH“ soll nirgends mehr stehen.** Hinweis gegeben, dass
+      Webspace zahlen nicht zwingend heißt, die Domain zu besitzen.
 - [ ] **Nächster Schritt: Mail an die Interessenten mit dem Link** (erst nach dem Livegang).
 - [ ] Livegang: Plugin ersetzen → Einstellungen prüfen → 6 Fotos → Import → U2 ersetzen →
       Cache leeren → Testreservierungen löschen → Vorschaubetrieb aus → privat gegenlesen.

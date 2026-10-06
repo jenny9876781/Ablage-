@@ -912,7 +912,12 @@ ist die Merkliste; erledigte Punkte hier abhaken, nicht löschen.
       auf kikripp.de ersetzen**.
 - [x] Nachtrag-Fotopaket gegen den WordPress-Stand (Import von Commit 7a913aa + Nachtrag
       vom 01.10.): nur F-630 bis F-635. Erwartete Importmeldung: „6 neu, 491 aktualisiert“.
-- [ ] Offen: BE10-04 hat in NEU1 Maße bekommen, steht aber auf „entfällt“ — nachfragen.
+- [x] BE10-04 bleibt draußen (bestätigt 06.10.).
+- [ ] **Impressum/Datenschutz zeigten die Kikripp Betriebsgesellschaft gGmbH** (insolvent),
+      nicht die Kikripp GmbH. Empfehlung: eigene Seiten „Impressum Artikelkatalog“ und
+      „Datenschutz Artikelkatalog“ für die GmbH anlegen und in den Plugin-Einstellungen
+      verlinken; die Seiten der gGmbH nicht überschreiben, solange nicht geklärt ist, wem
+      Website/Domain gehört (Insolvenzmasse?). Geschäftsführung und HRB der GmbH fehlen.
 - [ ] **Nächster Schritt: Mail an die Interessenten mit dem Link** (erst nach dem Livegang).
 - [ ] Livegang: Plugin ersetzen → Einstellungen prüfen → 6 Fotos → Import → U2 ersetzen →
       Cache leeren → Testreservierungen löschen → Vorschaubetrieb aus → privat gegenlesen.

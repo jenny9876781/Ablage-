@@ -876,6 +876,11 @@ ist die Merkliste; erledigte Punkte hier abhaken, nicht löschen.
       (37), Entscheidungen, Marken IKEA/Wesco/Wehrfritz (22), Versand überall „nur Abholung“
       (139), Preisregel < 200 € Fix (446 angepasst), Krepppapier BA08-40 bis -45 (F-629 bis
       F-635). 497 Zeilen. Rundlauf Excel → CSV: 0 Abweichungen.
+- Antworten 06.10.: NE02-05 70 € bestätigt · Kuckucksuhren NU01-02 sind 5 Stück (Nachzähl-Notiz
+  entfernen) · BU09-04/-05 Preise wie in ihrer Liste (sie schrieb „BA09“, gemeint sind die
+  offenen BU09) · BA08-38/-39 gibt es nicht · Krepppapier hat sie in ihrer Excel neu gestaltet
+  (von dort übernehmen, meine Vorschläge verwerfen) · der lange Vorsteuer-Absatz kommt **auch
+  in den Katalog**. Ihre Excel mit den Maßen war der Nachricht nicht angehängt.
 - [ ] Nutzerin ergänzt Maße in der Excel (Spalte „Maße“) und schickt sie zurück → Ablauf B.
 - [ ] OFFEN-Preise bestätigen: NE02-05 (70 € Set), BA08-40 bis -45, BU09-04, BU09-05.
 - [ ] BA08-38/-39: unbekannt, ob noch etwas kommt.

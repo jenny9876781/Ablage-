@@ -921,9 +921,15 @@ ist die Merkliste; erledigte Punkte hier abhaken, nicht löschen.
       → **Entscheidung 06.10.: die GmbH zahlt den Webspace, die bestehenden Seiten werden auf
       die Kikripp GmbH umgestellt; „gGmbH“ soll nirgends mehr stehen.** Hinweis gegeben, dass
       Webspace zahlen nicht zwingend heißt, die Domain zu besitzen.
-- [ ] **Nächster Schritt: Mail an die Interessenten mit dem Link** (erst nach dem Livegang).
-- [ ] Livegang: Plugin ersetzen → Einstellungen prüfen → 6 Fotos → Import → U2 ersetzen →
-      Cache leeren → Testreservierungen löschen → Vorschaubetrieb aus → privat gegenlesen.
+- [x] **LIVE seit 06.10.2026:** Impressum/Datenschutz auf GmbH geprüft, Testreservierungen
+      gelöscht, Vorschaubetrieb aus, Cache geleert, privat gegengelesen. Mailtext an die
+      Interessenten (Empfänger ins BCC) hat die Nutzerin übernommen und verschickt ihn selbst.
+      **Ab jetzt ist jede Reservierung echt** – keine Probereservierungen mehr; Tests nur auf
+      dem Testserver.
+- [ ] Laufender Betrieb: Reservierungsmails innerhalb von 3 Werktagen beantworten →
+      bestellt + Abholtermin → Bestellung erstellen → bezahlt; nach Abwicklung Kontaktdaten
+      löschen. Wöchentliche Updates bis Ende November, Spielzeug im November.
+- [ ] Zurückgestellt: WordPress-Update, Katalogseite aus der XML-Sitemap nehmen.
 
 - [x] Plugin 1.2.1 (06.10.): Einstellung „Fußzeile ausblenden“ (Standard an) – Body-Klasse
       `kikripp-ohne-fusszeile` nur auf der Katalogseite, CSS für Block-Themes

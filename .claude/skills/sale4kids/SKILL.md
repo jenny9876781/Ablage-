@@ -998,6 +998,11 @@ ist die Merkliste; erledigte Punkte hier abhaken, nicht löschen.
       `kikripp-ohne-menue`, blendet Navigation- und Social-Icons-Block im Header der Katalogseite
       aus, Logo bleibt). Nutzerin entfernt Menü + Facebook/Instagram auch auf der übrigen
       Website selbst (Design → Editor → Header). Umstellung ersetzt Texte nur, wenn unverändert.
+- [x] Plugin 1.2.4 (07.10.): Menü war auf der Live-Seite trotz 1.2.3 noch sichtbar – das Theme
+      nutzt offenbar keine Block-Navigation. CSS jetzt theme-unabhängig: `header nav`,
+      Menüknöpfe, `[class*=social]` und Links auf facebook.com/instagram.com im `<header>`, dazu
+      Elementor/Astra/Divi. Kopfzeile `Version:` im Plugin stand seit 1.2.2 falsch – mitziehen!
+      kikripp.de ist aus dem Container nicht erreichbar (Proxy 403), Quelltext bei Bedarf erfragen.
 - [x] BE10-12: neues Foto F-636 (ersetzt F-618), Beschreibung Schiebetüren + 2 Einlegeböden.
 - [x] NU03-02 Stockbetten: Beschreibung um Tischleranfertigung Ende 2019, Multiplex weiß
       melaminharzbeschichtet, Liegefläche 120x60, Neupreis 726 € ergänzt. Preis 400 € VHB bleibt

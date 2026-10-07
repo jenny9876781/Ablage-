@@ -258,4 +258,19 @@ body.kikripp-ohne-menue #site-navigation,
 body.kikripp-ohne-menue .main-navigation,
 body.kikripp-ohne-menue .site-header .social-navigation,
 body.kikripp-ohne-menue .site-header .social-links,
-body.kikripp-ohne-menue .header-social { display: none !important; }
+body.kikripp-ohne-menue .header-social,
+/* 1.2.4: unabhängig vom Theme – jedes Menü (<nav>) im Seitenkopf, Menüknopf fürs Telefon und alle
+   Verweise auf Facebook und Instagram. Elementor, Astra, Divi, Kadence, OceanWP und Co. */
+body.kikripp-ohne-menue header nav,
+body.kikripp-ohne-menue header [class*="menu-toggle"],
+body.kikripp-ohne-menue header [class*="nav-toggle"],
+body.kikripp-ohne-menue header [class*="hamburger"],
+body.kikripp-ohne-menue header [class*="social"],
+body.kikripp-ohne-menue header a[href*="facebook.com"],
+body.kikripp-ohne-menue header a[href*="instagram.com"],
+body.kikripp-ohne-menue .elementor-location-header .elementor-widget-nav-menu,
+body.kikripp-ohne-menue .elementor-location-header .elementor-widget-social-icons,
+body.kikripp-ohne-menue #masthead nav,
+body.kikripp-ohne-menue #main-header #et-top-navigation,
+body.kikripp-ohne-menue .ast-builder-menu,
+body.kikripp-ohne-menue .ast-header-social-wrap { display: none !important; }

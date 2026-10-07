@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Kikripp Artikelkatalog
  * Description: Artikelkatalog mit Reservierung für die Betriebsauflösung der Kikripp GmbH. Artikel werden importiert, Reservierungen im Backend verwaltet.
- * Version:     1.2.2
+ * Version:     1.2.4
  * Author:      Kikripp GmbH
  * Text Domain: kikripp-katalog
  * Requires at least: 5.8
@@ -13,7 +13,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-define('KIKRIPP_VERSION', '1.2.3');
+define('KIKRIPP_VERSION', '1.2.4');
 define('KIKRIPP_PFAD', plugin_dir_path(__FILE__));
 define('KIKRIPP_URL', plugin_dir_url(__FILE__));
 

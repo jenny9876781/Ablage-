@@ -212,14 +212,14 @@
     if (el('k-fenster') && !el('k-fenster').hidden) { schliessen(); }
   });
 
-  /* „So läuft es ab“: jede Zeile aus den Einstellungen wird ein Punkt. Auf dem Telefon
+  /* „So läuft es ab“: jede Zeile aus den Einstellungen wird ein Absatz. Auf dem Telefon
      zugeklappt, damit die Artikel nicht erst nach einem Bildschirm Text beginnen. */
   function ablaufKasten() {
     var punkte = String(ABLAUF).split(/\r?\n/).map(function (t) { return t.trim(); }).filter(Boolean);
     if (!punkte.length) { return ''; }
     var offen = window.matchMedia && window.matchMedia('(min-width: 561px)').matches;
     return '<details class="ablauf"' + (offen ? ' open' : '') + '><summary>So läuft es ab</summary>' +
-      '<p>' + sicher(punkte.join(' ')) + '</p></details>';
+      punkte.map(function (t) { return '<p>' + sicher(t) + '</p>'; }).join('') + '</details>';
   }
 
   /* Anbieterkennzeichnung. Der Katalog liegt auf fremdem Speicherplatz — es muss
@@ -464,7 +464,9 @@
           '<div>' + auswahlFeld('k-bes-zeit', BES_ZEITEN.map(function (z) { return [z, z + ' Uhr']; }), 'Uhrzeit wählen') + '</div></div></div>'
         : (BES_AB > 0 ? '<p class="hint-bes">Eine Besichtigung bieten wir für Artikel ab ' + eur(BES_AB) + ' an.</p>' : '')) +
       '<div class="feld"><label for="k-abhol">Gewünschter Abholtermin *</label>' +
-        auswahlFeld('k-abhol', abholtage, 'Montag oder Dienstag wählen') +
+        '<div class="zwei"><div>' + auswahlFeld('k-abhol', abholtage, 'Montag oder Dienstag wählen') + '</div>' +
+        '<div>' + auswahlFeld('k-abhol-zeit', BES_ZEITEN.map(function (z) { return [z, z + ' Uhr']; }), 'Uhrzeit (optional)') +
+        '</div></div>' +
         '<small class="hint">Abholung montags und dienstags 08:00–11:00 Uhr' +
         (SCHLUSS ? ', spätestens ' + datumText(SCHLUSS).slice(4) : '') + '. Abgeholt wird nach Zahlungseingang.</small>' +
         '<label class="chk2"><input type="checkbox" id="k-demontage"> Demontage nötig – Termin Freitagnachmittag ' +
@@ -520,7 +522,7 @@
       plz: wert('k-plz'), ort: wert('k-ort'),
       email: wert('k-mail'), telefon: wert('k-tel'), nachricht: wert('k-text'),
       besichtigung: besichtigung, besichtigung_tag: wert('k-bes-tag'), besichtigung_zeit: wert('k-bes-zeit'),
-      abholwunsch: wert('k-abhol'), demontage: !!(el('k-demontage') && el('k-demontage').checked),
+      abholwunsch: wert('k-abhol'), abholwunsch_zeit: wert('k-abhol') ? wert('k-abhol-zeit') : '', demontage: !!(el('k-demontage') && el('k-demontage').checked),
       webseite: wert('k-webseite'), dauer: Date.now() - formularSeit,
       artikel: merk
     };
@@ -532,8 +534,8 @@
     }
     if (!nutzlast.email) { fehler('Bitte geben Sie eine E-Mail-Adresse an.'); return; }
     if (nutzlast.telefon.replace(/\D/g, '').length < 6) {
-      fehler('Bitte geben Sie eine Telefonnummer an, unter der wir Sie erreichen. Wir rufen Sie nach der ' +
-        'Reservierung an.');
+      fehler('Bitte geben Sie eine Telefonnummer an, unter der wir Sie erreichen. Wir melden uns nach der ' +
+        'Reservierung bei Ihnen.');
       return;
     }
     if (besichtigung && (!nutzlast.besichtigung_tag || !nutzlast.besichtigung_zeit)) {
@@ -562,7 +564,8 @@
               (nutzlast.besichtigung ? '<div class="zeile"><span>Besichtigung gewünscht</span><b>' +
                 datumText(nutzlast.besichtigung_tag) + ', ' + sicher(nutzlast.besichtigung_zeit) + ' Uhr</b></div>' : '') +
               '<div class="zeile"><span>Abholung gewünscht</span><b>' +
-                (nutzlast.abholwunsch ? datumText(nutzlast.abholwunsch) : '') +
+                (nutzlast.abholwunsch ? datumText(nutzlast.abholwunsch) +
+                  (nutzlast.abholwunsch_zeit ? ', ' + sicher(nutzlast.abholwunsch_zeit) + ' Uhr' : '') : '') +
                 (nutzlast.demontage ? (nutzlast.abholwunsch ? ' · ' : '') + 'Demontage nach Vereinbarung' : '') + '</b></div>' +
               (k.email || k.telefon
                 ? '<div class="zeile"><span>Wir erreichen Sie unter</span><b>' +

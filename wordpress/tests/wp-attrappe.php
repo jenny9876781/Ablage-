@@ -118,6 +118,7 @@ $GLOBALS['mails'] = [];
 function get_option($name, $vorgabe = false) { return $GLOBALS['optionen'][$name] ?? $vorgabe; }
 function update_option($name, $wert) { $GLOBALS['optionen'][$name] = $wert; return true; }
 function add_option($name, $wert) { if (!isset($GLOBALS['optionen'][$name])) { $GLOBALS['optionen'][$name] = $wert; } return true; }
+function delete_option($name) { unset($GLOBALS['optionen'][$name]); return true; }
 function get_transient($n) { return false; }
 function set_transient($n, $w, $z) { return true; }
 function delete_transient($n) { return true; }

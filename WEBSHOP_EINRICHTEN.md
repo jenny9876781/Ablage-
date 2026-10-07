@@ -160,6 +160,7 @@ automatisch eingetragen; du prüfst sie nur.
 | Abholadresse | erscheint unter dem Katalog und auf der Bestellung |
 | Rechtliche Hinweise | die Kaufbedingungen mit dem Steuerabsatz; stehen unter dem Katalog und auf jeder Bestellung |
 | Fußzeile ausblenden | **an** — die Fußzeile der Website erscheint auf der Katalogseite nicht; Impressum und Datenschutz stehen im Anbieter-Block |
+| Menü ausblenden | **an** — Menü und Facebook-/Instagram-Symbole im Kopf der Website erscheinen auf der Katalogseite nicht; das Logo bleibt. Für die übrigen Seiten: *Design → Editor → Header* |
 | Vorschaubetrieb | **eingeschaltet lassen**, solange ihr testet |
 
 Zu **Vorschaubetrieb**: Solange der Haken gesetzt ist, werden alle eingehenden Reservierungen
@@ -459,11 +460,13 @@ Browserzeile steht. Damit sehe ich in der Regel sofort, woran es liegt.
 Unter **Artikelkatalog → Reservierungen** siehst du alle Vorgänge mit Kontaktdaten, Anschrift,
 Besichtigungs- und Abholwunsch. Der Ablauf:
 
-1. **reserviert** — läuft nach 3 Werktagen von selbst ab. Du rufst an.
+1. **reserviert** — läuft nach 3 Werktagen von selbst ab. Du meldest dich beim Interessenten.
 2. **bestellt** — nach dem Anruf anklicken. Ab dann läuft die Reservierung nicht mehr ab.
 3. **Bestellung erstellen** — *Unternehmen* oder *Privatperson* wählen, drucken oder als PDF
-   speichern, unterschreiben lassen (Unternehmen per Scan, Privatpersonen vor Ort).
-4. Rechnung aus DATEV, Abholtermin im Feld daneben eintragen.
+   speichern, unterschreiben lassen (per Scan oder bei der Abholung). Die Fassung *Privatperson*
+   enthält die Widerrufsbelehrung und das Widerrufsformular – immer mitschicken.
+4. Rechnung aus DATEV (für alle, auch Privatpersonen), Abholtermin im Feld daneben eintragen.
+   Abgeholt wird erst nach Zahlungseingang. Privatpersonen können 14 Tage ab Abholung widerrufen.
 5. **bezahlt** — nach Zahlungseingang. Die Artikel verschwinden aus dem Katalog.
 
 Nimmt jemand nur einen Teil, stornierst du die übrigen Positionen einzeln — sie sind sofort

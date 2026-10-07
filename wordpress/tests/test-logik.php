@@ -450,7 +450,13 @@ pruefe('Unternehmen: keine Verjährungsklausel', strpos($hu, 'ein Jahr ab Überg
 pruefe('Privat: gesonderte Verjährungsvereinbarung', strpos($hp, 'Gesonderte Vereinbarung zur Verjährung') !== false
        && strpos($hp, 'ein Jahr ab Übergabe') !== false, true);
 pruefe('Privat: eigene Unterschrift für die Klausel', substr_count($hp, 'Unterschrift Käufer'), 2);
-pruefe('Privat: Unterschrift vor Ort, Zahlung vor Übergabe', strpos($hp, 'vor Ort unterschrieben') !== false, true);
+pruefe('Privat: Zahlung ebenfalls per Rechnung vorab', strpos($hp, 'per E-Mail versandt') !== false
+       && strpos($hp, 'vor Ort unterschrieben') === false, true);
+pruefe('Privat: Widerrufsbelehrung', strpos($hp, 'Widerrufsbelehrung') !== false
+       && strpos($hp, 'binnen vierzehn Tagen ohne Angabe von Gründen') !== false, true);
+pruefe('Privat: Muster-Widerrufsformular', strpos($hp, 'Muster-Widerrufsformular') !== false
+       && strpos($hp, 'Hiermit widerrufe(n) ich/wir') !== false, true);
+pruefe('Unternehmen: keine Widerrufsbelehrung', strpos($hu, 'Widerrufsbelehrung') === false, true);
 pruefe('Unternehmen: Rechnung per Mail, Zahlung vorab', strpos($hu, 'per E-Mail versandt') !== false, true);
 pruefe('Steuerhinweis steht drauf', strpos($hu, '§ 4 Nr. 28 UStG') !== false, true);
 pruefe('Gesamtbetrag umsatzsteuerfrei', strpos($hu, '(umsatzsteuerfrei)') !== false && strpos($hu, '60,00 €') !== false, true);
@@ -534,14 +540,56 @@ titel('29. Umstellung 1.2.0 → 1.2.2: kürzerer Ablauftext');
 update_option('kikripp_plugin_version', '1.2.0');
 update_option('kikripp_ablauftext', str_replace("\n", "\r\n", kikripp_ablauf_120()));   // so speichert ein Formular
 kikripp_umstellen();
-pruefe('alter Text wird durch den Fließtext ersetzt', get_option('kikripp_ablauftext'), kikripp_ablauf_122());
-pruefe('Stand steht auf 1.2.2', get_option('kikripp_plugin_version'), '1.2.2');
+pruefe('alter Text wird über 1.2.2 bis zum Text von 1.2.3 ersetzt', get_option('kikripp_ablauftext'), kikripp_ablauf_123());
+pruefe('Stand steht auf 1.2.3', get_option('kikripp_plugin_version'), '1.2.3');
 update_option('kikripp_plugin_version', '1.2.0');
 update_option('kikripp_ablauftext', 'Eigener Text der Nutzerin');
 update_option('kikripp_ust_prozent', 7);
 kikripp_umstellen();
 pruefe('eigener Ablauftext bleibt', get_option('kikripp_ablauftext'), 'Eigener Text der Nutzerin');
 pruefe('1.2.2 fasst sonst nichts an', get_option('kikripp_ust_prozent'), 7);
+
+titel('30. Umstellung 1.2.2 → 1.2.3: Bezahlung gegen Rechnung, Widerrufshinweis, Menü');
+update_option('kikripp_plugin_version', '1.2.2');
+update_option('kikripp_ablauftext', kikripp_ablauf_122());
+update_option('kikripp_rechtstext', str_replace("\n", "\r\n", kikripp_rechtstext_120()));
+delete_option('kikripp_kopf_aus');
+kikripp_umstellen();
+pruefe('Ablauftext von 1.2.2 wird ersetzt', get_option('kikripp_ablauftext'), kikripp_ablauf_123());
+pruefe('neuer Text: Bezahlung generell gegen Rechnung',
+       strpos(get_option('kikripp_ablauftext'), 'generell per Überweisung gegen Rechnung vor der Abholung') !== false, true);
+pruefe('Kaufbedingungen bekommen den Widerrufshinweis', get_option('kikripp_rechtstext'), kikripp_rechtstext_123());
+pruefe('Menü ausblenden ist eingeschaltet', (int) get_option('kikripp_kopf_aus'), 1);
+pruefe('Stand steht auf 1.2.3', get_option('kikripp_plugin_version'), '1.2.3');
+update_option('kikripp_plugin_version', '1.2.2');
+update_option('kikripp_ablauftext', 'Eigener Text');
+update_option('kikripp_rechtstext', 'Eigene Bedingungen');
+update_option('kikripp_kopf_aus', 0);
+kikripp_umstellen();
+pruefe('eigener Ablauftext bleibt', get_option('kikripp_ablauftext'), 'Eigener Text');
+pruefe('eigene Kaufbedingungen bleiben', get_option('kikripp_rechtstext'), 'Eigene Bedingungen');
+pruefe('ausgeschaltetes Menü-Ausblenden bleibt aus', (int) get_option('kikripp_kopf_aus'), 0);
+kikripp_umstellen();
+pruefe('läuft nur einmal', get_option('kikripp_ablauftext'), 'Eigener Text');
+
+titel('31. Abholwunsch mit Uhrzeit');
+pruefe('mit Uhrzeit lesbar', Kikripp_Mail::abholung_text(['abholwunsch' => '2026-10-19 09:30']), 'Mo 19.10.2026, 09:30 Uhr');
+pruefe('ohne Uhrzeit wie bisher', Kikripp_Mail::abholung_text(['abholwunsch' => '2026-10-20']), 'Di 20.10.2026');
+$va = Kikripp_DB::reservieren(array_merge(kontakt('Uhrzeit'), ['abholwunsch' => '2026-10-19 10:30']), ['W-002' => 1]);
+pruefe('Datum und Uhrzeit passen in die Spalte', Kikripp_DB::vorgang($va)['abholwunsch'], '2026-10-19 10:30');
+
+titel('32. Menü im Kopf der Website auf der Katalogseite ausblenden');
+$GLOBALS['seiteninhalt'] = '[kikripp_katalog]';
+update_option('kikripp_kopf_aus', 1);
+pruefe('Katalogseite bekommt die Klasse', in_array('kikripp-ohne-menue', Kikripp_Frontend::body_klasse([]), true), true);
+update_option('kikripp_kopf_aus', 0);
+pruefe('ausgeschaltet: keine Klasse', in_array('kikripp-ohne-menue', Kikripp_Frontend::body_klasse([]), true), false);
+update_option('kikripp_kopf_aus', 1);
+$GLOBALS['seiteninhalt'] = 'Impressum der Kikripp GmbH';
+pruefe('andere Seiten bleiben unberührt', in_array('kikripp-ohne-menue', Kikripp_Frontend::body_klasse([]), true), false);
+pruefe('CSS blendet Navigation und Social-Icons-Block aus',
+       strpos($css, 'body.kikripp-ohne-menue header .wp-block-navigation') !== false
+       && strpos($css, 'body.kikripp-ohne-menue header .wp-block-social-links') !== false, true);
 
 printf("\n== Ergebnis: %d Prüfungen, %d Fehler ==\n", $geprueft, $fehler);
 exit($fehler > 0 ? 1 : 0);

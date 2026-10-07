@@ -214,6 +214,14 @@ class Kikripp_REST {
                     . ($schluss < PHP_INT_MAX ? gmdate('d.m.Y', $schluss) : 'Ende des Verkaufs') . '.');
             }
             $kontakt['abholwunsch'] = gmdate('Y-m-d', $t);
+            // Uhrzeit ist freiwillig – dieselben halben Stunden wie bei der Besichtigung (8 bis 11 Uhr)
+            $zeit = (string) $anfrage->get_param('abholwunsch_zeit');
+            if ($zeit !== '') {
+                if (!in_array($zeit, self::BESICHTIGUNG_ZEITEN, true)) {
+                    return self::fehler('Bitte wählen Sie für die Abholung eine Uhrzeit zwischen 08:00 und 10:30 Uhr.');
+                }
+                $kontakt['abholwunsch'] .= ' ' . $zeit;
+            }
         } elseif (!$kontakt['demontage']) {
             return self::fehler('Bitte wählen Sie einen Wunschtermin für die Abholung (montags oder dienstags) '
                 . 'oder kreuzen Sie an, dass eine Demontage nötig ist.');

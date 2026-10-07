@@ -278,8 +278,10 @@ class Kikripp_Admin {
      * Zwei Fassungen, weil das Recht es verlangt: Gegenüber Unternehmen ist die
      * Gewährleistung ausgeschlossen. Gegenüber Privatpersonen darf die Verjährung bei
      * gebrauchten Sachen nur auf ein Jahr verkürzt werden, wenn das gesondert vereinbart
-     * wird – deshalb ein eigener Kasten mit eigener Unterschrift. Privatpersonen
-     * unterschreiben vor Ort (Besichtigung oder Abholung); dann ist es kein Fernabsatz.
+     * wird – deshalb ein eigener Kasten mit eigener Unterschrift. Seit 07.10.2026 zahlen auch
+     * Privatpersonen per Rechnung vor der Abholung; der Vertrag kann also ohne Treffen
+     * zustande kommen (Fernabsatz). Die Fassung für Privatpersonen enthält deshalb die
+     * Widerrufsbelehrung und das Muster-Widerrufsformular (Anlage 1 und 2 zu Art. 246a EGBGB).
      */
     public static function bestellung() {
         if (!current_user_can('manage_options')) { wp_die('Keine Berechtigung.'); }
@@ -327,10 +329,7 @@ class Kikripp_Admin {
         foreach (preg_split('/\n\s*\n/', trim((string) get_option('kikripp_rechtstext', ''))) as $absatz) {
             if (trim($absatz) !== '') { $bedingungen .= '<p>' . $e(trim($absatz)) . '</p>'; }
         }
-        $zahlung = $privat
-            ? 'Die Bestellung wird vor Ort unterschrieben. Die Zahlung erfolgt vor der Übergabe per Überweisung; '
-              . 'die Ware wird erst nach Zahlung ausgehändigt.'
-            : 'Die Rechnung wird per E-Mail versandt. Der Betrag ist vorab auf das in der Rechnung angegebene Konto '
+        $zahlung = 'Die Rechnung wird per E-Mail versandt. Der Betrag ist vorab auf das in der Rechnung angegebene Konto '
               . 'zu überweisen; abgeholt wird erst nach Zahlungseingang.';
         $gewaehr = $privat
             ? '<div class="kasten"><b>Gesonderte Vereinbarung zur Verjährung</b>'
@@ -376,7 +375,52 @@ class Kikripp_Admin {
             . $gewaehr
             . '<div class="klein"><b>Kaufbedingungen</b>' . $bedingungen . '</div>'
             . '<div class="unterschrift"><span>Ort, Datum</span><span>Unterschrift Käufer</span><span>' . $e($firma) . '</span></div>'
+            . ($privat ? self::widerruf_html($firma, $e) : '')
             . '</body></html>';
+    }
+
+    /**
+     * Widerrufsbelehrung und Muster-Widerrufsformular für Verbraucher, nach den gesetzlichen
+     * Mustern. Angepasst an die Abholung: Die Ware wird an der Abholadresse zurückgegeben.
+     */
+    private static function widerruf_html($firma, $e) {
+        $adresse = (string) get_option('kikripp_abholadresse', '');
+        $mail = Kikripp_REST::kontakt_email();
+        $tel = (string) get_option('kikripp_telefon', '');
+        $wir = $e($firma) . ($adresse !== '' ? ', ' . $e($adresse) : '')
+            . ($tel !== '' ? ', Telefon ' . $e($tel) : '') . ($mail !== '' ? ', E-Mail ' . $e($mail) : '');
+        return '<div class="kasten" style="page-break-before:always"><b>Widerrufsbelehrung</b>'
+            . '<p><b>Widerrufsrecht</b><br>Sie haben das Recht, binnen vierzehn Tagen ohne Angabe von Gründen diesen Vertrag '
+            . 'zu widerrufen. Die Widerrufsfrist beträgt vierzehn Tage ab dem Tag, an dem Sie oder ein von Ihnen benannter '
+            . 'Dritter, der nicht der Beförderer ist, die Waren in Besitz genommen haben bzw. hat.</p>'
+            . '<p>Um Ihr Widerrufsrecht auszuüben, müssen Sie uns (' . $wir . ') mittels einer eindeutigen Erklärung '
+            . '(z. B. ein mit der Post versandter Brief oder eine E-Mail) über Ihren Entschluss, diesen Vertrag zu widerrufen, '
+            . 'informieren. Sie können dafür das beigefügte Muster-Widerrufsformular verwenden, das jedoch nicht vorgeschrieben '
+            . 'ist. Zur Wahrung der Widerrufsfrist reicht es aus, dass Sie die Mitteilung über die Ausübung des '
+            . 'Widerrufsrechts vor Ablauf der Widerrufsfrist absenden.</p>'
+            . '<p><b>Folgen des Widerrufs</b><br>Wenn Sie diesen Vertrag widerrufen, haben wir Ihnen alle Zahlungen, die wir '
+            . 'von Ihnen erhalten haben, unverzüglich und spätestens binnen vierzehn Tagen ab dem Tag zurückzuzahlen, an dem '
+            . 'die Mitteilung über Ihren Widerruf dieses Vertrags bei uns eingegangen ist. Für diese Rückzahlung verwenden wir '
+            . 'dasselbe Zahlungsmittel, das Sie bei der ursprünglichen Transaktion eingesetzt haben, es sei denn, mit Ihnen '
+            . 'wurde ausdrücklich etwas anderes vereinbart; in keinem Fall werden Ihnen wegen dieser Rückzahlung Entgelte '
+            . 'berechnet. Wir können die Rückzahlung verweigern, bis wir die Waren wieder zurückerhalten haben oder bis Sie '
+            . 'den Nachweis erbracht haben, dass Sie die Waren zurückgesandt haben, je nachdem, welches der frühere Zeitpunkt ist.</p>'
+            . '<p>Sie haben die Waren unverzüglich und in jedem Fall spätestens binnen vierzehn Tagen ab dem Tag, an dem Sie uns '
+            . 'über den Widerruf dieses Vertrags unterrichten, an uns zurückzugeben' . ($adresse !== '' ? ' (' . $e($adresse) . ')' : '')
+            . '. Die Frist ist gewahrt, wenn Sie die Waren vor Ablauf der Frist von vierzehn Tagen zurückbringen oder absenden. '
+            . 'Sie tragen die unmittelbaren Kosten der Rückgabe der Waren. Sie müssen für einen etwaigen Wertverlust der Waren '
+            . 'nur aufkommen, wenn dieser Wertverlust auf einen zur Prüfung der Beschaffenheit, Eigenschaften und '
+            . 'Funktionsweise der Waren nicht notwendigen Umgang mit ihnen zurückzuführen ist.</p></div>'
+            . '<div class="kasten"><b>Muster-Widerrufsformular</b>'
+            . '<p class="klein">(Wenn Sie den Vertrag widerrufen wollen, dann füllen Sie bitte dieses Formular aus und senden Sie es zurück.)</p>'
+            . '<p>An ' . $wir . ':</p>'
+            . '<p>Hiermit widerrufe(n) ich/wir (*) den von mir/uns (*) abgeschlossenen Vertrag über den Kauf der folgenden Waren (*):</p>'
+            . '<p>_______________________________________________________________</p>'
+            . '<p>Bestellt am (*) / erhalten am (*): ____________________</p>'
+            . '<p>Name des/der Verbraucher(s): ____________________</p>'
+            . '<p>Anschrift des/der Verbraucher(s): ____________________</p>'
+            . '<div class="unterschrift"><span>Datum</span><span>Unterschrift des/der Verbraucher(s) (nur bei Mitteilung auf Papier)</span></div>'
+            . '<p class="klein">(*) Unzutreffendes streichen.</p></div>';
     }
 
     public static function export() {
@@ -757,6 +801,13 @@ class Kikripp_Admin {
              . 'Bleibt die Fußzeile trotzdem sichtbar, nutzt das Theme eine ungewöhnliche Auszeichnung – bitte melden.</p></td></tr>',
              checked(1, (int) get_option('kikripp_fusszeile_aus', 1), false));
 
+        printf('<tr><th scope="row">Menü ausblenden</th><td>'
+             . '<label><input type="checkbox" name="kopf_aus" value="1" %s> '
+             . 'Menü und Social-Media-Symbole im Kopf der Website auf der Katalogseite nicht anzeigen</label>'
+             . '<p class="description">Das Logo bleibt stehen. Auf den übrigen Seiten der Website ändern Sie das Menü unter '
+             . 'Design → Editor → Header.</p></td></tr>',
+             checked(1, (int) get_option('kikripp_kopf_aus', 1), false));
+
         printf('<tr><th scope="row">Vorschaubetrieb</th><td>'
              . '<label><input type="checkbox" name="vorschau" value="1" %s> '
              . 'Eingehende Reservierungen als Testdaten kennzeichnen</label>'
@@ -794,6 +845,7 @@ class Kikripp_Admin {
         update_option('kikripp_steuerhinweis', sanitize_text_field(wp_unslash($_POST['steuerhinweis'] ?? '')));
         update_option('kikripp_vorschau', isset($_POST['vorschau']) ? 1 : 0);
         update_option('kikripp_fusszeile_aus', isset($_POST['fusszeile_aus']) ? 1 : 0);
+        update_option('kikripp_kopf_aus', isset($_POST['kopf_aus']) ? 1 : 0);
         update_option('kikripp_abholadresse', sanitize_text_field(wp_unslash($_POST['abholadresse'] ?? '')));
         update_option('kikripp_rechtstext', sanitize_textarea_field(wp_unslash($_POST['rechtstext'] ?? '')));
         update_option('kikripp_firma', sanitize_text_field(wp_unslash($_POST['firma'] ?? '')));

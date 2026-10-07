@@ -989,6 +989,19 @@ ist die Merkliste; erledigte Punkte hier abhaken, nicht löschen.
       bestellt + Abholtermin → Bestellung erstellen → bezahlt; nach Abwicklung Kontaktdaten
       löschen. Wöchentliche Updates bis Ende November, Spielzeug im November.
 - [ ] Zurückgestellt: WordPress-Update, Katalogseite aus der XML-Sitemap nehmen.
+- [x] Plugin 1.2.3 (07.10.): **Bezahlung jetzt für alle per Rechnung vor der Abholung**
+      (Wortlaut der Nutzerin, `kikripp_ablauf_123()`, zwei Absätze). Widerspruch wegen
+      Widerrufsrecht gegeben, Nutzerin bleibt dabei → Bestellung *Privatperson* enthält
+      Widerrufsbelehrung + Muster-Widerrufsformular, Kaufbedingungen einen Hinweis
+      (`kikripp_rechtstext_123()`). Abholwunsch mit freiwilliger Uhrzeit 08:00–10:30
+      (`abholwunsch` = `Y-m-d H:i`). Option „Menü ausblenden“ (`kikripp_kopf_aus`, Body-Klasse
+      `kikripp-ohne-menue`, blendet Navigation- und Social-Icons-Block im Header der Katalogseite
+      aus, Logo bleibt). Nutzerin entfernt Menü + Facebook/Instagram auch auf der übrigen
+      Website selbst (Design → Editor → Header). Umstellung ersetzt Texte nur, wenn unverändert.
+- [x] BE10-12: neues Foto F-636 (ersetzt F-618), Beschreibung Schiebetüren + 2 Einlegeböden.
+- [x] NU03-02 Stockbetten: Beschreibung um Tischleranfertigung Ende 2019, Multiplex weiß
+      melaminharzbeschichtet, Liegefläche 120x60, Neupreis 726 € ergänzt. Preis 400 € VHB
+      **unverändert** – Empfehlung an die Nutzerin: eher senken (16 Stück), Entscheidung offen.
 - [x] Social Media (06.10.): `scripts/build_social.py` → `ausgabe/social/` (5 Storys 1080×1920,
       Vorankündigung Spielzeug, Feed-Beitrag 1080×1350, Rot #C8102E, Archivo Black + Inter aus
       `assets/schriften`, ohne Logo, Story oben 230/unten 300 px frei). Begleittexte als Word

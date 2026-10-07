@@ -98,7 +98,8 @@ with sync_playwright() as p:
     recht = seite.inner_text(".recht") if seite.locator(".recht").count() else ""
     pruefe("Kaufbedingungen vorhanden", "Gewährleistung" in recht and "§ 4 Nr. 28 UStG" in recht
            and "§ 4 Nr. 23 UStG" in recht, f"({recht[:160]!r})")
-    pruefe("kein Satz mehr zum Widerrufsrecht", "Widerrufsrecht" not in recht)
+    # Seit 07.10.2026 zahlen auch Privatpersonen per Rechnung vorab – Verbraucher haben ein Widerrufsrecht.
+    pruefe("Hinweis auf das Widerrufsrecht für Verbraucher", "gesetzliches Widerrufsrecht" in recht, f"({recht[-200:]!r})")
     pruefe("Abholadresse genannt", "Hermann-Schwer-Str. 1" in recht)
     pruefe("Anbieter benannt",
            "anbieter" in recht.lower() and "Kikripp GmbH" in recht, f"({recht[:200]!r})")
@@ -106,6 +107,10 @@ with sync_playwright() as p:
            seite.locator('.recht a[href*="impressum"]').count() == 1)
     pruefe("Datenschutz verlinkt",
            seite.locator('.recht a[href*="datenschutz"]').count() == 1)
+    pruefe("Menü und Social-Media-Symbole im Kopf sind ausgeblendet",
+           seite.locator("#probe-menue").count() == 1 and not seite.locator("#probe-menue").is_visible()
+           and not seite.locator("#probe-social").is_visible())
+    pruefe("Logo im Kopf bleibt sichtbar", seite.locator("#probe-logo").is_visible())
     pruefe("Fußzeile der Website ist auf der Katalogseite ausgeblendet",
            seite.locator("#probe-fusszeile").count() == 1 and not seite.locator("#probe-fusszeile").is_visible())
     pruefe("kein Hut und kein Schriftzug KIKRIPP im Kopf", seite.locator(".kopf img").count() == 0
@@ -114,7 +119,8 @@ with sync_playwright() as p:
     band_fett = seite.evaluate("() => getComputedStyle(document.querySelector('.band')).fontWeight")
     pruefe("Ankündigung rot hinterlegt und fett", band_farbe == "rgb(200, 16, 46)" and int(band_fett) >= 700,
            f"({band_farbe}, {band_fett})")
-    pruefe("Ablauf als Fließtext", seite.locator(".ablauf p").count() == 1 and seite.locator(".ablauf li").count() == 0)
+    pruefe("Ablauf als Fließtext in zwei Absätzen", seite.locator(".ablauf p").count() == 2 and seite.locator(".ablauf li").count() == 0)
+    pruefe("Ablauf: Bezahlung generell gegen Rechnung", "generell per Überweisung gegen Rechnung" in ablauf, f"({ablauf!r})")
     pruefe("Kopf nennt die Verkäuferin",
            "Ein Angebot der Kikripp GmbH" in seite.inner_text(".kopf"))
     seite.screenshot(path="/tmp/kikweb/t02-katalog.png")
@@ -270,6 +276,9 @@ with sync_playwright() as p:
     pruefe("ohne Abholtermin wird nicht abgeschickt",
            "Abholung" in seite.inner_text("#k-meldung"), f"({seite.inner_text('#k-meldung')!r})")
     seite.select_option("#k-abhol", index=1)
+    zeiten = [t.strip() for t in seite.locator("#k-abhol-zeit option").all_inner_texts()[1:]]
+    pruefe("Abholung: Uhrzeiten 08:00 bis 10:30", zeiten[:1] == ["08:00 Uhr"] and zeiten[-1:] == ["10:30 Uhr"], f"({zeiten})")
+    seite.select_option("#k-abhol-zeit", "09:30")
     if seite.locator("#k-bes").count():
         seite.check("#k-bes")
         seite.select_option("#k-bes-tag", index=1); seite.select_option("#k-bes-zeit", "09:00")
@@ -284,7 +293,7 @@ with sync_playwright() as p:
     pruefe("Beleg zeigt Vorgangsnummer", "Vorgangsnummer" in beleg, f"({beleg[:200]!r})")
     pruefe("Beleg zeigt das Fristdatum (Werktag)",
            re.search(r"Reserviert bis\s+(Mo|Di|Mi|Do|Fr), \d{2}\.\d{2}\.\d{4}", beleg) is not None, f"({beleg!r})")
-    pruefe("Beleg zeigt den Abholwunsch", "Abholung gewünscht" in beleg, f"({beleg!r})")
+    pruefe("Beleg zeigt den Abholwunsch mit Uhrzeit", "Abholung gewünscht" in beleg and "09:30 Uhr" in beleg, f"({beleg!r})")
     pruefe("Beleg zeigt die Positionen", "3 Stück gesamt" in beleg, f"({beleg!r})")
     pruefe("Beleg zeigt die Kontaktdaten zum Gegenlesen",
            "test@example.org" in beleg and "07721 123456" in beleg, f"({beleg!r})")

@@ -48,6 +48,10 @@ class Kikripp_Frontend {
         if (self::ist_katalogseite() && (int) get_option('kikripp_fusszeile_aus', 1) === 1) {
             $klassen[] = 'kikripp-ohne-fusszeile';
         }
+        // Menü und Social-Media-Symbole im Kopf führen auf die alten Seiten der früheren Betreiberin.
+        if (self::ist_katalogseite() && (int) get_option('kikripp_kopf_aus', 1) === 1) {
+            $klassen[] = 'kikripp-ohne-menue';
+        }
         return $klassen;
     }
 

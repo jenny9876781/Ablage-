@@ -247,3 +247,15 @@ html.kik-offen { overflow: hidden; }
   html.kik-offen .kik-fenster-box { box-shadow: none; }
   .kikripp .kik-zu, .kikripp .knoepfe-beleg { display: none !important; }
 }
+
+/* 1.2.3: Menü und Social-Media-Symbole im Kopf der Website auf der Katalogseite ausblenden.
+   Block-Themes (Navigation-/Social-Icons-Block) und gängige klassische Themes. Das Logo bleibt. */
+body.kikripp-ohne-menue header .wp-block-navigation,
+body.kikripp-ohne-menue header .wp-block-social-links,
+body.kikripp-ohne-menue .wp-site-blocks > header .wp-block-navigation,
+body.kikripp-ohne-menue .wp-site-blocks > header .wp-block-social-links,
+body.kikripp-ohne-menue #site-navigation,
+body.kikripp-ohne-menue .main-navigation,
+body.kikripp-ohne-menue .site-header .social-navigation,
+body.kikripp-ohne-menue .site-header .social-links,
+body.kikripp-ohne-menue .header-social { display: none !important; }

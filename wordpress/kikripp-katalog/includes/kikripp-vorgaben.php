@@ -15,8 +15,14 @@ function kikripp_vorgaben_120() {
         'kikripp_mindestwert'      => 50,
         'kikripp_besichtigung_ab'  => 100,
         'kikripp_abholschluss'     => '2026-12-10',
-        'kikripp_ablauftext'       => kikripp_ablauf_122(),
-        'kikripp_rechtstext'       => implode("\n\n", [
+        'kikripp_ablauftext'       => kikripp_ablauf_123(),
+        'kikripp_rechtstext'       => kikripp_rechtstext_123(),
+    ];
+}
+
+/** Kaufbedingungen bis 1.2.2 – nur um sie beim Umstellen wiederzuerkennen. */
+function kikripp_rechtstext_120() {
+    return implode("\n\n", [
             'Gebrauchte Artikel aus Betriebsauflösung. Besichtigung und Funktionsprüfung vor Kauf ausdrücklich erwünscht. '
             . 'Verkauf im vorhandenen Zustand. Abholung durch den Käufer. Gewährleistung gegenüber Unternehmern ausgeschlossen. '
             . 'Gegenüber Verbrauchern gelten die gesetzlichen Bestimmungen; die Verjährungsfrist für Mängelansprüche bei '
@@ -25,8 +31,28 @@ function kikripp_vorgaben_120() {
             . 'die nach § 4 Nr. 23 UStG steuerfrei waren. Ein Vorsteuerabzug aus der Anschaffung oder den laufenden '
             . 'Aufwendungen war daher ausgeschlossen. Die Veräußerung erfolgt steuerfrei; Umsatzsteuer wird nicht berechnet '
             . 'und nicht ausgewiesen.',
-        ]),
-    ];
+        ]);
+}
+
+/**
+ * 1.2.3: Seit 07.10.2026 zahlen auch Privatpersonen per Rechnung vor der Abholung. Der Vertrag
+ * kommt dann ohne persönliches Treffen zustande, Verbraucher haben ein Widerrufsrecht. Die
+ * Belehrung steht in der Bestellung für Privatpersonen; hier nur der Hinweis darauf.
+ */
+function kikripp_rechtstext_123() {
+    return kikripp_rechtstext_120() . "\n\n" . 'Verbrauchern steht ein gesetzliches Widerrufsrecht zu. '
+        . 'Die Widerrufsbelehrung und das Muster-Widerrufsformular erhalten Sie mit der Bestellung.';
+}
+
+/** Ablauftext 1.2.3 – Wortlaut der Nutzerin vom 07.10.2026: Bezahlung generell gegen Rechnung. */
+function kikripp_ablauf_123() {
+    return 'Ihre Auswahl bleibt 3 Werktage reserviert, nach Eingang melden wir uns bei Ihnen. '
+        . 'Mindestbestellwert 50 €. Artikel ab 100 € können Sie donnerstags von 8 bis 11 Uhr nach '
+        . 'Vereinbarung besichtigen. Der Kaufvertrag kommt mit der unterschriebenen Bestellung zustande.' . "\n"
+        . 'Bezahlung: generell per Überweisung gegen Rechnung vor der Abholung. Abholung montags und dienstags '
+        . 'von 8 bis 11 Uhr, Demontage nach Vereinbarung auch freitagnachmittags oder samstagvormittags (bitte '
+        . 'Werkzeug mitbringen). Abholung spätestens bis 10.12.2026, danach geht nicht abgeholte Ware ohne '
+        . 'Erstattung in unser Eigentum zurück.';
 }
 
 /** Ablauf als Fließtext (Fassung 1.2.2, Wunsch 06.10.2026: kürzer, „melden wir uns“). */

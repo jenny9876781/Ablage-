@@ -13,7 +13,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-define('KIKRIPP_VERSION', '1.2.2');
+define('KIKRIPP_VERSION', '1.2.3');
 define('KIKRIPP_PFAD', plugin_dir_path(__FILE__));
 define('KIKRIPP_URL', plugin_dir_url(__FILE__));
 
@@ -81,7 +81,7 @@ function kikripp_umstellen() {
         update_option('kikripp_hinweisband', 'Ein Großteil unseres Spielzeugs kommt im November dazu – '
             . 'schauen Sie gern wieder vorbei. Der Katalog wird wöchentlich aktualisiert.');
     }
-    update_option('kikripp_plugin_version', '1.2.2');
+    update_option('kikripp_plugin_version', '1.2.3');
 }
 
 /**
@@ -89,10 +89,25 @@ function kikripp_umstellen() {
  * drinsteht – was die Nutzerin selbst geändert hat, bleibt.
  */
 function kikripp_umstellen_122($stand) {
-    if (version_compare($stand, '1.2.2', '>=')) { return; }
+    if (version_compare($stand, '1.2.2', '>=')) { kikripp_umstellen_123($stand); return; }
     $jetzt = str_replace("\r", '', (string) get_option('kikripp_ablauftext', ''));
     if (trim($jetzt) === trim(kikripp_ablauf_120())) {
         update_option('kikripp_ablauftext', kikripp_ablauf_122());
     }
     update_option('kikripp_plugin_version', '1.2.2');
+    kikripp_umstellen_123('1.2.2');
+}
+
+/**
+ * 1.2.3: Ablauftext mit „Bezahlung generell gegen Rechnung“ und Hinweis auf das Widerrufsrecht
+ * in den Kaufbedingungen. Ersetzt wird nur, was noch unverändert aus 1.2.2 stammt.
+ */
+function kikripp_umstellen_123($stand) {
+    if (version_compare($stand, '1.2.3', '>=')) { return; }
+    $ablauf = trim(str_replace("\r", '', (string) get_option('kikripp_ablauftext', '')));
+    if ($ablauf === trim(kikripp_ablauf_122())) { update_option('kikripp_ablauftext', kikripp_ablauf_123()); }
+    $recht = trim(str_replace("\r", '', (string) get_option('kikripp_rechtstext', '')));
+    if ($recht === trim(kikripp_rechtstext_120())) { update_option('kikripp_rechtstext', kikripp_rechtstext_123()); }
+    if (get_option('kikripp_kopf_aus', null) === null) { update_option('kikripp_kopf_aus', 1); }
+    update_option('kikripp_plugin_version', '1.2.3');
 }

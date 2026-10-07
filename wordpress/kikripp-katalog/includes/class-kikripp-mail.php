@@ -112,13 +112,15 @@ class Kikripp_Mail {
         return 'Do ' . gmdate('d.m.Y', $t) . ', ' . substr($b, 11) . ' Uhr';
     }
 
-    /** „Mo 12.10.2026“, ergänzt um den Demontagehinweis. */
+    /** „Mo 12.10.2026, 09:00 Uhr“ (Uhrzeit nur, wenn gewählt), ergänzt um den Demontagehinweis. */
     public static function abholung_text($v) {
         $teile = [];
         $w = trim((string) ($v['abholwunsch'] ?? ''));
         if ($w !== '') {
-            $t = strtotime($w . ' 12:00:00 UTC');
-            $teile[] = ['', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'][(int) gmdate('N', $t)] . ' ' . gmdate('d.m.Y', $t);
+            $t = strtotime(substr($w, 0, 10) . ' 12:00:00 UTC');
+            $teiltext = ['', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'][(int) gmdate('N', $t)] . ' ' . gmdate('d.m.Y', $t);
+            if (strlen($w) > 10) { $teiltext .= ', ' . substr($w, 11) . ' Uhr'; }
+            $teile[] = $teiltext;
         }
         if (!empty($v['demontage'])) { $teile[] = 'Demontage nötig – Termin Fr nachmittag / Sa vormittag nach Vereinbarung'; }
         return $teile ? implode('; ', $teile) : '—';

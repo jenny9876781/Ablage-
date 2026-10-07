@@ -1003,6 +1003,13 @@ ist die Merkliste; erledigte Punkte hier abhaken, nicht löschen.
       Menüknöpfe, `[class*=social]` und Links auf facebook.com/instagram.com im `<header>`, dazu
       Elementor/Astra/Divi. Kopfzeile `Version:` im Plugin stand seit 1.2.2 falsch – mitziehen!
       kikripp.de ist aus dem Container nicht erreichbar (Proxy 403), Quelltext bei Bedarf erfragen.
+- [x] Plugin 1.2.5 (07.10.): Quelltext von kikripp.de liegt vor – **klassisches Eigen-Theme
+      „kikripp“ (Bootstrap)**: `header.fixed-top > nav.navbar > a.navbar-brand` (Logo) +
+      `button.navbar-toggler` + `div#mainmenu` (Menü „footermenu“ + `ul.daycare-switch` =
+      Standort-Umschalter). `header nav` pauschal auszublenden nahm das Logo mit → jetzt gezielt
+      `#mainmenu`, `.navbar-toggler`, `.daycare-switch`. Die Nutzerin hat sitewide
+      `.daycare-switch { display:none !important; }` unter Anpassen → Zusätzliches CSS gesetzt;
+      Facebook/Instagram hat sie entfernt. WordPress 6.2.14, W3TC + Autoptimize, Cloudflare.
 - [x] BE10-12: neues Foto F-636 (ersetzt F-618), Beschreibung Schiebetüren + 2 Einlegeböden.
 - [x] NU03-02 Stockbetten: Beschreibung um Tischleranfertigung Ende 2019, Multiplex weiß
       melaminharzbeschichtet, Liegefläche 120x60, Neupreis 726 € ergänzt. Preis 400 € VHB bleibt

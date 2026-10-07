@@ -259,9 +259,14 @@ body.kikripp-ohne-menue .main-navigation,
 body.kikripp-ohne-menue .site-header .social-navigation,
 body.kikripp-ohne-menue .site-header .social-links,
 body.kikripp-ohne-menue .header-social,
-/* 1.2.4: unabhängig vom Theme – jedes Menü (<nav>) im Seitenkopf, Menüknopf fürs Telefon und alle
-   Verweise auf Facebook und Instagram. Elementor, Astra, Divi, Kadence, OceanWP und Co. */
-body.kikripp-ohne-menue header nav,
+/* 1.2.4/1.2.5: Menüknopf fürs Telefon und alle Verweise auf Facebook und Instagram, dazu gängige
+   Themes. Nicht pauschal `header nav` – im Theme von kikripp.de steckt das Logo in der <nav>.
+   kikripp.de (Theme „kikripp“, Bootstrap): Menü #mainmenu, Knopf .navbar-toggler,
+   Standort-Umschalter .daycare-switch. */
+body.kikripp-ohne-menue header #mainmenu,
+body.kikripp-ohne-menue header .navbar-collapse,
+body.kikripp-ohne-menue header .navbar-toggler,
+body.kikripp-ohne-menue .daycare-switch,
 body.kikripp-ohne-menue header [class*="menu-toggle"],
 body.kikripp-ohne-menue header [class*="nav-toggle"],
 body.kikripp-ohne-menue header [class*="hamburger"],
@@ -270,7 +275,7 @@ body.kikripp-ohne-menue header a[href*="facebook.com"],
 body.kikripp-ohne-menue header a[href*="instagram.com"],
 body.kikripp-ohne-menue .elementor-location-header .elementor-widget-nav-menu,
 body.kikripp-ohne-menue .elementor-location-header .elementor-widget-social-icons,
-body.kikripp-ohne-menue #masthead nav,
+body.kikripp-ohne-menue #masthead .main-navigation,
 body.kikripp-ohne-menue #main-header #et-top-navigation,
 body.kikripp-ohne-menue .ast-builder-menu,
 body.kikripp-ohne-menue .ast-header-social-wrap { display: none !important; }

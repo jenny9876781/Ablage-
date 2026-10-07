@@ -128,9 +128,14 @@ $zugang = Kikripp_Zugang::hat_zugang() ? 'true' : 'false';
 <nav class="wp-block-navigation" id="probe-menue"><a href="#">Leitbild</a> <a href="#">Team</a></nav>
 <ul class="wp-block-social-links" id="probe-social"><li>Facebook</li><li>Instagram</li></ul></header>
 <header class="elementor elementor-location-header" id="probe-kopf2"><div class="elementor-widget-container"><span id="probe-logo2">KIKRIPP</span>
-<nav class="elementor-nav-menu--main" id="probe-menue2"><ul><li><a href="#">Pädagogik</a></li></ul></nav>
+<div class="elementor-widget-nav-menu"><nav class="elementor-nav-menu--main" id="probe-menue2"><ul><li><a href="#">Pädagogik</a></li></ul></nav></div>
 <div class="elementor-menu-toggle" id="probe-toggle2">☰</div>
 <span class="icons"><a id="probe-fb2" href="https://www.facebook.com/kikripp">f</a> <a id="probe-ig2" href="https://www.instagram.com/kikripp">i</a></span></div></header>
+<header class="fixed-top" id="probe-kopf3" style="position:static"><div class="container"><nav class="navbar">
+<a class="navbar-brand" href="#" id="probe-logo3">KIKRIPP-Logo</a>
+<button class="navbar-toggler" id="probe-toggle3">☰</button>
+<div class="collapse navbar-collapse" id="mainmenu"><ul class="menu"><li><a href="#">Artikelkatalog</a></li></ul>
+<ul class="daycare-switch" id="probe-switch3"><li><a href="#">KIKRIPP</a></li></ul></div></nav></div></header>
 <div class="huelle"><div id="kikripp-katalog" class="kikripp"></div></div>
 <footer class="wp-block-template-part" id="probe-fusszeile">©2024 by Probe-Betreiberin · Impressum · Datenschutz</footer>
 <script>window.KIKRIPP = {basis:'/wp-json/kikripp/v1', signet:'/assets/signet.svg', zugang:<?php echo $zugang; ?>, admin:false, verwaltung:'#'};</script>

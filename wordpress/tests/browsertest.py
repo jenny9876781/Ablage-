@@ -114,6 +114,9 @@ with sync_playwright() as p:
     pruefe("auch bei anderem Theme (Elementor): Menü, Menüknopf, Facebook, Instagram weg",
            not any(seite.locator(w).is_visible() for w in ("#probe-menue2", "#probe-toggle2", "#probe-fb2", "#probe-ig2")))
     pruefe("auch dort bleibt das Logo", seite.locator("#probe-logo2").is_visible())
+    pruefe("Theme von kikripp.de: Menü, Menüknopf und Standort-Umschalter weg",
+           not any(seite.locator(w).is_visible() for w in ("#mainmenu", "#probe-toggle3", "#probe-switch3")))
+    pruefe("Theme von kikripp.de: Logo in der <nav> bleibt sichtbar", seite.locator("#probe-logo3").is_visible())
     pruefe("Fußzeile der Website ist auf der Katalogseite ausgeblendet",
            seite.locator("#probe-fusszeile").count() == 1 and not seite.locator("#probe-fusszeile").is_visible())
     pruefe("kein Hut und kein Schriftzug KIKRIPP im Kopf", seite.locator(".kopf img").count() == 0

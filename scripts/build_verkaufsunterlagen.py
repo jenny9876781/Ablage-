@@ -9,13 +9,13 @@ Die Abholübersicht ist eine Arbeitsdatei der Nutzerin. Sie wird nur einmal erze
 danach von Hand gepflegt – nicht überschreiben, wenn sie schon Einträge hat (--neu erzwingt es).
 Das Blatt „Artikel“ darin ist nur das Nachschlageverzeichnis für Bezeichnung und Raum.
 """
-import sys, os, csv
+import sys, os, csv, re
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from lib import AUSGABE, ROT, SCHWARZ, GRAU, FONT, FIRMA, STRASSE, PLZ_ORT, TELEFON, EMAIL
 from build_unterlagen_docx import dok_anlegen, p, kopf
 
 from docx.shared import Pt, Cm, RGBColor
-from docx.enum.text import WD_BREAK
+from docx.enum.text import WD_BREAK, WD_COLOR_INDEX
 from docx.oxml.ns import qn
 from docx.oxml import OxmlElement
 
@@ -56,7 +56,11 @@ def kasten(d, titel, text):
     for i, absatz in enumerate(text.split("\n")):
         a = z.paragraphs[0] if i == 0 else z.add_paragraph()
         a.paragraph_format.space_after = Pt(3)
-        lauf = a.add_run(absatz); lauf.font.size = Pt(9.5); lauf.font.name = FONT
+        for k, teil in enumerate(re.split(r"(\[[^\]]*\])", absatz)):
+            if not teil: continue
+            lauf = a.add_run(teil); lauf.font.size = Pt(9.5); lauf.font.name = FONT
+            if teil.startswith("["):
+                lauf.font.highlight_color = WD_COLOR_INDEX.YELLOW; lauf.bold = True
 
 
 def seitenumbruch(d):
@@ -125,36 +129,42 @@ ZUFAHRT = ("Die Zufahrt ist nur über die Peterzeller Straße 8 möglich: am Fir
 
 
 def mail(privat, du=False):
-    """Mail an den Käufer – Wortlaut der Nutzerin vom 08.10.2026, in Sie- und Du-Form."""
+    """Mail an den Käufer. So gebaut, dass nur die gelben Stellen geändert werden: Anrede (nur bei
+    Privatpersonen) und Abholtermin. Rechnungsnummer und Betrag stehen in der angehängten Rechnung."""
     if du:
+        anrede = "Hallo [Vorname]," if privat else "Hallo zusammen,"
         zeilen = [
-            "Betreff: Deine Bestellung Nr. [Vorgang] – Rechnung und Abholtermin", "",
-            "Hallo [Vorname],", "",
-            "vielen Dank für deine Reservierung! Anbei findest du die Rechnung Nr. [Rechnungsnr.] und deine Bestellung.", "",
-            "Bitte überweise den Rechnungsbetrag zeitnah unter Angabe der Rechnungsnummer auf das angegebene Konto. "
-            "Die Bestellung kannst du uns unterschrieben per Scan zurückschicken oder bei der Abholung unterschreiben.", "",
-            "Dein Abholtermin am [Wochentag], [Datum] um [Uhrzeit] Uhr ist mit dem Zahlungseingang bestätigt – "
-            "die Ware geben wir erst nach Zahlungseingang heraus.", "",
+            "Betreff: Rechnung und Abholtermin – Kikripp Artikelkatalog", "",
+            anrede, "",
+        ]
+        ihr = not privat
+        zeilen += [
+            ("vielen Dank für eure Reservierung! Anbei findet ihr die Rechnung und eure Bestellung." if ihr else
+             "vielen Dank für deine Reservierung! Anbei findest du die Rechnung und deine Bestellung."), "",
+            ("Bitte überweist den Rechnungsbetrag zeitnah unter Angabe der Rechnungsnummer auf das angegebene Konto. "
+             "Die Bestellung schickt ihr uns bitte unterschrieben per Scan zurück oder unterschreibt sie bei der Abholung."
+             if ihr else
+             "Bitte überweise den Rechnungsbetrag zeitnah unter Angabe der Rechnungsnummer auf das angegebene Konto. "
+             "Die Bestellung kannst du uns unterschrieben per Scan zurückschicken oder bei der Abholung unterschreiben."), "",
+            ("Euer" if ihr else "Dein") + " Abholtermin: [Wochentag, Datum, Uhrzeit] Uhr",
+            "Der Termin ist mit dem Zahlungseingang bestätigt – die Ware geben wir erst nach Zahlungseingang heraus.", "",
             f"Abholadresse: {ADRESSE}",
             ZUFAHRT,
-            "Bitte bring ausreichend Helfer, Werkzeug und ein passendes Fahrzeug mit.",
+            ("Bitte bringt" if ihr else "Bitte bring") + " ausreichend Helfer, Werkzeug und ein passendes Fahrzeug mit.",
         ]
         if privat:
             zeilen += ["", "Die Widerrufsbelehrung und das Widerrufsformular findest du in der beigefügten Bestellung."]
-        zeilen += ["", f"Bei Fragen erreichst du uns unter {TELEFON} oder {EMAIL}.", "",
-                   "Viele Grüße", "[Name]", FIRMA]
+        zeilen += ["", ("Bei Fragen erreicht ihr uns" if ihr else "Bei Fragen erreichst du uns")
+                   + f" unter {TELEFON} oder {EMAIL}.", "", "Viele Grüße", "Jenny Preisigke", FIRMA]
         return "\n".join(zeilen)
     zeilen = [
-        "Betreff: Ihre Bestellung Nr. [Vorgang] – Rechnung und Abholtermin", "",
-        ("Guten Tag [Frau/Herr Name]," if privat else "Sehr geehrte Damen und Herren, / Guten Tag [Frau/Herr Name],"), "",
-        ("vielen Dank für Ihre Reservierung. Anbei erhalten Sie die Rechnung Nr. [Rechnungsnr.] und Ihre Bestellung."
-         if privat else
-         "vielen Dank für Ihre Reservierung aus unserem Artikelkatalog. Anbei erhalten Sie die Rechnung "
-         "Nr. [Rechnungsnr.] und die Bestellung für [Firma]."), "",
+        "Betreff: Rechnung und Abholtermin – Kikripp Artikelkatalog", "",
+        "Guten Tag [Frau/Herr Nachname]," if privat else "Sehr geehrte Damen und Herren,", "",
+        "vielen Dank für Ihre Reservierung aus unserem Artikelkatalog. Anbei erhalten Sie die Rechnung und Ihre Bestellung.", "",
         "Bitte überweisen Sie den Rechnungsbetrag zeitnah unter Angabe der Rechnungsnummer auf das angegebene Konto. "
         "Die Bestellung senden Sie uns bitte unterschrieben per Scan zurück oder unterschreiben sie bei der Abholung.", "",
-        "Ihr Abholtermin am [Wochentag], [Datum] um [Uhrzeit] Uhr ist mit dem Zahlungseingang bestätigt – "
-        "die Ware geben wir erst nach Zahlungseingang heraus.", "",
+        "Ihr Abholtermin: [Wochentag, Datum, Uhrzeit] Uhr",
+        "Der Termin ist mit dem Zahlungseingang bestätigt – die Ware geben wir erst nach Zahlungseingang heraus.", "",
         f"Abholadresse: {ADRESSE}",
         ZUFAHRT,
         "Bitte bringen Sie ausreichend Helfer, Werkzeug und ein passendes Fahrzeug mit.",
@@ -162,7 +172,7 @@ def mail(privat, du=False):
     if privat:
         zeilen += ["", "Die Widerrufsbelehrung und das Widerrufsformular finden Sie in der beigefügten Bestellung."]
     zeilen += ["", f"Bei Fragen erreichen Sie uns unter {TELEFON} oder {EMAIL}.", "",
-               "Mit freundlichen Grüßen", "[Name]", FIRMA]
+               "Mit freundlichen Grüßen", "Jenny Preisigke", FIRMA]
     return "\n".join(zeilen)
 
 
@@ -211,10 +221,15 @@ def word():
       groesse=9.5, nach=4)
 
     seitenumbruch(d)
-    kopf(d, "Mail an den Käufer", "Vorlage – Rechnung und Bestellung als PDF anhängen")
-    kasten(d, "Sie – Privatperson", mail(True))
-    kasten(d, "Du – Privatperson", mail(True, du=True))
-    kasten(d, "Unternehmen (ohne Widerrufsbelehrung – Firmen haben kein Widerrufsrecht)", mail(False))
+    kopf(d, "Mail an den Käufer", "Rechnung und Bestellung als PDF anhängen · nur die gelben Stellen ändern")
+    kasten(d, "1. Sie – Privatperson", mail(True))
+    seitenumbruch(d)
+    kasten(d, "2. Sie – Firma", mail(False))
+    kasten(d, "3. Du – Privatperson", mail(True, du=True))
+    seitenumbruch(d)
+    kasten(d, "4. Du – Firma (ihr-Form, ohne Widerrufsbelehrung)", mail(False, du=True))
+    p(d, "Firmen haben kein Widerrufsrecht – deshalb fehlt dort der Satz zur Widerrufsbelehrung.",
+      groesse=9.5, kursiv=True, vor=4)
     ziel = os.path.join(AUSGABE, "S2_Verkauf_Ablauf_und_Texte.docx")
     d.save(ziel)
     print("geschrieben:", ziel)

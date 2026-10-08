@@ -1010,6 +1010,15 @@ ist die Merkliste; erledigte Punkte hier abhaken, nicht löschen.
       `#mainmenu`, `.navbar-toggler`, `.daycare-switch`. Die Nutzerin hat sitewide
       `.daycare-switch { display:none !important; }` unter Anpassen → Zusätzliches CSS gesetzt;
       Facebook/Instagram hat sie entfernt. WordPress 6.2.14, W3TC + Autoptimize, Cloudflare.
+- [x] Verkaufsabwicklung (08.10., erste zwei Reservierungen): `scripts/build_verkaufsunterlagen.py` →
+      `S2_Verkauf_Ablauf_und_Texte.docx` (Checkliste je Vorgang, DATEV-Textbausteine, Mail-Vorlagen
+      Unternehmen/Privat) und `05_Abholuebersicht.xlsx` (Kommissionierliste, ArtNr → Bezeichnung/
+      Raum per SVERWEIS aus Blatt „Artikel“). **Die Abholübersicht ist ab jetzt Arbeitsdatei der
+      Nutzerin** – das Skript überschreibt sie nicht, wenn Einträge drin sind (`--neu` erzwingt).
+      DATEV: Artikel „Verkauf Webkatalog“, steuerfrei; Erlöskonto-**Vorschlag** SKR04 4849 (Erlöse
+      Sachanlagenverkäufe bei Buchgewinn), UStVA Kz 48 – mit Steuerberater abstimmen lassen.
+      Empfohlen: Artikelstamm nicht von Hand, sondern wöchentlich per WP-CSV (Ablauf D); von Hand nur
+      Blatt „Rechnungen (DATEV)“ + Rechnungsnr/Zahlung. Excel vor jedem Bau zurückschicken lassen.
 - [x] BE10-12: neues Foto F-636 (ersetzt F-618), Beschreibung Schiebetüren + 2 Einlegeböden.
 - [x] NU03-02 Stockbetten: Beschreibung um Tischleranfertigung Ende 2019, Multiplex weiß
       melaminharzbeschichtet, Liegefläche 120x60, Neupreis 726 € ergänzt. Preis 400 € VHB bleibt

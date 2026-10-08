@@ -146,8 +146,11 @@ def mail(privat, du=False):
         return "\n".join(zeilen)
     zeilen = [
         "Betreff: Ihre Bestellung Nr. [Vorgang] – Rechnung und Abholtermin", "",
-        "Guten Tag [Frau/Herr Name],", "",
-        "vielen Dank für Ihre Reservierung. Anbei erhalten Sie die Rechnung Nr. [Rechnungsnr.] und Ihre Bestellung.", "",
+        ("Guten Tag [Frau/Herr Name]," if privat else "Sehr geehrte Damen und Herren, / Guten Tag [Frau/Herr Name],"), "",
+        ("vielen Dank für Ihre Reservierung. Anbei erhalten Sie die Rechnung Nr. [Rechnungsnr.] und Ihre Bestellung."
+         if privat else
+         "vielen Dank für Ihre Reservierung aus unserem Artikelkatalog. Anbei erhalten Sie die Rechnung "
+         "Nr. [Rechnungsnr.] und die Bestellung für [Firma]."), "",
         "Bitte überweisen Sie den Rechnungsbetrag zeitnah unter Angabe der Rechnungsnummer auf das angegebene Konto. "
         "Die Bestellung senden Sie uns bitte unterschrieben per Scan zurück oder unterschreiben sie bei der Abholung.", "",
         "Ihr Abholtermin am [Wochentag], [Datum] um [Uhrzeit] Uhr ist mit dem Zahlungseingang bestätigt – "
@@ -211,7 +214,7 @@ def word():
     kopf(d, "Mail an den Käufer", "Vorlage – Rechnung und Bestellung als PDF anhängen")
     kasten(d, "Sie – Privatperson", mail(True))
     kasten(d, "Du – Privatperson", mail(True, du=True))
-    p(d, "Bei Unternehmen: dieselbe Mail, nur ohne den Satz zur Widerrufsbelehrung.", groesse=9.5, kursiv=True, vor=4)
+    kasten(d, "Unternehmen (ohne Widerrufsbelehrung – Firmen haben kein Widerrufsrecht)", mail(False))
     ziel = os.path.join(AUSGABE, "S2_Verkauf_Ablauf_und_Texte.docx")
     d.save(ziel)
     print("geschrieben:", ziel)

@@ -102,8 +102,8 @@ POSITION = "BE10-12 IKEA Galant Aktenschrank weiß (gebraucht)"
 PFLICHT = ("Steuerfreie Lieferung gemäß § 4 Nr. 28 UStG. Die Gegenstände wurden ausschließlich für "
            "Umsätze verwendet, die nach § 4 Nr. 23 UStG steuerfrei waren; ein Vorsteuerabzug war "
            "ausgeschlossen. Umsatzsteuer wird daher nicht berechnet und nicht ausgewiesen.\n"
-           "Es handelt sich um gebrauchte Gegenstände, verkauft im vorhandenen Zustand.\n"
-           "Leistungsdatum: Tag der Abholung am __.__.2026.")
+           "Es handelt sich um gebrauchte Gegenstände, verkauft im vorhandenen Zustand.")
+# Das Leistungsdatum steht als „Lieferdatum“ (= Abholtag) im Rechnungskopf von DATEV.
 
 ABSCHLUSS = ("Bitte überweisen Sie den Rechnungsbetrag bis spätestens __.__.2026 unter Angabe der "
              "Rechnungsnummer. Die Ware wird nach Zahlungseingang zum vereinbarten Termin herausgegeben.\n"
@@ -172,9 +172,13 @@ def word():
     p(d, POSITION, groesse=9.5, kursiv=True, vor=2, nach=6)
     kasten(d, "Einleitungstext", EINLEITUNG)
     kasten(d, "Pflichtangaben (auf jede Rechnung)", PFLICHT)
-    kasten(d, "Zusatz nur bei Unternehmen", GEWAEHR_FIRMA)
-    kasten(d, "Zusatz nur bei Privatpersonen", GEWAEHR_PRIVAT)
+    kasten(d, "Gewährleistung (beide Sätze stehen auf jeder Rechnung)", GEWAEHR_PRIVAT + "\nBei Unternehmen: " + GEWAEHR_FIRMA)
     kasten(d, "Schlusstext", ABSCHLUSS)
+    kasten(d, "Fußzeile (Pflicht für die GmbH, § 35a GmbHG)",
+           "Sitz: Villingen-Schwenningen · Amtsgericht Freiburg i. Br. HRB 707915 · Geschäftsführung: Marisa Faißt-Neininger\n"
+           "Steuernummer und/oder USt-IdNr. (mindestens eine davon ist Pflicht)")
+    p(d, "Lieferdatum im Rechnungskopf = Abholtag. Eine Zeile je Artikelnummer, Stückzahl in die Spalte Menge.",
+      groesse=9.5, kursiv=True, vor=4)
     p(d, "Zum Erlöskonto", groesse=10, fett=True, vor=10, nach=2)
     p(d, "Ein eigenes Konto ist richtig: Verkauft werden Gegenstände der Einrichtung, keine laufenden "
          "Leistungen. Die meisten Möbel und Geräte sind Anlagevermögen und abgeschrieben oder geringwertig "

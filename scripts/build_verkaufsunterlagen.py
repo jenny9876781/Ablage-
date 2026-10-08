@@ -120,25 +120,44 @@ GEWAEHR_PRIVAT = ("Für Verbraucher gelten die gesetzlichen Bestimmungen; die Ve
                   "in Ihrer Bestellung.")
 
 
-def mail(privat):
+ZUFAHRT = ("Die Zufahrt ist nur über die Peterzeller Straße 8 möglich: am Firmengelände vorbei bis ans "
+           "Ende durchfahren, das Gebäude liegt auf der rechten Seite.")
+
+
+def mail(privat, du=False):
+    """Mail an den Käufer – Wortlaut der Nutzerin vom 08.10.2026, in Sie- und Du-Form."""
+    if du:
+        zeilen = [
+            "Betreff: Deine Bestellung Nr. [Vorgang] – Rechnung und Abholtermin", "",
+            "Hallo [Vorname],", "",
+            "vielen Dank für deine Reservierung! Anbei findest du die Rechnung Nr. [Rechnungsnr.] und deine Bestellung.", "",
+            "Bitte überweise den Rechnungsbetrag zeitnah unter Angabe der Rechnungsnummer auf das angegebene Konto. "
+            "Die Bestellung kannst du uns unterschrieben per Scan zurückschicken oder bei der Abholung unterschreiben.", "",
+            "Dein Abholtermin am [Wochentag], [Datum] um [Uhrzeit] Uhr ist mit dem Zahlungseingang bestätigt – "
+            "die Ware geben wir erst nach Zahlungseingang heraus.", "",
+            f"Abholadresse: {ADRESSE}",
+            ZUFAHRT,
+            "Bitte bring ausreichend Helfer, Werkzeug und ein passendes Fahrzeug mit.",
+        ]
+        if privat:
+            zeilen += ["", "Die Widerrufsbelehrung und das Widerrufsformular findest du in der beigefügten Bestellung."]
+        zeilen += ["", f"Bei Fragen erreichst du uns unter {TELEFON} oder {EMAIL}.", "",
+                   "Viele Grüße", "[Name]", FIRMA]
+        return "\n".join(zeilen)
     zeilen = [
-        "Betreff: Ihre Bestellung Nr. [Vorgang] – Rechnung und Abholtermin",
-        "",
-        "Guten Tag [Name],",
-        "",
-        "vielen Dank für Ihre Reservierung. Anbei erhalten Sie die Rechnung Nr. [Rechnungsnr.] und Ihre Bestellung.",
-        "",
-        "Bitte überweisen Sie den Betrag von [Betrag] € bis spätestens [Datum] unter Angabe der Rechnungsnummer. "
-        "Die Bestellung senden Sie uns bitte unterschrieben per Scan zurück oder unterschreiben sie bei der Abholung.",
-        "",
-        "Ihr Abholtermin: [Montag/Dienstag], [Datum], [Uhrzeit] Uhr",
+        "Betreff: Ihre Bestellung Nr. [Vorgang] – Rechnung und Abholtermin", "",
+        "Guten Tag [Frau/Herr Name],", "",
+        "vielen Dank für Ihre Reservierung. Anbei erhalten Sie die Rechnung Nr. [Rechnungsnr.] und Ihre Bestellung.", "",
+        "Bitte überweisen Sie den Rechnungsbetrag zeitnah unter Angabe der Rechnungsnummer auf das angegebene Konto. "
+        "Die Bestellung senden Sie uns bitte unterschrieben per Scan zurück oder unterschreiben sie bei der Abholung.", "",
+        "Ihr Abholtermin am [Wochentag], [Datum] um [Uhrzeit] Uhr ist mit dem Zahlungseingang bestätigt – "
+        "die Ware geben wir erst nach Zahlungseingang heraus.", "",
         f"Abholadresse: {ADRESSE}",
-        "Die Ware wird nach Zahlungseingang herausgegeben. Bitte bringen Sie ausreichend Helfer, Werkzeug "
-        "und ein passendes Fahrzeug mit.",
+        ZUFAHRT,
+        "Bitte bringen Sie ausreichend Helfer, Werkzeug und ein passendes Fahrzeug mit.",
     ]
     if privat:
-        zeilen += ["", "Die Widerrufsbelehrung und das Widerrufsformular finden Sie in der beigefügten Bestellung. "
-                   "Bitte lesen Sie sie vor der Unterschrift."]
+        zeilen += ["", "Die Widerrufsbelehrung und das Widerrufsformular finden Sie in der beigefügten Bestellung."]
     zeilen += ["", f"Bei Fragen erreichen Sie uns unter {TELEFON} oder {EMAIL}.", "",
                "Mit freundlichen Grüßen", "[Name]", FIRMA]
     return "\n".join(zeilen)
@@ -190,8 +209,9 @@ def word():
 
     seitenumbruch(d)
     kopf(d, "Mail an den Käufer", "Vorlage – Rechnung und Bestellung als PDF anhängen")
-    kasten(d, "Unternehmen", mail(False))
-    kasten(d, "Privatperson", mail(True))
+    kasten(d, "Sie – Privatperson", mail(True))
+    kasten(d, "Du – Privatperson", mail(True, du=True))
+    p(d, "Bei Unternehmen: dieselbe Mail, nur ohne den Satz zur Widerrufsbelehrung.", groesse=9.5, kursiv=True, vor=4)
     ziel = os.path.join(AUSGABE, "S2_Verkauf_Ablauf_und_Texte.docx")
     d.save(ziel)
     print("geschrieben:", ziel)

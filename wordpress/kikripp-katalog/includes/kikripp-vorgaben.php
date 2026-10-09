@@ -86,7 +86,8 @@ function kikripp_vorgaben_130() {
         'kikripp_zufahrt'         => 'Die Zufahrt ist nur über die Peterzeller Straße 8 möglich: am Firmengelände vorbei '
                                    . 'bis ans Ende durchfahren, das Gebäude liegt auf der rechten Seite.',
         'kikripp_mail_name'       => 'Jenny Preisigke',
-        'kikripp_erinnerung_zeit' => '14:00',
+        'kikripp_erinnerung_zeit' => '11:00',
+        'kikripp_termin_zusatz'   => 'Barrierefrei',
         'kikripp_zahlung_tage'    => 5,
     ];
 }

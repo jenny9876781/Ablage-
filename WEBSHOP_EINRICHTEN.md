@@ -163,7 +163,8 @@ automatisch eingetragen; du prüfst sie nur.
 | Menü ausblenden | **an** — Menü und Facebook-/Instagram-Symbole im Kopf der Website erscheinen auf der Katalogseite nicht; das Logo bleibt. Für die übrigen Seiten: *Design → Editor → Header* |
 | Zufahrt | Wegbeschreibung für die Käufer-Mail: „Die Zufahrt ist nur über die Peterzeller Straße 8 möglich …“ |
 | Name in Mailvorlagen | Jenny Preisigke — steht unter „Mail schreiben“ und der Zahlungserinnerung |
-| Erinnerung am Vortag um | 14:00 — Uhrzeit des Outlook-Termins „Vorbereiten“ am Werktag vor der Abholung |
+| Erinnerung am Vortag um | 11:00 — Uhrzeit des Outlook-Termins „Vorbereiten“ am Werktag vor der Abholung |
+| Zusatz im Terminbetreff | Barrierefrei — steht vorn im Betreff beider Outlook-Termine (für die Auswertung) |
 | Zahlungserinnerung nach | 5 Tagen — ab dann erscheint ein unbezahlter Vorgang unter „Zu erledigen“ |
 | Vorschaubetrieb | **eingeschaltet lassen**, solange ihr testet |
 
@@ -475,7 +476,7 @@ auf der Startseite der WordPress-Verwaltung, die Zahl am Menüpunkt zählt die o
 5. **✉ Mail schreiben** — öffnet Outlook mit fertigem Text (Sie/Du, Privat/Firma, Termin, Zufahrt).
    Rechnung und Bestellung anhängen, senden. Klappt der Knopf nicht: *Text kopieren*.
 6. **📅 In Outlook eintragen** — Datei öffnen, *Importieren*: zwei Termine, „Vorbereiten“ am Werktag
-   davor um 14:00 und die Abholung selbst mit Erinnerung 15 Minuten vorher.
+   davor um 11:00 und die Abholung selbst mit Erinnerung 15 Minuten vorher.
 7. **bezahlt** — nach Zahlungseingang. Die Artikel verschwinden aus dem Katalog.
    Kommt nichts: **✉ Zahlungserinnerung** (erscheint unter „Zu erledigen“ nach 5 Tagen).
 8. **Artikelkatalog → Abholplan** — alle Abholungen nach Tagen, mit Raum und Post-it-Code, rot =

@@ -543,7 +543,7 @@ update_option('kikripp_plugin_version', '1.2.0');
 update_option('kikripp_ablauftext', str_replace("\n", "\r\n", kikripp_ablauf_120()));   // so speichert ein Formular
 kikripp_umstellen();
 pruefe('alter Text wird über 1.2.2 bis zum Text von 1.2.3 ersetzt', get_option('kikripp_ablauftext'), kikripp_ablauf_123());
-pruefe('Stand steht auf 1.3.0', get_option('kikripp_plugin_version'), '1.3.0');
+pruefe('Stand steht auf 1.3.1', get_option('kikripp_plugin_version'), '1.3.1');
 update_option('kikripp_plugin_version', '1.2.0');
 update_option('kikripp_ablauftext', 'Eigener Text der Nutzerin');
 update_option('kikripp_ust_prozent', 7);
@@ -562,7 +562,7 @@ pruefe('neuer Text: Bezahlung generell gegen Rechnung',
        strpos(get_option('kikripp_ablauftext'), 'generell per Überweisung gegen Rechnung vor der Abholung') !== false, true);
 pruefe('Kaufbedingungen bekommen den Widerrufshinweis', get_option('kikripp_rechtstext'), kikripp_rechtstext_123());
 pruefe('Menü ausblenden ist eingeschaltet', (int) get_option('kikripp_kopf_aus'), 1);
-pruefe('Stand steht auf 1.3.0', get_option('kikripp_plugin_version'), '1.3.0');
+pruefe('Stand steht auf 1.3.1', get_option('kikripp_plugin_version'), '1.3.1');
 update_option('kikripp_plugin_version', '1.2.2');
 update_option('kikripp_ablauftext', 'Eigener Text');
 update_option('kikripp_rechtstext', 'Eigene Bedingungen');
@@ -714,7 +714,13 @@ $ics = Kikripp_Ablauf::ics(array_merge($m, ['id' => 77, 'telefon' => '0171 123',
 pruefe('zwei Termine', substr_count($ics, 'BEGIN:VEVENT'), 2);
 pruefe('Abholung 10:30 Sommerzeit = 08:30 UTC', strpos($ics, 'DTSTART:20261020T083000Z') !== false, true);
 pruefe('Erinnerung 15 Minuten vorher', strpos($ics, 'TRIGGER:-PT15M') !== false, true);
-pruefe('Vortag Montag 19.10. 14:00 = 12:00 UTC', strpos($ics, 'DTSTART:20261019T120000Z') !== false, true);
+pruefe('Vortag Montag 19.10. 11:00 = 09:00 UTC', strpos($ics, 'DTSTART:20261019T090000Z') !== false, true);
+pruefe('„Barrierefrei“ vorn im Betreff der Abholung', strpos($ics, 'SUMMARY:Barrierefrei – Abholung #77') !== false, true);
+pruefe('„Barrierefrei“ vorn im Betreff des Vortags', strpos($ics, 'SUMMARY:Barrierefrei – Vorbereiten') !== false, true);
+pruefe('beide Termine tragen den Zusatz', substr_count($ics, 'SUMMARY:Barrierefrei'), 2);
+update_option('kikripp_termin_zusatz', '');
+pruefe('leerer Zusatz: kein Präfix', strpos(Kikripp_Ablauf::ics($m), 'SUMMARY:Abholung #') !== false, true);
+update_option('kikripp_termin_zusatz', 'Barrierefrei');
 pruefe('Vortag erinnert zur Startzeit', strpos($ics, 'TRIGGER:PT0M') !== false, true);
 pruefe('feste UID je Vorgang', strpos($ics, 'UID:kikripp-77-abholung@kikripp.de') !== false, true);
 pruefe('Artikel mit Raum und Post-it-Code', strpos(str_replace("\r\n ", '', $ics), 'NE05-02 Sitzbank Massivholz – Raum Nebenraum (NE05)') !== false, true);
@@ -722,13 +728,13 @@ pruefe('Komma und Strichpunkt maskiert', strpos(str_replace("\r\n ", '', $ics), 
 pruefe('Zeilen höchstens 75 Byte', max(array_map('strlen', explode("\r\n", $ics))) <= 75, true);
 pruefe('Zeilenenden CRLF', substr($ics, -2) === "\r\n" && strpos(str_replace("\r\n", '', $ics), "\n") === false, true);
 pruefe('Abholung Montag → Vorbereiten am Freitag', strpos(Kikripp_Ablauf::ics(array_merge($m, ['abholung' => '2026-10-26 09:00'])),
-    'DTSTART:20261023T120000Z') !== false, true);
+    'DTSTART:20261023T090000Z') !== false, true);
 pruefe('Winterzeit: 26.10. 09:00 = 08:00 UTC', strpos(Kikripp_Ablauf::ics(array_merge($m, ['abholung' => '2026-10-26 09:00'])),
     'DTSTART:20261026T080000Z') !== false, true);
 pruefe('ohne Termin keine Datei', Kikripp_Ablauf::ics(array_merge($m, ['abholung' => ''])), '');
 update_option('kikripp_erinnerung_zeit', '15:30');
 pruefe('Uhrzeit der Vortagserinnerung einstellbar', strpos(Kikripp_Ablauf::ics($m), 'DTSTART:20261019T133000Z') !== false, true);
-update_option('kikripp_erinnerung_zeit', '14:00');
+update_option('kikripp_erinnerung_zeit', '11:00');
 
 titel('39. Verwaltungsseite, Abholplan, Dashboard');
 $GLOBALS['ist_admin'] = true;
@@ -771,14 +777,23 @@ pruefe('Erinnerungszeit gespeichert', get_option('kikripp_erinnerung_zeit'), '13
 pruefe('Zahlungsfrist gespeichert', get_option('kikripp_zahlung_tage'), 7);
 $_POST = ['erinnerung_zeit' => 'mittags'];
 try { Kikripp_Admin::einstellungen_speichern(); } catch (Attrappe_Weiterleitung $e) {}
-pruefe('ungültige Uhrzeit → 14:00', get_option('kikripp_erinnerung_zeit'), '14:00');
+pruefe('ungültige Uhrzeit → 11:00', get_option('kikripp_erinnerung_zeit'), '11:00');
 $_POST = [];
 foreach (array_keys(kikripp_vorgaben_130()) as $n) { delete_option($n); }
 update_option('kikripp_plugin_version', '1.2.5');
 kikripp_umstellen();
 pruefe('Umstellung setzt die Zufahrt', strpos((string) get_option('kikripp_zufahrt'), 'Peterzeller') !== false, true);
-pruefe('Umstellung: 14:00 Uhr', get_option('kikripp_erinnerung_zeit'), '14:00');
-pruefe('Stand 1.3.0', get_option('kikripp_plugin_version'), '1.3.0');
+pruefe('Umstellung: 11:00 Uhr', get_option('kikripp_erinnerung_zeit'), '11:00');
+pruefe('Umstellung: Zusatz Barrierefrei', get_option('kikripp_termin_zusatz'), 'Barrierefrei');
+pruefe('Stand 1.3.1', get_option('kikripp_plugin_version'), '1.3.1');
+update_option('kikripp_erinnerung_zeit', '14:00');
+update_option('kikripp_plugin_version', '1.3.0');
+kikripp_umstellen();
+pruefe('1.3.0 → 1.3.1: 14:00 wird 11:00', get_option('kikripp_erinnerung_zeit'), '11:00');
+update_option('kikripp_erinnerung_zeit', '13:15');
+update_option('kikripp_plugin_version', '1.3.0');
+kikripp_umstellen();
+pruefe('selbst gewählte Uhrzeit bleibt', get_option('kikripp_erinnerung_zeit'), '13:15');
 update_option('kikripp_zufahrt', 'Eigener Text');
 update_option('kikripp_plugin_version', '1.2.5');
 kikripp_umstellen();

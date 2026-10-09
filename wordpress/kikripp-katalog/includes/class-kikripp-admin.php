@@ -926,7 +926,12 @@ class Kikripp_Admin {
              . '<input type="time" id="k_erinn" name="erinnerung_zeit" step="900" value="%s">'
              . '<p class="description">Uhrzeit des Outlook-Termins „Vorbereiten“ am Werktag vor der Abholung. '
              . 'Die Abholung selbst erinnert 15 Minuten vorher.</p></td></tr>',
-             esc_attr(get_option('kikripp_erinnerung_zeit', '14:00')));
+             esc_attr(get_option('kikripp_erinnerung_zeit', '11:00')));
+
+        printf('<tr><th scope="row"><label for="k_zusatz">Zusatz im Terminbetreff</label></th><td>'
+             . '<input type="text" id="k_zusatz" name="termin_zusatz" class="regular-text" value="%s">'
+             . '<p class="description">Steht vorn im Betreff jedes Outlook-Termins (für die Auswertung). Leer lassen = kein Zusatz.</p></td></tr>',
+             esc_attr(get_option('kikripp_termin_zusatz', 'Barrierefrei')));
 
         printf('<tr><th scope="row"><label for="k_zahl">Zahlungserinnerung nach</label></th><td>'
              . '<input type="number" id="k_zahl" name="zahlung_tage" min="1" max="60" value="%d" style="width:70px"> Tagen'
@@ -995,7 +1000,8 @@ class Kikripp_Admin {
         update_option('kikripp_zufahrt', sanitize_text_field(wp_unslash($_POST['zufahrt'] ?? '')));
         update_option('kikripp_mail_name', sanitize_text_field(wp_unslash($_POST['mail_name'] ?? '')));
         $erinn = sanitize_text_field(wp_unslash($_POST['erinnerung_zeit'] ?? ''));
-        update_option('kikripp_erinnerung_zeit', preg_match('/^\d{2}:\d{2}$/', $erinn) ? $erinn : '14:00');
+        update_option('kikripp_erinnerung_zeit', preg_match('/^\d{2}:\d{2}$/', $erinn) ? $erinn : '11:00');
+        update_option('kikripp_termin_zusatz', sanitize_text_field(wp_unslash($_POST['termin_zusatz'] ?? '')));
         update_option('kikripp_zahlung_tage', max(1, min(60, (int) ($_POST['zahlung_tage'] ?? 5))));
         update_option('kikripp_rechtstext', sanitize_textarea_field(wp_unslash($_POST['rechtstext'] ?? '')));
         update_option('kikripp_firma', sanitize_text_field(wp_unslash($_POST['firma'] ?? '')));

@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Kikripp Artikelkatalog
  * Description: Artikelkatalog mit Reservierung für die Betriebsauflösung der Kikripp GmbH. Artikel werden importiert, Reservierungen im Backend verwaltet.
- * Version:     1.3.0
+ * Version:     1.3.1
  * Author:      Kikripp GmbH
  * Text Domain: kikripp-katalog
  * Requires at least: 5.8
@@ -13,7 +13,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-define('KIKRIPP_VERSION', '1.3.0');
+define('KIKRIPP_VERSION', '1.3.1');
 define('KIKRIPP_PFAD', plugin_dir_path(__FILE__));
 define('KIKRIPP_URL', plugin_dir_url(__FILE__));
 
@@ -120,7 +120,16 @@ function kikripp_umstellen_123($stand) {
 
 /** 1.3.0: Vorgaben für die Abwicklung ergänzen (Zufahrt, Name, Erinnerung, Zahlungsfrist). */
 function kikripp_umstellen_130($stand) {
-    if (version_compare($stand, '1.3.0', '>=')) { return; }
+    if (version_compare($stand, '1.3.0', '>=')) { kikripp_umstellen_131($stand); return; }
     foreach (kikripp_vorgaben_130() as $name => $wert) { add_option($name, $wert); }
     update_option('kikripp_plugin_version', '1.3.0');
+    kikripp_umstellen_131('1.3.0');
+}
+
+/** 1.3.1: Vortagserinnerung 11:00 statt 14:00 (nur wenn noch die alte Vorgabe steht), Zusatz „Barrierefrei“. */
+function kikripp_umstellen_131($stand) {
+    if (version_compare($stand, '1.3.1', '>=')) { return; }
+    if (get_option('kikripp_erinnerung_zeit', '') === '14:00') { update_option('kikripp_erinnerung_zeit', '11:00'); }
+    add_option('kikripp_termin_zusatz', 'Barrierefrei');
+    update_option('kikripp_plugin_version', '1.3.1');
 }

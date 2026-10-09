@@ -75,7 +75,7 @@ CHECKLISTE = [
     ("Bestellung", "„Bestellung erstellen“ – die passende Fassung ist fett – als PDF speichern."),
     ("Rechnung", "In DATEV mit dem Artikel „Verkauf Webkatalog“. Rechnungsnr. und Datum in WordPress eintragen – Speichern."),
     ("Mail an den Käufer", "„✉ Mail schreiben“: Outlook öffnet sich mit fertigem Text. Rechnung und Bestellung anhängen, senden."),
-    ("Kalender", "„📅 In Outlook eintragen“ → Datei öffnen → Importieren. Erinnerung am Werktag davor um 14 Uhr "
+    ("Kalender", "„📅 In Outlook eintragen“ → Datei öffnen → Importieren. Erinnerung am Werktag davor um 11 Uhr "
      "und 15 Minuten vor der Abholung."),
     ("Geld ist da", "„bezahlt“ klicken. Kommt nichts, steht nach 5 Tagen „Zahlungserinnerung“ unter „Zu erledigen“."),
     ("Tag vor der Abholung", "Artikelkatalog → Abholplan → „Tag drucken“. Ware bereitstellen, mit Name + Vorgangsnummer "

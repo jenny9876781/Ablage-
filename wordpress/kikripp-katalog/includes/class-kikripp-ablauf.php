@@ -313,7 +313,7 @@ class Kikripp_Ablauf {
 
     /**
      * Zwei Termine in einer Datei: die Abholung selbst (Erinnerung 15 Minuten vorher) und
-     * „vorbereiten“ am Werktag davor um 14:00 (Erinnerung zur Startzeit). Outlook kennt nur
+     * „vorbereiten“ am Werktag davor (Einstellung, Vorgabe 11:00) (Erinnerung zur Startzeit). Outlook kennt nur
      * eine Erinnerung je Termin – deshalb zwei Termine. Feste UIDs je Vorgang, damit ein
      * erneuter Import den Termin ersetzt statt ihn zu verdoppeln.
      */
@@ -334,7 +334,10 @@ class Kikripp_Ablauf {
         $ort = (string) get_option('kikripp_abholadresse', '');
         $kurz = self::wer($v) . ' (' . array_sum(array_column($pos, 'menge')) . ' Stück)';
         $tag = substr($v['abholung'], 0, 10);
-        $vortag = self::vorheriger_werktag($tag) . ' ' . (get_option('kikripp_erinnerung_zeit', '14:00') ?: '14:00');
+        $vortag = self::vorheriger_werktag($tag) . ' ' . (get_option('kikripp_erinnerung_zeit', '11:00') ?: '11:00');
+        // Zusatz vorn im Betreff (09.10.2026: „Barrierefrei“ – wird für eine Auswertung gebraucht)
+        $zusatz = trim((string) get_option('kikripp_termin_zusatz', 'Barrierefrei'));
+        $vorn = $zusatz !== '' ? "$zusatz – " : '';
         $stempel = gmdate('Ymd\THis\Z');
         $seq = time();
         $ereignis = function ($uid, $start, $dauer, $titel, $alarm) use ($stempel, $seq, $info, $ort) {
@@ -349,9 +352,9 @@ class Kikripp_Ablauf {
         };
         $teile = array_merge(
             ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Kikripp GmbH//Artikelkatalog//DE', 'CALSCALE:GREGORIAN', 'METHOD:PUBLISH'],
-            $ereignis("kikripp-$id-abholung@kikripp.de", $v['abholung'], 30, "Abholung #$id: $kurz", '-PT15M'),
+            $ereignis("kikripp-$id-abholung@kikripp.de", $v['abholung'], 30, $vorn . "Abholung #$id: $kurz", '-PT15M'),
             $ereignis("kikripp-$id-vortag@kikripp.de", $vortag, 15,
-                'Vorbereiten: Abholung ' . self::termin_text($v['abholung'], true) . " – #$id $kurz", 'PT0M'),
+                $vorn . 'Vorbereiten: Abholung ' . self::termin_text($v['abholung'], true) . " – #$id $kurz", 'PT0M'),
             ['END:VCALENDAR']
         );
         return implode('', array_map([__CLASS__, 'falten'], $teile));

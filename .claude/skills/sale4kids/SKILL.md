@@ -1033,6 +1033,9 @@ ist die Merkliste; erledigte Punkte hier abhaken, nicht löschen.
       Export hat neue Spalten Abholung/Rechnungsnr/Rechnung_am/Abgeholt_am/Notiz; `reservierungen_einlesen.py`
       übernimmt Rechnungsnr, Zahlung=bezahlt, Abholtermin. Excel-Blatt „Rechnungen (DATEV)“ entfernt
       (5 Blätter), Verkaufsübersicht bleibt. Excel-Abholübersicht nur noch mit `--abholuebersicht`.
+- [x] Plugin 1.3.1 (09.10.): Vortagserinnerung **11:00** (Umstellung nur, wenn noch 14:00 stand),
+      Einstellung „Zusatz im Terminbetreff“ = **Barrierefrei** vorn in beiden Outlook-Terminen (für eine
+      Auswertung der Nutzerin). 1.3.0 live getestet mit Vorgang Sonja Müller – funktioniert.
 - [x] BE10-12: neues Foto F-636 (ersetzt F-618), Beschreibung Schiebetüren + 2 Einlegeböden.
 - [x] NU03-02 Stockbetten: Beschreibung um Tischleranfertigung Ende 2019, Multiplex weiß
       melaminharzbeschichtet, Liegefläche 120x60, Neupreis 726 € ergänzt. Preis 400 € VHB bleibt

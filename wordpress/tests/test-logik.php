@@ -288,6 +288,7 @@ update_option('kikripp_mail_an', 'saldi4kids@outlook.com');
 titel('17. Die Kontaktdaten stehen auf der Verwaltungsseite');
 require_once __DIR__ . '/../kikripp-katalog/includes/class-kikripp-admin.php';
 require_once __DIR__ . '/../kikripp-katalog/includes/class-kikripp-ablauf.php';
+require_once __DIR__ . '/../kikripp-katalog/includes/class-kikripp-auswertung.php';
 $GLOBALS['ist_admin'] = true;
 update_option('kikripp_vorschau', 0);
 // Eigener Artikel, damit die Bestaende der vorherigen Abschnitte nicht hineinspielen.
@@ -740,16 +741,17 @@ titel('39. Verwaltungsseite, Abholplan, Dashboard');
 $GLOBALS['ist_admin'] = true;
 $_GET = [];
 Kikripp_DB::vorgang_status($va, 'bestellt');
+$_GET = ['reiter' => 'zahlung'];
 ob_start(); Kikripp_Admin::seite_reservierungen(); $seite = ob_get_clean();
-foreach (['Umsatz bezahlt:' => 'Kennzahlen', 'Zu erledigen (' => 'Aufgabenliste', 'nav-tab-active' => 'Reiter',
+foreach (['Umsatz bezahlt:' => 'Kennzahlen', 'Zu erledigen:' => 'Aufgabenliste', 'nav-tab-active' => 'Reiter',
           'name="abhol_tag" value="2026-10-20"' => 'Abholtag im Formular', 'name="rechnungsnr" value="4000113"' => 'Rechnungsnummer im Formular',
           '✉ Mail schreiben' => 'Mail-Knopf', '✉ Zahlungserinnerung' => 'Erinnerungs-Knopf', '📅 In Outlook eintragen' => 'Outlook-Knopf',
           '✓ abgeholt' => 'Abgeholt-Knopf', 'id="vorgang-' . $va . '"' => 'Sprungmarke'] as $text => $was) {
     pruefe($was . ' steht auf der Seite', strpos($seite, $text) !== false, true);
 }
-$_GET = ['reiter' => 'abgeholt'];
+$_GET = ['reiter' => 'fertig'];
 ob_start(); Kikripp_Admin::seite_reservierungen(); $seite = ob_get_clean();
-pruefe('Reiter „Abgeholt“ blendet bestellte Vorgänge aus', strpos($seite, 'id="vorgang-' . $va . '"') === false, true);
+pruefe('Reiter „Abgeschlossen“ blendet bestellte Vorgänge aus', strpos($seite, 'id="vorgang-' . $va . '"') === false, true);
 $_GET = [];
 $vw = Kikripp_DB::reservieren(array_merge(kontakt('Wunsch Person'), ['abholwunsch' => '2026-10-27']), ['AB-001' => 1]);
 ob_start(); Kikripp_Admin::seite_reservierungen(); $seite = ob_get_clean();
@@ -799,6 +801,143 @@ update_option('kikripp_plugin_version', '1.2.5');
 kikripp_umstellen();
 pruefe('eigene Zufahrt bleibt', get_option('kikripp_zufahrt'), 'Eigener Text');
 $GLOBALS['ATTRAPPE_WIRFT_BEI_WEITERLEITUNG'] = false;
+$GLOBALS['ist_admin'] = false;
+
+
+titel('41. 1.4.0: Wer ist dran?');
+$jetzt = strtotime('2026-10-19 12:00:00 UTC');
+$st = function ($v) use ($jetzt) { return Kikripp_Ablauf::stand($v, Kikripp_Ablauf::aufgaben([$v], $jetzt), $jetzt); };
+$x = $st($fall(['status' => 'offen']));
+pruefe('neu → Zu tun, blau, Knopf bestellt', $x['reiter'] . '|' . $x['farbe'] . '|' . $x['knopf'][0], 'zu_tun|blau|bestellt');
+$x = $st($fall(['status' => 'offen', 'ablauf' => '2026-10-19 23:59:59']));
+pruefe('Frist läuft heute ab → rot', $x['farbe'], 'rot');
+$x = $st($fall(['status' => 'offen', 'ablauf' => '2026-10-10 23:59:59']));
+pruefe('abgelaufen → Zu tun, Knopf stornieren', $x['reiter'] . '|' . $x['knopf'][0], 'zu_tun|storniert');
+$x = $st($fall([]));
+pruefe('bestellt ohne Rechnung → Zu tun, Knopf aufklappen', $x['reiter'] . '|' . $x['knopf'][0], 'zu_tun|aufklappen');
+pruefe('nächster Schritt in Worten', strpos($x['schritt'], 'Rechnung schreiben') !== false, true);
+$x = $st($fall(['rechnungsnr' => '4000113', 'rechnung_am' => '2026-10-16', 'abholung' => '2026-10-27 09:00']));
+pruefe('Rechnung raus → Wartet auf Zahlung, grau, Knopf bezahlt', $x['reiter'] . '|' . $x['farbe'] . '|' . $x['knopf'][0], 'zahlung|grau|bezahlt');
+pruefe('… seit 3 Tagen', $x['schritt'], 'Rechnung raus – wartet auf Zahlung seit 3 Tagen');
+$x = $st($fall(['rechnungsnr' => '4000113', 'rechnung_am' => '2026-10-12', 'abholung' => '2026-10-27 09:00']));
+pruefe('Zahlungsfrist um → zurück in Zu tun', $x['reiter'] . '|' . $x['farbe'], 'zu_tun|blau');
+$x = $st($fall(['rechnungsnr' => '1', 'rechnung_am' => '2026-10-19', 'abholung' => '2026-10-20 10:30']));
+pruefe('Abholung morgen unbezahlt → Zu tun, rot', $x['reiter'] . '|' . $x['farbe'], 'zu_tun|rot');
+$x = $st($fall(['status' => 'bezahlt', 'abholung' => '2026-10-27 09:00']));
+pruefe('bezahlt → Wartet auf Abholung, Knopf abgeholt', $x['reiter'] . '|' . $x['knopf'][0], 'abholung|abgeholt');
+pruefe('… mit Termin', $x['schritt'], 'bezahlt – Abholung Di 27.10., 09:00 Uhr');
+$x = $st($fall(['status' => 'bezahlt', 'abholung' => '2026-10-20 09:00']));
+pruefe('bezahlt, Abholung morgen bleibt in Wartet (nur Hinweis)', $x['reiter'], 'abholung');
+$x = $st($fall(['status' => 'bezahlt', 'abholung' => '2026-10-13 09:00']));
+pruefe('Termin vorbei, nicht abgeholt → Zu tun, rot', $x['reiter'] . '|' . $x['farbe'], 'zu_tun|rot');
+$x = $st($fall(['status' => 'bezahlt', 'abgeholt_am' => '2026-10-16']));
+pruefe('abgeholt → Abgeschlossen, hellgrau', $x['reiter'] . '|' . $x['farbe'], 'fertig|hell');
+$x = $st($fall(['status' => 'bezahlt', 'abgeholt_am' => '2026-10-01']));
+pruefe('abgeholt + 14 Tage → Knopf Kontaktdaten löschen', $x['knopf'][0] . '|' . (strpos($x['schritt'], 'Kontaktdaten löschen') !== false ? 'ja' : 'nein'), 'kontakt|ja');
+$x = $st($fall(['status' => 'storniert', 'kontakt_weg' => 1]));
+pruefe('storniert → Storniert/abgelaufen, kein Knopf', $x['reiter'] . '|' . var_export($x['knopf'], true), 'erledigt|NULL');
+
+titel('42. Suche');
+$such = $fall(['id' => 412, 'name' => 'Sonja Müller', 'firma' => 'Kita Regenbogen', 'rechnungsnr' => '4000113',
+    'positionen' => [['artnr' => 'NE05-02', 'menge' => 1, 'preis_netto' => 1, 'status' => 'reserviert', 'daten' => '{}']]]);
+foreach (['müller' => 'Name, klein geschrieben', 'Regenbogen' => 'Firma', '4000113' => 'Rechnungsnummer',
+          'ne05-02' => 'Artikelnummer', '#412' => 'Vorgangsnummer', '412' => 'Nummer ohne #'] as $q => $was) {
+    pruefe("findet über $was", Kikripp_Ablauf::passt($such, $q), true);
+}
+pruefe('findet nichts Falsches', Kikripp_Ablauf::passt($such, 'Schmidt'), false);
+pruefe('#41 ist nicht #412', Kikripp_Ablauf::passt($such, '#41'), false);
+
+titel('43. Übersichtsseite 1.4.0');
+$GLOBALS['ist_admin'] = true;
+$_GET = [];
+ob_start(); Kikripp_Admin::seite_reservierungen(); $seite = ob_get_clean();
+pruefe('Start-Reiter ist „Zu tun“', (bool) preg_match('/nav-tab nav-tab-active[^>]*>Zu tun/', $seite), true);
+pruefe('Zu-erledigen-Kasten ist zugeklappt', strpos($seite, '<details') !== false && strpos($seite, '<details open') === false, true);
+pruefe('Spalte „Nächster Schritt“', strpos($seite, 'Nächster Schritt') !== false, true);
+pruefe('Details stecken in einer zugeklappten Zeile', strpos($seite, 'class="kik-details" hidden') !== false
+       || strpos($seite, 'class="kik-details"') !== false, true);
+pruefe('Knopf „bearbeiten ▾“', strpos($seite, 'bearbeiten ▾') !== false, true);
+pruefe('Suchfeld', strpos($seite, 'name="suche"') !== false, true);
+pruefe('Farben nur Blau/Rot/Grau', preg_match_all('/background:(#[0-9a-f]{6})"><\/td>/', $seite, $m) > 0
+       && !array_diff(array_unique($m[1]), ['#2271b1', '#d63638', '#50575e', '#a7aaad']), true);
+$_GET = ['suche' => 'Sonja'];
+ob_start(); Kikripp_Admin::seite_reservierungen(); $seite = ob_get_clean();
+pruefe('Suche über alle Reiter', strpos($seite, 'Suchergebnis für „Sonja“') !== false && strpos($seite, 'id="vorgang-' . $va . '"') !== false, true);
+pruefe('bei Suche ist kein Reiter aktiv', strpos($seite, 'nav-tab-active') === false, true);
+$_GET = [];
+$GLOBALS['ist_admin'] = false;
+
+
+titel('44. Auswertung');
+global $wpdb;
+$wpdb->query('DELETE FROM ' . Kikripp_DB::t_position());
+$wpdb->query('DELETE FROM ' . Kikripp_DB::t_vorgang());
+$wpdb->query('DELETE FROM ' . Kikripp_DB::t_artikel());
+update_option('kikripp_vorschau', 0);
+$art = function ($nr, $menge, $preis, $titel, $kat, $raum) {
+    global $wpdb;
+    $wpdb->insert(Kikripp_DB::t_artikel(), ['artnr' => $nr, 'sortierung' => 0, 'menge' => $menge, 'preis_netto' => $preis, 'aktiv' => 1,
+        'im_katalog' => 1, 'daten' => wp_json_encode(['nr' => $nr, 'titel' => $titel, 'kat' => $kat, 'raum' => $raum, 'einheit' => 'Stück']),
+        'aktualisiert' => current_time('mysql')]);
+};
+$art('M-1', 4, 50.0, 'Sitzbank', 'Möbel', 'Nebenraum');
+$art('M-2', 2, 90.0, 'Schrank', 'Möbel', 'Büro');
+$art('G-1', 3, 10.0, 'Gießkanne', 'Garten', 'Garten');
+$art('L-1', 1, 300.0, 'Liege', 'Garten', 'Garten');      // nie reserviert
+$e = Kikripp_DB::reservieren(array_merge(kontakt('Sonja Müller'), []), ['M-1' => 2, 'G-1' => 1]);
+Kikripp_DB::vorgang_status($e, 'bezahlt');
+Kikripp_DB::vorgang_bearbeiten($e, ['rechnungsnr' => '4000113', 'rechnung_am' => '2026-10-08', 'abholung' => '2026-10-20 10:30']);
+$wpdb->query("UPDATE " . Kikripp_DB::t_position() . " SET bezahlt_am = '2026-10-12 09:00:00' WHERE vorgang_id = $e");
+Kikripp_DB::abgeholt_setzen($e, '2026-10-20');
+$f = Kikripp_DB::reservieren(array_merge(kontakt('Peter Klein'), ['firma' => 'Kita Regenbogen']), ['M-2' => 1]);
+Kikripp_DB::vorgang_status($f, 'bestellt');
+Kikripp_DB::vorgang_bearbeiten($f, ['rechnungsnr' => '4000114', 'rechnung_am' => Kikripp_Ablauf::heute(), 'abholung' => '2026-10-27 09:00']);
+$s = Kikripp_DB::reservieren(kontakt('Storno'), ['G-1' => 1]);
+Kikripp_DB::vorgang_status($s, 'storniert');
+$von = '2026-09-01'; $bis = '2026-12-31';
+
+$a = Kikripp_Auswertung::daten('verkauf', $von, $bis);
+pruefe('Verkaufsliste: zwei bezahlte Positionen', count($a['zeilen']), 2);
+pruefe('Verkaufsliste: Summe', $a['summe'][11], 110.0);
+pruefe('Verkaufsliste: Rechnungsnr., Käufer, Bezeichnung', $a['zeilen'][0][1] . '|' . $a['zeilen'][0][4] . '|' . $a['zeilen'][0][7], '4000113|Sonja Müller|Sitzbank');
+pruefe('Verkaufsliste: Datum und abgeholt', $a['zeilen'][0][0] . '|' . $a['zeilen'][0][12], '12.10.2026|20.10.2026');
+pruefe('Verkaufsliste: Zeitraum filtert', count(Kikripp_Auswertung::daten('verkauf', '2026-10-13', '2026-12-31')['zeilen']), 0);
+$u = Kikripp_Auswertung::daten('umsatz', $von, $bis);
+pruefe('Umsatz: Monat Oktober', $u['zeilen'][0][1] . '|' . $u['zeilen'][0][4], 'Oktober 2026|110');
+pruefe('Umsatz: KW 42', strpos($u['zeilen'][1][1], 'KW 42 (12.10.–18.10.2026)') === 0, true);
+pruefe('Umsatz: 1 Vorgang, 3 Stück', $u['summe'][2] . '|' . $u['summe'][3], '1|3');
+$k = Kikripp_Auswertung::daten('kategorie', $von, $bis);
+$moebel = array_values(array_filter($k['zeilen'], function ($z) { return $z[0] === 'Möbel'; }))[0];
+pruefe('Kategorie Möbel: verkauft 2, reserviert 1, übrig 3', $moebel[3] . '|' . $moebel[5] . '|' . $moebel[6], '2|1|3');
+pruefe('Kategorie Möbel: Restwert', $moebel[7], 2 * 50.0 + 1 * 90.0);
+$r = Kikripp_Auswertung::daten('raum', $von, $bis);
+pruefe('nach Raum gruppiert', in_array('Büro', array_column($r['zeilen'], 0), true), true);
+$l = Kikripp_Auswertung::daten('ladenhueter', $von, $bis);
+pruefe('Ladenhüter: nur die Liege', array_column($l['zeilen'], 0), ['L-1']);
+$o = Kikripp_Auswertung::daten('offen', $von, $bis);
+pruefe('Offene Posten: Kita Regenbogen', count($o['zeilen']) . '|' . $o['zeilen'][0][0] . '|' . $o['zeilen'][0][5], '1|4000114|90');
+$ab = Kikripp_Auswertung::daten('abholungen', $von, $bis);
+pruefe('Abholungen: zwei Termine', count($ab['zeilen']), 2);
+pruefe('Abholungen: Betreff wie in Outlook', $ab['zeilen'][0][11], 'Barrierefrei – Abholung #' . $e . ': Sonja Müller (3 Stück)');
+pruefe('Abholungen: Wochentag und Uhrzeit', $ab['zeilen'][0][1] . ' ' . $ab['zeilen'][0][2], 'Dienstag 10:30');
+$kz = Kikripp_Auswertung::daten('kennzahlen', $von, $bis);
+$wert = array_column($kz['zeilen'], 1, 0);
+pruefe('Kennzahlen: 3 Reservierungen', $wert['Reservierungen im Zeitraum'], 3);
+pruefe('Kennzahlen: 1 storniert', $wert['davon storniert'], 1);
+pruefe('Kennzahlen: Umsatz', $wert['Umsatz bezahlt im Zeitraum'], 110.0);
+pruefe('Kennzahlen: Privat/Firma', $wert['bezahlte Vorgänge Privat / Firma'], '1 / 0');
+$csv = Kikripp_Auswertung::csv('verkauf', $von, $bis);
+pruefe('CSV mit BOM', substr($csv, 0, 3), "\xEF\xBB\xBF");
+pruefe('CSV mit Strichpunkt und Komma-Dezimalen', strpos($csv, ';50,00;100,00;') !== false, true);
+pruefe('CSV: Kopfzeile mit Zeitraum', strpos($csv, 'Zeitraum 01.09.2026 – 31.12.2026') !== false, true);
+$GLOBALS['ist_admin'] = true;
+$_GET = ['von' => '2026-09-01', 'bis' => '2026-12-31'];
+ob_start(); Kikripp_Auswertung::seite(); $seite = ob_get_clean();
+pruefe('Seite zeigt alle sieben Auswertungen', substr_count($seite, 'Als Excel-Datei exportieren'), 8);
+pruefe('Seite: Zeitraum-Felder', strpos($seite, 'name="von" value="2026-09-01"') !== false, true);
+$_GET = ['von' => '2026-12-31', 'bis' => '2026-09-01'];
+pruefe('vertauschter Zeitraum wird gedreht', Kikripp_Auswertung::zeitraum(), ['2026-09-01', '2026-12-31']);
+$_GET = [];
 $GLOBALS['ist_admin'] = false;
 
 printf("\n== Ergebnis: %d Prüfungen, %d Fehler ==\n", $geprueft, $fehler);

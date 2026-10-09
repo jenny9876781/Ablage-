@@ -463,9 +463,13 @@ Browserzeile steht. Damit sehe ich in der Regel sofort, woran es liegt.
 ## Im laufenden Betrieb
 
 Unter **Artikelkatalog → Reservierungen** stehen oben die **Kennzahlen** (Umsatz bezahlt, Rechnungen
-offen, reserviert) und der Kasten **„Zu erledigen“** – er sagt dir, was heute dran ist. Darunter die
-**Reiter** Aktiv · Neu · Bestellt · Bezahlt · Abgeholt · Storniert/abgelaufen. Derselbe Kasten steht auch
-auf der Startseite der WordPress-Verwaltung, die Zahl am Menüpunkt zählt die offenen Aufgaben.
+offen, reserviert) und ein Suchfeld (Name, Firma, Rechnungsnr., Artikelnr.). Die **Reiter** sortieren nach
+„Wer ist dran?“: **Zu tun** · Wartet auf Zahlung · Wartet auf Abholung · Abgeschlossen ·
+Storniert/abgelaufen · Alle. Jeder Vorgang ist eine Zeile mit **„Nächster Schritt“** und genau einem
+Hauptknopf; *bearbeiten ▾* klappt Kontakt, Artikel, Termin, Rechnung und alle Knöpfe auf. Farben: Blau =
+du bist dran, Rot = dringend, Grau = wartet, Hellgrau = erledigt. Ein Vorgang wandert von selbst in den
+richtigen Reiter. Der Kasten „Zu erledigen“ steht zugeklappt darüber und offen auf der Startseite der
+WordPress-Verwaltung; die Zahl am Menüpunkt zählt die offenen Aufgaben.
 
 1. **Neu** — läuft nach 3 Werktagen von selbst ab. Du meldest dich beim Interessenten.
 2. **bestellt** — nach der Zusage anklicken. Ab dann läuft die Reservierung nicht mehr ab.
@@ -483,6 +487,10 @@ auf der Startseite der WordPress-Verwaltung, die Zahl am Menüpunkt zählt die o
    noch nicht bezahlt. *Tag drucken* ist die Liste zum Bereitstellen.
 9. **✓ abgeholt** bei der Übergabe. Danach Kontaktdaten löschen – „Zu erledigen“ erinnert daran
    (bei Privatpersonen erst 14 Tage nach der Abholung, wegen der Widerrufsfrist).
+
+**Artikelkatalog → Auswertung**: Zeitraum wählen, sieben Auswertungen, jede als Excel-Datei:
+Verkaufsliste für den Steuerberater · Umsatz nach Monat und Woche · nach Kategorie und Raum (mit Restwert)
+· Ladenhüter (nie reserviert) · offene Posten · Abholungen (mit dem Betreff aus Outlook) · Kennzahlen.
 
 Nimmt jemand nur einen Teil, stornierst du die übrigen Positionen einzeln — sie sind sofort
 wieder im Katalog. *Frist verlängern* gibt weitere 3 Werktage.

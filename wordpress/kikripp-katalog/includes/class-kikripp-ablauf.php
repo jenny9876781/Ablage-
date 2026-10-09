@@ -103,6 +103,73 @@ class Kikripp_Ablauf {
         return trim((string) ($v['abgeholt_am'] ?? '')) !== '' ? 'abgeholt' : 'bezahlt';
     }
 
+    // ------------------------------------------------------------ 1.4.0: Wer ist dran?
+
+    const FARBE = ['blau' => '#2271b1', 'rot' => '#d63638', 'grau' => '#50575e', 'hell' => '#a7aaad'];
+
+    /**
+     * Stand eines Vorgangs für die Übersicht: in welchen Reiter er gehört, welche Farbe, welcher
+     * Satz „Nächster Schritt“ und welcher eine Hauptknopf. $aufgaben sind nur die dieses Vorgangs.
+     * Reiter: zu_tun · zahlung · abholung · fertig · erledigt.
+     */
+    public static function stand($v, array $aufgaben, $jetzt = null) {
+        $jetzt = $jetzt ?? current_time('timestamp');
+        $heute = gmdate('Y-m-d', $jetzt);
+        $warn = array_values(array_filter($aufgaben, function ($a) { return $a['art'] === 'warn'; }));
+        $abgeholt = trim((string) ($v['abgeholt_am'] ?? '')) !== '';
+        $kontakt = (int) ($v['kontakt_weg'] ?? 0) === 0 && trim((string) $v['name']) !== '';
+        $knopf = null;
+        if ($v['status'] === 'offen') {
+            $knopf = strtotime($v['ablauf']) < $jetzt ? ['storniert', 'stornieren'] : ['bestellt', 'bestellt'];
+        } elseif ($v['status'] === 'bestellt') {
+            $knopf = (trim((string) $v['rechnungsnr']) === '' || trim((string) ($v['abholung'] ?? '')) === '')
+                ? ['aufklappen', 'Rechnung / Termin eintragen'] : ['bezahlt', 'bezahlt'];
+        } elseif ($v['status'] === 'bezahlt' && !$abgeholt) {
+            $knopf = ['abgeholt', 'abgeholt'];
+        } elseif ($v['status'] === 'bezahlt' && $kontakt) {
+            $knopf = ['kontakt', 'Kontaktdaten löschen'];
+        } elseif ($v['status'] === 'storniert' && $kontakt) {
+            $knopf = ['kontakt', 'Kontaktdaten löschen'];
+        }
+        if ($warn) {
+            usort($warn, function ($a, $b) { return $a['rang'] <=> $b['rang']; });
+            return ['reiter' => 'zu_tun', 'farbe' => $warn[0]['rang'] <= 1 ? 'rot' : 'blau',
+                    'schritt' => $warn[0]['text'], 'rang' => $warn[0]['rang'], 'knopf' => $knopf];
+        }
+        if ($v['status'] === 'storniert') {
+            return ['reiter' => 'erledigt', 'farbe' => 'hell', 'schritt' => 'storniert', 'rang' => 99, 'knopf' => $knopf];
+        }
+        if ($v['status'] === 'bestellt') {
+            $seit = ($v['rechnung_am'] ?? '') !== '' ? self::tage_zwischen($v['rechnung_am'], $heute) : null;
+            return ['reiter' => 'zahlung', 'farbe' => 'grau', 'rang' => 50, 'knopf' => $knopf,
+                    'schritt' => 'Rechnung raus – wartet auf Zahlung' . ($seit !== null ? ($seit === 0 ? ' (seit heute)'
+                        : ' seit ' . $seit . ($seit === 1 ? ' Tag' : ' Tagen')) : '')];
+        }
+        if ($v['status'] === 'bezahlt' && !$abgeholt) {
+            return ['reiter' => 'abholung', 'farbe' => 'grau', 'rang' => 50, 'knopf' => $knopf,
+                    'schritt' => 'bezahlt – Abholung ' . (self::termin_text($v['abholung'] ?? '', true) ?: 'ohne Termin')];
+        }
+        if ($v['status'] === 'bezahlt') {
+            $info = array_filter($aufgaben, function ($a) { return $a['art'] === 'info'; });
+            return ['reiter' => 'fertig', 'farbe' => 'hell', 'rang' => 90, 'knopf' => $knopf,
+                    'schritt' => 'abgeholt am ' . self::datum_text($v['abgeholt_am'])
+                        . ($info ? ' – Kontaktdaten löschen' : '')];
+        }
+        // offen ohne Aufgabe kommt nicht vor (jede Reservierung ist eine Aufgabe) – zur Sicherheit:
+        return ['reiter' => 'zu_tun', 'farbe' => 'blau', 'schritt' => 'beim Interessenten melden', 'rang' => 3, 'knopf' => $knopf];
+    }
+
+    /** Passt ein Vorgang zum Suchbegriff? Name, Firma, Mail, Telefon, Rechnungsnr., Artikelnummer, #Nummer. */
+    public static function passt($v, $suche) {
+        $klein = function ($t) { return function_exists('mb_strtolower') ? mb_strtolower($t) : strtolower($t); };
+        $suche = $klein(trim((string) $suche));
+        if ($suche === '') { return true; }
+        if (preg_match('/^#?(\d+)$/', $suche, $m) && (int) $m[1] === (int) $v['id']) { return true; }
+        $heu = [$v['name'], $v['firma'] ?? '', $v['email'], $v['telefon'], $v['rechnungsnr'] ?? '', $v['notiz'] ?? '', $v['ort'] ?? ''];
+        foreach ($v['positionen'] as $p) { $heu[] = $p['artnr']; }
+        return strpos($klein(implode(' | ', $heu)), $suche) !== false;
+    }
+
     // ------------------------------------------------------------ C: Zu erledigen
 
     /**
@@ -332,12 +399,9 @@ class Kikripp_Ablauf {
             . (trim((string) ($v['notiz'] ?? '')) !== '' ? 'Notiz: ' . $v['notiz'] . "\n" : '')
             . "\nArtikel:\n" . implode("\n", $zeilen);
         $ort = (string) get_option('kikripp_abholadresse', '');
-        $kurz = self::wer($v) . ' (' . array_sum(array_column($pos, 'menge')) . ' Stück)';
         $tag = substr($v['abholung'], 0, 10);
         $vortag = self::vorheriger_werktag($tag) . ' ' . (get_option('kikripp_erinnerung_zeit', '11:00') ?: '11:00');
-        // Zusatz vorn im Betreff (09.10.2026: „Barrierefrei“ – wird für eine Auswertung gebraucht)
-        $zusatz = trim((string) get_option('kikripp_termin_zusatz', 'Barrierefrei'));
-        $vorn = $zusatz !== '' ? "$zusatz – " : '';
+        list($betreff_abholung, $betreff_vortag) = self::termin_betreff($v);
         $stempel = gmdate('Ymd\THis\Z');
         $seq = time();
         $ereignis = function ($uid, $start, $dauer, $titel, $alarm) use ($stempel, $seq, $info, $ort) {
@@ -352,12 +416,25 @@ class Kikripp_Ablauf {
         };
         $teile = array_merge(
             ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Kikripp GmbH//Artikelkatalog//DE', 'CALSCALE:GREGORIAN', 'METHOD:PUBLISH'],
-            $ereignis("kikripp-$id-abholung@kikripp.de", $v['abholung'], 30, $vorn . "Abholung #$id: $kurz", '-PT15M'),
-            $ereignis("kikripp-$id-vortag@kikripp.de", $vortag, 15,
-                $vorn . 'Vorbereiten: Abholung ' . self::termin_text($v['abholung'], true) . " – #$id $kurz", 'PT0M'),
+            $ereignis("kikripp-$id-abholung@kikripp.de", $v['abholung'], 30, $betreff_abholung, '-PT15M'),
+            $ereignis("kikripp-$id-vortag@kikripp.de", $vortag, 15, $betreff_vortag, 'PT0M'),
             ['END:VCALENDAR']
         );
         return implode('', array_map([__CLASS__, 'falten'], $teile));
+    }
+
+    /**
+     * Betreff der beiden Outlook-Termine – an einer Stelle, damit die Auswertung „Abholungen“
+     * genau denselben Text zeigt, nach dem in Outlook gesucht wird.
+     * Zusatz vorn (09.10.2026: „Barrierefrei“ – für die Zeitauswertung der Nutzerin).
+     */
+    public static function termin_betreff($v) {
+        $id = (int) $v['id'];
+        $kurz = self::wer($v) . ' (' . array_sum(array_column(self::positionen($v), 'menge')) . ' Stück)';
+        $zusatz = trim((string) get_option('kikripp_termin_zusatz', 'Barrierefrei'));
+        $vorn = $zusatz !== '' ? "$zusatz – " : '';
+        return [$vorn . "Abholung #$id: $kurz",
+                $vorn . 'Vorbereiten: Abholung ' . self::termin_text($v['abholung'] ?? '', true) . " – #$id $kurz"];
     }
 
     public static function ics_url($id) {

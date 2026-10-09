@@ -1046,6 +1046,16 @@ ist die Merkliste; erledigte Punkte hier abhaken, nicht löschen.
 - [x] Plugin 1.3.1 (09.10.): Vortagserinnerung **11:00** (Umstellung nur, wenn noch 14:00 stand),
       Einstellung „Zusatz im Terminbetreff“ = **Barrierefrei** vorn in beiden Outlook-Terminen (für eine
       Auswertung der Nutzerin). 1.3.0 live getestet mit Vorgang Sonja Müller – funktioniert.
+- [x] **Plugin 1.4.0 (09.10.)**: Reservierungen nach „Wer ist dran?“ (`Kikripp_Ablauf::stand`): Reiter
+      Zu tun (Start) · Wartet auf Zahlung · Wartet auf Abholung · Abgeschlossen · Storniert/abgelaufen · Alle;
+      eine kompakte Zeile je Vorgang mit „Nächster Schritt“ + EIN Hauptknopf, Details per „bearbeiten ▾“
+      (offen nur, wenn Rechnung/Termin fehlt oder per #vorgang-N angesprungen), Suchfeld, nur WP-Farben
+      (Blau #2271b1 dran, Rot #d63638 dringend = Aufgabenrang ≤ 1, Grau #50575e wartet, Hellgrau erledigt).
+      Neue Seite **Auswertung** (`class-kikripp-auswertung.php`): Zeitraum (Standard 01.09. bis Jahresende),
+      7 Auswertungen + CSV (BOM, „;“, Komma): Verkaufsliste Steuerberater, Umsatz Monat/KW, Kategorie,
+      Raum, Ladenhüter, offene Posten, Abholungen (mit Outlook-Betreff „Barrierefrei – …“ via
+      `termin_betreff`), Kennzahlen. „Barrierefrei“ dient der Zeitauswertung der Nutzerin, die in einem
+      anderen Claude-Projekt läuft – sie will dafür evtl. später separat etwas Neues.
 - [x] BE10-12: neues Foto F-636 (ersetzt F-618), Beschreibung Schiebetüren + 2 Einlegeböden.
 - [x] NU03-02 Stockbetten: Beschreibung um Tischleranfertigung Ende 2019, Multiplex weiß
       melaminharzbeschichtet, Liegefläche 120x60, Neupreis 726 € ergänzt. Preis 400 € VHB bleibt

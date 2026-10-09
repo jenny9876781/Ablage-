@@ -99,9 +99,14 @@ class Kikripp_Admin {
             'id' => (int) $id], $extra), admin_url('admin-post.php')), 'kikripp_aktion_' . (int) $id);
     }
 
-    const REITER = ['aktiv' => 'Aktiv', 'neu' => 'Neu', 'bestellt' => 'Bestellt (unbezahlt)', 'bezahlt' => 'Bezahlt',
-                    'abgeholt' => 'Abgeholt', 'erledigt' => 'Storniert / abgelaufen', 'alle' => 'Alle'];
+    const REITER = ['zu_tun' => 'Zu tun', 'zahlung' => 'Wartet auf Zahlung', 'abholung' => 'Wartet auf Abholung',
+                    'fertig' => 'Abgeschlossen', 'erledigt' => 'Storniert / abgelaufen', 'alle' => 'Alle'];
 
+    /**
+     * Reservierungen (1.4.0): Reiter nach „Wer ist dran?“, eine kompakte Zeile je Vorgang mit
+     * „Nächster Schritt“ und einem Hauptknopf, Details aufklappbar, Suchfeld. Farben aus WordPress:
+     * Blau = du bist dran, Rot = dringend, Grau = wartet, Hellgrau = erledigt.
+     */
     public static function seite_reservierungen() {
         if (!current_user_can('manage_options')) { return; }
         $vorgaenge = Kikripp_DB::vorgaenge();
@@ -109,159 +114,197 @@ class Kikripp_Admin {
         echo '<div class="wrap"><h1>Reservierungen</h1>';
         self::hinweis();
 
-        // F: Kennzahlen
         $k = Kikripp_Ablauf::kennzahlen($vorgaenge, $jetzt);
-        echo '<p style="font-size:14px;background:#fff;border:1px solid #ccd0d4;padding:8px 12px;display:inline-block">'
+        echo '<p style="font-size:14px;background:#fff;border:1px solid #c3c4c7;padding:8px 12px;display:inline-block;margin:6px 0">'
            . 'Umsatz bezahlt: <strong>' . esc_html(Kikripp_Mail::eur($k['bezahlt'])) . '</strong> &nbsp;·&nbsp; '
            . 'Rechnungen offen: <strong>' . esc_html(Kikripp_Mail::eur($k['rechnung_offen'])) . '</strong> &nbsp;·&nbsp; '
            . 'bestellt, ohne Rechnung: <strong>' . esc_html(Kikripp_Mail::eur($k['ohne_rechnung'])) . '</strong> &nbsp;·&nbsp; '
            . 'reserviert: <strong>' . esc_html(Kikripp_Mail::eur($k['reserviert'])) . '</strong></p>';
 
-        // C: Zu erledigen
         $aufgaben = Kikripp_Ablauf::aufgaben($vorgaenge, $jetzt);
-        echo '<div style="background:#fff;border:1px solid #ccd0d4;border-left:4px solid #C8102E;padding:8px 14px;margin:8px 0 14px;max-width:1100px">'
-           . '<h2 style="margin:4px 0 6px;font-size:15px">Zu erledigen (' . count($aufgaben) . ')</h2>'
-           . Kikripp_Ablauf::aufgaben_html($aufgaben) . '</div>';
-
-        // E: Reiter
+        $je_vorgang = [];
+        foreach ($aufgaben as $a) { $je_vorgang[$a['id']][] = $a; }
+        $stand = [];
         $zahl = array_fill_keys(array_keys(self::REITER), 0);
         foreach ($vorgaenge as $v) {
-            $r = Kikripp_Ablauf::reiter_von($v, $jetzt);
-            $zahl[$r]++; $zahl['alle']++;
-            if (in_array($r, ['neu', 'bestellt', 'bezahlt'], true)) { $zahl['aktiv']++; }
+            $stand[$v['id']] = Kikripp_Ablauf::stand($v, $je_vorgang[$v['id']] ?? [], $jetzt);
+            $zahl[$stand[$v['id']]['reiter']]++; $zahl['alle']++;
         }
-        $reiter = sanitize_key($_GET['reiter'] ?? 'aktiv');
-        if (!isset(self::REITER[$reiter])) { $reiter = 'aktiv'; }
-        echo '<nav class="nav-tab-wrapper" style="margin-bottom:10px">';
+
+        // Suche
+        $suche = sanitize_text_field(wp_unslash($_GET['suche'] ?? ''));
+        echo '<form method="get" style="float:right;margin:8px 0"><input type="hidden" name="page" value="kikripp-reservierungen">'
+           . '<input type="search" name="suche" value="' . esc_attr($suche) . '" placeholder="Name, Firma, Rechnungsnr., Artikelnr. …" style="width:280px"> '
+           . '<button class="button">Suchen</button>'
+           . ($suche !== '' ? ' <a href="' . esc_url(admin_url('admin.php?page=kikripp-reservierungen')) . '">zurücksetzen</a>' : '')
+           . '</form>';
+
+        // Zu erledigen – auf dieser Seite zugeklappt, der Reiter „Zu tun“ zeigt dasselbe
+        $warn = count(array_filter($aufgaben, function ($a) { return $a['art'] === 'warn'; }));
+        echo '<details style="clear:left;background:#fff;border:1px solid #c3c4c7;border-left:4px solid #2271b1;padding:6px 12px;margin:8px 0;max-width:1100px">'
+           . '<summary style="cursor:pointer"><strong>Zu erledigen:</strong> ' . $warn . ' Aufgabe' . ($warn === 1 ? '' : 'n')
+           . (count($aufgaben) > $warn ? ' · ' . (count($aufgaben) - $warn) . ' Hinweis(e)' : '') . ' – anzeigen</summary>'
+           . '<div style="margin-top:6px">' . Kikripp_Ablauf::aufgaben_html($aufgaben) . '</div></details>';
+
+        $reiter = sanitize_key($_GET['reiter'] ?? 'zu_tun');
+        if (!isset(self::REITER[$reiter])) { $reiter = 'zu_tun'; }
+        echo '<nav class="nav-tab-wrapper" style="clear:both;margin-bottom:10px">';
         foreach (self::REITER as $schluessel => $name) {
-            echo '<a class="nav-tab' . ($schluessel === $reiter ? ' nav-tab-active' : '') . '" href="'
+            $aktiv = $suche === '' && $schluessel === $reiter;
+            echo '<a class="nav-tab' . ($aktiv ? ' nav-tab-active' : '') . '" href="'
                . esc_url(admin_url('admin.php?page=kikripp-reservierungen&reiter=' . $schluessel)) . '">'
-               . esc_html($name) . ' <span style="color:#777">(' . $zahl[$schluessel] . ')</span></a>';
+               . esc_html($name) . ' <span style="color:' . ($schluessel === 'zu_tun' && $zahl[$schluessel] ? '#2271b1;font-weight:600' : '#646970') . '">('
+               . $zahl[$schluessel] . ')</span></a>';
         }
         echo '</nav>';
-        echo '<p style="color:#555;max-width:1100px;margin:4px 0 10px">Ablauf: <strong>Neu</strong> (läuft nach '
-           . Kikripp_DB::frist_werktage() . ' Werktagen ab) → nach der Zusage <strong>bestellt</strong>, Abholtermin, Bestellung erstellen, '
-           . 'Rechnung aus DATEV, „Mail schreiben“, „In Outlook eintragen“ → nach Zahlungseingang <strong>bezahlt</strong> → '
-           . 'bei der Übergabe <strong>abgeholt</strong>.</p>';
-        echo '<p><a href="' . esc_url(wp_nonce_url(admin_url('admin-post.php?action=kikripp_export'), 'kikripp_export')) . '" class="button">Alle Reservierungen als CSV exportieren</a> '
-           . '<a href="' . esc_url(admin_url('admin.php?page=kikripp-abholplan')) . '" class="button">Abholplan</a></p>';
 
-        $sichtbar = array_filter($vorgaenge, function ($v) use ($reiter, $jetzt) {
-            $r = Kikripp_Ablauf::reiter_von($v, $jetzt);
-            return $reiter === 'alle' || $r === $reiter || ($reiter === 'aktiv' && in_array($r, ['neu', 'bestellt', 'bezahlt'], true));
+        if ($suche !== '') {
+            $sichtbar = array_filter($vorgaenge, function ($v) use ($suche) { return Kikripp_Ablauf::passt($v, $suche); });
+            echo '<p>Suchergebnis für „' . esc_html($suche) . '“ in allen Reitern: ' . count($sichtbar) . ' Vorgang/Vorgänge.</p>';
+        } else {
+            $sichtbar = array_filter($vorgaenge, function ($v) use ($reiter, $stand) {
+                return $reiter === 'alle' || $stand[$v['id']]['reiter'] === $reiter;
+            });
+        }
+        // Reihenfolge: Zu tun nach Dringlichkeit, Warten nach Abholtermin, Abgeschlossen neueste zuerst
+        usort($sichtbar, function ($a, $b) use ($stand, $reiter) {
+            $sa = $stand[$a['id']]; $sb = $stand[$b['id']];
+            if (in_array($reiter, ['zahlung', 'abholung'], true)) {
+                $ta = ($a['abholung'] ?? '') ?: '9999'; $tb = ($b['abholung'] ?? '') ?: '9999';
+                return [$ta, $a['id']] <=> [$tb, $b['id']];
+            }
+            if ($reiter === 'fertig') { return [$b['abgeholt_am'] ?? '', $b['id']] <=> [$a['abgeholt_am'] ?? '', $a['id']]; }
+            if ($reiter === 'zu_tun') { return [$sa['rang'], $a['id']] <=> [$sb['rang'], $b['id']]; }
+            return $b['id'] <=> $a['id'];
         });
+
+        echo '<p style="margin:4px 0 8px"><a href="' . esc_url(admin_url('admin.php?page=kikripp-abholplan')) . '" class="button">Abholplan</a> '
+           . '<a href="' . esc_url(admin_url('admin.php?page=kikripp-auswertung')) . '" class="button">Auswertung</a> '
+           . '<a href="' . esc_url(wp_nonce_url(admin_url('admin-post.php?action=kikripp_export'), 'kikripp_export')) . '" class="button">Alle Reservierungen als CSV exportieren</a></p>';
+
         if (empty($sichtbar)) {
-            echo '<p>' . (empty($vorgaenge) ? 'Es liegen noch keine Reservierungen vor.' : 'In diesem Reiter ist nichts.') . '</p></div>';
+            echo '<p>' . (empty($vorgaenge) ? 'Es liegen noch keine Reservierungen vor.'
+                : ($reiter === 'zu_tun' && $suche === '' ? 'Nichts zu tun. 👍' : 'Hier ist nichts.')) . '</p></div>';
             return;
         }
 
-        echo '<table class="widefat striped"><thead><tr>'
-           . '<th>Nr.</th><th>Eingegangen</th><th>Interessent</th><th>Positionen</th>'
-           . '<th>Summe</th><th>Status</th><th>Wünsche</th><th>Aktion</th>'
-           . '</tr></thead><tbody>';
+        echo '<style>.kik-tab td{vertical-align:middle}.kik-tab tr.kik-zeile td{border-top:1px solid #dcdcde}'
+           . '.kik-tab .kik-details td{background:#f6f7f7;border-top:0}.kik-tab .kik-auf{white-space:nowrap}'
+           . '.kik-tab td.kik-balken{width:4px;padding:0}</style>';
+        echo '<table class="widefat kik-tab"><thead><tr><th class="kik-balken"></th><th>Nr.</th><th>Käufer</th><th>Artikel</th><th>Summe</th>'
+           . '<th>Abholung</th><th>Rechnung</th><th>Nächster Schritt</th><th style="text-align:right">Aktion</th></tr></thead><tbody>';
+        foreach ($sichtbar as $v) { echo self::zeile_html($v, $stand[$v['id']], $jetzt); }
+        echo '</tbody></table>';
+        echo '<script>'
+           . 'function kikAuf(id,zeigen){var d=document.getElementById("details-"+id),l=document.getElementById("auf-"+id);if(!d)return;'
+           . 'var an=zeigen===undefined?d.hidden:zeigen;d.hidden=!an;if(l)l.textContent=an?"zuklappen ▴":"bearbeiten ▾";}'
+           . 'function kikKopieren(id){var t=document.getElementById(id);if(!t)return;'
+           . 'if(navigator.clipboard){navigator.clipboard.writeText(t.value);}else{t.style.display="block";t.select();document.execCommand("copy");t.style.display="none";}'
+           . 'var m=document.getElementById(id+"-ok");if(m){m.style.display="inline";setTimeout(function(){m.style.display="none";},2000);}}'
+           . 'var h=location.hash.match(/^#vorgang-(\d+)$/);if(h){kikAuf(h[1],true);}'
+           . '</script>';
+        echo '</div>';
+    }
 
-        foreach ($sichtbar as $v) {
-            $summe = 0;
-            $posten = [];
-            $offen_oder_bestellt = in_array($v['status'], ['offen', 'bestellt'], true);
-            foreach ($v['positionen'] as $p) {
-                $zeile = sprintf('%d × %s', (int) $p['menge'], esc_html($p['artnr']));
-                if ($p['status'] === 'storniert') {
-                    $posten[] = '<s style="color:#999">' . $zeile . '</s>';
-                    continue;
-                }
-                $summe += (float) $p['preis_netto'] * (int) $p['menge'];
-                if ($offen_oder_bestellt && count($v['positionen']) > 1) {
-                    $zeile .= ' <a href="' . esc_url(self::aktion_url('pos', $v['id'], ['pid' => (int) $p['id']]))
-                            . '" style="font-size:11px" onclick="return confirm(\'Nur diese Position stornieren?\')">'
-                            . 'stornieren</a>';
-                }
-                $posten[] = $zeile;
-            }
+    /** Eine kompakte Zeile plus aufklappbare Details. */
+    private static function zeile_html($v, $st, $jetzt) {
+        $id = (int) $v['id'];
+        $farbe = Kikripp_Ablauf::FARBE[$st['farbe']];
+        $blass = $st['farbe'] === 'hell';
+        $pos = Kikripp_Ablauf::positionen($v);
+        $stueck = array_sum(array_column($pos, 'menge'));
+        $wer = trim((string) $v['name']) !== '' || trim((string) ($v['firma'] ?? '')) !== ''
+            ? '<strong>' . esc_html(trim((string) $v['name']) ?: $v['firma']) . '</strong>'
+              . (trim((string) ($v['firma'] ?? '')) !== '' && trim((string) $v['name']) !== '' ? '<br><span style="font-size:12px;color:#646970">' . esc_html($v['firma']) . '</span>' : '')
+            : '<span style="color:#8c8f94">Kontaktdaten gelöscht</span>';
+        $titel = implode("\n", array_map(function ($p) { return $p['menge'] . ' × ' . $p['artnr'] . ' ' . $p['titel']; }, $pos));
+        $abholung = trim((string) ($v['abholung'] ?? '')) !== ''
+            ? esc_html(Kikripp_Ablauf::termin_text($v['abholung'], true))
+            : (trim((string) ($v['abholwunsch'] ?? '')) !== '' ? '<span style="color:#8c8f94">Wunsch: ' . esc_html(Kikripp_Mail::abholung_text($v)) . '</span>' : '—');
+        $offen = $st['knopf'] && $st['knopf'][0] === 'aufklappen';
 
-            echo '<tr id="vorgang-' . (int) $v['id'] . '">';
-            echo '<td><strong>#' . (int) $v['id'] . '</strong>' . ($v['testdaten'] ? ' <em>(Test)</em>' : '') . '</td>';
-            echo '<td>' . esc_html(mysql2date('d.m.Y H:i', $v['erstellt'])) . '</td>';
-            $suche = sprintf('[%s] Neue Reservierung #%d',
-                get_option('kikripp_firma', 'Kikripp GmbH'), (int) $v['id']);
-            echo '<td>';
-            if ($v['name'] !== '' || $v['email'] !== '' || $v['telefon'] !== '') {
-                $loesch = self::aktion_url('kontakt', $v['id']);
-                echo '<strong>' . esc_html($v['name']) . '</strong><br>';
-                if (trim((string) ($v['firma'] ?? '')) !== '') { echo esc_html($v['firma']) . '<br>'; }
-                if (trim((string) ($v['strasse'] ?? '')) !== '') {
-                    echo esc_html($v['strasse']) . ', ' . esc_html(trim($v['plz'] . ' ' . $v['ort'])) . '<br>';
-                }
-                if ($v['email'] !== '') {
-                    echo '<a href="mailto:' . esc_attr($v['email']) . '">'
-                       . esc_html($v['email']) . '</a><br>';
-                }
-                if ($v['telefon'] !== '') {
-                    echo '<a href="tel:' . esc_attr(preg_replace('/[^0-9+]/', '', $v['telefon']))
-                       . '">' . esc_html($v['telefon']) . '</a><br>';
-                }
-                echo '<a href="' . esc_url($loesch) . '" style="font-size:11px" onclick="return confirm(\'Kontaktdaten zu diesem Vorgang endgültig löschen?\')">'
-                   . 'erledigt – Kontaktdaten löschen</a>';
-            } elseif ((int) $v['kontakt_weg']) {
-                echo '<span style="color:#777">Kontaktdaten gelöscht.</span><br>'
-                   . '<code style="font-size:11px">' . esc_html($suche) . '</code>';
+        $knopf = '';
+        if ($st['knopf']) {
+            list($was, $text) = $st['knopf'];
+            if ($was === 'aufklappen') {
+                $knopf = '<a href="#" class="button button-primary" onclick="kikAuf(' . $id . ',true);return false">' . esc_html($text) . '</a>';
             } else {
-                echo '<span style="color:#777">—</span>';
-            }
-            echo '</td>';
-            echo '<td>' . implode('<br>', $posten) . '</td>';
-            echo '<td>' . esc_html(Kikripp_Mail::eur($summe)) . '</td>';
-            echo '<td>' . self::status_text($v, $jetzt);
-            if ($v['status'] === 'offen') {
-                echo '<br><span style="font-size:11px;color:#555">bis ' . esc_html(mysql2date('d.m.Y', $v['ablauf'])) . '</span>';
-            }
-            if (trim((string) ($v['abgeholt_am'] ?? '')) !== '') {
-                echo '<br><span style="color:#00a32a">abgeholt ' . esc_html(Kikripp_Ablauf::datum_text($v['abgeholt_am'])) . '</span>';
-            }
-            echo '</td>';
-
-            echo '<td style="font-size:12px">Besichtigung: ' . esc_html(Kikripp_Mail::besichtigung_text($v))
-               . '<br>Abholwunsch: ' . esc_html(Kikripp_Mail::abholung_text($v)) . '</td>';
-
-            echo '<td>';
-            $aktionen = [];
-            if ($v['status'] === 'offen') { $aktionen['bestellt'] = 'bestellt'; }
-            if ($offen_oder_bestellt) {
-                $aktionen['bezahlt'] = 'bezahlt';
-                $aktionen['storniert'] = 'stornieren';
-            }
-            if ($v['status'] === 'offen') { $aktionen['verlaengern'] = 'Frist verlängern'; }
-            $aktionen['loeschen'] = 'löschen';
-            foreach ($aktionen as $was => $beschriftung) {
-                $stil = $was === 'loeschen' ? ' style="color:#b32d2e"' : '';
-                $frage = $was === 'loeschen' ? ' onclick="return confirm(\'Diesen Vorgang wirklich löschen?\')"'
-                       : ($was === 'storniert' ? ' onclick="return confirm(\'Vorgang stornieren? Die Artikel sind dann wieder im Katalog.\')"' : '');
-                echo '<a href="' . esc_url(self::aktion_url($was, $v['id'])) . '"' . $stil . $frage . '>'
-                   . esc_html($beschriftung) . '</a><br>';
-            }
-            if ($v['status'] !== 'storniert') {
-                $b = wp_nonce_url(admin_url('admin-post.php?action=kikripp_bestellung&id=' . (int) $v['id']),
-                    'kikripp_bestellung_' . (int) $v['id']);
-                $privat = Kikripp_Ablauf::privat($v);
-                echo '<span style="font-size:11px;color:#555">Bestellung erstellen:</span><br>'
-                   . '<a href="' . esc_url($b . '&art=unternehmen') . '" target="_blank"' . ($privat ? '' : ' style="font-weight:600"') . '>Unternehmen</a> · '
-                   . '<a href="' . esc_url($b . '&art=privat') . '" target="_blank"' . ($privat ? ' style="font-weight:600"' : '') . '>Privatperson</a>';
-            }
-            echo '</td></tr>';
-
-            if (trim((string) $v['nachricht']) !== '') {
-                echo '<tr><td></td><td colspan="7" style="color:#555">Nachricht: '
-                   . esc_html($v['nachricht']) . '</td></tr>';
-            }
-            if ($v['status'] !== 'storniert') {
-                echo '<tr><td></td><td colspan="7" style="background:#f6f7f7">' . self::bearbeiten_html($v) . '</td></tr>';
+                $frage = ['storniert' => 'Vorgang stornieren? Die Artikel sind dann wieder im Katalog.',
+                          'kontakt' => 'Kontaktdaten zu diesem Vorgang endgültig löschen?',
+                          'abgeholt' => $v['status'] === 'bezahlt' ? '' : 'Noch nicht als bezahlt vermerkt. Trotzdem abgeholt?'][$was] ?? '';
+                $knopf = '<a class="button' . (in_array($was, ['kontakt', 'storniert'], true) ? '' : ' button-primary') . '" href="'
+                    . esc_url(self::aktion_url($was, $id)) . '"' . ($frage !== '' ? ' onclick="return confirm(\'' . esc_js($frage) . '\')"' : '') . '>'
+                    . ($was === 'abgeholt' ? '✓ ' : '') . esc_html($text) . '</a>';
             }
         }
-        echo '</tbody></table>';
-        echo '<script>function kikKopieren(id){var t=document.getElementById(id);if(!t)return;'
-           . 'if(navigator.clipboard){navigator.clipboard.writeText(t.value);}else{t.style.display="block";t.select();document.execCommand("copy");t.style.display="none";}'
-           . 'var m=document.getElementById(id+"-ok");if(m){m.style.display="inline";setTimeout(function(){m.style.display="none";},2000);}}</script>';
-        echo '</div>';
+
+        $h = '<tr id="vorgang-' . $id . '" class="kik-zeile"' . ($blass ? ' style="color:#8c8f94"' : '') . '>'
+           . '<td class="kik-balken" style="background:' . $farbe . '"></td>'
+           . '<td><strong>#' . $id . '</strong>' . (!empty($v['testdaten']) ? '<br><em style="font-size:11px">Test</em>' : '') . '</td>'
+           . '<td>' . $wer . '</td>'
+           . '<td title="' . esc_attr($titel) . '">' . count($pos) . ' Pos. · ' . $stueck . ' Stück</td>'
+           . '<td style="white-space:nowrap">' . esc_html(Kikripp_Mail::eur(Kikripp_Ablauf::summe($v))) . '</td>'
+           . '<td>' . $abholung . (!empty($v['demontage']) ? '<br><span style="font-size:11px">Demontage</span>' : '') . '</td>'
+           . '<td>' . (trim((string) ($v['rechnungsnr'] ?? '')) !== '' ? esc_html($v['rechnungsnr']) : '—') . '</td>'
+           . '<td style="color:' . $farbe . ';font-weight:' . ($blass ? '400' : '600') . '">' . esc_html($st['schritt']) . '</td>'
+           . '<td class="kik-auf" style="text-align:right">' . $knopf
+           . ' <a href="#" id="auf-' . $id . '" onclick="kikAuf(' . $id . ');return false" style="margin-left:6px">'
+           . ($offen ? 'zuklappen ▴' : 'bearbeiten ▾') . '</a></td></tr>';
+
+        // Details
+        $d = '<div style="display:flex;flex-wrap:wrap;gap:24px;margin-bottom:8px">';
+        $d .= '<div style="min-width:220px">';
+        if ($v['name'] !== '' || $v['email'] !== '' || $v['telefon'] !== '') {
+            $d .= '<strong>' . esc_html($v['name']) . '</strong><br>';
+            if (trim((string) ($v['firma'] ?? '')) !== '') { $d .= esc_html($v['firma']) . '<br>'; }
+            if (trim((string) ($v['strasse'] ?? '')) !== '') { $d .= esc_html($v['strasse']) . ', ' . esc_html(trim($v['plz'] . ' ' . $v['ort'])) . '<br>'; }
+            if ($v['email'] !== '') { $d .= '<a href="mailto:' . esc_attr($v['email']) . '">' . esc_html($v['email']) . '</a><br>'; }
+            if ($v['telefon'] !== '') { $d .= '<a href="tel:' . esc_attr(preg_replace('/[^0-9+]/', '', $v['telefon'])) . '">' . esc_html($v['telefon']) . '</a><br>'; }
+            $d .= '<a href="' . esc_url(self::aktion_url('kontakt', $id)) . '" style="font-size:11px" onclick="return confirm(\'Kontaktdaten zu diesem Vorgang endgültig löschen?\')">erledigt – Kontaktdaten löschen</a>';
+        } elseif ((int) $v['kontakt_weg']) {
+            $d .= '<span style="color:#646970">Kontaktdaten gelöscht.</span>';
+        }
+        $d .= '<div style="font-size:11px;color:#646970;margin-top:4px">eingegangen ' . esc_html(mysql2date('d.m.Y H:i', $v['erstellt']))
+            . ($v['status'] === 'offen' ? ' · reserviert bis ' . esc_html(mysql2date('d.m.Y', $v['ablauf'])) : '') . '</div></div>';
+        $d .= '<div style="min-width:240px">';
+        $offen_oder_bestellt = in_array($v['status'], ['offen', 'bestellt'], true);
+        foreach ($v['positionen'] as $p) {
+            $daten = json_decode((string) ($p['daten'] ?? ''), true);
+            $t = esc_html((int) $p['menge'] . ' × ' . $p['artnr'] . ' ' . (is_array($daten) ? ($daten['titel'] ?? '') : ''))
+               . ' · ' . esc_html(Kikripp_Mail::eur((float) $p['preis_netto'] * (int) $p['menge']));
+            if ($p['status'] === 'storniert') { $d .= '<s style="color:#8c8f94">' . $t . '</s><br>'; continue; }
+            $d .= $t;
+            if ($offen_oder_bestellt && count($v['positionen']) > 1) {
+                $d .= ' <a href="' . esc_url(self::aktion_url('pos', $id, ['pid' => (int) $p['id']])) . '" style="font-size:11px" onclick="return confirm(\'Nur diese Position stornieren?\')">stornieren</a>';
+            }
+            $d .= '<br>';
+        }
+        $d .= '<div style="font-size:12px;color:#646970;margin-top:4px">Besichtigung: ' . esc_html(Kikripp_Mail::besichtigung_text($v))
+            . '<br>Abholwunsch: ' . esc_html(Kikripp_Mail::abholung_text($v)) . '</div>';
+        if (trim((string) $v['nachricht']) !== '') { $d .= '<div style="margin-top:4px">Nachricht: <em>' . esc_html($v['nachricht']) . '</em></div>'; }
+        $d .= '</div><div style="min-width:180px">';
+        $aktionen = [];
+        if ($v['status'] === 'offen') { $aktionen['bestellt'] = 'bestellt'; $aktionen['verlaengern'] = 'Frist verlängern'; }
+        if ($offen_oder_bestellt) { $aktionen['bezahlt'] = 'bezahlt'; $aktionen['storniert'] = 'stornieren'; }
+        $aktionen['loeschen'] = 'löschen';
+        foreach ($aktionen as $was => $text) {
+            $frage = ['loeschen' => 'Diesen Vorgang wirklich löschen?', 'storniert' => 'Vorgang stornieren? Die Artikel sind dann wieder im Katalog.'][$was] ?? '';
+            $d .= '<a href="' . esc_url(self::aktion_url($was, $id)) . '"' . ($was === 'loeschen' ? ' style="color:#d63638"' : '')
+                . ($frage !== '' ? ' onclick="return confirm(\'' . esc_js($frage) . '\')"' : '') . '>' . esc_html($text) . '</a><br>';
+        }
+        if ($v['status'] !== 'storniert') {
+            $b = wp_nonce_url(admin_url('admin-post.php?action=kikripp_bestellung&id=' . $id), 'kikripp_bestellung_' . $id);
+            $privat = Kikripp_Ablauf::privat($v);
+            $d .= '<span style="font-size:11px;color:#646970">Bestellung erstellen:</span><br>'
+                . '<a href="' . esc_url($b . '&art=unternehmen') . '" target="_blank"' . ($privat ? '' : ' style="font-weight:600"') . '>Unternehmen</a> · '
+                . '<a href="' . esc_url($b . '&art=privat') . '" target="_blank"' . ($privat ? ' style="font-weight:600"' : '') . '>Privatperson</a>';
+        }
+        $d .= '</div></div>';
+        if ($v['status'] !== 'storniert') { $d .= self::bearbeiten_html($v); }
+
+        $h .= '<tr id="details-' . $id . '" class="kik-details"' . ($offen ? '' : ' hidden') . '><td class="kik-balken" style="background:' . $farbe
+            . '"></td><td colspan="8">' . $d . '</td></tr>';
+        return $h;
     }
 
     /**

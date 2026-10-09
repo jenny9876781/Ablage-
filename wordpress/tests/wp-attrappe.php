@@ -216,3 +216,4 @@ if (!function_exists('wp_add_dashboard_widget')) {
     function wp_add_dashboard_widget($id, $titel, $fn) { $GLOBALS['widgets'][$id] = $titel; }
 }
 if (!function_exists('check_admin_referer')) { function check_admin_referer($a = -1, $n = '_wpnonce') { return 1; } }
+if (!function_exists('esc_js')) { function esc_js($s) { return addslashes(htmlspecialchars((string) $s, ENT_COMPAT)); } }

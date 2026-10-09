@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Kikripp Artikelkatalog
  * Description: Artikelkatalog mit Reservierung für die Betriebsauflösung der Kikripp GmbH. Artikel werden importiert, Reservierungen im Backend verwaltet.
- * Version:     1.3.1
+ * Version:     1.4.0
  * Author:      Kikripp GmbH
  * Text Domain: kikripp-katalog
  * Requires at least: 5.8
@@ -13,7 +13,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-define('KIKRIPP_VERSION', '1.3.1');
+define('KIKRIPP_VERSION', '1.4.0');
 define('KIKRIPP_PFAD', plugin_dir_path(__FILE__));
 define('KIKRIPP_URL', plugin_dir_url(__FILE__));
 
@@ -24,6 +24,7 @@ require_once KIKRIPP_PFAD . 'includes/class-kikripp-mail.php';
 require_once KIKRIPP_PFAD . 'includes/class-kikripp-rest.php';
 require_once KIKRIPP_PFAD . 'includes/class-kikripp-admin.php';
 require_once KIKRIPP_PFAD . 'includes/class-kikripp-ablauf.php';
+require_once KIKRIPP_PFAD . 'includes/class-kikripp-auswertung.php';
 require_once KIKRIPP_PFAD . 'includes/class-kikripp-frontend.php';
 
 register_activation_hook(__FILE__, ['Kikripp_DB', 'tabellen_anlegen']);
@@ -34,6 +35,7 @@ add_action('plugins_loaded', function () {
     Kikripp_REST::start();
     Kikripp_Admin::start();
     Kikripp_Ablauf::start();
+    Kikripp_Auswertung::start();
     Kikripp_Frontend::start();
 });
 

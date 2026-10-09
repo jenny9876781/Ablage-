@@ -989,6 +989,16 @@ ist die Merkliste; erledigte Punkte hier abhaken, nicht löschen.
       bestellt + Abholtermin → Bestellung erstellen → bezahlt; nach Abwicklung Kontaktdaten
       löschen. Wöchentliche Updates bis Ende November, Spielzeug im November.
 - [ ] Zurückgestellt: WordPress-Update, Katalogseite aus der XML-Sitemap nehmen.
+- [ ] **Urlaubsvertretung: einfache Anleitung für die Kollegin (63, wenig technikaffin)** – zurückgestellt
+      am 09.10. (Ablauf kann sich noch ändern). **Erinnerung an die Nutzerin am Mi 21.10.2026**; Urlaub
+      ab Ende Oktober. Brainstorming steht: (a) 1-seitiger laminierter Spickzettel + Word-Anleitung mit
+      einem großen Screenshot je Schritt, rote Nummern/Pfeile, Kundendaten geschwärzt; (b) Aufbau nach
+      Situationen: neue Reservierung · Rechnung+Mail · Geld da · morgen Abholung · Kunde da · Hilfe;
+      roter Faden „jeden Morgen zuerst ‚Zu erledigen‘“; (c) Screenshots macht die Nutzerin (ich komme nicht
+      ins echte WordPress) mit einer Testreservierung „Test Urlaub“, danach löschen; ich bereite sie auf;
+      (d) vorher gemeinsam durchspielen. Offene Fragen: Umfang (inkl. DATEV/Abholung?), DATEV-Zugang,
+      eigenes WP-Konto (Administratorin auf KIKRIPP), Mailkonto für „Mail schreiben“, Name unter Mails
+      (Empfehlung: automatisch der angemeldete Benutzer – Plugin-Änderung), Notfallkontakt, Papier/Schriftgröße.
 - [x] Plugin 1.2.3 (07.10.): **Bezahlung jetzt für alle per Rechnung vor der Abholung**
       (Wortlaut der Nutzerin, `kikripp_ablauf_123()`, zwei Absätze). Widerspruch wegen
       Widerrufsrecht gegeben, Nutzerin bleibt dabei → Bestellung *Privatperson* enthält

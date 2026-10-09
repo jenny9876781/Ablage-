@@ -68,26 +68,23 @@ def seitenumbruch(d):
 
 
 CHECKLISTE = [
-    ("Reservierung kommt", "Mail kommt an, Vorgang steht unter Artikelkatalog → Reservierungen. "
+    ("Reservierung kommt", "WordPress → Artikelkatalog → Reservierungen. „Zu erledigen“ zeigt, was dran ist. "
      "Innerhalb von 3 Werktagen beim Interessenten melden."),
-    ("Käufer sagt zu", "WordPress: „bestellt“ klicken und Abholtermin eintragen. Sonst läuft die "
-     "Reservierung nach 3 Werktagen ab und die Ware steht wieder im Katalog."),
-    ("Bestellung", "„Bestellung erstellen: Unternehmen“ oder „Privatperson“ → als PDF speichern. "
-     "Nicht drucken – sie geht per Mail mit."),
-    ("Rechnung", "In DATEV Auftragswesen mit dem Artikel „Verkauf Webkatalog“ und den Textbausteinen "
-     "auf Seite 2. Leistungsdatum = Abholtag."),
-    ("Mail an den Käufer", "Rechnung und Bestellung als PDF anhängen, Vorlage auf Seite 3."),
-    ("Listen", "Excel „Rechnungen (DATEV)“: Zeile mit Rechnungsnr. und „geschrieben am“. "
-     "Abholübersicht: je Artikel eine Zeile mit Abholtag und Uhrzeit."),
-    ("Geld ist da", "WordPress: „bezahlt“. Excel: „bezahlt am“. Abholübersicht: bezahlt = ja."),
-    ("Tag vor der Abholung", "Abholübersicht nach Abholtag filtern, drucken, Ware bereitstellen und "
-     "mit Zettel „Name + Vorgangsnummer“ markieren. Bestellung 2× drucken."),
-    ("Abholung", "Nur gegen bezahlte Rechnung herausgeben. Beide Exemplare unterschreiben lassen, "
-     "eins geht mit. Abholübersicht: abgeholt = ja."),
-    ("Abschluss", "Mappe je Vorgang: Bestellung, Rechnung, Zahlungseingang. Kontaktdaten in WordPress "
-     "löschen – bei Privatpersonen erst 14 Tage nach der Abholung (Widerrufsfrist)."),
-    ("Einmal pro Woche", "Unter Artikelkatalog → Reservierungen die CSV herunterladen und an Claude "
-     "schicken, zusammen mit der Excel-Artikelstammliste."),
+    ("Käufer sagt zu", "„bestellt“ klicken. In der grauen Zeile den Abholtermin bestätigen (Wunsch ist vorbelegt), "
+     "ggf. „per Du“ – Speichern."),
+    ("Bestellung", "„Bestellung erstellen“ – die passende Fassung ist fett – als PDF speichern."),
+    ("Rechnung", "In DATEV mit dem Artikel „Verkauf Webkatalog“. Rechnungsnr. und Datum in WordPress eintragen – Speichern."),
+    ("Mail an den Käufer", "„✉ Mail schreiben“: Outlook öffnet sich mit fertigem Text. Rechnung und Bestellung anhängen, senden."),
+    ("Kalender", "„📅 In Outlook eintragen“ → Datei öffnen → Importieren. Erinnerung am Werktag davor um 14 Uhr "
+     "und 15 Minuten vor der Abholung."),
+    ("Geld ist da", "„bezahlt“ klicken. Kommt nichts, steht nach 5 Tagen „Zahlungserinnerung“ unter „Zu erledigen“."),
+    ("Tag vor der Abholung", "Artikelkatalog → Abholplan → „Tag drucken“. Ware bereitstellen, mit Name + Vorgangsnummer "
+     "markieren. Bestellung 2× drucken."),
+    ("Abholung", "Nur gegen bezahlte Rechnung. Beide Exemplare unterschreiben lassen, eins geht mit. „✓ abgeholt“ klicken."),
+    ("Abschluss", "Mappe je Vorgang: Bestellung, Rechnung, Zahlungseingang. Kontaktdaten löschen, wenn „Zu erledigen“ "
+     "daran erinnert (Privatpersonen: 14 Tage nach der Abholung)."),
+    ("Einmal pro Woche", "Reservierungen → „Alle Reservierungen als CSV exportieren“ und mit der Artikelstammliste an Claude "
+     "schicken – Rechnungsnummern und Abholungen kommen dann automatisch in die Liste."),
 ]
 
 SONDERFAELLE = [
@@ -355,4 +352,6 @@ def excel(neu):
 
 if __name__ == "__main__":
     word()
-    excel("--neu" in sys.argv)
+    # Die Excel-Abholübersicht ist seit Plugin 1.3.0 durch den Abholplan in WordPress ersetzt.
+    if "--abholuebersicht" in sys.argv:
+        excel("--neu" in sys.argv)

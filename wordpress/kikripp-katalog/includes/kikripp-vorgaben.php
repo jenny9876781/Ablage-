@@ -79,3 +79,14 @@ function kikripp_ablauf_120() {
             'Abholung bis spätestens 10.12.2026. Nicht abgeholte Ware geht ohne Erstattung in unser Eigentum zurück.',
         ]);
 }
+
+/** Vorgaben 1.3.0 (Abwicklung): nur setzen, was noch fehlt. */
+function kikripp_vorgaben_130() {
+    return [
+        'kikripp_zufahrt'         => 'Die Zufahrt ist nur über die Peterzeller Straße 8 möglich: am Firmengelände vorbei '
+                                   . 'bis ans Ende durchfahren, das Gebäude liegt auf der rechten Seite.',
+        'kikripp_mail_name'       => 'Jenny Preisigke',
+        'kikripp_erinnerung_zeit' => '14:00',
+        'kikripp_zahlung_tage'    => 5,
+    ];
+}

@@ -152,7 +152,6 @@ TEXTE = [
     ("Die Blätter", ""),
     ("  Artikelstamm", "Alle Artikel. Hier wird gepflegt. Grau hinterlegte Spalten sind die Felder zum Ausfüllen, alles andere rechnet sich selbst oder bleibt stehen."),
     ("  Verkaufsübersicht", "Reines Auswertungsblatt. Umsatz, offene Rechnungen, Restbestand – rechnet automatisch. Hier nichts eintragen."),
-    ("  Rechnungen (DATEV)", "Abtippliste: je Zeile eine Rechnung, in der Reihenfolge der DATEV-Erfassungsmaske. Ausdrucken und abarbeiten."),
     ("  Kasse", "Barverkäufe je Tag für das Kassenbuch. Pflicht bei einer GmbH (GoBD)."),
     ("", ""),
     ("Die wichtigsten Regeln", ""),
@@ -385,58 +384,8 @@ nz = block(nz, "Nach Raum", "Raum", sorted({a["Raum"] for a in daten}))
 block(nz, "Nach Verkaufskanal", "Kanal",
       ["Webkatalog", "Kleinanzeigen", "eBay", "Direkt", "Händler", "Verkaufstag"], mit_rest=False)
 
-# =============================================================================
-# Blatt 4: Rechnungen (DATEV)
-# =============================================================================
-re_ = wb.create_sheet("Rechnungen (DATEV)")
-RE_SP = [("lfd.", 6), ("Käufer / Firma", 30), ("Anschrift", 38), ("Artikel (ArtNr)", 26),
-         ("Leistungsdatum", 14), ("Betrag" if USt_SATZ == 0 else "Netto", 13),
-         ("USt" if USt_SATZ == 0 else f"USt {int(USt_SATZ*100)} %", 13),
-         ("Gesamt" if USt_SATZ == 0 else "Brutto", 13),
-         ("Zahlart", 13), ("DATEV-Rechnungsnr", 18), ("geschrieben am", 14), ("bezahlt am", 13)]
-re_["A1"] = "Rechnungen – Abtippliste für DATEV Auftragswesen"
-re_["A1"].font = Font(name=FONT, size=14, bold=True, color=DUNKEL)
-re_.merge_cells("A2:L2")
-re_["A2"] = ("Die Spalten stehen in der Reihenfolge der DATEV-Erfassungsmaske. Ausdrucken, abarbeiten, "
-             "die DATEV-Rechnungsnummer hier und im Artikelstamm eintragen. "
-             + ("Steuerfreie Lieferung gemäß § 4 Nr. 28 UStG – auf jeder Rechnung „gebrauchte Artikel“ und den "
-                "Steuerhinweis angeben, keine Umsatzsteuer ausweisen. " if USt_SATZ == 0
-                else "USt und Brutto rechnen sich selbst. ") +
-             "Die Rechnung selbst wird ausschließlich in DATEV erstellt – es gibt bewusst kein zweites Rechnungsdokument.")
-re_["A2"].font = Font(name=FONT, size=9, italic=True, color=SCHWARZ)
-re_["A2"].fill = PatternFill("solid", fgColor=PAPIER)
-re_["A2"].border = Border(left=Side(style="thick", color=ROT))
-re_["A2"].alignment = Alignment(wrap_text=True, vertical="center")
-re_.row_dimensions[2].height = 34
-for i, (h, w) in enumerate(RE_SP, start=1):
-    c = re_.cell(row=4, column=i, value=h)
-    c.font = Font(name=FONT, size=10, bold=True, color="FFFFFF")
-    c.fill = PatternFill("solid", fgColor=MITTEL)
-    c.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
-    c.border = RAHMEN
-    re_.column_dimensions[get_column_letter(i)].width = w
-re_.row_dimensions[4].height = 30
-for r in range(5, 45):
-    re_.cell(row=r, column=1, value=r - 4).font = Font(name=FONT, size=10)
-    re_.cell(row=r, column=7, value=f"=IF(F{r}=\"\",\"\",F{r}*{USt_SATZ})").number_format = EUR
-    re_.cell(row=r, column=8, value=f"=IF(F{r}=\"\",\"\",F{r}+G{r})").number_format = EUR
-    re_.cell(row=r, column=6).number_format = EUR
-    for col in range(1, len(RE_SP) + 1):
-        cc = re_.cell(row=r, column=col)
-        cc.border = RAHMEN
-        cc.font = Font(name=FONT, size=10)
-        if col in (2, 3, 4, 5, 6, 9, 10, 11, 12):
-            cc.fill = PatternFill("solid", fgColor=FELD_INTERN)
-re_.cell(row=45, column=5, value="Summe").font = Font(name=FONT, size=11, bold=True)
-for col in (6, 7, 8):
-    letter = get_column_letter(col)
-    c = re_.cell(row=45, column=col, value=f"=SUM({letter}5:{letter}44)")
-    c.font = Font(name=FONT, size=11, bold=True); c.number_format = EUR
-    c.fill = PatternFill("solid", fgColor=HELL); c.border = RAHMEN
-re_.freeze_panes = "A5"
-re_.page_setup.orientation = "landscape"
-re_.sheet_properties.pageSetUpPr.fitToPage = True
-re_.page_setup.fitToWidth = 1
+# Blatt „Rechnungen (DATEV)“ entfällt seit 09.10.2026: Rechnungsnummer und -datum stehen am Vorgang
+# in WordPress (Plugin 1.3.0) und kommen über den Reservierungs-Export in den Artikelstamm.
 
 # =============================================================================
 # Blatt 5: Kasse

@@ -201,3 +201,18 @@ if (!function_exists('wp_nonce_field')) {
         return $feld;
     }
 }
+// Ab Fassung 1.3.0 (Bearbeitungszeile, Abholplan, Rücksprung)
+if (!function_exists('checked')) {
+    function checked($a, $b = true, $ausgeben = true) {
+        $r = ((string) $a === (string) $b) ? ' checked="checked"' : '';
+        if ($ausgeben) { echo $r; }
+        return $r;
+    }
+}
+if (!function_exists('wp_get_referer')) { function wp_get_referer() { return $GLOBALS['referer'] ?? ''; } }
+if (!function_exists('date_i18n')) { function date_i18n($f, $t = null) { return gmdate($f, $t ?? time()); } }
+if (!function_exists('nocache_headers')) { function nocache_headers() {} }
+if (!function_exists('wp_add_dashboard_widget')) {
+    function wp_add_dashboard_widget($id, $titel, $fn) { $GLOBALS['widgets'][$id] = $titel; }
+}
+if (!function_exists('check_admin_referer')) { function check_admin_referer($a = -1, $n = '_wpnonce') { return 1; } }

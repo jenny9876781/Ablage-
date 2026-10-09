@@ -39,6 +39,7 @@ function check_admin_referer($a) { return true; }
 function wp_die($t) { throw new RuntimeException($t); }
 
 require $b . 'includes/class-kikripp-admin.php';
+require $b . 'includes/class-kikripp-ablauf.php';
 
 /** Spielt eine Importdatei ein - ueber genau den Code, der auch in WordPress laeuft. */
 function importiere($pfad) {

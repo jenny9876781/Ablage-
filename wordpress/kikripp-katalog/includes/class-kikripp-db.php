@@ -9,7 +9,7 @@ if (!defined('ABSPATH')) { exit; }
  */
 class Kikripp_DB {
 
-    const SCHEMA_VERSION = 4;
+    const SCHEMA_VERSION = 5;
 
     public static function t_artikel()  { global $wpdb; return $wpdb->prefix . 'kikripp_artikel'; }
     public static function t_vorgang()  { global $wpdb; return $wpdb->prefix . 'kikripp_vorgang'; }
@@ -47,6 +47,12 @@ class Kikripp_DB {
             abholwunsch VARCHAR(20) NOT NULL DEFAULT '',
             demontage TINYINT(1) NOT NULL DEFAULT 0,
             abholtermin VARCHAR(80) NOT NULL DEFAULT '',
+            abholung VARCHAR(16) NOT NULL DEFAULT '',
+            rechnungsnr VARCHAR(40) NOT NULL DEFAULT '',
+            rechnung_am VARCHAR(10) NOT NULL DEFAULT '',
+            notiz TEXT NULL,
+            abgeholt_am VARCHAR(10) NOT NULL DEFAULT '',
+            du TINYINT(1) NOT NULL DEFAULT 0,
             erstellt DATETIME NOT NULL,
             ablauf DATETIME NOT NULL,
             status VARCHAR(20) NOT NULL DEFAULT 'offen',
@@ -264,7 +270,9 @@ class Kikripp_DB {
         $liste = $wpdb->get_results($sql, ARRAY_A);
         foreach ($liste as &$v) {
             $v['positionen'] = $wpdb->get_results($wpdb->prepare(
-                "SELECT * FROM " . self::t_position() . " WHERE vorgang_id = %d ORDER BY id", $v['id']), ARRAY_A);
+                "SELECT p.*, a.daten FROM " . self::t_position() . " p
+                 LEFT JOIN " . self::t_artikel() . " a ON a.artnr = p.artnr
+                 WHERE p.vorgang_id = %d ORDER BY p.id", $v['id']), ARRAY_A);
         }
         return $liste;
     }
@@ -362,6 +370,41 @@ class Kikripp_DB {
             $wpdb->update(self::t_vorgang(), ['status' => 'storniert'], ['id' => (int) $vorgang_id]);
         }
         return $rest;
+    }
+
+    /**
+     * Bearbeitungsfelder eines Vorgangs (1.3.0): fester Abholtermin „Y-m-d H:i“, Rechnungsnummer
+     * und -datum aus DATEV, interne Notiz, Anrede Du/Sie für die Mailvorlage.
+     * Ungültige Datumsangaben werden verworfen statt halb gespeichert.
+     */
+    public static function vorgang_bearbeiten($id, array $f) {
+        global $wpdb;
+        $neu = [];
+        if (array_key_exists('abholung', $f)) {
+            $a = trim((string) $f['abholung']);
+            $neu['abholung'] = preg_match('/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}$/', $a) ? $a : '';
+        }
+        if (array_key_exists('rechnungsnr', $f)) { $neu['rechnungsnr'] = substr(trim((string) $f['rechnungsnr']), 0, 40); }
+        if (array_key_exists('rechnung_am', $f)) {
+            $r = trim((string) $f['rechnung_am']);
+            $neu['rechnung_am'] = preg_match('/^\d{4}-\d{2}-\d{2}$/', $r) ? $r : '';
+        }
+        if (array_key_exists('notiz', $f)) { $neu['notiz'] = (string) $f['notiz']; }
+        if (array_key_exists('du', $f)) { $neu['du'] = $f['du'] ? 1 : 0; }
+        if (!$neu) { return false; }
+        return $wpdb->update(self::t_vorgang(), $neu, ['id' => (int) $id]) !== false;
+    }
+
+    /**
+     * Abgeholt vermerken (Datum) oder zurücknehmen (leer). Wer abholt, hat bezahlt –
+     * ein noch „bestellter“ Vorgang wird dabei auf bezahlt gesetzt (z. B. Barzahlung vor Ort).
+     */
+    public static function abgeholt_setzen($id, $datum) {
+        global $wpdb;
+        $v = self::vorgang($id);
+        if (!$v || $v['status'] === 'storniert') { return false; }
+        if ($datum !== '' && $v['status'] !== 'bezahlt') { self::vorgang_status($id, 'bezahlt'); }
+        return $wpdb->update(self::t_vorgang(), ['abgeholt_am' => (string) $datum], ['id' => (int) $id]) !== false;
     }
 
     /** Vereinbarten Abholtermin am Vorgang vermerken (freier Text, z. B. „Di 13.10., 9 Uhr“). */

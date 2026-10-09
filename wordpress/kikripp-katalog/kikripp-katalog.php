@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Kikripp Artikelkatalog
  * Description: Artikelkatalog mit Reservierung für die Betriebsauflösung der Kikripp GmbH. Artikel werden importiert, Reservierungen im Backend verwaltet.
- * Version:     1.2.5
+ * Version:     1.3.0
  * Author:      Kikripp GmbH
  * Text Domain: kikripp-katalog
  * Requires at least: 5.8
@@ -13,7 +13,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-define('KIKRIPP_VERSION', '1.2.5');
+define('KIKRIPP_VERSION', '1.3.0');
 define('KIKRIPP_PFAD', plugin_dir_path(__FILE__));
 define('KIKRIPP_URL', plugin_dir_url(__FILE__));
 
@@ -23,6 +23,7 @@ require_once KIKRIPP_PFAD . 'includes/class-kikripp-zugang.php';
 require_once KIKRIPP_PFAD . 'includes/class-kikripp-mail.php';
 require_once KIKRIPP_PFAD . 'includes/class-kikripp-rest.php';
 require_once KIKRIPP_PFAD . 'includes/class-kikripp-admin.php';
+require_once KIKRIPP_PFAD . 'includes/class-kikripp-ablauf.php';
 require_once KIKRIPP_PFAD . 'includes/class-kikripp-frontend.php';
 
 register_activation_hook(__FILE__, ['Kikripp_DB', 'tabellen_anlegen']);
@@ -32,6 +33,7 @@ add_action('plugins_loaded', function () {
     kikripp_umstellen();
     Kikripp_REST::start();
     Kikripp_Admin::start();
+    Kikripp_Ablauf::start();
     Kikripp_Frontend::start();
 });
 
@@ -59,6 +61,7 @@ register_activation_hook(__FILE__, function () {
     add_option('kikripp_impressum_url', 'https://www.kikripp.de/impressum/');
     add_option('kikripp_datenschutz_url', 'https://www.kikripp.de/datenschutz/');
     foreach (kikripp_vorgaben_120() as $name => $wert) { add_option($name, $wert); }
+    foreach (kikripp_vorgaben_130() as $name => $wert) { add_option($name, $wert); }
     add_option('kikripp_plugin_version', KIKRIPP_VERSION);
 });
 
@@ -81,7 +84,9 @@ function kikripp_umstellen() {
         update_option('kikripp_hinweisband', 'Ein Großteil unseres Spielzeugs kommt im November dazu – '
             . 'schauen Sie gern wieder vorbei. Der Katalog wird wöchentlich aktualisiert.');
     }
+    if (get_option('kikripp_kopf_aus', null) === null) { update_option('kikripp_kopf_aus', 1); }
     update_option('kikripp_plugin_version', '1.2.3');
+    kikripp_umstellen_130('1.2.3');
 }
 
 /**
@@ -103,11 +108,19 @@ function kikripp_umstellen_122($stand) {
  * in den Kaufbedingungen. Ersetzt wird nur, was noch unverändert aus 1.2.2 stammt.
  */
 function kikripp_umstellen_123($stand) {
-    if (version_compare($stand, '1.2.3', '>=')) { return; }
+    if (version_compare($stand, '1.2.3', '>=')) { kikripp_umstellen_130($stand); return; }
     $ablauf = trim(str_replace("\r", '', (string) get_option('kikripp_ablauftext', '')));
     if ($ablauf === trim(kikripp_ablauf_122())) { update_option('kikripp_ablauftext', kikripp_ablauf_123()); }
     $recht = trim(str_replace("\r", '', (string) get_option('kikripp_rechtstext', '')));
     if ($recht === trim(kikripp_rechtstext_120())) { update_option('kikripp_rechtstext', kikripp_rechtstext_123()); }
     if (get_option('kikripp_kopf_aus', null) === null) { update_option('kikripp_kopf_aus', 1); }
     update_option('kikripp_plugin_version', '1.2.3');
+    kikripp_umstellen_130('1.2.3');
+}
+
+/** 1.3.0: Vorgaben für die Abwicklung ergänzen (Zufahrt, Name, Erinnerung, Zahlungsfrist). */
+function kikripp_umstellen_130($stand) {
+    if (version_compare($stand, '1.3.0', '>=')) { return; }
+    foreach (kikripp_vorgaben_130() as $name => $wert) { add_option($name, $wert); }
+    update_option('kikripp_plugin_version', '1.3.0');
 }

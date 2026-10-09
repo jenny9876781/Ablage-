@@ -126,10 +126,9 @@ if not os.path.exists(p):
     F("01_Artikelstamm_kikripp.xlsx fehlt – erst erzeugen")
 else:
     wb = load_workbook(p)
-    erwartet = ["Anleitung", "Artikelstamm", "Verkaufsübersicht", "Rechnungen (DATEV)",
-                "Kasse", "Design"]
+    erwartet = ["Anleitung", "Artikelstamm", "Verkaufsübersicht", "Kasse", "Design"]
     if wb.sheetnames != erwartet: F(f"Blätter weichen ab: {wb.sheetnames}")
-    else: OK("alle sechs Blätter vorhanden")
+    else: OK("alle fünf Blätter vorhanden")
     st, vu = wb["Artikelstamm"], wb["Verkaufsübersicht"]
     kopf = {c.column_letter: c.value for c in st[2] if c.value}
     # Zeile 8 „davon teilverkauft“ ist dazugekommen, alles darunter rückt eins nach unten.

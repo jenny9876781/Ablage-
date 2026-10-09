@@ -4,10 +4,10 @@
 
 Die Datei laden Sie in WordPress unter „Artikelkatalog → Reservierungen →
 Alle Reservierungen als CSV exportieren“ herunter. Übernommen werden je Artikel
-Status, verkaufte Menge, Verkaufspreis und Verkaufsdatum. Rechnungsnummer, Zahlung,
-Zahlart und **Käufer** bleiben unberührt – die tragen Sie selbst ein, sobald die
-Rechnung aus DATEV vorliegt. Der Webkatalog speichert keine Namen; die stehen
-ausschließlich in den Benachrichtigungsmails an saldi4kids@outlook.com.
+Status, verkaufte Menge, Verkaufspreis, Verkaufsdatum und Käufer. Seit Plugin 1.3.0 stehen
+auch Rechnungsnummer, Abholtermin und „abgeholt“ am Vorgang in WordPress – sie werden
+mit übernommen, ebenso Zahlung = bezahlt für bezahlte Positionen. Zahlart bleibt unberührt.
+Ältere Exporte ohne diese Spalten funktionieren weiter.
 
 Ohne --schreiben wird nur angezeigt, was sich ändern würde.
 """
@@ -67,7 +67,17 @@ def lese_export(pfad):
             continue
         pos = (z.get("Positionsstatus") or "").strip().lower()
         e = je_artikel.setdefault(nr, {"verkauft": 0.0, "reserviert": 0.0, "erloes": 0.0,
-                                       "kaeufer": [], "reserviert_fuer": [], "datum": ""})
+                                       "kaeufer": [], "reserviert_fuer": [], "datum": "",
+                                       "rechnung": [], "abholung": []})
+        rnr = (z.get("Rechnungsnr") or "").strip()
+        if rnr and pos in ("bezahlt", "reserviert") and rnr not in e["rechnung"]:
+            e["rechnung"].append(rnr)
+        abgeholt = datum(z.get("Abgeholt_am"))
+        termin = (z.get("Abholung") or "").strip()
+        if pos in ("bezahlt", "reserviert"):
+            text = f"abgeholt {abgeholt}" if abgeholt else (f"{datum(termin[:10])} {termin[11:16]}".strip() if termin else "")
+            if text and text not in e["abholung"]:
+                e["abholung"].append(text)
         menge = zahl(z.get("Menge"))
         preis = zahl(z.get("Preis_netto"))
         name = (z.get("Name") or "").strip()
@@ -117,11 +127,20 @@ def eintragen(pfad, schreiben):
             if e["kaeufer"]:
                 neu["Käufer"] = ", ".join(e["kaeufer"])
             neu["Kanal"] = "Webkatalog"
+            neu["Zahlung"] = "bezahlt"
+            if e["rechnung"]:
+                neu["Rechnungsnr"] = ", ".join(e["rechnung"])
+            if e["abholung"]:
+                neu["Abholtermin"] = ", ".join(e["abholung"])
         elif e["reserviert"] > 0:
             neu["Status"] = "reserviert"
             if e["reserviert_fuer"]:
                 neu["Reserviert_für"] = ", ".join(e["reserviert_fuer"])
             neu["Kanal"] = "Webkatalog"
+            if e["rechnung"]:
+                neu["Rechnungsnr"] = ", ".join(e["rechnung"])
+            if e["abholung"]:
+                neu["Abholtermin"] = ", ".join(e["abholung"])
         else:
             neu["Status"] = "verfügbar"
             neu["Reserviert_für"] = ""

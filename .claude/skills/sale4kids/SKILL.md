@@ -1019,6 +1019,20 @@ ist die Merkliste; erledigte Punkte hier abhaken, nicht löschen.
       Sachanlagenverkäufe bei Buchgewinn), UStVA Kz 48 – mit Steuerberater abstimmen lassen.
       Empfohlen: Artikelstamm nicht von Hand, sondern wöchentlich per WP-CSV (Ablauf D); von Hand nur
       Blatt „Rechnungen (DATEV)“ + Rechnungsnr/Zahlung. Excel vor jedem Bau zurückschicken lassen.
+- [x] **Plugin 1.3.0 (09.10.): Abwicklung in WordPress** (Wunsch der Nutzerin, Punkte A–F):
+      neue Klasse `includes/class-kikripp-ablauf.php`, SCHEMA_VERSION 5 (Vorgang: `abholung` Y-m-d H:i,
+      `rechnungsnr`, `rechnung_am`, `notiz`, `abgeholt_am`, `du`). Reservierungen mit Kennzahlen,
+      „Zu erledigen“ (Regeln in `Kikripp_Ablauf::aufgaben`), Reitern, grauer Bearbeitungszeile je Vorgang,
+      Knöpfen „Mail schreiben“ (mailto, 4 Varianten Sie/Du × Privat/Firma, < 2000 Zeichen) + „Text
+      kopieren“, „Zahlungserinnerung“, „In Outlook eintragen“ (ICS mit 2 Terminen: Vortag 14:00 PT0M,
+      Abholung −15 min; Outlook kann nur 1 Erinnerung je Termin) und „✓ abgeholt“ (setzt ggf. bezahlt).
+      Seite **Abholplan** + „Tag drucken“, Dashboard-Kasten, Blase = Zahl der Warn-Aufgaben.
+      Einstellungen: Zufahrt, Name in Mailvorlagen, Erinnerung am Vortag um, Zahlungserinnerung nach.
+      **Keine Mails aus WordPress** (Zustellung an Microsoft scheitert, Abschnitt 9) – Termin per Mail an
+      jenny.preisigke@outlook.de erst nach SMTP-Einrichtung (WP Mail SMTP + kikripp.de-Postfach), offen.
+      Export hat neue Spalten Abholung/Rechnungsnr/Rechnung_am/Abgeholt_am/Notiz; `reservierungen_einlesen.py`
+      übernimmt Rechnungsnr, Zahlung=bezahlt, Abholtermin. Excel-Blatt „Rechnungen (DATEV)“ entfernt
+      (5 Blätter), Verkaufsübersicht bleibt. Excel-Abholübersicht nur noch mit `--abholuebersicht`.
 - [x] BE10-12: neues Foto F-636 (ersetzt F-618), Beschreibung Schiebetüren + 2 Einlegeböden.
 - [x] NU03-02 Stockbetten: Beschreibung um Tischleranfertigung Ende 2019, Multiplex weiß
       melaminharzbeschichtet, Liegefläche 120x60, Neupreis 726 € ergänzt. Preis 400 € VHB bleibt

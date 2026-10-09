@@ -161,6 +161,10 @@ automatisch eingetragen; du prüfst sie nur.
 | Rechtliche Hinweise | die Kaufbedingungen mit dem Steuerabsatz; stehen unter dem Katalog und auf jeder Bestellung |
 | Fußzeile ausblenden | **an** — die Fußzeile der Website erscheint auf der Katalogseite nicht; Impressum und Datenschutz stehen im Anbieter-Block |
 | Menü ausblenden | **an** — Menü und Facebook-/Instagram-Symbole im Kopf der Website erscheinen auf der Katalogseite nicht; das Logo bleibt. Für die übrigen Seiten: *Design → Editor → Header* |
+| Zufahrt | Wegbeschreibung für die Käufer-Mail: „Die Zufahrt ist nur über die Peterzeller Straße 8 möglich …“ |
+| Name in Mailvorlagen | Jenny Preisigke — steht unter „Mail schreiben“ und der Zahlungserinnerung |
+| Erinnerung am Vortag um | 14:00 — Uhrzeit des Outlook-Termins „Vorbereiten“ am Werktag vor der Abholung |
+| Zahlungserinnerung nach | 5 Tagen — ab dann erscheint ein unbezahlter Vorgang unter „Zu erledigen“ |
 | Vorschaubetrieb | **eingeschaltet lassen**, solange ihr testet |
 
 Zu **Vorschaubetrieb**: Solange der Haken gesetzt ist, werden alle eingehenden Reservierungen
@@ -457,17 +461,27 @@ Browserzeile steht. Damit sehe ich in der Regel sofort, woran es liegt.
 
 ## Im laufenden Betrieb
 
-Unter **Artikelkatalog → Reservierungen** siehst du alle Vorgänge mit Kontaktdaten, Anschrift,
-Besichtigungs- und Abholwunsch. Der Ablauf:
+Unter **Artikelkatalog → Reservierungen** stehen oben die **Kennzahlen** (Umsatz bezahlt, Rechnungen
+offen, reserviert) und der Kasten **„Zu erledigen“** – er sagt dir, was heute dran ist. Darunter die
+**Reiter** Aktiv · Neu · Bestellt · Bezahlt · Abgeholt · Storniert/abgelaufen. Derselbe Kasten steht auch
+auf der Startseite der WordPress-Verwaltung, die Zahl am Menüpunkt zählt die offenen Aufgaben.
 
-1. **reserviert** — läuft nach 3 Werktagen von selbst ab. Du meldest dich beim Interessenten.
-2. **bestellt** — nach dem Anruf anklicken. Ab dann läuft die Reservierung nicht mehr ab.
-3. **Bestellung erstellen** — *Unternehmen* oder *Privatperson* wählen, drucken oder als PDF
-   speichern, unterschreiben lassen (per Scan oder bei der Abholung). Die Fassung *Privatperson*
-   enthält die Widerrufsbelehrung und das Widerrufsformular – immer mitschicken.
-4. Rechnung aus DATEV (für alle, auch Privatpersonen), Abholtermin im Feld daneben eintragen.
-   Abgeholt wird erst nach Zahlungseingang. Privatpersonen können 14 Tage ab Abholung widerrufen.
-5. **bezahlt** — nach Zahlungseingang. Die Artikel verschwinden aus dem Katalog.
+1. **Neu** — läuft nach 3 Werktagen von selbst ab. Du meldest dich beim Interessenten.
+2. **bestellt** — nach der Zusage anklicken. Ab dann läuft die Reservierung nicht mehr ab.
+3. In der grauen Zeile unter dem Vorgang: **Abholtermin** (der Wunsch des Käufers ist vorbelegt),
+   **Rechnungsnr.** und **Rechnung vom** aus DATEV, ggf. **Notiz** und **per Du** → *Speichern*.
+4. **Bestellung erstellen** — *Unternehmen* oder *Privatperson* (die passende ist fett), als PDF
+   speichern. Die Fassung *Privatperson* enthält Widerrufsbelehrung und -formular.
+5. **✉ Mail schreiben** — öffnet Outlook mit fertigem Text (Sie/Du, Privat/Firma, Termin, Zufahrt).
+   Rechnung und Bestellung anhängen, senden. Klappt der Knopf nicht: *Text kopieren*.
+6. **📅 In Outlook eintragen** — Datei öffnen, *Importieren*: zwei Termine, „Vorbereiten“ am Werktag
+   davor um 14:00 und die Abholung selbst mit Erinnerung 15 Minuten vorher.
+7. **bezahlt** — nach Zahlungseingang. Die Artikel verschwinden aus dem Katalog.
+   Kommt nichts: **✉ Zahlungserinnerung** (erscheint unter „Zu erledigen“ nach 5 Tagen).
+8. **Artikelkatalog → Abholplan** — alle Abholungen nach Tagen, mit Raum und Post-it-Code, rot =
+   noch nicht bezahlt. *Tag drucken* ist die Liste zum Bereitstellen.
+9. **✓ abgeholt** bei der Übergabe. Danach Kontaktdaten löschen – „Zu erledigen“ erinnert daran
+   (bei Privatpersonen erst 14 Tage nach der Abholung, wegen der Widerrufsfrist).
 
 Nimmt jemand nur einen Teil, stornierst du die übrigen Positionen einzeln — sie sind sofort
 wieder im Katalog. *Frist verlängern* gibt weitere 3 Werktage.

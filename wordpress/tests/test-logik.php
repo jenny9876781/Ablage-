@@ -287,6 +287,7 @@ update_option('kikripp_mail_an', 'saldi4kids@outlook.com');
 
 titel('17. Die Kontaktdaten stehen auf der Verwaltungsseite');
 require_once __DIR__ . '/../kikripp-katalog/includes/class-kikripp-admin.php';
+require_once __DIR__ . '/../kikripp-katalog/includes/class-kikripp-ablauf.php';
 $GLOBALS['ist_admin'] = true;
 update_option('kikripp_vorschau', 0);
 // Eigener Artikel, damit die Bestaende der vorherigen Abschnitte nicht hineinspielen.
@@ -312,10 +313,11 @@ pruefe('die Nachricht steht genau einmal da',
 titel('17b. Der Zähler am Menüpunkt ersetzt die Benachrichtigung');
 $GLOBALS['menue_titel'] = [];
 Kikripp_Admin::menue();
-$offene = count(array_filter(Kikripp_DB::vorgaenge(),
-    function ($v) { return $v['status'] === 'offen'; }));
+// Seit 1.3.0 zählt die Blase die Aufgaben unter „Zu erledigen“, die etwas verlangen.
+$offene = count(array_filter(Kikripp_Ablauf::aufgaben(Kikripp_DB::vorgaenge()),
+    function ($a) { return $a['art'] === 'warn'; }));
 pruefe('es gibt offene Vorgänge zum Anzeigen', $offene > 0, true);
-pruefe('der Menüpunkt trägt die Zahl der offenen Vorgänge',
+pruefe('der Menüpunkt trägt die Zahl der offenen Aufgaben',
        strpos($GLOBALS['menue_titel'][0], '>' . $offene . '<') !== false, true);
 pruefe('Import und Einstellungen tragen keine Zahl',
        strpos($GLOBALS['menue_titel'][2] . $GLOBALS['menue_titel'][3], 'count-') === false, true);
@@ -541,7 +543,7 @@ update_option('kikripp_plugin_version', '1.2.0');
 update_option('kikripp_ablauftext', str_replace("\n", "\r\n", kikripp_ablauf_120()));   // so speichert ein Formular
 kikripp_umstellen();
 pruefe('alter Text wird über 1.2.2 bis zum Text von 1.2.3 ersetzt', get_option('kikripp_ablauftext'), kikripp_ablauf_123());
-pruefe('Stand steht auf 1.2.3', get_option('kikripp_plugin_version'), '1.2.3');
+pruefe('Stand steht auf 1.3.0', get_option('kikripp_plugin_version'), '1.3.0');
 update_option('kikripp_plugin_version', '1.2.0');
 update_option('kikripp_ablauftext', 'Eigener Text der Nutzerin');
 update_option('kikripp_ust_prozent', 7);
@@ -560,7 +562,7 @@ pruefe('neuer Text: Bezahlung generell gegen Rechnung',
        strpos(get_option('kikripp_ablauftext'), 'generell per Überweisung gegen Rechnung vor der Abholung') !== false, true);
 pruefe('Kaufbedingungen bekommen den Widerrufshinweis', get_option('kikripp_rechtstext'), kikripp_rechtstext_123());
 pruefe('Menü ausblenden ist eingeschaltet', (int) get_option('kikripp_kopf_aus'), 1);
-pruefe('Stand steht auf 1.2.3', get_option('kikripp_plugin_version'), '1.2.3');
+pruefe('Stand steht auf 1.3.0', get_option('kikripp_plugin_version'), '1.3.0');
 update_option('kikripp_plugin_version', '1.2.2');
 update_option('kikripp_ablauftext', 'Eigener Text');
 update_option('kikripp_rechtstext', 'Eigene Bedingungen');
@@ -590,6 +592,199 @@ pruefe('andere Seiten bleiben unberührt', in_array('kikripp-ohne-menue', Kikrip
 pruefe('CSS blendet Navigation und Social-Icons-Block aus',
        strpos($css, 'body.kikripp-ohne-menue header .wp-block-navigation') !== false
        && strpos($css, 'body.kikripp-ohne-menue header .wp-block-social-links') !== false, true);
+
+
+titel('33. Abwicklung 1.3.0: Felder am Vorgang');
+update_option('kikripp_vorschau', 0);
+update_option('kikripp_abholadresse', 'Hermann-Schwer-Str. 1, 78048 Villingen-Schwenningen');
+update_option('kikripp_telefon', '07725 5179702');
+update_option('kikripp_kontakt_email', 'saldi4kids@outlook.com');
+foreach (kikripp_vorgaben_130() as $n => $w) { update_option($n, $w); }
+artikel_anlegen('AB-001', 5, 50.0, 'Sitzbank');
+$va = Kikripp_DB::reservieren(array_merge(kontakt('Sonja Müller'), ['abholwunsch' => '2026-10-20 10:30']), ['AB-001' => 2]);
+pruefe('gültiger Termin wird gespeichert', Kikripp_DB::vorgang_bearbeiten($va, ['abholung' => '2026-10-20 10:30',
+    'rechnungsnr' => '4000113', 'rechnung_am' => '2026-10-08', 'notiz' => 'kommt mit Anhänger', 'du' => true]), true);
+$g = Kikripp_DB::vorgang($va);
+pruefe('Abholung', $g['abholung'], '2026-10-20 10:30');
+pruefe('Rechnungsnummer', $g['rechnungsnr'], '4000113');
+pruefe('Rechnungsdatum', $g['rechnung_am'], '2026-10-08');
+pruefe('Notiz', $g['notiz'], 'kommt mit Anhänger');
+pruefe('per Du', (int) $g['du'], 1);
+Kikripp_DB::vorgang_bearbeiten($va, ['abholung' => '20.10.2026', 'rechnung_am' => 'gestern']);
+$g = Kikripp_DB::vorgang($va);
+pruefe('ungültiger Termin wird verworfen, nicht halb gespeichert', $g['abholung'], '');
+pruefe('ungültiges Rechnungsdatum wird verworfen', $g['rechnung_am'], '');
+Kikripp_DB::vorgang_bearbeiten($va, ['abholung' => '2026-10-20 10:30', 'rechnung_am' => '2026-10-08']);
+
+titel('34. Abgeholt');
+Kikripp_DB::vorgang_status($va, 'bestellt');
+Kikripp_DB::abgeholt_setzen($va, '2026-10-20');
+$g = Kikripp_DB::vorgang($va);
+pruefe('abgeholt setzt den Vorgang auf bezahlt', $g['status'], 'bezahlt');
+pruefe('Abholdatum steht', $g['abgeholt_am'], '2026-10-20');
+pruefe('Ware ist verkauft', katalog_nach('AB-001')['menge'], 3);
+pruefe('Reiter: abgeholt', Kikripp_Ablauf::reiter_von($g, time()), 'abgeholt');
+Kikripp_DB::abgeholt_setzen($va, '');
+$g = Kikripp_DB::vorgang($va);
+pruefe('zurücknehmen leert nur das Datum', $g['abgeholt_am'] . '|' . $g['status'], '|bezahlt');
+pruefe('Reiter: bezahlt', Kikripp_Ablauf::reiter_von($g, time()), 'bezahlt');
+$vs = Kikripp_DB::reservieren(kontakt('Storno'), ['AB-001' => 1]);
+Kikripp_DB::vorgang_status($vs, 'storniert');
+pruefe('stornierter Vorgang kann nicht abgeholt werden', Kikripp_DB::abgeholt_setzen($vs, '2026-10-20'), false);
+
+titel('35. Zu erledigen');
+// Fester Stichtag: Montag, 19.10.2026, 12 Uhr
+$jetzt = strtotime('2026-10-19 12:00:00 UTC');
+$fall = function ($f) { return array_merge(['id' => 900, 'name' => 'Test Person', 'firma' => '', 'status' => 'bestellt',
+    'ablauf' => '2026-10-30 23:59:59', 'abholung' => '', 'rechnungsnr' => '', 'rechnung_am' => '', 'abgeholt_am' => '',
+    'kontakt_weg' => 0, 'testdaten' => 0, 'positionen' => [], 'du' => 0, 'email' => 'a@b.de', 'telefon' => '1'], $f); };
+$texte = function ($v) use ($jetzt) { return implode(' | ', array_column(Kikripp_Ablauf::aufgaben([$v], $jetzt), 'text')); };
+pruefe('neue Reservierung', strpos($texte($fall(['status' => 'offen'])), 'Neue Reservierung') !== false, true);
+pruefe('Frist läuft morgen ab', strpos($texte($fall(['status' => 'offen', 'ablauf' => '2026-10-20 23:59:59'])), 'läuft am 20.10.2026 ab') !== false, true);
+pruefe('abgelaufen', strpos($texte($fall(['status' => 'offen', 'ablauf' => '2026-10-16 23:59:59'])), 'abgelaufen') !== false, true);
+$t = $texte($fall([]));
+pruefe('bestellt: Rechnung fehlt', strpos($t, 'Rechnung schreiben') !== false, true);
+pruefe('bestellt: Abholtermin fehlt', strpos($t, 'Abholtermin eintragen') !== false, true);
+pruefe('5 Tage unbezahlt → Zahlungserinnerung', strpos($texte($fall(['rechnungsnr' => '1', 'rechnung_am' => '2026-10-13',
+    'abholung' => '2026-10-27 09:00'])), 'Seit 6 Tagen unbezahlt') !== false, true);
+pruefe('4 Tage unbezahlt → noch nicht', $texte($fall(['rechnungsnr' => '1', 'rechnung_am' => '2026-10-15', 'abholung' => '2026-10-27 09:00'])), '');
+pruefe('Abholung morgen, unbezahlt → Warnung', strpos($texte($fall(['rechnungsnr' => '1', 'rechnung_am' => '2026-10-19',
+    'abholung' => '2026-10-20 10:30'])), 'noch nicht bezahlt') !== false, true);
+pruefe('bezahlt, Abholung morgen → bereitstellen (Info)', Kikripp_Ablauf::aufgaben([$fall(['status' => 'bezahlt',
+    'abholung' => '2026-10-20 10:30'])], $jetzt)[0]['art'] ?? '', 'info');
+pruefe('bezahlt, Termin vorbei, nicht abgeholt', strpos($texte($fall(['status' => 'bezahlt', 'abholung' => '2026-10-13 09:00'])), 'abgeholt?') !== false, true);
+pruefe('Privat: Kontaktdaten erst nach 14 Tagen löschen', $texte($fall(['status' => 'bezahlt', 'abgeholt_am' => '2026-10-13'])), '');
+pruefe('Privat nach 14 Tagen: löschen', strpos($texte($fall(['status' => 'bezahlt', 'abgeholt_am' => '2026-10-05'])), 'Kontaktdaten löschen') !== false, true);
+pruefe('Firma: gleich löschen', strpos($texte($fall(['status' => 'bezahlt', 'firma' => 'Kita GmbH', 'abgeholt_am' => '2026-10-19'])), 'Kontaktdaten löschen') !== false, true);
+pruefe('gelöschte Kontaktdaten: nichts mehr zu tun', $texte($fall(['status' => 'bezahlt', 'abgeholt_am' => '2026-10-05', 'kontakt_weg' => 1])), '');
+$reihe = Kikripp_Ablauf::aufgaben([$fall(['id' => 1, 'status' => 'bezahlt', 'abgeholt_am' => '2026-10-01']),
+    $fall(['id' => 2, 'rechnungsnr' => '1', 'rechnung_am' => '2026-10-19', 'abholung' => '2026-10-20 10:30'])], $jetzt);
+pruefe('dringendstes zuerst: unbezahlte Abholung morgen', $reihe[0]['id'] . ':' . $reihe[0]['art'], '2:warn');
+pruefe('Testdaten zählen außerhalb der Vorschau nicht', Kikripp_Ablauf::aufgaben([$fall(['testdaten' => 1])], $jetzt), []);
+pruefe('Freitag → nächster Werktag ist Montag', Kikripp_Ablauf::naechster_werktag('2026-10-16'), '2026-10-19');
+pruefe('Montag → Werktag davor ist Freitag', Kikripp_Ablauf::vorheriger_werktag('2026-10-19'), '2026-10-16');
+
+titel('36. Kennzahlen');
+$pos = function ($preis, $menge, $st = 'reserviert') { return ['artnr' => 'X-1', 'menge' => $menge, 'preis_netto' => $preis, 'status' => $st, 'daten' => '{}']; };
+$k = Kikripp_Ablauf::kennzahlen([
+    $fall(['id' => 1, 'status' => 'bezahlt', 'positionen' => [$pos(50, 2, 'bezahlt')]]),
+    $fall(['id' => 2, 'status' => 'bestellt', 'rechnungsnr' => '7', 'positionen' => [$pos(30, 1)]]),
+    $fall(['id' => 3, 'status' => 'bestellt', 'positionen' => [$pos(20, 1), $pos(99, 1, 'storniert')]]),
+    $fall(['id' => 4, 'status' => 'offen', 'positionen' => [$pos(10, 3)]]),
+    $fall(['id' => 5, 'status' => 'offen', 'ablauf' => '2026-10-01 23:59:59', 'positionen' => [$pos(500, 1)]]),
+], $jetzt);
+pruefe('Umsatz bezahlt', $k['bezahlt'], 100.0);
+pruefe('Rechnungen offen', $k['rechnung_offen'], 30.0);
+pruefe('bestellt ohne Rechnung (Storno zählt nicht)', $k['ohne_rechnung'], 20.0);
+pruefe('reserviert (abgelaufene zählen nicht)', $k['reserviert'], 30.0);
+
+titel('37. Mailtexte: Sie/Du × Privat/Firma');
+$m = $fall(['name' => 'Sonja Müller', 'abholung' => '2026-10-20 10:30', 'rechnungsnr' => '4000113', 'rechnung_am' => '2026-10-08',
+    'positionen' => [$pos(50, 2)]]);
+list($b1, $t1) = Kikripp_Ablauf::mail_text($m);
+pruefe('Sie privat: Anrede mit Namen', strpos($t1, 'Guten Tag Sonja Müller,') === 0, true);
+pruefe('Termin ausgeschrieben', strpos($t1, 'Ihr Abholtermin: Dienstag, 20.10.2026 um 10:30 Uhr') !== false, true);
+pruefe('Zufahrt aus den Einstellungen', strpos($t1, 'Peterzeller Straße 8') !== false, true);
+pruefe('Privat: Widerrufsbelehrung erwähnt', strpos($t1, 'Widerrufsbelehrung') !== false, true);
+pruefe('Name in der Signatur', strpos($t1, "Mit freundlichen Grüßen\nJenny Preisigke\nKikripp GmbH") !== false, true);
+list(, $t2) = Kikripp_Ablauf::mail_text(array_merge($m, ['firma' => 'Kita Sonnenschein']));
+pruefe('Sie Firma: Damen und Herren', strpos($t2, 'Sehr geehrte Damen und Herren,') === 0, true);
+pruefe('Firma: keine Widerrufsbelehrung', strpos($t2, 'Widerruf') === false, true);
+list(, $t3) = Kikripp_Ablauf::mail_text(array_merge($m, ['du' => 1]));
+pruefe('Du privat: Vorname', strpos($t3, 'Hallo Sonja,') === 0, true);
+pruefe('Du privat: Dein Abholtermin', strpos($t3, 'Dein Abholtermin:') !== false && strpos($t3, 'Viele Grüße') !== false, true);
+pruefe('Du privat: Widerruf in Du-Form', strpos($t3, 'findest du in der beigefügten Bestellung') !== false, true);
+list(, $t4) = Kikripp_Ablauf::mail_text(array_merge($m, ['du' => 1, 'firma' => 'Kita Sonnenschein']));
+pruefe('Du Firma: ihr-Form', strpos($t4, 'Hallo zusammen,') === 0 && strpos($t4, 'Euer Abholtermin') !== false, true);
+pruefe('Du Firma: kein Sie, kein Widerruf', strpos($t4, ' Sie ') === false && strpos($t4, 'Widerruf') === false, true);
+list(, $t5) = Kikripp_Ablauf::mail_text(array_merge($m, ['abholung' => '']));
+pruefe('ohne Termin bleibt ein Platzhalter', strpos($t5, '[Abholtermin]') !== false, true);
+list($b6, $t6) = Kikripp_Ablauf::mail_text($m, 'erinnerung');
+pruefe('Erinnerung: Betreff mit Rechnungsnummer', $b6, 'Zahlungserinnerung – Rechnung 4000113');
+pruefe('Erinnerung: Datum und Betrag', strpos($t6, 'Nr. 4000113 vom 08.10.2026 über 100,00 €') !== false, true);
+$link = Kikripp_Ablauf::mailto($m);
+pruefe('Mail-Link geht an den Käufer', strpos($link, 'mailto:a%40b.de?subject=') === 0, true);
+pruefe('Mail-Link bleibt unter 2000 Zeichen (Outlook)', strlen(Kikripp_Ablauf::mailto(array_merge($m, ['du' => 1]))) < 2000, true);
+pruefe('Zeilenumbrüche als CRLF', strpos($link, '%0D%0A') !== false, true);
+
+titel('38. Outlook-Termine');
+$ics = Kikripp_Ablauf::ics(array_merge($m, ['id' => 77, 'telefon' => '0171 123', 'notiz' => 'Anhänger, Kombi',
+    'positionen' => [['artnr' => 'NE05-02', 'menge' => 2, 'preis_netto' => 50, 'status' => 'reserviert',
+                      'daten' => '{"titel":"Sitzbank Massivholz","raum":"Nebenraum","einheit":"Stück"}']]]));
+pruefe('zwei Termine', substr_count($ics, 'BEGIN:VEVENT'), 2);
+pruefe('Abholung 10:30 Sommerzeit = 08:30 UTC', strpos($ics, 'DTSTART:20261020T083000Z') !== false, true);
+pruefe('Erinnerung 15 Minuten vorher', strpos($ics, 'TRIGGER:-PT15M') !== false, true);
+pruefe('Vortag Montag 19.10. 14:00 = 12:00 UTC', strpos($ics, 'DTSTART:20261019T120000Z') !== false, true);
+pruefe('Vortag erinnert zur Startzeit', strpos($ics, 'TRIGGER:PT0M') !== false, true);
+pruefe('feste UID je Vorgang', strpos($ics, 'UID:kikripp-77-abholung@kikripp.de') !== false, true);
+pruefe('Artikel mit Raum und Post-it-Code', strpos(str_replace("\r\n ", '', $ics), 'NE05-02 Sitzbank Massivholz – Raum Nebenraum (NE05)') !== false, true);
+pruefe('Komma und Strichpunkt maskiert', strpos(str_replace("\r\n ", '', $ics), 'Anhänger\\, Kombi') !== false, true);
+pruefe('Zeilen höchstens 75 Byte', max(array_map('strlen', explode("\r\n", $ics))) <= 75, true);
+pruefe('Zeilenenden CRLF', substr($ics, -2) === "\r\n" && strpos(str_replace("\r\n", '', $ics), "\n") === false, true);
+pruefe('Abholung Montag → Vorbereiten am Freitag', strpos(Kikripp_Ablauf::ics(array_merge($m, ['abholung' => '2026-10-26 09:00'])),
+    'DTSTART:20261023T120000Z') !== false, true);
+pruefe('Winterzeit: 26.10. 09:00 = 08:00 UTC', strpos(Kikripp_Ablauf::ics(array_merge($m, ['abholung' => '2026-10-26 09:00'])),
+    'DTSTART:20261026T080000Z') !== false, true);
+pruefe('ohne Termin keine Datei', Kikripp_Ablauf::ics(array_merge($m, ['abholung' => ''])), '');
+update_option('kikripp_erinnerung_zeit', '15:30');
+pruefe('Uhrzeit der Vortagserinnerung einstellbar', strpos(Kikripp_Ablauf::ics($m), 'DTSTART:20261019T133000Z') !== false, true);
+update_option('kikripp_erinnerung_zeit', '14:00');
+
+titel('39. Verwaltungsseite, Abholplan, Dashboard');
+$GLOBALS['ist_admin'] = true;
+$_GET = [];
+Kikripp_DB::vorgang_status($va, 'bestellt');
+ob_start(); Kikripp_Admin::seite_reservierungen(); $seite = ob_get_clean();
+foreach (['Umsatz bezahlt:' => 'Kennzahlen', 'Zu erledigen (' => 'Aufgabenliste', 'nav-tab-active' => 'Reiter',
+          'name="abhol_tag" value="2026-10-20"' => 'Abholtag im Formular', 'name="rechnungsnr" value="4000113"' => 'Rechnungsnummer im Formular',
+          '✉ Mail schreiben' => 'Mail-Knopf', '✉ Zahlungserinnerung' => 'Erinnerungs-Knopf', '📅 In Outlook eintragen' => 'Outlook-Knopf',
+          '✓ abgeholt' => 'Abgeholt-Knopf', 'id="vorgang-' . $va . '"' => 'Sprungmarke'] as $text => $was) {
+    pruefe($was . ' steht auf der Seite', strpos($seite, $text) !== false, true);
+}
+$_GET = ['reiter' => 'abgeholt'];
+ob_start(); Kikripp_Admin::seite_reservierungen(); $seite = ob_get_clean();
+pruefe('Reiter „Abgeholt“ blendet bestellte Vorgänge aus', strpos($seite, 'id="vorgang-' . $va . '"') === false, true);
+$_GET = [];
+$vw = Kikripp_DB::reservieren(array_merge(kontakt('Wunsch Person'), ['abholwunsch' => '2026-10-27']), ['AB-001' => 1]);
+ob_start(); Kikripp_Admin::seite_reservierungen(); $seite = ob_get_clean();
+pruefe('Abholwunsch wird als Vorschlag vorbelegt', strpos($seite, 'name="abhol_tag" value="2026-10-27"') !== false
+       && strpos($seite, 'Wunsch – bitte bestätigen') !== false, true);
+ob_start(); Kikripp_Ablauf::seite_abholplan(); $plan = ob_get_clean();
+pruefe('Abholplan zeigt den Tag', strpos($plan, 'Dienstag, 20.10.2026') !== false, true);
+pruefe('Abholplan: unbezahlt rot markiert', strpos($plan, 'NOCH NICHT BEZAHLT') !== false, true);
+pruefe('Abholplan: Artikel mit Bezeichnung und Post-it-Code', strpos($plan, 'Sitzbank') !== false && strpos($plan, '<td>AB</td>') !== false, true);
+pruefe('Abholplan: Druckknopf', strpos($plan, 'Tag drucken') !== false, true);
+pruefe('Abholplan: Vorgänge ohne Termin', strpos($plan, 'Noch ohne Abholtermin') !== false, true);
+$druck = Kikripp_Ablauf::druck_html('2026-10-20');
+pruefe('Druckansicht: Titel und Abhakkästchen', strpos($druck, 'Abholungen Dienstag, 20.10.2026') !== false && strpos($druck, '☐') !== false, true);
+pruefe('Druckansicht ohne Knöpfe zum Klicken', strpos($druck, '✓ abgeholt') === false, true);
+ob_start(); Kikripp_Ablauf::widget(); $w = ob_get_clean();
+pruefe('Dashboard-Kasten mit Aufgaben', strpos($w, 'Abholplan') !== false && strpos($w, '<li') !== false, true);
+
+titel('40. Einstellungen und Umstellung 1.3.0');
+$_POST = ['zufahrt' => 'Über den Hof', 'mail_name' => 'Anna', 'erinnerung_zeit' => '13:45', 'zahlung_tage' => '7'];
+$GLOBALS['ATTRAPPE_WIRFT_BEI_WEITERLEITUNG'] = true;
+try { Kikripp_Admin::einstellungen_speichern(); } catch (Attrappe_Weiterleitung $e) {}
+pruefe('Zufahrt gespeichert', get_option('kikripp_zufahrt'), 'Über den Hof');
+pruefe('Name gespeichert', get_option('kikripp_mail_name'), 'Anna');
+pruefe('Erinnerungszeit gespeichert', get_option('kikripp_erinnerung_zeit'), '13:45');
+pruefe('Zahlungsfrist gespeichert', get_option('kikripp_zahlung_tage'), 7);
+$_POST = ['erinnerung_zeit' => 'mittags'];
+try { Kikripp_Admin::einstellungen_speichern(); } catch (Attrappe_Weiterleitung $e) {}
+pruefe('ungültige Uhrzeit → 14:00', get_option('kikripp_erinnerung_zeit'), '14:00');
+$_POST = [];
+foreach (array_keys(kikripp_vorgaben_130()) as $n) { delete_option($n); }
+update_option('kikripp_plugin_version', '1.2.5');
+kikripp_umstellen();
+pruefe('Umstellung setzt die Zufahrt', strpos((string) get_option('kikripp_zufahrt'), 'Peterzeller') !== false, true);
+pruefe('Umstellung: 14:00 Uhr', get_option('kikripp_erinnerung_zeit'), '14:00');
+pruefe('Stand 1.3.0', get_option('kikripp_plugin_version'), '1.3.0');
+update_option('kikripp_zufahrt', 'Eigener Text');
+update_option('kikripp_plugin_version', '1.2.5');
+kikripp_umstellen();
+pruefe('eigene Zufahrt bleibt', get_option('kikripp_zufahrt'), 'Eigener Text');
+$GLOBALS['ATTRAPPE_WIRFT_BEI_WEITERLEITUNG'] = false;
+$GLOBALS['ist_admin'] = false;
 
 printf("\n== Ergebnis: %d Prüfungen, %d Fehler ==\n", $geprueft, $fehler);
 exit($fehler > 0 ? 1 : 0);

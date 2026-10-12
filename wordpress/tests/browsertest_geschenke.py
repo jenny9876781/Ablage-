@@ -1,10 +1,10 @@
-"""Browsertest „zu verschenken“ (Plugin 1.5.0).
+"""Browsertest „zu verschenken“ (Plugin 1.5.0) und NEU-Schild (1.6.0).
 
 Der Testserver muss mit KIK_TEST_NOVEMBER=1 laufen, damit die vorbereiteten Positionen
 (Spielzeug und Geschenke, im Artikelstamm noch Im_Katalog = nein) sichtbar sind:
 
     rm -f /tmp/kikripp-web.sqlite /tmp/kikripp-optionen.json /tmp/kikripp-mails.log
-    cd wordpress/tests && KIK_TEST_NOVEMBER=1 php -S 127.0.0.1:8801 -t /tmp/kikweb server.php &
+    cd wordpress/tests && KIK_TEST_NOVEMBER=1 KIK_TEST_NEU=NE04-17,NE03-12 php -S 127.0.0.1:8801 -t /tmp/kikweb server.php &
 """
 import sys, json, urllib.request
 from playwright.sync_api import sync_playwright
@@ -62,6 +62,21 @@ with sync_playwright() as p:
     text = karten.first.inner_text()
     pruefe("Preisfeld sagt „zu verschenken“", "zu verschenken" in text and "0,00" not in text, f"({text[-120:]!r})")
     seite.screenshot(path="/tmp/kikweb/g01-geschenke.png")
+
+    print("\n1b) NEU-Schild und Sortierung")
+    seite.select_option("#k-kat", ""); seite.wait_for_timeout(400)
+    erste = [seite.locator(".karte .nr").nth(i).inner_text() for i in range(2)]
+    pruefe("Neuheiten stehen ganz oben", sorted(erste) == ["NE03-12", "NE04-17"], f"({erste!r})")
+    pruefe("Schild NEU an genau 2 Karten", seite.locator(".karte .neuschild").count() == 2,
+           f"({seite.locator('.karte .neuschild').count()})")
+    seite.check("#k-neu"); seite.wait_for_timeout(300)
+    pruefe("Häkchen „nur Neuheiten“ filtert", seite.locator(".karte").count() == 2)
+    seite.screenshot(path="/tmp/kikweb/g02-neu.png")
+    seite.uncheck("#k-neu")
+    seite.select_option("#k-sort", "auf"); seite.wait_for_timeout(300)
+    erste = seite.locator(".karte .nr").first.inner_text()
+    pruefe("Sortierung nach Preis zieht NEU nicht vor", erste not in ("NE03-12", "NE04-17"), f"({erste!r})")
+    seite.select_option("#k-sort", ""); seite.select_option("#k-kat", "zu verschenken"); seite.wait_for_timeout(300)
 
     print("\n2) Nur Geschenke: kein Mindestbestellwert, höchstens 5")
     for nr in geschenke[:5]:

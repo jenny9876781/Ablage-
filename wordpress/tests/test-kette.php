@@ -196,5 +196,36 @@ pruefe('die Meldung enthaelt kein ACHTUNG', strpos($m, 'ACHTUNG') === false, tru
 pruefe('die Meldung erklaert die versteckten Positionen',
        strpos($m, 'stehen nicht im Katalog') !== false, true);
 
+echo "\nNEU-Markierung (1.6.0)\n";
+global $wpdb;
+// Ausgangslage wie nach dem ersten Import mit 1.5.0: alle Stempel leer
+foreach ($wpdb->get_results('SELECT artnr, daten FROM ' . Kikripp_DB::t_artikel(), ARRAY_A) as $z) {
+    $d = json_decode($z['daten'], true); unset($d['neu_seit']);
+    $wpdb->update(Kikripp_DB::t_artikel(), ['daten' => wp_json_encode($d)], ['artnr' => $z['artnr']]);
+}
+$b = Kikripp_Admin::einspielen($alle);
+pruefe('wiederholter Import markiert nichts als neu', $b['neu_markiert'], 0);
+pruefe('kein Artikel trägt NEU', count(array_filter(Kikripp_DB::katalog_artikel(), function ($a) { return $a['neu']; })), 0);
+$versteckt = null;
+foreach ($alle as $i => $a) { if (!empty($a['aktiv']) && empty($a['im_katalog'])) { $versteckt = $i; break; } }
+$zusatz = $alle;
+$zusatz[$versteckt]['im_katalog'] = true;                       // November: wird sichtbar
+$zusatz[] = array_merge($alle[0], ['nr' => 'TEST-NEU1']);         // ganz neu angelegt
+$b = Kikripp_Admin::einspielen($zusatz);
+pruefe('sichtbar gestellt + neu angelegt = 2 NEU', $b['neu_markiert'], 2);
+pruefe('Meldung nennt die NEU-Markierung', strpos(Kikripp_Admin::import_meldung($b), '2 Artikel sind ab heute 14 Tage als NEU markiert') !== false, true);
+pruefe('der sichtbar gestellte trägt NEU', im_katalog($zusatz[$versteckt]['nr'])['neu'] ?? null, true);
+pruefe('der neu angelegte trägt NEU', im_katalog('TEST-NEU1')['neu'] ?? null, true);
+pruefe('ein alter Artikel trägt kein NEU', im_katalog($alle[0]['nr'])['neu'] ?? null, false);
+pruefe('der Stempel geht nicht nach außen', array_key_exists('neu_seit', im_katalog('TEST-NEU1')), false);
+$b = Kikripp_Admin::einspielen($zusatz);
+pruefe('nächster Import behält NEU', im_katalog('TEST-NEU1')['neu'] ?? null, true);
+pruefe('… und zählt nicht doppelt', $b['neu_markiert'], 0);
+$d = json_decode($wpdb->get_var("SELECT daten FROM " . Kikripp_DB::t_artikel() . " WHERE artnr = 'TEST-NEU1'"), true);
+$d['neu_seit'] = gmdate('Y-m-d H:i:s', time() - 15 * 86400);
+$wpdb->update(Kikripp_DB::t_artikel(), ['daten' => wp_json_encode($d)], ['artnr' => 'TEST-NEU1']);
+pruefe('nach 15 Tagen kein NEU mehr', im_katalog('TEST-NEU1')['neu'] ?? null, false);
+Kikripp_Admin::einspielen($alle);
+
 printf("\n== Kettentest: %d Fehler ==\n", $fehler);
 exit($fehler > 0 ? 1 : 0);

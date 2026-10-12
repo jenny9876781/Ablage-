@@ -11,6 +11,9 @@ class Kikripp_DB {
 
     const SCHEMA_VERSION = 5;
 
+    /** 1.6.0: So viele Tage trägt ein Artikel nach dem Import, mit dem er sichtbar wurde, das Schild NEU. */
+    const NEU_TAGE = 14;
+
     public static function t_artikel()  { global $wpdb; return $wpdb->prefix . 'kikripp_artikel'; }
     public static function t_vorgang()  { global $wpdb; return $wpdb->prefix . 'kikripp_vorgang'; }
     public static function t_position() { global $wpdb; return $wpdb->prefix . 'kikripp_position'; }
@@ -143,6 +146,9 @@ class Kikripp_DB {
             $daten['reserviert'] = min($b['reserviert'], $rest);
             $daten['preis']      = (float) $z['preis_netto'];
             $daten['status']     = $frei > 0 ? 'verfügbar' : 'reserviert';
+            $seit = (string) ($daten['neu_seit'] ?? '');
+            $daten['neu']        = $seit !== '' && strtotime($seit) >= strtotime(current_time('mysql')) - self::NEU_TAGE * DAY_IN_SECONDS;
+            unset($daten['neu_seit']);
             $out[] = $daten;
         }
         return $out;

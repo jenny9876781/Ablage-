@@ -1088,6 +1088,14 @@ ist die Merkliste; erledigte Punkte hier abhaken, nicht löschen.
       Tests: 383 Logik, 91 Browser, 16 mobil, neu `browsertest_geschenke.py` (16, Server mit KIK_TEST_NOVEMBER=1).
       Erwartete Importmeldung: „109 neu, 497 aktualisiert“. Ablauftext „So läuft es ab“ (Option) nennt die
       Geschenke noch nicht – ggf. im November ergänzen.
+- [x] **Plugin 1.6.0 (12.10.): Schild NEU.** Kein Excel-Feld: `einspielen()` stempelt `neu_seit` (in `daten`)
+      beim Import, mit dem ein Artikel **erstmals sichtbar** wird (neu angelegt oder Im_Katalog nein → ja);
+      sonst bleibt der alte Stempel. `katalog_artikel()` liefert `neu` = Stempel jünger als
+      `Kikripp_DB::NEU_TAGE` (14), der Stempel selbst geht nicht nach außen. Katalog: rotes Schild „neu“ unten
+      rechts am Foto, Standard-Sortierung Neuheiten zuerst (Preissortierung unverändert), Häkchen „nur
+      Neuheiten“. Importmeldung: „x Artikel sind ab heute 14 Tage als NEU markiert.“ Bestehende Artikel werden
+      beim ersten Import mit 1.6.0 **nicht** neu (kein Stempel). Testserver: `KIK_TEST_NEU=NR1,NR2`.
+      NE03-12 auf 6 Stück (5 graue = NE04-16).
 - [x] Plugin 1.2.1 (06.10.): Einstellung „Fußzeile ausblenden“ (Standard an) – Body-Klasse
       `kikripp-ohne-fusszeile` nur auf der Katalogseite, CSS für Block-Themes
       (`footer.wp-block-template-part`) und klassische Themes (`#colophon`, `.site-footer`).

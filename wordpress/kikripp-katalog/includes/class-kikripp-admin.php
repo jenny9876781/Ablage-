@@ -676,7 +676,7 @@ class Kikripp_Admin {
         delete_transient('kikripp_bilder');
 
         global $wpdb;
-        $neu = $geaendert = $ohne_bild = $ohne_bild_versteckt = 0;
+        $neu = $geaendert = $ohne_bild = $ohne_bild_versteckt = $neu_markiert = 0;
         $fehlende_fotos = [];
         $reserviert_entfernt = [];
         $belegung = Kikripp_DB::belegung();
@@ -718,6 +718,16 @@ class Kikripp_Admin {
                 'foto'    => (string) ($a['foto'] ?? ''),
                 'bild'    => $bild,
             ];
+            // 1.6.0: „neu“ ab dem Import, mit dem ein Artikel zum ersten Mal sichtbar wird – neu
+            // angelegt oder von „nicht im Katalog“ auf sichtbar gestellt. Sonst bleibt der alte Stempel.
+            $alt = $wpdb->get_row($wpdb->prepare(
+                'SELECT aktiv, im_katalog, daten FROM ' . Kikripp_DB::t_artikel() . ' WHERE artnr = %s', $artnr), ARRAY_A);
+            $alt_daten = $alt ? json_decode((string) $alt['daten'], true) : null;
+            $war_sichtbar = $alt && (int) $alt['aktiv'] === 1 && (int) $alt['im_katalog'] === 1;
+            $daten['neu_seit'] = ($im_katalog && !$war_sichtbar) ? current_time('mysql')
+                : (is_array($alt_daten) ? (string) ($alt_daten['neu_seit'] ?? '') : '');
+            if ($im_katalog && !$war_sichtbar) { $neu_markiert++; }
+
             $zeile = [
                 'sortierung'   => (int) ($a['sortierung'] ?? $i),
                 'menge'        => max(0, (int) ($a['menge'] ?? 0)),
@@ -763,6 +773,7 @@ class Kikripp_Admin {
         return [
             'neu'                 => $neu,
             'geaendert'           => $geaendert,
+            'neu_markiert'        => $neu_markiert,
             'ohne_bild'           => $ohne_bild,
             'ohne_bild_versteckt' => $ohne_bild_versteckt,
             'fehlende_fotos'      => $fehlende_fotos,
@@ -774,6 +785,9 @@ class Kikripp_Admin {
     /** Aus dem Bericht den Satz bauen, der nach dem Import oben auf der Seite steht. */
     public static function import_meldung(array $b) {
         $meldung = sprintf('Import abgeschlossen: %d neu, %d aktualisiert.', $b['neu'], $b['geaendert']);
+        if (!empty($b['neu_markiert'])) {
+            $meldung .= sprintf(' %d Artikel sind ab heute %d Tage als NEU markiert.', $b['neu_markiert'], Kikripp_DB::NEU_TAGE);
+        }
         if (!empty($b['verschwunden'])) {
             $meldung .= sprintf(' %d Artikel standen nicht mehr in der Datei und wurden aus dem '
                               . 'Katalog genommen (%s).', count($b['verschwunden']),

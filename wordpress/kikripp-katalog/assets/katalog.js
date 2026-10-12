@@ -160,6 +160,7 @@
           '<select id="k-sort" aria-label="Sortierung"><option value="">Sortierung: Standard</option>' +
             '<option value="auf">Preis aufsteigend</option><option value="ab">Preis absteigend</option></select>' +
           '<label class="chk"><input type="checkbox" id="k-design"> nur Markenware</label>' +
+          '<label class="chk"><input type="checkbox" id="k-neu"> nur Neuheiten</label>' +
           '<label class="chk"><input type="checkbox" id="k-frei" checked> nur verfügbare</label>' +
         '</div>' +
         '<div class="zaehler" id="k-zaehler"></div>' +
@@ -178,7 +179,7 @@
           ? '<p>Abholung nach Terminvereinbarung: ' + sicher(ABHOLUNG) + '</p>' : '') +
         '</div>' : '');
 
-    ['k-q', 'k-kat', 'k-raum', 'k-sort', 'k-design', 'k-frei'].forEach(function (id) {
+    ['k-q', 'k-kat', 'k-raum', 'k-sort', 'k-design', 'k-neu', 'k-frei'].forEach(function (id) {
       el(id).addEventListener('input', render);
     });
     el('k-leeren').addEventListener('click', function () {
@@ -257,15 +258,20 @@
   function render() {
     var q = el('k-q').value.toLowerCase().trim();
     var kat = el('k-kat').value, raum = el('k-raum').value;
-    var nurFrei = el('k-frei').checked, nurDesign = el('k-design').checked;
+    var nurFrei = el('k-frei').checked, nurDesign = el('k-design').checked, nurNeu = el('k-neu').checked;
     var liste = ARTIKEL.filter(function (a) {
       return (!q || (a.nr + ' ' + a.titel + ' ' + a.beschr + ' ' + (a.buendel || '')).toLowerCase().indexOf(q) >= 0)
         && (!kat || a.kat === kat) && (!raum || a.raum === raum)
-        && (!nurFrei || a.frei > 0) && (!nurDesign || !!a.marke);
+        && (!nurFrei || a.frei > 0) && (!nurDesign || !!a.marke) && (!nurNeu || !!a.neu);
     });
     var sort = el('k-sort') ? el('k-sort').value : '';
     if (sort) {
       liste = liste.slice().sort(function (x, y) { return sort === 'auf' ? x.preis - y.preis : y.preis - x.preis; });
+    } else {
+      // Standard: Neuheiten zuerst, sonst die Reihenfolge der Importdatei (stabil über den Index)
+      liste = liste.map(function (a, i) { return [a, i]; })
+        .sort(function (x, y) { return (y[0].neu ? 1 : 0) - (x[0].neu ? 1 : 0) || x[1] - y[1]; })
+        .map(function (p) { return p[0]; });
     }
     el('k-zaehler').innerHTML = '<b>' + liste.length + '</b> von ' + ARTIKEL.length + ' Positionen';
     el('k-raster').innerHTML = liste.length
@@ -298,7 +304,8 @@
       : '';
     return '<div class="karte' + (frei ? '' : ' weg') + '">' +
       '<div class="bild">' + bild + '<span class="nr">' + sicher(a.nr) + '</span>' + abzeichen +
-        (a.marke ? '<span class="markenschild">' + sicher(a.marke) + '</span>' : '') + '</div>' +
+        (a.marke ? '<span class="markenschild">' + sicher(a.marke) + '</span>' : '') +
+        (a.neu ? '<span class="neuschild">neu</span>' : '') + '</div>' +
       '<div class="txt"><h3>' + sicher(a.titel) + '</h3>' +
       '<p class="b">' + absatz(a.beschr) + '</p>' +
       (a.mengenhinweis ? '<p class="hw">' + absatz(a.mengenhinweis) + '</p>' : '') +

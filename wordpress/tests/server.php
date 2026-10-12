@@ -88,6 +88,8 @@ if ((int) $wpdb->get_var('SELECT COUNT(*) FROM ' . Kikripp_DB::t_artikel()) === 
                 'versand' => $a['versand'], 'marke' => $a['marke'] ?? '', 'buendel' => $a['buendel'] ?? '',
                 'mengenhinweis' => $a['mengenhinweis'] ?? '', 'foto' => $a['foto'],
                 'bild' => '/fotos/' . $a['foto'] . '.jpg',
+                // KIK_TEST_NEU=NR1,NR2 stempelt diese Artikel als frisch importiert (Schild NEU)
+                'neu_seit' => in_array($a['nr'], explode(',', (string) getenv('KIK_TEST_NEU')), true) ? current_time('mysql') : '',
             ]),
             'aktualisiert' => current_time('mysql'),
         ]);

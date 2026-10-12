@@ -1088,6 +1088,8 @@ ist die Merkliste; erledigte Punkte hier abhaken, nicht löschen.
       Tests: 383 Logik, 91 Browser, 16 mobil, neu `browsertest_geschenke.py` (16, Server mit KIK_TEST_NOVEMBER=1).
       Erwartete Importmeldung: „109 neu, 497 aktualisiert“. Ablauftext „So läuft es ab“ (Option) nennt die
       Geschenke noch nicht – ggf. im November ergänzen.
+- [ ] **Offen aus 12.10.:** Nutzerin ändert die Preise Bettwäsche NE04-17/-18 (Vorschlag 4 €) und Spannbettlaken
+      NE04-19 (Vorschlag 1 €) selbst in der Excel – bei der nächsten Aktualisierung per Ablauf B übernehmen.
 - [x] **Plugin 1.6.0 (12.10.): Schild NEU.** Kein Excel-Feld: `einspielen()` stempelt `neu_seit` (in `daten`)
       beim Import, mit dem ein Artikel **erstmals sichtbar** wird (neu angelegt oder Im_Katalog nein → ja);
       sonst bleibt der alte Stempel. `katalog_artikel()` liefert `neu` = Stempel jünger als

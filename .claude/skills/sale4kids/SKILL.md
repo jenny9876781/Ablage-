@@ -1068,6 +1068,26 @@ ist die Merkliste; erledigte Punkte hier abhaken, nicht löschen.
       Upload zu Canva ist aus dem Container gesperrt (403), die Nutzerin tauscht die Fotos selbst
       (`Fotos_fuer_Canva.zip`). Platzhalterfotos dürfen nie so gepostet werden.
 
+- [x] **12.10.2026: Spielzeug + „zu verschenken“, Plugin 1.5.0.** 4 Word-Dateien + 107 Fotos (F-637 bis F-743).
+      109 neue Zeilen (606). Sofort sichtbar nur NE04-16 bis -20 und NE03-12 (Bettnester, Bettwäsche,
+      Spannbettlaken, Wickelauflage). **Spielzeug (Kategorie „Spielzeug“) und Geschenke (Kategorie „zu
+      verschenken“, Preis 0) stehen auf Im_Katalog = nein – gehen im November online** (dann Im_Katalog = ja
+      setzen und Fotopaket-Nachtrag mit F-637 bis F-734/F-741 bis F-743 bauen). Bestehende Spielzeuge
+      (BA04-10 bis -18, Puppenwagen BA03-05/BU05-07/-09, BU05-04, BA06-10, BA06-12, NU07-04) auf „Spielzeug“.
+      **Geschenke ohne Post-it: Nummer `<Raumcode>-V01…`** (V = verschenken, Vorschlag angenommen), Fotos sind
+      nach Raum aufgenommen. NE04-V01/-V02 (34 Kissen, 31 Decken, ungewaschen) ohne Foto.
+      **BU04-16** gehörte der entfallenen Wanddeko → die trägt wieder **K-117**, BU04-16 = Steckmosaik (Post-it
+      sollte nicht neu geschrieben werden). BU04-25/-26 und BA04-21/-22 gibt es nicht. BA04-41/-42 ohne Foto
+      angelegt (OFFEN: Foto folgt). Pixi-Foto (ca. 14 Pixi + Wieso Feuerwehr) kam nur als Chat-Bild – als Datei
+      anfordern. F-681 (IMG_2723) = zweite Ansicht von F-682, unbenutzt. F-642: Finger weg (Beschnitt+Maske).
+      Kein Satz „gewaschen auf Wunsch“ (Nutzerin). Preise günstig geschätzt („Preis geschätzt“ in Bemerkung).
+      Plugin 1.5.0: Preis 0 → „zu verschenken“/„geschenkt“; Geschenke zählen nicht zum Mindestbestellwert
+      (nur Geschenke = immer reservierbar, Kaufanteil muss 50 € erreichen); **höchstens 5 Geschenk-Positionen
+      je Reservierung** (`kikripp_geschenke_max`, Vorgabe 5, ohne Einstellungsfeld; Server + Browser);
+      Abwicklung `Kikripp_Ablauf::geschenk()`: keine Rechnung, Termin → „abgeholt“, eigene Mail ohne Rechnung.
+      Tests: 383 Logik, 91 Browser, 16 mobil, neu `browsertest_geschenke.py` (16, Server mit KIK_TEST_NOVEMBER=1).
+      Erwartete Importmeldung: „109 neu, 497 aktualisiert“. Ablauftext „So läuft es ab“ (Option) nennt die
+      Geschenke noch nicht – ggf. im November ergänzen.
 - [x] Plugin 1.2.1 (06.10.): Einstellung „Fußzeile ausblenden“ (Standard an) – Body-Klasse
       `kikripp-ohne-fusszeile` nur auf der Katalogseite, CSS für Block-Themes
       (`footer.wp-block-template-part`) und klassische Themes (`#colophon`, `.site-footer`).

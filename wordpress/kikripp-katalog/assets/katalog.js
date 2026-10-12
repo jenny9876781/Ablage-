@@ -9,7 +9,7 @@
 
   var ARTIKEL = [], UST = 0.19, HINWEIS = '', FRIST = 3, IST_ADMIN = false;
   var RECHT = '', ABHOLUNG = '', ANBIETER = {}, STEUER = '', ABLAUF = '';
-  var MINDEST = 0, BES_AB = 0, SCHLUSS = '', HEUTE = '';
+  var MINDEST = 0, GESCHENKE_MAX = 5, BES_AB = 0, SCHLUSS = '', HEUTE = '';
   var BES_ZEITEN = ['08:00', '08:30', '09:00', '09:30', '10:00', '10:30'];
   var formularSeit = 0;
   var merk = {};                       // ArtNr -> gewünschte Stückzahl
@@ -27,6 +27,9 @@
   function absatz(s) { return sicher(s).replace(/\r?\n/g, '<br>'); }
   function el(id) { return document.getElementById(id); }
   function brutto(p) { return p * (1 + UST); }
+  /** Betrag einer Zeile – Geschenke (Preis 0) heißen „geschenkt“ statt „0,00 €“. */
+  function betrag(netto) { return netto > 0 ? eur(brutto(netto)) : 'geschenkt'; }
+  function geschenk(a) { return !(a.preis > 0); }
 
   // Datumsrechnung immer in UTC und ab dem Serverdatum - die Uhr des Besuchers kann falsch gehen.
   function tag(iso) { return new Date(iso + 'T12:00:00Z'); }
@@ -104,6 +107,7 @@
       STEUER = a.daten.steuer || '';
       ABLAUF = a.daten.ablauf || '';
       MINDEST = a.daten.mindestwert || 0;
+      GESCHENKE_MAX = a.daten.geschenke_max || 5;
       BES_AB = a.daten.besichtigung_ab || 0;
       SCHLUSS = a.daten.abholschluss || '';
       HEUTE = a.daten.heute || iso(new Date());
@@ -306,9 +310,12 @@
         (BES_AB > 0 && a.preis >= BES_AB ? '<span class="bes">Besichtigung möglich</span>' : '') +
         (a.buendel ? '<span class="bnd">Sammlung ' + sicher(a.buendel) + '</span>' : '') +
       '</div>' +
-      '<div class="preis"><b>' + eur(brutto(a.preis)) + vhb + '</b>' +
-        '<small>' + (UST > 0 ? 'inkl. USt · netto ' + eur(a.preis) : sicher(STEUER || 'Endpreis')) +
-        ' · je ' + sicher(a.einheit) + '</small></div>' +
+      (geschenk(a)
+        ? '<div class="preis geschenk"><b>zu verschenken</b><small>kostenlos · nur Abholung · höchstens ' +
+            GESCHENKE_MAX + ' Geschenke je Reservierung</small></div>'
+        : '<div class="preis"><b>' + eur(brutto(a.preis)) + vhb + '</b>' +
+          '<small>' + (UST > 0 ? 'inkl. USt · netto ' + eur(a.preis) : sicher(STEUER || 'Endpreis')) +
+          ' · je ' + sicher(a.einheit) + '</small></div>') +
       auswahl + '</div></div>';
   }
 
@@ -357,6 +364,10 @@
     var n = feld ? parseInt(feld.value, 10) : 1;
     if (isNaN(n) || n < 1) { n = 1; }
     if (n > a.frei) { n = a.frei; if (feld) { feld.value = n; } }
+    if (geschenk(a) && !merk[nr] && auswahl().filter(function (p) { return geschenk(p.a); }).length >= GESCHENKE_MAX) {
+      window.alert('Je Reservierung können höchstens ' + GESCHENKE_MAX + ' Artikel „zu verschenken“ dabei sein.');
+      return;
+    }
     merk[nr] = n;
     leiste();
     knoepfe();
@@ -375,14 +386,15 @@
     var w = auswahl();
     var stueck = 0, netto = 0;
     w.forEach(function (p) { stueck += p.menge; netto += p.menge * p.a.preis; });
-    var fehlt = MINDEST > 0 ? MINDEST - brutto(netto) : 0;
+    // Geschenke zählen nicht zum Mindestbestellwert; nur Geschenke = kein Mindestwert.
+    var fehlt = MINDEST > 0 && netto > 0 ? MINDEST - brutto(netto) : 0;
     el('k-merk').innerHTML = stueck
-      ? stueck + ' Stück vorgemerkt · <b>' + eur(brutto(netto)) + '</b>' +
+      ? stueck + ' Stück vorgemerkt · <b>' + betrag(netto) + '</b>' +
         (UST > 0 ? ' <span style="opacity:.8">inkl. USt</span>' : '') +
         (fehlt > 0.004 ? '<br><span class="mindest">Mindestbestellwert ' + eur(MINDEST) +
           ' – es fehlen noch ' + eur(fehlt) + '</span>' : '')
       : 'Noch nichts vorgemerkt – Stückzahl eintragen und auf „reservieren“ klicken.' +
-        (MINDEST > 0 ? ' Mindestbestellwert ' + eur(MINDEST) + '.' : '');
+        (MINDEST > 0 ? ' Mindestbestellwert ' + eur(MINDEST) + ' (gilt nicht für Artikel „zu verschenken“).' : '');
     el('k-anfragen').disabled = stueck === 0 || fehlt > 0.004;
     // Ohne Auswahl braucht die Leiste auf dem Telefon keine Knoepfe (siehe katalog.css).
     var l = wurzel.querySelector('.leiste');
@@ -396,7 +408,7 @@
     liste.innerHTML = listeOffen ? w.map(function (p) {
       return '<div class="zeile"><span>' + sicher(p.a.nr) + ' · ' + sicher(p.a.titel) + '</span>' +
         '<input type="number" min="1" max="' + p.a.frei + '" value="' + p.menge + '" data-liste="' + sicher(p.a.nr) + '" aria-label="Stückzahl">' +
-        '<b>' + eur(brutto(p.menge * p.a.preis)) + '</b>' +
+        '<b>' + betrag(p.menge * p.a.preis) + '</b>' +
         '<button class="weg" data-weg="' + sicher(p.a.nr) + '" aria-label="Entfernen">×</button></div>';
     }).join('') : '';
   }
@@ -433,7 +445,7 @@
     var zeilen = w.map(function (p) {
       netto += p.menge * p.a.preis; stueck += p.menge; teuerster = Math.max(teuerster, p.a.preis);
       return '<div><span>' + p.menge + ' × ' + sicher(p.a.nr) + ' ' + sicher(p.a.titel) + '</span>' +
-             '<span>' + eur(brutto(p.menge * p.a.preis)) + '</span></div>';
+             '<span>' + betrag(p.menge * p.a.preis) + '</span></div>';
     }).join('');
     var mitBesichtigung = BES_AB > 0 && teuerster >= BES_AB;
     var donnerstage = tage([4]).map(function (d) { return [d, datumText(d)]; });
@@ -447,7 +459,7 @@
       'Bestellung zustande. Sie können die Reservierung jederzeit formlos zurücknehmen.</p>' +
       '<div class="pos">' + zeilen +
         '<div style="border-top:1px solid #dcdcdc;margin-top:8px;padding-top:8px">' +
-        '<b>' + stueck + ' Stück gesamt</b><b>' + eur(brutto(netto)) + (UST > 0 ? ' inkl. USt' : '') + '</b></div></div>' +
+        '<b>' + stueck + ' Stück gesamt</b><b>' + betrag(netto) + (UST > 0 && netto > 0 ? ' inkl. USt' : '') + '</b></div></div>' +
       '<div class="feld"><label for="k-name">Name *</label><input id="k-name" autocomplete="name" required></div>' +
       '<div class="feld"><label for="k-firma">Firma / Einrichtung</label><input id="k-firma" autocomplete="organization">' +
       '<small class="hint">Leer lassen, wenn Sie als Privatperson kaufen.</small></div>' +
@@ -504,10 +516,10 @@
     var zeilen = letzteAuswahl.map(function (p) {
       netto += p.menge * p.preis; stueck += p.menge;
       return '<div class="zeile"><span>' + p.menge + ' × ' + sicher(p.nr) + ' ' +
-             sicher(p.titel) + '</span><b>' + eur(brutto(p.menge * p.preis)) + '</b></div>';
+             sicher(p.titel) + '</span><b>' + betrag(p.menge * p.preis) + '</b></div>';
     }).join('');
     return zeilen + '<div class="zeile summe"><span>' + stueck + ' Stück gesamt</span><b>' +
-           eur(brutto(netto)) + (UST > 0 ? ' inkl. USt' : '') + '</b></div>';
+           betrag(netto) + (UST > 0 && netto > 0 ? ' inkl. USt' : '') + '</b></div>';
   }
 
   function senden() {

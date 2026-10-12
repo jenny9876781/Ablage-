@@ -30,7 +30,8 @@ if fehlt: F(f"Fotodatei fehlt: {fehlt}")
 else:     OK("alle Fotoverweise zeigen auf vorhandene Dateien")
 if ohne_foto: W(f"{len(ohne_foto)} Positionen ohne Foto: {ohne_foto[:8]}")
 
-ohne_preis = [a["ArtNr"] for a in aktiv if not a["Preis_netto"]]
+# „zu verschenken“ hat bewusst 0 € – das ist kein fehlender Preis.
+ohne_preis = [a["ArtNr"] for a in aktiv if not a["Preis_netto"] and a.get("Kategorie") != "zu verschenken"]
 if ohne_preis: W(f"{len(ohne_preis)} Positionen ohne Preis: {ohne_preis[:8]}")
 else:          OK("alle aktiven Positionen haben einen Preis")
 ohne_mass = [a["ArtNr"] for a in aktiv if not a.get("Maße")]

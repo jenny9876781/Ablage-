@@ -231,7 +231,7 @@ class Kikripp_Admin {
             } else {
                 $frage = ['storniert' => 'Vorgang stornieren? Die Artikel sind dann wieder im Katalog.',
                           'kontakt' => 'Kontaktdaten zu diesem Vorgang endgültig löschen?',
-                          'abgeholt' => $v['status'] === 'bezahlt' ? '' : 'Noch nicht als bezahlt vermerkt. Trotzdem abgeholt?'][$was] ?? '';
+                          'abgeholt' => ($v['status'] === 'bezahlt' || Kikripp_Ablauf::geschenk($v)) ? '' : 'Noch nicht als bezahlt vermerkt. Trotzdem abgeholt?'][$was] ?? '';
                 $knopf = '<a class="button' . (in_array($was, ['kontakt', 'storniert'], true) ? '' : ' button-primary') . '" href="'
                     . esc_url(self::aktion_url($was, $id)) . '"' . ($frage !== '' ? ' onclick="return confirm(\'' . esc_js($frage) . '\')"' : '') . '>'
                     . ($was === 'abgeholt' ? '✓ ' : '') . esc_html($text) . '</a>';
@@ -352,7 +352,7 @@ class Kikripp_Admin {
         if (in_array($v['status'], ['bestellt', 'bezahlt'], true)) {
             if (trim((string) ($v['abgeholt_am'] ?? '')) === '') {
                 $knoepfe[] = '<a class="button" href="' . esc_url(self::aktion_url('abgeholt', $id)) . '"'
-                    . ($v['status'] === 'bezahlt' ? '' : ' onclick="return confirm(\'Noch nicht als bezahlt vermerkt. Trotzdem abgeholt (wird dabei als bezahlt vermerkt)?\')"')
+                    . (($v['status'] === 'bezahlt' || Kikripp_Ablauf::geschenk($v)) ? '' : ' onclick="return confirm(\'Noch nicht als bezahlt vermerkt. Trotzdem abgeholt (wird dabei als bezahlt vermerkt)?\')"')
                     . '>✓ abgeholt</a>';
             } else {
                 $knoepfe[] = '<a href="' . esc_url(self::aktion_url('nicht_abgeholt', $id)) . '" style="font-size:11px">„abgeholt“ zurücknehmen</a>';

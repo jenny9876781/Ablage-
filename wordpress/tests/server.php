@@ -79,7 +79,8 @@ if ((int) $wpdb->get_var('SELECT COUNT(*) FROM ' . Kikripp_DB::t_artikel()) === 
         $wpdb->insert(Kikripp_DB::t_artikel(), [
             'artnr' => $a['nr'], 'sortierung' => $i, 'menge' => $a['menge'],
             'preis_netto' => $a['preis'], 'aktiv' => $a['aktiv'] ? 1 : 0,
-            'im_katalog' => $a['im_katalog'] ? 1 : 0,
+            // KIK_TEST_NOVEMBER=1 zeigt auch die vorbereiteten Positionen (Spielzeug, zu verschenken)
+            'im_katalog' => ($a['im_katalog'] || (getenv('KIK_TEST_NOVEMBER') && $a['aktiv'])) ? 1 : 0,
             'daten' => wp_json_encode([
                 'nr' => $a['nr'], 'titel' => $a['titel'], 'beschr' => $a['beschr'],
                 'kat' => $a['kat'], 'raum' => $a['raum'], 'zustand' => $a['zustand'],

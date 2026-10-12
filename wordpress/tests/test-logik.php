@@ -940,5 +940,29 @@ pruefe('vertauschter Zeitraum wird gedreht', Kikripp_Auswertung::zeitraum(), ['2
 $_GET = [];
 $GLOBALS['ist_admin'] = false;
 
+titel('45. Zu verschenken (1.5.0)');
+$jetzt = strtotime('2026-10-19 12:00:00 UTC');
+$pos = function ($preis) { return ['artnr' => 'BA04-V01', 'menge' => 1, 'preis_netto' => $preis, 'status' => 'aktiv',
+    'daten' => wp_json_encode(['titel' => 'Bücher', 'raum' => 'Gruppenraum'])]; };
+$gf = function ($f) use ($pos) { return array_merge(['id' => 950, 'name' => 'Test Person', 'firma' => '', 'status' => 'bestellt',
+    'ablauf' => '2026-10-30 23:59:59', 'abholung' => '', 'rechnungsnr' => '', 'rechnung_am' => '', 'abgeholt_am' => '',
+    'kontakt_weg' => 0, 'testdaten' => 0, 'positionen' => [$pos(0)], 'du' => 0, 'email' => 'a@b.de', 'telefon' => '1'], $f); };
+pruefe('nur 0-€-Positionen = Geschenk', Kikripp_Ablauf::geschenk($gf([])), true);
+pruefe('mit Kaufartikel kein Geschenk', Kikripp_Ablauf::geschenk($gf(['positionen' => [$pos(0), $pos(20)]])), false);
+pruefe('ohne Positionen kein Geschenk', Kikripp_Ablauf::geschenk($gf(['positionen' => []])), false);
+$t = implode(' | ', array_column(Kikripp_Ablauf::aufgaben([$gf([])], $jetzt), 'text'));
+pruefe('Geschenk: keine Rechnung verlangt', strpos($t, 'Rechnung') === false, true);
+pruefe('Geschenk: Abholtermin verlangt', strpos($t, 'Geschenk – Abholtermin eintragen') !== false, true);
+pruefe('Geschenk mit Termin morgen: kein „unbezahlt“', implode(' | ', array_column(Kikripp_Ablauf::aufgaben(
+    [$gf(['abholung' => '2026-10-20 10:30'])], $jetzt), 'text')), 'Abholung Di 20.10., 10:30 Uhr – Geschenk bereitstellen.');
+$st = Kikripp_Ablauf::stand($gf(['abholung' => '2026-10-27 09:00']), [], $jetzt);
+pruefe('Geschenk mit Termin: Hauptknopf „abgeholt“', $st['knopf'][0] . '|' . $st['reiter'], 'abgeholt|abholung');
+$st = Kikripp_Ablauf::stand($gf([]), [], $jetzt);
+pruefe('Geschenk ohne Termin: „Termin eintragen“', $st['knopf'][1], 'Termin eintragen');
+$m = Kikripp_Ablauf::mail_text($gf(['abholung' => '2026-10-27 09:00']));
+pruefe('Geschenk-Mail ohne Rechnung', strpos($m[0] . $m[1], 'Rechnung') === false && strpos($m[1], 'geschenkt') !== false, true);
+pruefe('Kaufvorgang weiter mit Rechnung', strpos(Kikripp_Ablauf::mail_text($gf(['positionen' => [$pos(20)]]))[0], 'Rechnung') !== false, true);
+pruefe('Höchstzahl Geschenke: Vorgabe 5', Kikripp_REST::geschenke_max(), 5);
+
 printf("\n== Ergebnis: %d Prüfungen, %d Fehler ==\n", $geprueft, $fehler);
 exit($fehler > 0 ? 1 : 0);

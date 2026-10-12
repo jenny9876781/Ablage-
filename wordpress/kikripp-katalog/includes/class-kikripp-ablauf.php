@@ -95,6 +95,15 @@ class Kikripp_Ablauf {
         return $s;
     }
 
+    /**
+     * 1.5.0: Nur Geschenke (alle Positionen 0 €). Dann gibt es keine Rechnung und keine Zahlung –
+     * der Vorgang braucht nur einen Abholtermin und danach „abgeholt“.
+     */
+    public static function geschenk($v) {
+        $pos = self::positionen($v);
+        return $pos !== [] && self::summe($v) <= 0.0;
+    }
+
     /** In welchen Reiter gehört ein Vorgang? */
     public static function reiter_von($v, $jetzt) {
         if ($v['status'] === 'storniert') { return 'erledigt'; }
@@ -121,6 +130,8 @@ class Kikripp_Ablauf {
         $knopf = null;
         if ($v['status'] === 'offen') {
             $knopf = strtotime($v['ablauf']) < $jetzt ? ['storniert', 'stornieren'] : ['bestellt', 'bestellt'];
+        } elseif ($v['status'] === 'bestellt' && self::geschenk($v)) {
+            $knopf = trim((string) ($v['abholung'] ?? '')) === '' ? ['aufklappen', 'Termin eintragen'] : ['abgeholt', 'abgeholt'];
         } elseif ($v['status'] === 'bestellt') {
             $knopf = (trim((string) $v['rechnungsnr']) === '' || trim((string) ($v['abholung'] ?? '')) === '')
                 ? ['aufklappen', 'Rechnung / Termin eintragen'] : ['bezahlt', 'bezahlt'];
@@ -138,6 +149,10 @@ class Kikripp_Ablauf {
         }
         if ($v['status'] === 'storniert') {
             return ['reiter' => 'erledigt', 'farbe' => 'hell', 'schritt' => 'storniert', 'rang' => 99, 'knopf' => $knopf];
+        }
+        if ($v['status'] === 'bestellt' && self::geschenk($v)) {
+            return ['reiter' => 'abholung', 'farbe' => 'grau', 'rang' => 50, 'knopf' => $knopf,
+                    'schritt' => 'Geschenk – Abholung ' . (self::termin_text($v['abholung'] ?? '', true) ?: 'ohne Termin')];
         }
         if ($v['status'] === 'bestellt') {
             $seit = ($v['rechnung_am'] ?? '') !== '' ? self::tage_zwischen($v['rechnung_am'], $heute) : null;
@@ -203,6 +218,17 @@ class Kikripp_Ablauf {
                     }
                     break;
                 case 'bestellt':
+                    if (self::geschenk($v)) {                 // keine Rechnung, keine Zahlung
+                        if ($tag === '') {
+                            $neu($v, 'Geschenk – Abholtermin eintragen.', 'warn', 2);
+                        } elseif ($tag < $heute) {
+                            $neu($v, 'Abholtermin war am ' . self::datum_text($tag) . ' – abgeholt? Bitte vermerken.', 'warn', 1);
+                        } elseif ($tag <= $morgen) {
+                            $neu($v, 'Abholung ' . ($tag === $heute ? 'heute' : self::termin_text($v['abholung'], true))
+                                . ' – Geschenk bereitstellen.', 'info', 6);
+                        }
+                        break;
+                    }
                     if ($tag !== '' && $tag <= $morgen) {
                         $neu($v, 'Abholung ' . ($tag < $heute ? 'war am ' . self::datum_text($tag) : ($tag === $heute ? 'heute' : 'am '
                             . self::termin_text($v['abholung'], true))) . ' – noch nicht bezahlt!', 'warn', 0);
@@ -314,6 +340,22 @@ class Kikripp_Ablauf {
                      'Falls sich deine Zahlung mit dieser Nachricht überschnitten hat, betrachte sie bitte als gegenstandslos.',
                      'Falls sich eure Zahlung mit dieser Nachricht überschnitten hat, betrachtet sie bitte als gegenstandslos.')
                 . "\n\n$gruss";
+            return [$betreff, $text];
+        }
+
+        if (self::geschenk($v)) {                        // 1.5.0: nur Geschenke – keine Rechnung
+            $betreff = 'Abholtermin – Kikripp Artikelkatalog';
+            $text = "$anrede\n\n"
+                . $w('vielen Dank für Ihre Reservierung aus unserem Artikelkatalog. Die Artikel bekommen Sie geschenkt – es fällt nichts an.',
+                     'vielen Dank für deine Reservierung! Die Artikel bekommst du geschenkt – es fällt nichts an.',
+                     'vielen Dank für eure Reservierung! Die Artikel bekommt ihr geschenkt – es fällt nichts an.')
+                . "\n\n"
+                . $w('Ihr', 'Dein', 'Euer') . " Abholtermin: $termin\n"
+                . ($adresse !== '' ? "Abholadresse: $adresse\n" : '')
+                . ($zufahrt !== '' ? "$zufahrt\n" : '')
+                . "\n"
+                . $w('Bei Fragen erreichen Sie uns', 'Bei Fragen erreichst du uns', 'Bei Fragen erreicht ihr uns')
+                . " unter $tel oder $mail.\n\n$gruss";
             return [$betreff, $text];
         }
 

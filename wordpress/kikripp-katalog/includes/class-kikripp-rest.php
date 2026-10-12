@@ -58,6 +58,11 @@ class Kikripp_REST {
         ], 401));
     }
 
+    /** Höchstzahl der Positionen „zu verschenken“ je Reservierung (Vorgabe der Kikripp GmbH: 5). */
+    public static function geschenke_max() {
+        return max(1, (int) get_option('kikripp_geschenke_max', 5));
+    }
+
     public static function artikel($anfrage) {
         if (!Kikripp_Zugang::hat_zugang()) {
             return self::ohne_cache(new WP_REST_Response(['ok' => false, 'gesperrt' => true], 401));
@@ -71,6 +76,7 @@ class Kikripp_REST {
             'frist'    => Kikripp_DB::frist_werktage(),
             'ablauf'   => (string) get_option('kikripp_ablauftext', ''),
             'mindestwert'     => (float) get_option('kikripp_mindestwert', 0),
+            'geschenke_max'   => self::geschenke_max(),
             'besichtigung_ab' => (float) get_option('kikripp_besichtigung_ab', 0),
             'abholschluss'    => (string) get_option('kikripp_abholschluss', ''),
             'heute'    => substr(current_time('mysql'), 0, 10),
@@ -174,12 +180,20 @@ class Kikripp_REST {
         $wunsch = $anfrage->get_param('artikel');
         if (!is_array($wunsch)) { $wunsch = []; }
         // Preise für Mindestbestellwert und Besichtigung kommen aus der Datenbank, nie vom Browser.
-        $summe = 0.0; $teuerster = 0.0;
+        $summe = 0.0; $teuerster = 0.0; $geschenke = 0;
         foreach (Kikripp_DB::katalog_artikel() as $a) {
             if (!empty($wunsch[$a['nr']]) && (int) $wunsch[$a['nr']] > 0) {
                 $summe += (int) $wunsch[$a['nr']] * (float) $a['preis'];
                 $teuerster = max($teuerster, (float) $a['preis']);
+                if ((float) $a['preis'] <= 0) { $geschenke++; }
             }
+        }
+        // 1.5.0: Geschenke (Preis 0) zählen nicht zum Mindestbestellwert – eine Reservierung nur aus
+        // Geschenken geht immer durch ($summe = 0). Je Reservierung höchstens GESCHENKE_MAX Positionen.
+        $max = self::geschenke_max();
+        if ($geschenke > $max) {
+            return self::fehler(sprintf('Je Reservierung können höchstens %d Artikel „zu verschenken“ dabei sein. '
+                . 'Ihre Auswahl enthält %d.', $max, $geschenke));
         }
         $mindest = (float) get_option('kikripp_mindestwert', 0);
         if ($summe > 0 && $summe < $mindest) {

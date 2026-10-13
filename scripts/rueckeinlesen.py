@@ -19,7 +19,7 @@ UEBERNEHMEN = ["Bezeichnung", "Beschreibung", "Kategorie", "Marke", "Bündel", "
                "Raum", "Menge", "Einheit",
                "Zustand", "Maße", "Wertklasse", "Aktiv", "Im_Katalog",
                "Anlagennr", "Anschaffungswert_netto",
-               "Preis_netto", "Preisbasis", "Versand", "Foto", "Status", "Kanal",
+               "Preis_netto", "Preisbasis", "Preis_geprüft", "Versand", "Foto", "Status", "Kanal",
                "Reserviert_für", "Verkauft_Menge", "Verkaufspreis_netto", "Verkaufsdatum",
                "Käufer", "Rechnungsnr", "Zahlung", "Zahlart", "Abholtermin",
                "Mengenhinweis", "Bemerkung"]

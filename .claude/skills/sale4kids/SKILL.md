@@ -1088,8 +1088,18 @@ ist die Merkliste; erledigte Punkte hier abhaken, nicht löschen.
       Tests: 383 Logik, 91 Browser, 16 mobil, neu `browsertest_geschenke.py` (16, Server mit KIK_TEST_NOVEMBER=1).
       Erwartete Importmeldung: „109 neu, 497 aktualisiert“. Ablauftext „So läuft es ab“ (Option) nennt die
       Geschenke noch nicht – ggf. im November ergänzen.
-- [ ] **Offen aus 12.10.:** Nutzerin ändert die Preise Bettwäsche NE04-17/-18 (Vorschlag 4 €) und Spannbettlaken
-      NE04-19 (Vorschlag 1 €) selbst in der Excel – bei der nächsten Aktualisierung per Ablauf B übernehmen.
+- [x] Preise Bettwäsche NE04-17/-18 4 €, Spannbettlaken NE04-19 1 € übernommen (13.10.).
+- [x] **13.10.: Excel der Nutzerin eingearbeitet + Spalte `Preis_geprüft` (offen/ok).** Von Hand übernommen
+      (nicht per rueckeinlesen – siehe unten): BA07-01 Menge 4, BE10-05 Menge 10, BA08-02 entfällt, BA08-41 67 Rollen
+      35 €, NE04-17/-18 4 €, NE04-19 1 €, **GA01-03/-04 wieder aktiv, Im_Katalog nein bis ca. 20.10.** (Erinnerung
+      per send_later am Di 20.10. 08:45, trig_01HgEKnETosrQpi4x3SkDsnC). `Preis_geprüft = offen`: 48 Spielzeug-Sets
+      vom 12.10. + GA01-03/-04 (vorläufig 200/250 € VHB). Alles andere „ok“, Geschenke „ok“. Sicherung:
+      `build_katalog_import.py` gibt „offen“ nie als sichtbar aus, `pruefen.py` meldet FEHLER, wenn ein offener
+      Preis auf Im_Katalog = ja steht. Excel: Preis + Prüfspalte dunkelgrau/fett, Auswahl „offen,ok“.
+      **Falle:** `rueckeinlesen.einlesen()` SCHREIBT sofort (auch beim Import als Modul) – für den Probelauf nur
+      `UEBERNEHMEN`/`zahl_aus` importieren und die Mappe selbst lesen. Und: der Excel-Bau schrieb Preis 0 als leere
+      Zelle (`or None`) – zurückgelesen wären alle Geschenke ohne Preis gewesen; behoben.
+      **Im November / bei Veröffentlichung:** nur Preise mit „ok“ gehen online – vorher Prüfliste abfragen.
 - [x] **Plugin 1.8.1 (13.10.): Zusatz mit Rabatt legte nichts an** – Ursache: Freitext „10 % / = 40“ zu streng
       („150“ wurde abgelehnt) und die Fehlermeldung stand oben, während die Seite zum Vorgang sprang. Jetzt
       Betrag + Auswahl (€ Festpreis gesamt / € je Stück / % Rabatt, `rabatt_aus_feldern`), Festpreis auch über

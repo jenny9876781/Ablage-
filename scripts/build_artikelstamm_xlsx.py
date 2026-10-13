@@ -45,6 +45,7 @@ SPALTEN = [
     ("Anschaffungswert_netto", 17, "Buchhaltung",  "eur"),
     ("Preis_netto",            13, "Preis",        "eur"),
     ("Preisbasis",             11, "Preis",        "text"),
+    ("Preis_geprüft",          12, "Preis",        "text"),
     ("Positionswert_netto",    17, "Preis",        "formel"),
     ("Versand",                16, "Vermarktung",  "text"),
     ("Foto",                   9,  "Vermarktung",  "text"),
@@ -80,7 +81,7 @@ def L(n): return get_column_letter(IDX[n])
 
 PFLEGE = {"Menge", "Verkauft_Menge", "Maße", "Aktiv", "Im_Katalog",
           "Anlagennr", "Anschaffungswert_netto", "Preis_netto",
-          "Preisbasis", "Marke", "Bündel", "Status", "Kanal", "Reserviert_für", "Verkaufspreis_netto",
+          "Preisbasis", "Preis_geprüft", "Marke", "Bündel", "Status", "Kanal", "Reserviert_für", "Verkaufspreis_netto",
           "Verkaufsdatum", "Käufer", "Rechnungsnr", "Zahlung", "Zahlart", "Abholtermin", "Bemerkung"}
 
 AUSWAHL = {
@@ -90,6 +91,7 @@ AUSWAHL = {
     "Einheit":    '"Stück,Karton,Set,Palette,Konvolut"',
     "Zustand":    '"neuwertig,gut,gebraucht,stark gebraucht,defekt"',
     "Preisbasis": '"Fix,VHB"',
+    "Preis_geprüft": '"offen,ok"',
     "Versand":    '"nur Abholung,Versand möglich,Spedition"',
     "Status":     '"verfügbar,reserviert,teilverkauft,verkauft,gespendet,entsorgt"',
     "Kanal":      '"Webkatalog,Kleinanzeigen,eBay,Direkt,Händler,Verkaufstag"',
@@ -165,6 +167,8 @@ TEXTE = [
     ("  Anlagennummer", "Wenn bekannt eintragen – der Steuerberater braucht sie für den Anlagenabgang."),
     ("", ""),
     ("Hinweise zu den Preisen", "Alle Preise in dieser Datei sind Schätzwerte auf Basis der Fotos. Sie sind zur Überarbeitung gedacht."),
+    ("  Preis_geprüft", "„offen“ = Preis ist noch geschätzt und muss kontrolliert werden (dunkelgrau hinterlegt). Nach der Kontrolle „ok“ eintragen. "
+     "Filter auf „offen“ zeigt die Prüfliste. Artikel mit „offen“ gehen nicht in den Webkatalog."),
     ("Markenware", "Vitra, Stokke, USM Haller und Kartell sind dort vermerkt, wo die Marke am Stück belegt ist. Für diese Stücke gibt es einen eigenen Gebrauchtmarkt mit Fachhändlern – dort sind höhere Preise erzielbar als im Sammelangebot."),
     ("Kunst", "Die Acrylbilder sind Eigenarbeiten einer Privatperson, die Schwarzwald-Trachtenmotive sind Kaufware. Beides ist in der Beschreibung vermerkt."),
     ("", ""),
@@ -226,7 +230,9 @@ for j, art in enumerate(daten):
         elif typ == "bild":
             wert = None
         else:
-            wert = art.get(name) or None
+            wert = art.get(name)
+            if wert == "" or (wert is None):            # 0 bleibt 0 (Geschenke), nur Leeres wird leer
+                wert = None
         c = ws.cell(row=r, column=IDX[name], value=wert)
         c.font = Font(name=FONT, size=10)
         c.border = RAHMEN
@@ -238,6 +244,10 @@ for j, art in enumerate(daten):
             c.number_format = "0"
         if name in PFLEGE:
             c.fill = PatternFill("solid", fgColor=FELD_INTERN)
+        # Preis noch nicht geprüft: Preis und Prüfspalte dunkler grau und fett (kein Gelb, kein flächiges Rot)
+        if name in ("Preis_netto", "Preis_geprüft") and (art.get("Preis_geprüft") or "") == "offen":
+            c.fill = PatternFill("solid", fgColor="BFBFBF")
+            c.font = Font(name=FONT, size=10, bold=True)
     mini = miniatur(art.get("Foto"))
     if mini:
         bild = XLImage(mini)

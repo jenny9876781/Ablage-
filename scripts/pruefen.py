@@ -34,6 +34,12 @@ if ohne_foto: W(f"{len(ohne_foto)} Positionen ohne Foto: {ohne_foto[:8]}")
 ohne_preis = [a["ArtNr"] for a in aktiv if not a["Preis_netto"] and a.get("Kategorie") != "zu verschenken"]
 if ohne_preis: W(f"{len(ohne_preis)} Positionen ohne Preis: {ohne_preis[:8]}")
 else:          OK("alle aktiven Positionen haben einen Preis")
+# Preis_geprüft (13.10.2026): „offen“ = geschätzter Preis. Sichtbar im Katalog darf keiner davon sein.
+_preis_offen = [a["ArtNr"] for a in aktiv if (a.get("Preis_geprüft") or "") == "offen"]
+_offen_sichtbar = [a["ArtNr"] for a in aktiv if (a.get("Preis_geprüft") or "") == "offen" and a.get("Im_Katalog") == "ja"]
+if _offen_sichtbar: F(f"{len(_offen_sichtbar)} Positionen mit ungeprüftem Preis stehen im Katalog: {_offen_sichtbar[:10]} – erst prüfen (Preis_geprüft = ok) oder Im_Katalog = nein")
+if _preis_offen: W(f"{len(_preis_offen)} Preise noch zu prüfen (Preis_geprüft = offen)")
+else:            OK("alle Preise geprüft")
 ohne_mass = [a["ArtNr"] for a in aktiv if not a.get("Maße")]
 if ohne_mass: W(f"{len(ohne_mass)} Positionen ohne Maßangabe")
 # Seit die internen Notizen in der Bemerkung stehen, muss dort mitgesucht werden -

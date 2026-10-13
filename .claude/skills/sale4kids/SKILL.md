@@ -1090,6 +1090,12 @@ ist die Merkliste; erledigte Punkte hier abhaken, nicht löschen.
       Geschenke noch nicht – ggf. im November ergänzen.
 - [ ] **Offen aus 12.10.:** Nutzerin ändert die Preise Bettwäsche NE04-17/-18 (Vorschlag 4 €) und Spannbettlaken
       NE04-19 (Vorschlag 1 €) selbst in der Excel – bei der nächsten Aktualisierung per Ablauf B übernehmen.
+- [x] **Plugin 1.8.1 (13.10.): Zusatz mit Rabatt legte nichts an** – Ursache: Freitext „10 % / = 40“ zu streng
+      („150“ wurde abgelehnt) und die Fehlermeldung stand oben, während die Seite zum Vorgang sprang. Jetzt
+      Betrag + Auswahl (€ Festpreis gesamt / € je Stück / % Rabatt, `rabatt_aus_feldern`), Festpreis auch über
+      mehrere Artikel (nach Katalogwert verteilt, Rest auf den letzten), Meldung zusätzlich am Vorgang
+      (`kikripp_vorgang`), nach erfolgreichem Zusatz Reiter „alle“. Nebenbei: Reiter „zu_tun“ ging beim
+      Zurückspringen verloren (Regex ohne „_“).
 - [x] **Plugin 1.8.0 (13.10.): Preis je Position + Rabatt.** SCHEMA_VERSION 6: Position hat `preis_original`
       (Katalogpreis beim ersten Ändern) und `festpreis` (Gesamtbetrag der Position, exakt; dann ist
       `preis_netto` nur der gerundete Stückpreis). **Immer `Kikripp_DB::pos_betrag()` / `pos_stueck()` benutzen,

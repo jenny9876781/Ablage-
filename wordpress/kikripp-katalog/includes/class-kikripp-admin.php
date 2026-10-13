@@ -66,19 +66,22 @@ class Kikripp_Admin {
         }
     }
 
-    private static function zurueck($seite, $meldung, $fehler = false, $anker = '') {
+    private static function zurueck($seite, $meldung, $fehler = false, $anker = '', $reiter_fest = null) {
         // Aus dem Abholplan heraus geklickt? Dann dorthin zurück, nicht in die Reservierungen.
         $herkunft = (string) wp_get_referer();
         if ($seite === 'kikripp-reservierungen' && strpos($herkunft, 'page=kikripp-abholplan') !== false) {
             $seite = 'kikripp-abholplan';
         }
         $reiter = null;
-        if (preg_match('/[?&]reiter=([a-z]+)/', $herkunft, $m)) { $reiter = $m[1]; }
+        if (preg_match('/[?&]reiter=([a-z_]+)/', $herkunft, $m)) { $reiter = $m[1]; }
+        if ($reiter_fest !== null) { $reiter = $reiter_fest; }
         $url = add_query_arg(array_filter([
             'page' => $seite,
             'reiter' => $seite === 'kikripp-reservierungen' ? $reiter : null,
             'kikripp_meldung' => $meldung,
             'kikripp_fehler' => $fehler ? '1' : null,
+            // 1.8.1: die Seite springt zum Vorgang – dort muss die Meldung auch stehen, sonst sieht man sie nicht
+            'kikripp_vorgang' => preg_match('/^vorgang-(\d+)$/', $anker, $m2) ? $m2[1] : null,
         ]), admin_url('admin.php'));
         wp_safe_redirect($url . ($anker !== '' ? '#' . $anker : ''));
         exit;
@@ -316,6 +319,11 @@ class Kikripp_Admin {
                 . '<a href="' . esc_url($b . '&art=privat') . '" target="_blank"' . ($privat ? ' style="font-weight:600"' : '') . '>Privatperson</a>';
         }
         $d .= '</div></div>';
+        if (isset($_GET['kikripp_meldung'], $_GET['kikripp_vorgang']) && (int) $_GET['kikripp_vorgang'] === $id) {
+            $fehler = isset($_GET['kikripp_fehler']);
+            $d = '<div style="margin:0 0 10px;padding:8px 12px;border-left:4px solid ' . ($fehler ? '#d63638' : '#00a32a')
+               . ';background:#fff;font-weight:600">' . esc_html(wp_unslash($_GET['kikripp_meldung'])) . '</div>' . $d;
+        }
         if ($v['status'] !== 'storniert') { $d .= self::bearbeiten_html($v); }
 
         $h .= '<tr id="details-' . $id . '" class="kik-details"' . ($offen ? '' : ' hidden') . '><td class="kik-balken" style="background:' . $farbe
@@ -354,7 +362,9 @@ class Kikripp_Admin {
                 . '<input type="hidden" name="action" value="kikripp_zusatz"><input type="hidden" name="id" value="' . $id . '">'
                 . 'Zusatzbestellung (eigene Rechnung, gleicher Abholtermin, ohne Mindestbestellwert): '
                 . '<input type="text" name="artikel" placeholder="z. B. BU01-10 x 3, NE04-19" style="width:240px"> '
-                . 'Rabatt <input type="text" name="rabatt" placeholder="10 % oder = 40" style="width:110px" title="leer = Katalogpreis; „10 %“ für alle Positionen; „= 40“ Festpreis bei genau einem Artikel"> '
+                . 'Preis <input type="text" name="rabatt_wert" inputmode="decimal" placeholder="leer = Katalog" style="width:100px"> '
+                . '<select name="rabatt_art"><option value="">– bitte wählen –</option><option value="gesamt">€ Festpreis gesamt</option>'
+                . '<option value="stueck">€ je Stück</option><option value="prozent">% Rabatt</option></select> '
                 . '<button class="button">Zusatz anlegen</button></form>';
         }
         if (trim((string) ($v['abholtermin'] ?? '')) !== '') {
@@ -432,12 +442,13 @@ class Kikripp_Admin {
         if (!$wunsch) {
             self::zurueck('kikripp-reservierungen', 'Bitte eine Artikelnummer eintragen, z. B. „BU01-10“ oder „BU01-10 x 3“.', true, 'vorgang-' . $id);
         }
-        $neu = Kikripp_DB::zusatz_anlegen($id, $wunsch, Kikripp_DB::rabatt_aus_text(sanitize_text_field(wp_unslash($_POST['rabatt'] ?? ''))));
+        $neu = Kikripp_DB::zusatz_anlegen($id, $wunsch, Kikripp_DB::rabatt_aus_feldern(
+            sanitize_text_field(wp_unslash($_POST['rabatt_wert'] ?? '')), sanitize_key($_POST['rabatt_art'] ?? '')));
         if (is_wp_error($neu)) {
             self::zurueck('kikripp-reservierungen', 'Zusatz nicht angelegt: ' . $neu->get_error_message(), true, 'vorgang-' . $id);
         }
         self::zurueck('kikripp-reservierungen', sprintf('Zusatzbestellung #%d zu Vorgang #%d angelegt (bestellt, gleicher Abholtermin). '
-            . 'Jetzt eine eigene Rechnung schreiben und dort eintragen.', $neu, $id), false, 'vorgang-' . $neu);
+            . 'Jetzt eine eigene Rechnung schreiben und dort eintragen.', $neu, $id), false, 'vorgang-' . $neu, 'alle');
     }
 
     public static function termin_speichern() {

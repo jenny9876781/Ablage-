@@ -475,6 +475,24 @@ class Kikripp_DB {
     }
 
     /**
+     * 1.8.1: Rabatt aus zwei Feldern – Betrag und Art (prozent | gesamt | stueck). Leerer Betrag = kein Rabatt.
+     * Betrag wie „150“, „150 €“, „29,50“ oder „10 %“ – Zeichen drumherum stören nicht.
+     */
+    public static function rabatt_aus_feldern($wert, $art) {
+        $t = trim(str_replace(['€', '%', ' ', "\xc2\xa0", '='], '', (string) $wert));
+        if ($t === '') { return null; }
+        if (!preg_match('/^\d+(?:[.,]\d{1,2})?$/', $t)) {
+            return new WP_Error('rabatt', 'Rabatt: bitte nur eine Zahl eintragen, z. B. 150 oder 10.');
+        }
+        $w = (float) str_replace(',', '.', $t);
+        if ($art === 'prozent') {
+            return ($w > 0 && $w <= 100) ? ['prozent', $w] : new WP_Error('rabatt', 'Rabatt bitte zwischen 0 und 100 % angeben.');
+        }
+        if (in_array($art, ['gesamt', 'stueck'], true)) { return [$art, $w]; }
+        return new WP_Error('rabatt', 'Rabatt: bitte auswählen, ob die Zahl Prozent, ein Festpreis oder ein Stückpreis ist.');
+    }
+
+    /**
      * 1.7.0: Zusatzbestellung zu einem bestehenden Vorgang – eigener Vorgang mit eigener Rechnung,
      * gleichen Kontaktdaten und gleichem Abholtermin, ohne Mindestbestellwert. Geht bei jedem Stand,
      * solange der Vorgang nicht storniert oder schon abgeholt ist. Gibt die neue Nummer zurück.
@@ -482,8 +500,8 @@ class Kikripp_DB {
     public static function zusatz_anlegen($basis_id, array $wunsch, $rabatt = null) {
         global $wpdb;
         if (is_wp_error($rabatt)) { return $rabatt; }
-        if ($rabatt && $rabatt[0] === 'gesamt' && count($wunsch) !== 1) {
-            return new WP_Error('rabatt', 'Ein Festpreis geht nur bei genau einem Artikel. Bei mehreren Artikeln die Preise danach einzeln ändern.');
+        if ($rabatt && $rabatt[0] === 'stueck' && count($wunsch) !== 1) {
+            return new WP_Error('rabatt', 'Ein Stückpreis geht nur bei genau einem Artikel – bei mehreren „Festpreis gesamt“ wählen.');
         }
         $v = self::vorgang($basis_id);
         if (!$v) { return new WP_Error('fehlt', 'Vorgang nicht gefunden.'); }
@@ -510,11 +528,22 @@ class Kikripp_DB {
         $alt = trim((string) ($v['notiz'] ?? ''));
         $wpdb->update(self::t_vorgang(), ['notiz' => ltrim($alt . ' · Zusatz: #' . (int) $neu, ' ·')], ['id' => (int) $basis_id]);
         if ($rabatt) {                                            // 1.8.0: Rabatt gleich beim Anlegen
-            foreach (self::vorgang($neu)['positionen'] as $p) {
-                if ($rabatt[0] === 'gesamt') {
-                    self::preis_setzen($neu, $p['id'], $rabatt[1], 'gesamt');
-                } else {
-                    self::preis_setzen($neu, $p['id'], round((float) $p['preis_netto'] * (1 - $rabatt[1] / 100), 2), 'stueck');
+            $pos = self::vorgang($neu)['positionen'];
+            if ($rabatt[0] === 'gesamt') {
+                // Festpreis für den ganzen Zusatz: nach Katalogwert verteilt, der letzte bekommt den Rest
+                // (so ergibt die Summe auf den Cent genau den Festpreis).
+                $wert = array_sum(array_map([__CLASS__, 'pos_betrag'], $pos));
+                $rest = round($rabatt[1], 2);
+                foreach (array_values($pos) as $i => $p) {
+                    $teil = $i === count($pos) - 1 ? $rest
+                        : ($wert > 0 ? round($rabatt[1] * self::pos_betrag($p) / $wert, 2) : round($rabatt[1] / count($pos), 2));
+                    $rest = round($rest - $teil, 2);
+                    self::preis_setzen($neu, $p['id'], $teil, 'gesamt');
+                }
+            } else {
+                foreach ($pos as $p) {
+                    self::preis_setzen($neu, $p['id'], $rabatt[0] === 'stueck' ? $rabatt[1]
+                        : round((float) $p['preis_netto'] * (1 - $rabatt[1] / 100), 2), 'stueck');
                 }
             }
         }

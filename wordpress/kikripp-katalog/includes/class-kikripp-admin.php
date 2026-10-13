@@ -13,6 +13,7 @@ class Kikripp_Admin {
         add_action('admin_post_kikripp_termin', [__CLASS__, 'termin_speichern']);
         add_action('admin_post_kikripp_vorgang', [__CLASS__, 'vorgang_speichern']);
         add_action('admin_post_kikripp_zusatz', [__CLASS__, 'zusatz_speichern']);
+        add_action('admin_post_kikripp_preis', [__CLASS__, 'preis_speichern']);
         add_action('admin_post_kikripp_bestellung', [__CLASS__, 'bestellung']);
         add_action('admin_notices', [__CLASS__, 'hinweis_passwort']);
     }
@@ -272,9 +273,23 @@ class Kikripp_Admin {
         foreach ($v['positionen'] as $p) {
             $daten = json_decode((string) ($p['daten'] ?? ''), true);
             $t = esc_html((int) $p['menge'] . ' × ' . $p['artnr'] . ' ' . (is_array($daten) ? ($daten['titel'] ?? '') : ''))
-               . ' · ' . esc_html(Kikripp_Mail::eur((float) $p['preis_netto'] * (int) $p['menge']));
+               . ' · ' . esc_html(Kikripp_Mail::eur(Kikripp_DB::pos_betrag($p)));
             if ($p['status'] === 'storniert') { $d .= '<s style="color:#8c8f94">' . $t . '</s><br>'; continue; }
             $d .= $t;
+            if (($p['preis_original'] ?? null) !== null && $p['preis_original'] !== '') {
+                $d .= ' <span style="font-size:11px;color:#646970">(Katalog <s>' . esc_html(Kikripp_Mail::eur((float) $p['preis_original'] * (int) $p['menge'])) . '</s>'
+                    . (($p['festpreis'] ?? null) !== null && $p['festpreis'] !== '' ? ', Festpreis' : '') . ')</span>';
+            }
+            if ($offen_oder_bestellt) {                       // 1.8.0: Preis ändern (Stückpreis oder Festpreis)
+                $d .= ' <details style="display:inline-block;font-size:11px"><summary style="cursor:pointer;color:#2271b1">Preis ändern</summary>'
+                    . '<form method="post" action="' . esc_url(admin_url('admin-post.php')) . '" style="margin:4px 0">'
+                    . wp_nonce_field('kikripp_preis_' . $id, '_wpnonce', true, false)
+                    . '<input type="hidden" name="action" value="kikripp_preis"><input type="hidden" name="id" value="' . $id . '">'
+                    . '<input type="hidden" name="pid" value="' . (int) $p['id'] . '">'
+                    . '<input type="text" name="preis" inputmode="decimal" placeholder="z. B. 30" style="width:70px"> € '
+                    . '<select name="art"><option value="stueck">je Stück</option><option value="gesamt">Festpreis für ' . (int) $p['menge'] . ' Stück</option></select> '
+                    . '<button class="button button-small">ändern</button></form></details>';
+            }
             if ($offen_oder_bestellt && count($v['positionen']) > 1) {
                 $d .= ' <a href="' . esc_url(self::aktion_url('pos', $id, ['pid' => (int) $p['id']])) . '" style="font-size:11px" onclick="return confirm(\'Nur diese Position stornieren?\')">stornieren</a>';
             }
@@ -339,6 +354,7 @@ class Kikripp_Admin {
                 . '<input type="hidden" name="action" value="kikripp_zusatz"><input type="hidden" name="id" value="' . $id . '">'
                 . 'Zusatzbestellung (eigene Rechnung, gleicher Abholtermin, ohne Mindestbestellwert): '
                 . '<input type="text" name="artikel" placeholder="z. B. BU01-10 x 3, NE04-19" style="width:240px"> '
+                . 'Rabatt <input type="text" name="rabatt" placeholder="10 % oder = 40" style="width:110px" title="leer = Katalogpreis; „10 %“ für alle Positionen; „= 40“ Festpreis bei genau einem Artikel"> '
                 . '<button class="button">Zusatz anlegen</button></form>';
         }
         if (trim((string) ($v['abholtermin'] ?? '')) !== '') {
@@ -391,6 +407,23 @@ class Kikripp_Admin {
             false, 'vorgang-' . $id);
     }
 
+    public static function preis_speichern() {
+        if (!current_user_can('manage_options')) { wp_die('Keine Berechtigung.'); }
+        $id = (int) ($_POST['id'] ?? 0);
+        check_admin_referer('kikripp_preis_' . $id);
+        $roh = str_replace(['€', ' '], '', sanitize_text_field(wp_unslash($_POST['preis'] ?? '')));
+        if (!preg_match('/^\d+(?:[.,]\d{1,2})?$/', $roh)) {
+            self::zurueck('kikripp-reservierungen', 'Bitte einen Betrag eintragen, z. B. „30“ oder „29,50“.', true, 'vorgang-' . $id);
+        }
+        $art = sanitize_key($_POST['art'] ?? 'stueck') === 'gesamt' ? 'gesamt' : 'stueck';
+        $ok = Kikripp_DB::preis_setzen($id, (int) ($_POST['pid'] ?? 0), (float) str_replace(',', '.', $roh), $art);
+        if (is_wp_error($ok)) {
+            self::zurueck('kikripp-reservierungen', 'Preis nicht geändert: ' . $ok->get_error_message(), true, 'vorgang-' . $id);
+        }
+        self::zurueck('kikripp-reservierungen', sprintf('Preis in Vorgang #%d geändert. Neue Summe: %s.', $id,
+            Kikripp_Mail::eur(Kikripp_Ablauf::summe(Kikripp_DB::vorgang($id)))), false, 'vorgang-' . $id);
+    }
+
     public static function zusatz_speichern() {
         if (!current_user_can('manage_options')) { wp_die('Keine Berechtigung.'); }
         $id = (int) ($_POST['id'] ?? 0);
@@ -399,7 +432,7 @@ class Kikripp_Admin {
         if (!$wunsch) {
             self::zurueck('kikripp-reservierungen', 'Bitte eine Artikelnummer eintragen, z. B. „BU01-10“ oder „BU01-10 x 3“.', true, 'vorgang-' . $id);
         }
-        $neu = Kikripp_DB::zusatz_anlegen($id, $wunsch);
+        $neu = Kikripp_DB::zusatz_anlegen($id, $wunsch, Kikripp_DB::rabatt_aus_text(sanitize_text_field(wp_unslash($_POST['rabatt'] ?? ''))));
         if (is_wp_error($neu)) {
             self::zurueck('kikripp-reservierungen', 'Zusatz nicht angelegt: ' . $neu->get_error_message(), true, 'vorgang-' . $id);
         }
@@ -496,11 +529,17 @@ class Kikripp_Admin {
             $d = json_decode((string) $p['daten'], true);
             $titel = is_array($d) && !empty($d['titel']) ? $d['titel'] : $p['artnr'];
             $einheit = is_array($d) && !empty($d['einheit']) ? $d['einheit'] : 'Stück';
-            $wert = (float) $p['preis_netto'] * (int) $p['menge'];
+            $wert = Kikripp_DB::pos_betrag($p);
             $summe += $wert;
+            $fest = ($p['festpreis'] ?? null) !== null && $p['festpreis'] !== '';
+            $orig = ($p['preis_original'] ?? null) !== null && $p['preis_original'] !== '' && (float) $p['preis_original'] * (int) $p['menge'] > $wert + 0.004;
+            // 1.8.0: vereinbarter Preis – der Katalogpreis steht durchgestrichen darüber
+            $einzel = $fest ? 'Festpreis' : $e(Kikripp_Mail::eur($p['preis_netto']));
+            if ($orig) { $einzel = '<s style="color:#777">' . $e(Kikripp_Mail::eur($p['preis_original'])) . '</s><br>' . $einzel; }
             $zeilen .= '<tr><td>' . $e($p['artnr']) . '</td><td>' . $e($titel) . '</td><td class="r">'
-                . (int) $p['menge'] . ' ' . $e($einheit) . '</td><td class="r">' . $e(Kikripp_Mail::eur($p['preis_netto']))
-                . '</td><td class="r">' . $e(Kikripp_Mail::eur($wert)) . '</td></tr>';
+                . (int) $p['menge'] . ' ' . $e($einheit) . '</td><td class="r">' . $einzel
+                . '</td><td class="r">' . ($orig ? '<s style="color:#777">' . $e(Kikripp_Mail::eur((float) $p['preis_original'] * (int) $p['menge'])) . '</s><br>' : '')
+                . $e(Kikripp_Mail::eur($wert)) . '</td></tr>';
         }
         $summenzeile = $ust > 0
             ? '<tr class="s"><td colspan="4">Summe netto</td><td class="r">' . $e(Kikripp_Mail::eur($summe)) . '</td></tr>'
@@ -633,7 +672,8 @@ class Kikripp_Admin {
                     $v['telefon'], sprintf('[%s] Neue Reservierung #%d', $firma, (int) $v['id']),
                     str_replace(["\r", "\n"], ' ', (string) $v['nachricht']),
                     $p['artnr'], $p['menge'],
-                    number_format((float) $p['preis_netto'], 2, ',', '.'), $p['status'],
+                    // Stückpreis; beim Festpreis mit 4 Nachkommastellen, damit Menge × Preis den Betrag ergibt
+                    number_format(Kikripp_DB::pos_stueck($p), ($p['festpreis'] ?? null) !== null && $p['festpreis'] !== '' ? 4 : 2, ',', ''), $p['status'],
                     $p['bezahlt_am'] ?? '',
                     $v['firma'] ?? '', $v['strasse'] ?? '', $v['plz'] ?? '', $v['ort'] ?? '',
                     Kikripp_Mail::besichtigung_text($v), Kikripp_Mail::abholung_text($v),

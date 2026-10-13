@@ -81,7 +81,8 @@ class Kikripp_Ablauf {
             $code = strtok((string) $p['artnr'], '-');
             $raum = trim((string) ($d['raum'] ?? ''));
             $out[] = [
-                'artnr' => $p['artnr'], 'menge' => (int) $p['menge'], 'preis' => (float) $p['preis_netto'],
+                'artnr' => $p['artnr'], 'menge' => (int) $p['menge'], 'preis' => Kikripp_DB::pos_stueck($p),
+                'betrag' => Kikripp_DB::pos_betrag($p),
                 'titel' => (string) ($d['titel'] ?? ''), 'einheit' => (string) ($d['einheit'] ?? 'Stück'),
                 'raum'  => $raum !== '' ? "$raum ($code)" : $code,
             ];
@@ -91,7 +92,7 @@ class Kikripp_Ablauf {
 
     public static function summe($v) {
         $s = 0.0;
-        foreach (self::positionen($v) as $p) { $s += $p['preis'] * $p['menge']; }
+        foreach (self::positionen($v) as $p) { $s += $p['betrag']; }
         return $s;
     }
 

@@ -11,7 +11,7 @@ class Kikripp_Mail {
         foreach ($v['positionen'] as $p) {
             $daten = json_decode((string) $p['daten'], true);
             $titel = is_array($daten) && !empty($daten['titel']) ? $daten['titel'] : $p['artnr'];
-            $wert = (float) $p['preis_netto'] * (int) $p['menge'];
+            $wert = Kikripp_DB::pos_betrag($p);
             $summe += $wert;
             $zeilen[] = sprintf('%d × %s  %s — %s',
                 (int) $p['menge'], $p['artnr'], $titel, self::eur($wert));

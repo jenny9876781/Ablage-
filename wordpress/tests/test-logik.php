@@ -993,5 +993,48 @@ ob_start(); Kikripp_Admin::seite_reservierungen(); $seite = ob_get_clean();
 pruefe('Feld „Zusatz anlegen“ steht auf der Seite', strpos($seite, 'name="action" value="kikripp_zusatz"') !== false, true);
 $_GET = []; $GLOBALS['ist_admin'] = false;
 
+titel('47. Preis ändern und Rabatt (1.8.0)');
+artikel_anlegen('PR-001', 5, 75.0, 'Kuckucksuhr');
+artikel_anlegen('PR-002', 6, 40.0, 'Regal');
+$pv = Kikripp_DB::reservieren(array_merge(kontakt('Preis Kunde'), ['strasse' => 'Weg 2', 'plz' => '78048', 'ort' => 'VS']), ['PR-001' => 5, 'PR-002' => 1]);
+$pos = function ($v, $nr) { foreach ($v['positionen'] as $p) { if ($p['artnr'] === $nr) { return $p; } } return null; };
+$g = Kikripp_DB::vorgang($pv);
+pruefe('Summe vorher', Kikripp_Ablauf::summe($g), 415.0);
+pruefe('Festpreis 150 € für 5 Uhren', Kikripp_DB::preis_setzen($pv, $pos($g, 'PR-001')['id'], 150, 'gesamt'), true);
+$g = Kikripp_DB::vorgang($pv);
+pruefe('Summe mit Festpreis', Kikripp_Ablauf::summe($g), 190.0);
+pruefe('Katalogpreis bleibt gemerkt', (float) $pos($g, 'PR-001')['preis_original'], 75.0);
+pruefe('Notiz vermerkt die Änderung', strpos($g['notiz'], 'PR-001 375,00 € → 150,00 € (Festpreis)') !== false, true);
+pruefe('Festpreis 100 € für 3: genau 100', Kikripp_DB::pos_betrag(['festpreis' => '100.00', 'preis_netto' => '33.33', 'menge' => 3]), 100.0);
+pruefe('Stückpreis ändern', Kikripp_DB::preis_setzen($pv, $pos($g, 'PR-002')['id'], 29.5, 'stueck'), true);
+$g = Kikripp_DB::vorgang($pv);
+pruefe('Summe mit Stückpreis', Kikripp_Ablauf::summe($g), 179.5);
+pruefe('Festpreis zurück auf Stückpreis', Kikripp_DB::preis_setzen($pv, $pos($g, 'PR-001')['id'], 32, 'stueck') === true
+    && Kikripp_DB::pos_betrag($pos(Kikripp_DB::vorgang($pv), 'PR-001')) === 160.0, true);
+pruefe('Original bleibt der Katalogpreis', (float) $pos(Kikripp_DB::vorgang($pv), 'PR-001')['preis_original'], 75.0);
+pruefe('negativer Preis abgelehnt', is_wp_error(Kikripp_DB::preis_setzen($pv, $pos($g, 'PR-002')['id'], -1)), true);
+$html = Kikripp_Admin::bestellung_html($pv, 'unternehmen');
+if (getenv('KIK_BESTELLUNG_HTML')) { file_put_contents(getenv('KIK_BESTELLUNG_HTML'), $html); }
+pruefe('Bestellung: Katalogpreis durchgestrichen', strpos($html, '<s style="color:#777">75,00') !== false, true);
+pruefe('Bestellung: neue Summe', strpos($html, '189,50') !== false, true);
+Kikripp_DB::vorgang_status($pv, 'bezahlt');
+pruefe('nach „bezahlt“ gesperrt', Kikripp_DB::preis_setzen($pv, $pos($g, 'PR-002')['id'], 1)->get_error_code(), 'gesperrt');
+pruefe('Rabatt lesen: 10 %', Kikripp_DB::rabatt_aus_text('10 %'), ['prozent', 10.0]);
+pruefe('Rabatt lesen: = 40 €', Kikripp_DB::rabatt_aus_text('= 40 €'), ['gesamt', 40.0]);
+pruefe('Rabatt lesen: leer', Kikripp_DB::rabatt_aus_text(''), null);
+pruefe('Rabatt lesen: Unsinn', is_wp_error(Kikripp_DB::rabatt_aus_text('viel')), true);
+$basis = Kikripp_DB::reservieren(kontakt('Rabatt Kunde'), ['PR-002' => 1]);
+$z = Kikripp_DB::zusatz_anlegen($basis, ['PR-002' => 2], ['prozent', 10]);
+pruefe('Zusatz mit 10 %: 2 × 36 €', Kikripp_Ablauf::summe(Kikripp_DB::vorgang($z)), 72.0);
+$z = Kikripp_DB::zusatz_anlegen($basis, ['PR-002' => 1], ['gesamt', 25]);
+pruefe('Zusatz mit Festpreis 25 €', Kikripp_Ablauf::summe(Kikripp_DB::vorgang($z)), 25.0);
+pruefe('Festpreis bei 2 Artikeln abgelehnt', Kikripp_DB::zusatz_anlegen($basis, ['PR-002' => 1, 'PR-001' => 1], ['gesamt', 25])->get_error_code(), 'rabatt');
+$GLOBALS['ist_admin'] = true; $_GET = ['reiter' => 'alle'];
+ob_start(); Kikripp_Admin::seite_reservierungen(); $seite = ob_get_clean();
+pruefe('Feld „Preis ändern“ auf der Seite', strpos($seite, 'name="action" value="kikripp_preis"') !== false, true);
+pruefe('Rabattfeld bei der Zusatzbestellung', strpos($seite, 'name="rabatt"') !== false, true);
+pruefe('Katalogpreis neben dem Festpreis', strpos($seite, 'Festpreis)</span>') !== false, true);
+$_GET = []; $GLOBALS['ist_admin'] = false;
+
 printf("\n== Ergebnis: %d Prüfungen, %d Fehler ==\n", $geprueft, $fehler);
 exit($fehler > 0 ? 1 : 0);

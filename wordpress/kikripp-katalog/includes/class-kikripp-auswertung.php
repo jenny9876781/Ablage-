@@ -80,11 +80,11 @@ class Kikripp_Auswertung {
                     foreach ($v['positionen'] as $p) {
                         if ($p['status'] !== 'bezahlt' || !self::im_zeitraum($p['bezahlt_am'] ?? '', $von, $bis)) { continue; }
                         $d = json_decode((string) ($p['daten'] ?? ''), true); $d = is_array($d) ? $d : [];
-                        $betrag = (float) $p['preis_netto'] * (int) $p['menge'];
+                        $betrag = Kikripp_DB::pos_betrag($p);
                         $summe += $betrag; $stueck += (int) $p['menge'];
                         $zeilen[] = [self::d($p['bezahlt_am']), $v['rechnungsnr'] ?? '', self::d($v['rechnung_am'] ?? ''), '#' . (int) $v['id'],
                             self::kaeufer($v), Kikripp_Ablauf::privat($v) ? 'Privat' : 'Firma', $p['artnr'], (string) ($d['titel'] ?? ''),
-                            (string) ($d['kat'] ?? ''), (int) $p['menge'], (float) $p['preis_netto'], $betrag, self::d($v['abgeholt_am'] ?? '')];
+                            (string) ($d['kat'] ?? ''), (int) $p['menge'], round(Kikripp_DB::pos_stueck($p), 2), $betrag, self::d($v['abgeholt_am'] ?? '')];
                     }
                 }
                 usort($zeilen, function ($a, $b) { return [implode('', array_reverse(explode('.', $a[0]))), $a[3]] <=> [implode('', array_reverse(explode('.', $b[0]))), $b[3]]; });
@@ -99,7 +99,7 @@ class Kikripp_Auswertung {
                     foreach ($v['positionen'] as $p) {
                         if ($p['status'] !== 'bezahlt' || !self::im_zeitraum($p['bezahlt_am'] ?? '', $von, $bis)) { continue; }
                         $t = strtotime(substr($p['bezahlt_am'], 0, 10) . ' 12:00:00 UTC');
-                        $betrag = (float) $p['preis_netto'] * (int) $p['menge'];
+                        $betrag = Kikripp_DB::pos_betrag($p);
                         foreach ([[&$monat, gmdate('Y-m', $t)], [&$woche, gmdate('o-W', $t)]] as $ziel) {
                             $k = $ziel[1];
                             if (!isset($ziel[0][$k])) { $ziel[0][$k] = ['v' => [], 's' => 0, 'e' => 0.0]; }
@@ -131,7 +131,7 @@ class Kikripp_Auswertung {
                 $erloes = [];
                 foreach (self::vorgaenge() as $v) {
                     foreach ($v['positionen'] as $p) {
-                        if ($p['status'] === 'bezahlt') { $erloes[$p['artnr']] = ($erloes[$p['artnr']] ?? 0) + (float) $p['preis_netto'] * (int) $p['menge']; }
+                        if ($p['status'] === 'bezahlt') { $erloes[$p['artnr']] = ($erloes[$p['artnr']] ?? 0) + Kikripp_DB::pos_betrag($p); }
                     }
                 }
                 $g = [];

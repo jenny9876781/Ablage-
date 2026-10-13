@@ -9,7 +9,7 @@ if (!defined('ABSPATH')) { exit; }
  */
 class Kikripp_DB {
 
-    const SCHEMA_VERSION = 5;
+    const SCHEMA_VERSION = 6;   // 6: Position mit preis_original und festpreis (1.8.0)
 
     /** 1.6.0: So viele Tage trägt ein Artikel nach dem Import, mit dem er sichtbar wurde, das Schild NEU. */
     const NEU_TAGE = 14;
@@ -74,6 +74,8 @@ class Kikripp_DB {
             preis_netto DECIMAL(10,2) NOT NULL DEFAULT 0,
             status VARCHAR(20) NOT NULL DEFAULT 'reserviert',
             bezahlt_am DATETIME NULL,
+            preis_original DECIMAL(10,2) NULL,
+            festpreis DECIMAL(10,2) NULL,
             PRIMARY KEY (id),
             KEY vorgang_id (vorgang_id),
             KEY artnr (artnr, status)
@@ -401,13 +403,88 @@ class Kikripp_DB {
         return $wpdb->update(self::t_vorgang(), $neu, ['id' => (int) $id]) !== false;
     }
 
+    // ------------------------------------------------------------ 1.8.0: Preis je Position
+
+    /** Betrag einer Position: der Festpreis, wenn einer vereinbart ist, sonst Stückpreis × Menge. */
+    public static function pos_betrag($p) {
+        if (isset($p['festpreis']) && $p['festpreis'] !== null && $p['festpreis'] !== '') { return round((float) $p['festpreis'], 2); }
+        return round((float) $p['preis_netto'] * (int) $p['menge'], 2);
+    }
+
+    /** Stückpreis einer Position – beim Festpreis der rechnerische (kann mehr als zwei Nachkommastellen haben). */
+    public static function pos_stueck($p) {
+        $m = (int) $p['menge'];
+        return $m > 0 ? self::pos_betrag($p) / $m : (float) $p['preis_netto'];
+    }
+
+    /**
+     * Preis einer Position ändern: $art 'stueck' (neuer Stückpreis) oder 'gesamt' (Festpreis für die ganze
+     * Position, wird genau so gespeichert). Nur solange der Vorgang offen oder bestellt ist – danach steht
+     * die Rechnung. Der ursprüngliche Katalogpreis bleibt in preis_original, die Änderung in der Notiz.
+     */
+    public static function preis_setzen($vorgang_id, $position_id, $wert, $art = 'stueck', $notiz = true) {
+        global $wpdb;
+        $v = self::vorgang($vorgang_id);
+        if (!$v) { return new WP_Error('fehlt', 'Vorgang nicht gefunden.'); }
+        if (!in_array($v['status'], ['offen', 'bestellt'], true)) {
+            return new WP_Error('gesperrt', 'Der Preis lässt sich nur ändern, solange der Vorgang offen oder bestellt ist.');
+        }
+        $p = null;
+        foreach ($v['positionen'] as $x) { if ((int) $x['id'] === (int) $position_id) { $p = $x; } }
+        if (!$p || $p['status'] === 'storniert') { return new WP_Error('position', 'Position nicht gefunden.'); }
+        $wert = round((float) $wert, 2);
+        if ($wert < 0) { return new WP_Error('wert', 'Der Preis darf nicht negativ sein.'); }
+        $vorher = self::pos_betrag($p);
+        $original = ($p['preis_original'] ?? null) !== null && $p['preis_original'] !== '' ? (float) $p['preis_original'] : (float) $p['preis_netto'];
+        $menge = max(1, (int) $p['menge']);
+        $felder = $art === 'gesamt'
+            ? ['festpreis' => $wert, 'preis_netto' => round($wert / $menge, 2)]
+            : ['festpreis' => null, 'preis_netto' => $wert];
+        $felder['preis_original'] = $original;
+        // NULL für festpreis: über prepare() würde daraus '' – deshalb eigene Abfrage
+        if ($felder['festpreis'] === null) {
+            $wpdb->query($wpdb->prepare('UPDATE ' . self::t_position() . ' SET festpreis = NULL, preis_netto = %f, preis_original = %f WHERE id = %d',
+                $felder['preis_netto'], $original, (int) $position_id));
+        } else {
+            $wpdb->update(self::t_position(), $felder, ['id' => (int) $position_id]);
+        }
+        if ($notiz) {
+            $eur = function ($w) { return number_format($w, 2, ',', '.') . ' €'; };
+            $neu = $art === 'gesamt' ? $wert : $wert * (int) $p['menge'];
+            $text = gmdate('d.m.', current_time('timestamp')) . ': ' . $p['artnr'] . ' ' . $eur($vorher) . ' → ' . $eur($neu)
+                . ($art === 'gesamt' ? ' (Festpreis)' : ' (' . $eur($wert) . ' je Stück)');
+            $alt = trim((string) ($v['notiz'] ?? ''));
+            $wpdb->update(self::t_vorgang(), ['notiz' => ltrim($alt . ' · ' . $text, ' ·')], ['id' => (int) $vorgang_id]);
+        }
+        return true;
+    }
+
+    /**
+     * Rabatt-Angabe der Zusatzbestellung lesen: „10 %“ / „10%“ -> ['prozent', 10], „= 40“ / „=40 €“ -> ['gesamt', 40],
+     * leer -> null, Unlesbares -> WP_Error.
+     */
+    public static function rabatt_aus_text($text) {
+        $t = trim(str_replace(['€', ' '], '', (string) $text));
+        if ($t === '') { return null; }
+        if (preg_match('/^(\d+(?:[.,]\d+)?)%$/', $t, $m)) {
+            $w = (float) str_replace(',', '.', $m[1]);
+            return ($w > 0 && $w <= 100) ? ['prozent', $w] : new WP_Error('rabatt', 'Rabatt bitte zwischen 0 und 100 % angeben.');
+        }
+        if (preg_match('/^=(\d+(?:[.,]\d{1,2})?)$/', $t, $m)) { return ['gesamt', (float) str_replace(',', '.', $m[1])]; }
+        return new WP_Error('rabatt', 'Rabatt bitte als „10 %“ oder als Festpreis „= 40“ eintragen.');
+    }
+
     /**
      * 1.7.0: Zusatzbestellung zu einem bestehenden Vorgang – eigener Vorgang mit eigener Rechnung,
      * gleichen Kontaktdaten und gleichem Abholtermin, ohne Mindestbestellwert. Geht bei jedem Stand,
      * solange der Vorgang nicht storniert oder schon abgeholt ist. Gibt die neue Nummer zurück.
      */
-    public static function zusatz_anlegen($basis_id, array $wunsch) {
+    public static function zusatz_anlegen($basis_id, array $wunsch, $rabatt = null) {
         global $wpdb;
+        if (is_wp_error($rabatt)) { return $rabatt; }
+        if ($rabatt && $rabatt[0] === 'gesamt' && count($wunsch) !== 1) {
+            return new WP_Error('rabatt', 'Ein Festpreis geht nur bei genau einem Artikel. Bei mehreren Artikeln die Preise danach einzeln ändern.');
+        }
         $v = self::vorgang($basis_id);
         if (!$v) { return new WP_Error('fehlt', 'Vorgang nicht gefunden.'); }
         if ($v['status'] === 'storniert') { return new WP_Error('storniert', 'Der Vorgang ist storniert.'); }
@@ -432,6 +509,15 @@ class Kikripp_DB {
         ], ['id' => (int) $neu]);
         $alt = trim((string) ($v['notiz'] ?? ''));
         $wpdb->update(self::t_vorgang(), ['notiz' => ltrim($alt . ' · Zusatz: #' . (int) $neu, ' ·')], ['id' => (int) $basis_id]);
+        if ($rabatt) {                                            // 1.8.0: Rabatt gleich beim Anlegen
+            foreach (self::vorgang($neu)['positionen'] as $p) {
+                if ($rabatt[0] === 'gesamt') {
+                    self::preis_setzen($neu, $p['id'], $rabatt[1], 'gesamt');
+                } else {
+                    self::preis_setzen($neu, $p['id'], round((float) $p['preis_netto'] * (1 - $rabatt[1] / 100), 2), 'stueck');
+                }
+            }
+        }
         return (int) $neu;
     }
 

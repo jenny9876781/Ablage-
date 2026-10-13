@@ -1090,6 +1090,15 @@ ist die Merkliste; erledigte Punkte hier abhaken, nicht löschen.
       Geschenke noch nicht – ggf. im November ergänzen.
 - [ ] **Offen aus 12.10.:** Nutzerin ändert die Preise Bettwäsche NE04-17/-18 (Vorschlag 4 €) und Spannbettlaken
       NE04-19 (Vorschlag 1 €) selbst in der Excel – bei der nächsten Aktualisierung per Ablauf B übernehmen.
+- [x] **Plugin 1.8.0 (13.10.): Preis je Position + Rabatt.** SCHEMA_VERSION 6: Position hat `preis_original`
+      (Katalogpreis beim ersten Ändern) und `festpreis` (Gesamtbetrag der Position, exakt; dann ist
+      `preis_netto` nur der gerundete Stückpreis). **Immer `Kikripp_DB::pos_betrag()` / `pos_stueck()` benutzen,
+      nie `preis_netto × menge`** (Ablauf, Mail, Bestellung, Auswertung, Export). `preis_setzen()` nur bei
+      offen/bestellt (danach steht die DATEV-Rechnung), schreibt „13.10.: NR alt → neu (Festpreis)“ in die
+      Notiz. Verwaltung: „Preis ändern“ je Position (je Stück / Festpreis). Zusatzbestellung mit Feld
+      „Rabatt“: „10 %“ für alle Positionen oder „= 40“ Festpreis (nur bei genau einem Artikel).
+      Bestellung zeigt den Katalogpreis durchgestrichen. Export: Stückpreis beim Festpreis mit 4 Nachkommastellen;
+      `reservierungen_einlesen.py` rundet ihn auf 2 – im Excel kann die Summe dann um 1 Cent abweichen.
 - [x] **Plugin 1.7.0 (13.10.): Zusatzbestellung + Admin-Reservierung.** (A) Feld „Zusatzbestellung“ in der
       Bearbeitungszeile jedes Vorgangs (nicht storniert, nicht abgeholt, Kontaktdaten vorhanden): Text
       „BU01-10 x 3, NE04-19“ (`Kikripp_DB::wunsch_aus_text`) → `Kikripp_DB::zusatz_anlegen()` legt einen

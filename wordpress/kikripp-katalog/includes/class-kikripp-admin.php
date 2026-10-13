@@ -12,6 +12,7 @@ class Kikripp_Admin {
         add_action('admin_post_kikripp_export', [__CLASS__, 'export']);
         add_action('admin_post_kikripp_termin', [__CLASS__, 'termin_speichern']);
         add_action('admin_post_kikripp_vorgang', [__CLASS__, 'vorgang_speichern']);
+        add_action('admin_post_kikripp_zusatz', [__CLASS__, 'zusatz_speichern']);
         add_action('admin_post_kikripp_bestellung', [__CLASS__, 'bestellung']);
         add_action('admin_notices', [__CLASS__, 'hinweis_passwort']);
     }
@@ -332,6 +333,14 @@ class Kikripp_Admin {
            . '<label style="font-size:12px;flex:1;min-width:200px">Notiz (intern)<br><input type="text" name="notiz" value="' . esc_attr((string) ($v['notiz'] ?? '')) . '" style="width:100%"></label>'
            . '<label style="font-size:12px"><input type="checkbox" name="du" value="1"' . checked(1, (int) ($v['du'] ?? 0), false) . '> per Du</label>'
            . '<button class="button button-primary">Speichern</button></form>';
+        if (trim((string) ($v['abgeholt_am'] ?? '')) === '' && (int) $v['kontakt_weg'] === 0 && trim((string) $v['name']) !== '') {
+            $h .= '<form method="post" action="' . esc_url(admin_url('admin-post.php')) . '" style="margin-top:8px;font-size:12px">'
+                . wp_nonce_field('kikripp_zusatz_' . $id, '_wpnonce', true, false)
+                . '<input type="hidden" name="action" value="kikripp_zusatz"><input type="hidden" name="id" value="' . $id . '">'
+                . 'Zusatzbestellung (eigene Rechnung, gleicher Abholtermin, ohne Mindestbestellwert): '
+                . '<input type="text" name="artikel" placeholder="z. B. BU01-10 x 3, NE04-19" style="width:240px"> '
+                . '<button class="button">Zusatz anlegen</button></form>';
+        }
         if (trim((string) ($v['abholtermin'] ?? '')) !== '') {
             $h .= '<div style="font-size:11px;color:#777;margin-top:4px">Früher eingetragen: ' . esc_html($v['abholtermin']) . '</div>';
         }
@@ -380,6 +389,22 @@ class Kikripp_Admin {
         self::zurueck('kikripp-reservierungen', sprintf('Vorgang #%d gespeichert.', $id) .
             ($abholung !== '' ? ' Abholung: ' . Kikripp_Ablauf::termin_text($abholung) . ' – jetzt „In Outlook eintragen“.' : ''),
             false, 'vorgang-' . $id);
+    }
+
+    public static function zusatz_speichern() {
+        if (!current_user_can('manage_options')) { wp_die('Keine Berechtigung.'); }
+        $id = (int) ($_POST['id'] ?? 0);
+        check_admin_referer('kikripp_zusatz_' . $id);
+        $wunsch = Kikripp_DB::wunsch_aus_text(sanitize_text_field(wp_unslash($_POST['artikel'] ?? '')));
+        if (!$wunsch) {
+            self::zurueck('kikripp-reservierungen', 'Bitte eine Artikelnummer eintragen, z. B. „BU01-10“ oder „BU01-10 x 3“.', true, 'vorgang-' . $id);
+        }
+        $neu = Kikripp_DB::zusatz_anlegen($id, $wunsch);
+        if (is_wp_error($neu)) {
+            self::zurueck('kikripp-reservierungen', 'Zusatz nicht angelegt: ' . $neu->get_error_message(), true, 'vorgang-' . $id);
+        }
+        self::zurueck('kikripp-reservierungen', sprintf('Zusatzbestellung #%d zu Vorgang #%d angelegt (bestellt, gleicher Abholtermin). '
+            . 'Jetzt eine eigene Rechnung schreiben und dort eintragen.', $neu, $id), false, 'vorgang-' . $neu);
     }
 
     public static function termin_speichern() {

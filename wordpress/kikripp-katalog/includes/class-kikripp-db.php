@@ -402,6 +402,51 @@ class Kikripp_DB {
     }
 
     /**
+     * 1.7.0: Zusatzbestellung zu einem bestehenden Vorgang – eigener Vorgang mit eigener Rechnung,
+     * gleichen Kontaktdaten und gleichem Abholtermin, ohne Mindestbestellwert. Geht bei jedem Stand,
+     * solange der Vorgang nicht storniert oder schon abgeholt ist. Gibt die neue Nummer zurück.
+     */
+    public static function zusatz_anlegen($basis_id, array $wunsch) {
+        global $wpdb;
+        $v = self::vorgang($basis_id);
+        if (!$v) { return new WP_Error('fehlt', 'Vorgang nicht gefunden.'); }
+        if ($v['status'] === 'storniert') { return new WP_Error('storniert', 'Der Vorgang ist storniert.'); }
+        if (trim((string) ($v['abgeholt_am'] ?? '')) !== '') {
+            return new WP_Error('abgeholt', 'Der Vorgang ist schon abgeholt – bitte eine neue Reservierung anlegen.');
+        }
+        if ((int) $v['kontakt_weg'] === 1 || trim((string) $v['name']) === '') {
+            return new WP_Error('kontakt', 'Zu diesem Vorgang sind keine Kontaktdaten mehr gespeichert.');
+        }
+        $kontakt = ['name' => $v['name'], 'email' => $v['email'], 'telefon' => $v['telefon'], 'nachricht' => '',
+                    'firma' => $v['firma'] ?? '', 'strasse' => $v['strasse'] ?? '', 'plz' => $v['plz'] ?? '',
+                    'ort' => $v['ort'] ?? '', 'abholwunsch' => $v['abholwunsch'] ?? '', 'demontage' => $v['demontage'] ?? 0];
+        $neu = self::reservieren($kontakt, $wunsch);
+        if (is_wp_error($neu)) { return $neu; }
+        self::vorgang_status($neu, 'bestellt');                  // eigene Rechnung folgt, läuft nicht ab
+        $wpdb->update(self::t_vorgang(), [
+            'abholung'    => (string) ($v['abholung'] ?? ''),
+            'abholtermin' => (string) ($v['abholtermin'] ?? ''),
+            'du'          => (int) ($v['du'] ?? 0),
+            'testdaten'   => (int) ($v['testdaten'] ?? 0),
+            'notiz'       => sprintf('Zusatz zu #%d – eigene Rechnung', (int) $basis_id),
+        ], ['id' => (int) $neu]);
+        $alt = trim((string) ($v['notiz'] ?? ''));
+        $wpdb->update(self::t_vorgang(), ['notiz' => ltrim($alt . ' · Zusatz: #' . (int) $neu, ' ·')], ['id' => (int) $basis_id]);
+        return (int) $neu;
+    }
+
+    /** „BU01-10 x 3, NE04-19“ -> ['BU01-10' => 3, 'NE04-19' => 1]. Leere oder unlesbare Teile fallen weg. */
+    public static function wunsch_aus_text($text) {
+        $out = [];
+        foreach (preg_split('/[,;\n]+/', (string) $text) as $teil) {
+            if (!preg_match('/^\s*([A-Za-z]{1,4}\d{0,3}-[A-Za-z]?\d{1,3})\s*(?:[x×*]\s*(\d+))?\s*$/u', $teil, $m)) { continue; }
+            $nr = strtoupper($m[1]);
+            $out[$nr] = ($out[$nr] ?? 0) + max(1, (int) ($m[2] ?? 1));
+        }
+        return $out;
+    }
+
+    /**
      * Abgeholt vermerken (Datum) oder zurücknehmen (leer). Wer abholt, hat bezahlt –
      * ein noch „bestellter“ Vorgang wird dabei auf bezahlt gesetzt (z. B. Barzahlung vor Ort).
      */

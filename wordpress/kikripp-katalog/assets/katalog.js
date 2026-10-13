@@ -54,7 +54,7 @@
   function hole(pfad, optionen) {
     return fetch(W.basis + pfad, Object.assign({
       credentials: 'same-origin',
-      headers: { 'Content-Type': 'application/json' },
+      headers: W.nonce ? { 'Content-Type': 'application/json', 'X-WP-Nonce': W.nonce } : { 'Content-Type': 'application/json' },
       cache: 'no-store'
     }, optionen || {})).then(function (a) {
       return a.json().then(function (d) { return { status: a.status, daten: d }; });
@@ -371,7 +371,7 @@
     var n = feld ? parseInt(feld.value, 10) : 1;
     if (isNaN(n) || n < 1) { n = 1; }
     if (n > a.frei) { n = a.frei; if (feld) { feld.value = n; } }
-    if (geschenk(a) && !merk[nr] && auswahl().filter(function (p) { return geschenk(p.a); }).length >= GESCHENKE_MAX) {
+    if (geschenk(a) && !IST_ADMIN && !merk[nr] && auswahl().filter(function (p) { return geschenk(p.a); }).length >= GESCHENKE_MAX) {
       window.alert('Je Reservierung können höchstens ' + GESCHENKE_MAX + ' Artikel „zu verschenken“ dabei sein.');
       return;
     }
@@ -394,14 +394,16 @@
     var stueck = 0, netto = 0;
     w.forEach(function (p) { stueck += p.menge; netto += p.menge * p.a.preis; });
     // Geschenke zählen nicht zum Mindestbestellwert; nur Geschenke = kein Mindestwert.
-    var fehlt = MINDEST > 0 && netto > 0 ? MINDEST - brutto(netto) : 0;
+    // Die Verwaltung (angemeldet) reserviert im Namen von Kunden ohne Mindestbestellwert.
+    var fehlt = MINDEST > 0 && netto > 0 && !IST_ADMIN ? MINDEST - brutto(netto) : 0;
     el('k-merk').innerHTML = stueck
       ? stueck + ' Stück vorgemerkt · <b>' + betrag(netto) + '</b>' +
         (UST > 0 ? ' <span style="opacity:.8">inkl. USt</span>' : '') +
         (fehlt > 0.004 ? '<br><span class="mindest">Mindestbestellwert ' + eur(MINDEST) +
           ' – es fehlen noch ' + eur(fehlt) + '</span>' : '')
       : 'Noch nichts vorgemerkt – Stückzahl eintragen und auf „reservieren“ klicken.' +
-        (MINDEST > 0 ? ' Mindestbestellwert ' + eur(MINDEST) + ' (gilt nicht für Artikel „zu verschenken“).' : '');
+        (IST_ADMIN ? ' Sie sind als Verwaltung angemeldet: Mindestbestellwert und Geschenke-Grenze gelten für Sie nicht.'
+          : (MINDEST > 0 ? ' Mindestbestellwert ' + eur(MINDEST) + ' (gilt nicht für Artikel „zu verschenken“).' : ''));
     el('k-anfragen').disabled = stueck === 0 || fehlt > 0.004;
     // Ohne Auswahl braucht die Leiste auf dem Telefon keine Knoepfe (siehe katalog.css).
     var l = wurzel.querySelector('.leiste');

@@ -150,7 +150,8 @@ class Kikripp_REST {
         if (self::sieht_nach_roboter_aus($anfrage)) {
             return self::fehler('Die Reservierung konnte nicht verarbeitet werden. Bitte versuchen Sie es erneut.');
         }
-        if (self::zu_viele(false)) {
+        $admin = Kikripp_Zugang::ist_admin();   // 1.7.0: Verwaltung reserviert im Namen von Kunden
+        if (!$admin && self::zu_viele(false)) {
             return self::fehler('Von diesem Anschluss sind in der letzten Stunde schon mehrere Reservierungen '
                 . 'eingegangen. Bitte rufen Sie uns an.', 429);
         }
@@ -191,12 +192,12 @@ class Kikripp_REST {
         // 1.5.0: Geschenke (Preis 0) zählen nicht zum Mindestbestellwert – eine Reservierung nur aus
         // Geschenken geht immer durch ($summe = 0). Je Reservierung höchstens GESCHENKE_MAX Positionen.
         $max = self::geschenke_max();
-        if ($geschenke > $max) {
+        if (!$admin && $geschenke > $max) {
             return self::fehler(sprintf('Je Reservierung können höchstens %d Artikel „zu verschenken“ dabei sein. '
                 . 'Ihre Auswahl enthält %d.', $max, $geschenke));
         }
         $mindest = (float) get_option('kikripp_mindestwert', 0);
-        if ($summe > 0 && $summe < $mindest) {
+        if (!$admin && $summe > 0 && $summe < $mindest) {
             return self::fehler(sprintf('Der Mindestbestellwert beträgt %s. Ihre Auswahl liegt bei %s.',
                 Kikripp_Mail::eur($mindest), Kikripp_Mail::eur($summe)));
         }
@@ -245,7 +246,7 @@ class Kikripp_REST {
         if (is_wp_error($id)) {
             return self::fehler($id->get_error_message(), 409);
         }
-        self::zu_viele(true);
+        if (!$admin) { self::zu_viele(true); }
 
         // Die Mail an die Kikripp GmbH ist die einzige, die rausgeht. Die Kontaktdaten
         // bleiben in der Verwaltung, bis dort jemand „erledigt“ klickt.

@@ -72,6 +72,9 @@ if (empty($GLOBALS['optionen'])) {
     file_put_contents($zustand, json_encode($GLOBALS['optionen']));
 }
 
+// Angemeldete Verwaltung nachstellen: Keks kik_test_admin=1 (1.7.0, Reservierung ohne Mindestwert)
+$GLOBALS['ist_admin'] = !empty($_COOKIE['kik_test_admin']);
+
 global $wpdb;
 if ((int) $wpdb->get_var('SELECT COUNT(*) FROM ' . Kikripp_DB::t_artikel()) === 0) {
     $daten = json_decode(file_get_contents(__DIR__ . '/../../ausgabe/katalog_import.json'), true);
@@ -141,6 +144,6 @@ $zugang = Kikripp_Zugang::hat_zugang() ? 'true' : 'false';
 <ul class="daycare-switch" id="probe-switch3"><li><a href="#">KIKRIPP</a></li></ul></div></nav></div></header>
 <div class="huelle"><div id="kikripp-katalog" class="kikripp"></div></div>
 <footer class="wp-block-template-part" id="probe-fusszeile">©2024 by Probe-Betreiberin · Impressum · Datenschutz</footer>
-<script>window.KIKRIPP = {basis:'/wp-json/kikripp/v1', signet:'/assets/signet.svg', zugang:<?php echo $zugang; ?>, admin:false, verwaltung:'#'};</script>
+<script>window.KIKRIPP = {basis:'/wp-json/kikripp/v1', signet:'/assets/signet.svg', zugang:<?php echo $zugang; ?>, admin:<?php echo $GLOBALS['ist_admin'] ? 'true' : 'false'; ?>, verwaltung:'#', nonce:'<?php echo $GLOBALS['ist_admin'] ? 'test-nonce' : ''; ?>'};</script>
 <script src="/assets/katalog.js"></script>
 </body></html>

@@ -1090,6 +1090,17 @@ ist die Merkliste; erledigte Punkte hier abhaken, nicht löschen.
       Geschenke noch nicht – ggf. im November ergänzen.
 - [ ] **Offen aus 12.10.:** Nutzerin ändert die Preise Bettwäsche NE04-17/-18 (Vorschlag 4 €) und Spannbettlaken
       NE04-19 (Vorschlag 1 €) selbst in der Excel – bei der nächsten Aktualisierung per Ablauf B übernehmen.
+- [x] **Plugin 1.7.0 (13.10.): Zusatzbestellung + Admin-Reservierung.** (A) Feld „Zusatzbestellung“ in der
+      Bearbeitungszeile jedes Vorgangs (nicht storniert, nicht abgeholt, Kontaktdaten vorhanden): Text
+      „BU01-10 x 3, NE04-19“ (`Kikripp_DB::wunsch_aus_text`) → `Kikripp_DB::zusatz_anlegen()` legt einen
+      **eigenen Vorgang** an: gleiche Kontaktdaten, Status bestellt, gleicher Abholtermin, Du/Sie übernommen,
+      Notiz „Zusatz zu #N – eigene Rechnung“, beim Basisvorgang „Zusatz: #M“. Kein Mindestbestellwert.
+      (B) Angemeldete Verwaltung reserviert im Katalog ohne Mindestwert, ohne Geschenke-Grenze und ohne
+      Stundenbremse. **Dafür schickt der Katalog jetzt `X-WP-Nonce`** (nur für Angemeldete ausgegeben – ein
+      zwischengespeicherter, abgelaufener Nonce würde sonst den Katalog für alle sperren). Vorher war
+      `IST_ADMIN` in REST immer falsch, weil WordPress REST ohne Nonce als abgemeldet behandelt.
+      Testserver: Keks `kik_test_admin=1`. Test 39 nutzt jetzt Reiter „alle“ (war datumsabhängig rot ab 13.10.).
+      Kuckucksuhren NU01-02: Angebot 75 € für alle 5 – Empfehlung 150 €, nicht unter 120 € (Recherche 13.10.).
 - [x] **Plugin 1.6.0 (12.10.): Schild NEU.** Kein Excel-Feld: `einspielen()` stempelt `neu_seit` (in `daten`)
       beim Import, mit dem ein Artikel **erstmals sichtbar** wird (neu angelegt oder Im_Katalog nein → ja);
       sonst bleibt der alte Stempel. `katalog_artikel()` liefert `neu` = Stempel jünger als

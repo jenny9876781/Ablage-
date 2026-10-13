@@ -741,7 +741,7 @@ titel('39. Verwaltungsseite, Abholplan, Dashboard');
 $GLOBALS['ist_admin'] = true;
 $_GET = [];
 Kikripp_DB::vorgang_status($va, 'bestellt');
-$_GET = ['reiter' => 'zahlung'];
+$_GET = ['reiter' => 'alle'];   // nicht „zahlung“: ab 5 Tagen nach der Rechnung wandert der Vorgang nach „Zu tun“
 ob_start(); Kikripp_Admin::seite_reservierungen(); $seite = ob_get_clean();
 foreach (['Umsatz bezahlt:' => 'Kennzahlen', 'Zu erledigen:' => 'Aufgabenliste', 'nav-tab-active' => 'Reiter',
           'name="abhol_tag" value="2026-10-20"' => 'Abholtag im Formular', 'name="rechnungsnr" value="4000113"' => 'Rechnungsnummer im Formular',
@@ -963,6 +963,35 @@ $m = Kikripp_Ablauf::mail_text($gf(['abholung' => '2026-10-27 09:00']));
 pruefe('Geschenk-Mail ohne Rechnung', strpos($m[0] . $m[1], 'Rechnung') === false && strpos($m[1], 'geschenkt') !== false, true);
 pruefe('Kaufvorgang weiter mit Rechnung', strpos(Kikripp_Ablauf::mail_text($gf(['positionen' => [$pos(20)]]))[0], 'Rechnung') !== false, true);
 pruefe('Höchstzahl Geschenke: Vorgabe 5', Kikripp_REST::geschenke_max(), 5);
+
+titel('46. Zusatzbestellung (1.7.0)');
+pruefe('Text lesen: Menge und Komma', Kikripp_DB::wunsch_aus_text('bu01-10 x 3, NE04-19; BA04-V01*2'), ['BU01-10' => 3, 'NE04-19' => 1, 'BA04-V01' => 2]);
+pruefe('Text lesen: Unsinn fällt weg', Kikripp_DB::wunsch_aus_text('hallo, , K-117'), ['K-117' => 1]);
+artikel_anlegen('ZU-001', 5, 80.0, 'Kommode');
+artikel_anlegen('ZU-002', 4, 9.0, 'Hocker');
+$basis = Kikripp_DB::reservieren(array_merge(kontakt('Zusatz Kunde'), ['firma' => 'Kita Sonne', 'strasse' => 'Weg 1', 'plz' => '78048', 'ort' => 'VS']), ['ZU-001' => 1]);
+Kikripp_DB::vorgang_status($basis, 'bestellt');
+Kikripp_DB::vorgang_bearbeiten($basis, ['abholung' => '2026-10-27 09:30', 'du' => true]);
+$z = Kikripp_DB::zusatz_anlegen($basis, ['ZU-002' => 1]);
+pruefe('Zusatz angelegt', is_int($z) && $z !== $basis, true);
+$g = Kikripp_DB::vorgang($z);
+pruefe('Zusatz: bestellt, gleicher Termin', $g['status'] . '|' . $g['abholung'], 'bestellt|2026-10-27 09:30');
+pruefe('Zusatz: gleiche Kontaktdaten', $g['name'] . '|' . $g['firma'] . '|' . $g['ort'] . '|' . $g['du'], 'Zusatz Kunde|Kita Sonne|VS|1');
+pruefe('Zusatz: unter Mindestwert erlaubt (9 €)', Kikripp_Ablauf::summe($g), 9.0);
+pruefe('Zusatz: Verweis in der Notiz', $g['notiz'], 'Zusatz zu #' . $basis . ' – eigene Rechnung');
+pruefe('Basis: Verweis auf den Zusatz', Kikripp_DB::vorgang($basis)['notiz'], 'Zusatz: #' . $z);
+pruefe('Bestand abgezogen', katalog_nach('ZU-002')['frei'], 3);
+pruefe('Zusatz verlangt eigene Rechnung', strpos(implode('|', array_column(Kikripp_Ablauf::aufgaben([$g]), 'text')), 'Rechnung schreiben') !== false, true);
+Kikripp_DB::vorgang_status($basis, 'bezahlt');
+pruefe('Zusatz auch zu bezahltem Vorgang', is_int(Kikripp_DB::zusatz_anlegen($basis, ['ZU-002' => 1])), true);
+pruefe('mehr als verfügbar → Fehler', is_wp_error(Kikripp_DB::zusatz_anlegen($basis, ['ZU-002' => 9])), true);
+Kikripp_DB::abgeholt_setzen($basis, '2026-10-27');
+pruefe('nach Abholung kein Zusatz', Kikripp_DB::zusatz_anlegen($basis, ['ZU-002' => 1])->get_error_code(), 'abgeholt');
+pruefe('unbekannter Vorgang', Kikripp_DB::zusatz_anlegen(999999, ['ZU-002' => 1])->get_error_code(), 'fehlt');
+$GLOBALS['ist_admin'] = true; $_GET = ['reiter' => 'alle'];
+ob_start(); Kikripp_Admin::seite_reservierungen(); $seite = ob_get_clean();
+pruefe('Feld „Zusatz anlegen“ steht auf der Seite', strpos($seite, 'name="action" value="kikripp_zusatz"') !== false, true);
+$_GET = []; $GLOBALS['ist_admin'] = false;
 
 printf("\n== Ergebnis: %d Prüfungen, %d Fehler ==\n", $geprueft, $fehler);
 exit($fehler > 0 ? 1 : 0);

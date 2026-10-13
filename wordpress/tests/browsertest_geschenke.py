@@ -31,9 +31,12 @@ if len(geschenke) < 6:
     sys.exit("Zu wenige Geschenke im Katalog – läuft der Server mit KIK_TEST_NOVEMBER=1?")
 pruefe("Höchstzahl kommt vom Server", daten.get("geschenke_max") == 5, f"({daten.get('geschenke_max')!r})")
 
-def post(koerper):
+def post(koerper, admin=False):
+    kopf = {"Content-Type": "application/json"}
+    if admin:
+        kopf["Cookie"] = "kik_test_admin=1"
     anfrage = urllib.request.Request(BASIS + "wp-json/kikripp/v1/reservierung", method="POST",
-                                     data=json.dumps(koerper).encode(), headers={"Content-Type": "application/json"})
+                                     data=json.dumps(koerper).encode(), headers=kopf)
     try:
         with urllib.request.urlopen(anfrage, timeout=10) as a:
             return json.load(a)
@@ -104,6 +107,19 @@ with sync_playwright() as p:
     dlg = seite.inner_text("#k-dlg")
     pruefe("Formular zeigt „geschenkt“", "geschenkt" in dlg and "\n0,00" not in dlg, f"({dlg[300:700]!r})")
     pruefe("keine Seitenfehler", not konsole, f"({konsole!r})")
+
+    print("\n4b) Verwaltung angemeldet: kein Mindestbestellwert (1.7.0)")
+    s2 = b.new_context(viewport={"width": 1280, "height": 1100})
+    s2.add_cookies([{"name": "kik_test_admin", "value": "1", "url": BASIS}])
+    v = s2.new_page()
+    nonce = []
+    v.on("request", lambda r: nonce.append(r.headers.get("x-wp-nonce")) if "/wp-json/" in r.url else None)
+    v.goto(BASIS, wait_until="networkidle"); v.wait_for_selector(".karte", timeout=20000)
+    pruefe("Nonce geht mit", "test-nonce" in nonce, f"({nonce[:2]!r})")
+    pruefe("Hinweis für die Verwaltung", "als Verwaltung angemeldet" in v.inner_text("#k-merk"))
+    v.locator(f'button[data-res="{billig[1]}"]').click(); v.wait_for_timeout(300)
+    pruefe("Verwaltung: unter 50 € abschickbar", not v.locator("#k-anfragen").is_disabled())
+    s2.close()
     b.close()
 
 print("\n5) Server")
@@ -113,6 +129,9 @@ a = post(dict(kontakt, artikel={billig[0]: 1, geschenke[0]: 1}, dauer=5000))
 pruefe("Server: Kaufanteil unter Mindestwert abgelehnt", not a.get("ok"), f"({a!r})")
 a = post(dict(kontakt, artikel={nr: 1 for nr in geschenke[:5]}, dauer=5000))
 pruefe("Server nimmt 5 Geschenke ohne Mindestwert an", a.get("ok") is True, f"({a!r})")
+
+a = post(dict(kontakt, artikel={billig[2]: 1}, dauer=5000), admin=True)
+pruefe("Server: Verwaltung darf unter Mindestwert reservieren", a.get("ok") is True, f"({a!r})")
 
 print(f"\n== Geschenke-Browsertest: {proben} Prüfungen, {len(fehler)} Fehler ==")
 sys.exit(1 if fehler else 0)

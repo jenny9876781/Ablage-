@@ -112,6 +112,10 @@ class Kikripp_Frontend {
             'admin'   => Kikripp_Zugang::ist_admin(),
             'verwaltung' => admin_url('admin.php?page=kikripp-reservierungen'),
             'linkparam'  => Kikripp_Zugang::LINK_PARAMETER,
+            // 1.7.0: Ohne Nonce behandelt WordPress jede REST-Anfrage als abgemeldet – dann wüsste
+            // der Katalog nie, dass die Verwaltung reserviert. Nur für Angemeldete ausgeben: ein
+            // zwischengespeicherter, abgelaufener Nonce würde den Katalog für Besucher lahmlegen.
+            'nonce'      => is_user_logged_in() ? wp_create_nonce('wp_rest') : '',
         ]);
         // Der Rahmen ist statisch und darf zwischengespeichert werden,
         // die Daten kommen live über die Schnittstelle.

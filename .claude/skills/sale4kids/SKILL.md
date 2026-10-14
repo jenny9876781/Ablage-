@@ -1088,6 +1088,15 @@ ist die Merkliste; erledigte Punkte hier abhaken, nicht löschen.
       Tests: 383 Logik, 91 Browser, 16 mobil, neu `browsertest_geschenke.py` (16, Server mit KIK_TEST_NOVEMBER=1).
       Erwartete Importmeldung: „109 neu, 497 aktualisiert“. Ablauftext „So läuft es ab“ (Option) nennt die
       Geschenke noch nicht – ggf. im November ergänzen.
+- [x] **14.10.2026: Weihnachtsdeko NU01-23 bis -52 (Bündel „Weihnachten“), Garten GA01-19 bis -21.** 33 neu (639).
+      Deko alle `Preis_geprüft = offen`, Im_Katalog nein (Schätzpreise). GA01-19 Rutsche offen/nein. **GA01-20
+      gelbes Spielhaus 150 € und GA01-21 weißes Spielhaus 350 € VHB: Preis vereinbart, sofort sichtbar – die Nutzerin
+      reserviert beide direkt nach dem Import im Katalog als Verwaltung und setzt sie auf bestellt** (wir können in
+      WordPress nichts selbst anlegen). NE03-12 = 11 Stück. NU01-02 neues Foto F-746, **Menge bleibt 5** (1 verkauft,
+      1 reserviert über den Katalog – WordPress zieht selbst ab; nie Menge senken, wenn der Abgang im Katalog lief).
+      BU12-14 neues Foto F-745. NU01-35 ohne Foto (kommt). F-744 = Chat-Bild NU01-41 (über /root/.claude/uploads/manuell
+      eingespielt). Spiegelungen der Fotografin in F-774 (Silberkugeln) und F-757 (Kugelkranz) maskiert.
+      Importmeldung: „33 neu, 606 aktualisiert … 2 Artikel … NEU“.
 - [x] Preise Bettwäsche NE04-17/-18 4 €, Spannbettlaken NE04-19 1 € übernommen (13.10.).
 - [x] **13.10.: Excel der Nutzerin eingearbeitet + Spalte `Preis_geprüft` (offen/ok).** Von Hand übernommen
       (nicht per rueckeinlesen – siehe unten): BA07-01 Menge 4, BE10-05 Menge 10, BA08-02 entfällt, BA08-41 67 Rollen

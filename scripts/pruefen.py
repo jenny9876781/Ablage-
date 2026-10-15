@@ -34,6 +34,17 @@ if ohne_foto: W(f"{len(ohne_foto)} Positionen ohne Foto: {ohne_foto[:8]}")
 ohne_preis = [a["ArtNr"] for a in aktiv if not a["Preis_netto"] and a.get("Kategorie") != "zu verschenken"]
 if ohne_preis: W(f"{len(ohne_preis)} Positionen ohne Preis: {ohne_preis[:8]}")
 else:          OK("alle aktiven Positionen haben einen Preis")
+# Kasse (15.10.2026): die Mappe muss alle Buchungen aus daten/kasse.csv tragen – nie leer neu angelegt
+try:
+    from lib import lade_kasse as _lk, kasse_aus_mappe as _km
+    from openpyxl import load_workbook as _lw
+    _xl = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "ausgabe", "01_Artikelstamm_kikripp.xlsx")
+    if os.path.exists(_xl):
+        _a1, _b1 = _lk(); _a2, _b2 = _km(_lw(_xl, data_only=True))
+        if (_a1, _b1) != (_a2, _b2): F(f"Kasse in der Arbeitsmappe weicht von daten/kasse.csv ab ({len(_b2)} statt {len(_b1)} Buchungen)")
+        else: OK(f"Kasse: {len(_b1)} Buchungen in der Mappe")
+except Exception as _e:
+    F(f"Kasse nicht prüfbar: {_e}")
 # Preis_geprüft (13.10.2026): „offen“ = geschätzter Preis. Sichtbar im Katalog darf keiner davon sein.
 _preis_offen = [a["ArtNr"] for a in aktiv if (a.get("Preis_geprüft") or "") == "offen"]
 _offen_sichtbar = [a["ArtNr"] for a in aktiv if (a.get("Preis_geprüft") or "") == "offen" and a.get("Im_Katalog") == "ja"]

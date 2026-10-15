@@ -105,6 +105,15 @@ class Kikripp_Ablauf {
         return $pos !== [] && self::summe($v) <= 0.0;
     }
 
+    /** 1.9.0: wartet der Vorgang auf eine Rückinfo? */
+    public static function wartet($v) { return trim((string) ($v['warte_seit'] ?? '')) !== ''; }
+
+    /** … und ist die Wiedervorlage erreicht? Dann gehört er wieder zu „Zu tun“. */
+    public static function wiedervorlage_faellig($v, $heute) {
+        $bis = (string) ($v['warte_bis'] ?? '');
+        return self::wartet($v) && $bis !== '' && $bis <= $heute;
+    }
+
     /** In welchen Reiter gehört ein Vorgang? */
     public static function reiter_von($v, $jetzt) {
         if ($v['status'] === 'storniert') { return 'erledigt'; }
@@ -129,6 +138,12 @@ class Kikripp_Ablauf {
         $abgeholt = trim((string) ($v['abgeholt_am'] ?? '')) !== '';
         $kontakt = (int) ($v['kontakt_weg'] ?? 0) === 0 && trim((string) $v['name']) !== '';
         $knopf = null;
+        if (self::wartet($v) && !self::wiedervorlage_faellig($v, $heute)) {
+            $notiz = trim((string) ($v['warte_notiz'] ?? ''));
+            return ['reiter' => 'warten', 'farbe' => 'grau', 'rang' => 60, 'knopf' => ['rueckinfo', 'Rückinfo da'],
+                    'schritt' => 'wartet auf Rückinfo' . ($notiz !== '' ? ': ' . $notiz : '')
+                        . (!empty($v['warte_bis']) ? ' · Wiedervorlage ' . self::datum_text($v['warte_bis']) : '')];
+        }
         if ($v['status'] === 'offen') {
             $knopf = strtotime($v['ablauf']) < $jetzt ? ['storniert', 'stornieren'] : ['bestellt', 'bestellt'];
         } elseif ($v['status'] === 'bestellt' && self::geschenk($v)) {
@@ -206,6 +221,14 @@ class Kikripp_Ablauf {
             $tag = substr((string) ($v['abholung'] ?? ''), 0, 10);
             $abgeholt = trim((string) ($v['abgeholt_am'] ?? '')) !== '';
             $kontakt = (int) ($v['kontakt_weg'] ?? 0) === 0 && trim((string) $v['name']) !== '';
+            if (self::wartet($v)) {                     // 1.9.0: ruht bis zur Rückinfo oder Wiedervorlage
+                if (self::wiedervorlage_faellig($v, $heute)) {
+                    $notiz = trim((string) ($v['warte_notiz'] ?? ''));
+                    $neu($v, 'Wiedervorlage: noch keine Rückinfo' . ($notiz !== '' ? ' („' . $notiz . '“)' : '')
+                        . ' – nachfassen oder „Rückinfo da“.', 'warn', 1);
+                }
+                continue;
+            }
             switch ($v['status']) {
                 case 'offen':
                     $ablauf = strtotime($v['ablauf']);

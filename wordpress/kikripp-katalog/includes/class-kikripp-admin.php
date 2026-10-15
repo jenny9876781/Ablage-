@@ -14,6 +14,7 @@ class Kikripp_Admin {
         add_action('admin_post_kikripp_vorgang', [__CLASS__, 'vorgang_speichern']);
         add_action('admin_post_kikripp_zusatz', [__CLASS__, 'zusatz_speichern']);
         add_action('admin_post_kikripp_preis', [__CLASS__, 'preis_speichern']);
+        add_action('admin_post_kikripp_warten', [__CLASS__, 'warten_speichern']);
         add_action('admin_post_kikripp_bestellung', [__CLASS__, 'bestellung']);
         add_action('admin_notices', [__CLASS__, 'hinweis_passwort']);
     }
@@ -104,7 +105,7 @@ class Kikripp_Admin {
             'id' => (int) $id], $extra), admin_url('admin-post.php')), 'kikripp_aktion_' . (int) $id);
     }
 
-    const REITER = ['zu_tun' => 'Zu tun', 'zahlung' => 'Wartet auf Zahlung', 'abholung' => 'Wartet auf Abholung',
+    const REITER = ['zu_tun' => 'Zu tun', 'warten' => 'Warte auf Rückinfo', 'zahlung' => 'Wartet auf Zahlung', 'abholung' => 'Wartet auf Abholung',
                     'fertig' => 'Abgeschlossen', 'erledigt' => 'Storniert / abgelaufen', 'alle' => 'Alle'];
 
     /**
@@ -226,7 +227,8 @@ class Kikripp_Admin {
         $abholung = trim((string) ($v['abholung'] ?? '')) !== ''
             ? esc_html(Kikripp_Ablauf::termin_text($v['abholung'], true))
             : (trim((string) ($v['abholwunsch'] ?? '')) !== '' ? '<span style="color:#8c8f94">Wunsch: ' . esc_html(Kikripp_Mail::abholung_text($v)) . '</span>' : '—');
-        $offen = $st['knopf'] && $st['knopf'][0] === 'aufklappen';
+        // 1.9.0: nichts klappt von selbst auf – offen ist nur der Vorgang, an dem gerade gearbeitet wurde (#vorgang-N)
+        $offen = false;
 
         $knopf = '';
         if ($st['knopf']) {
@@ -356,6 +358,24 @@ class Kikripp_Admin {
            . '<label style="font-size:12px;flex:1;min-width:200px">Notiz (intern)<br><input type="text" name="notiz" value="' . esc_attr((string) ($v['notiz'] ?? '')) . '" style="width:100%"></label>'
            . '<label style="font-size:12px"><input type="checkbox" name="du" value="1"' . checked(1, (int) ($v['du'] ?? 0), false) . '> per Du</label>'
            . '<button class="button button-primary">Speichern</button></form>';
+        // 1.9.0: Warte auf Rückinfo
+        if (trim((string) ($v['abgeholt_am'] ?? '')) === '') {
+            if (Kikripp_Ablauf::wartet($v)) {
+                $h .= '<div style="margin-top:8px;font-size:12px;padding:6px 10px;background:#fff;border-left:4px solid #50575e">'
+                    . '<b>Wartet auf Rückinfo</b> seit ' . esc_html(Kikripp_Ablauf::datum_text($v['warte_seit']))
+                    . (trim((string) $v['warte_notiz']) !== '' ? ': ' . esc_html($v['warte_notiz']) : '')
+                    . (!empty($v['warte_bis']) ? ' · Wiedervorlage ' . esc_html(Kikripp_Ablauf::datum_text($v['warte_bis'])) : '')
+                    . ($v['status'] === 'offen' ? ' · Reservierungsfrist angehalten' : '')
+                    . ' <a class="button button-small" href="' . esc_url(self::aktion_url('rueckinfo', $id)) . '">Rückinfo da</a></div>';
+            } else {
+                $h .= '<form method="post" action="' . esc_url(admin_url('admin-post.php')) . '" style="margin-top:8px;font-size:12px">'
+                    . wp_nonce_field('kikripp_warten_' . $id, '_wpnonce', true, false)
+                    . '<input type="hidden" name="action" value="kikripp_warten"><input type="hidden" name="id" value="' . $id . '">'
+                    . 'Warte auf Rückinfo: <input type="text" name="warte_notiz" placeholder="worauf? z. B. Kunde klärt Transporter" style="width:240px"> '
+                    . 'Wiedervorlage <input type="date" name="warte_bis"> '
+                    . '<button class="button">warte auf Rückinfo</button></form>';
+            }
+        }
         if (trim((string) ($v['abgeholt_am'] ?? '')) === '' && (int) $v['kontakt_weg'] === 0 && trim((string) $v['name']) !== '') {
             $h .= '<form method="post" action="' . esc_url(admin_url('admin-post.php')) . '" style="margin-top:8px;font-size:12px">'
                 . wp_nonce_field('kikripp_zusatz_' . $id, '_wpnonce', true, false)
@@ -415,6 +435,17 @@ class Kikripp_Admin {
         self::zurueck('kikripp-reservierungen', sprintf('Vorgang #%d gespeichert.', $id) .
             ($abholung !== '' ? ' Abholung: ' . Kikripp_Ablauf::termin_text($abholung) . ' – jetzt „In Outlook eintragen“.' : ''),
             false, 'vorgang-' . $id);
+    }
+
+    public static function warten_speichern() {
+        if (!current_user_can('manage_options')) { wp_die('Keine Berechtigung.'); }
+        $id = (int) ($_POST['id'] ?? 0);
+        check_admin_referer('kikripp_warten_' . $id);
+        $bis = sanitize_text_field(wp_unslash($_POST['warte_bis'] ?? ''));
+        Kikripp_DB::warten_setzen($id, sanitize_text_field(wp_unslash($_POST['warte_notiz'] ?? '')), $bis);
+        self::zurueck('kikripp-reservierungen', sprintf('Vorgang #%d wartet auf Rückinfo%s.', $id,
+            preg_match('/^\d{4}-\d{2}-\d{2}$/', $bis) ? ' – Wiedervorlage am ' . Kikripp_Ablauf::datum_text($bis) : ''),
+            false, 'vorgang-' . $id, 'warten');
     }
 
     public static function preis_speichern() {
@@ -493,6 +524,9 @@ class Kikripp_Admin {
             case 'abgeholt':
                 Kikripp_DB::abgeholt_setzen($id, Kikripp_Ablauf::heute());
                 self::zurueck('kikripp-reservierungen', sprintf('Vorgang #%d ist abgeholt.', $id), false, 'vorgang-' . $id);
+            case 'rueckinfo':
+                Kikripp_DB::warten_beenden($id);
+                self::zurueck('kikripp-reservierungen', sprintf('Rückinfo zu Vorgang #%d ist da – er steht wieder im normalen Ablauf.', $id), false, 'vorgang-' . $id, 'alle');
             case 'nicht_abgeholt':
                 Kikripp_DB::abgeholt_setzen($id, '');
                 self::zurueck('kikripp-reservierungen', sprintf('„abgeholt“ bei Vorgang #%d zurückgenommen.', $id), false, 'vorgang-' . $id);

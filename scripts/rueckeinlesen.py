@@ -109,6 +109,26 @@ def einlesen(xlsx):
     if ergaenzt:  print("   neu:", ", ".join(ergaenzt))
     if entfallen: print("   entfällt:", ", ".join(entfallen))
 
+    # ---- Kasse (seit 15.10.2026) ----
+    # Buchführung der Nutzerin: wird übernommen, aber nie gekürzt. Hat die Mappe weniger Buchungen
+    # als die Datenbasis, ist es vermutlich eine alte Kopie – dann bleibt die Datenbasis unverändert.
+    from lib import lade_kasse, kasse_aus_mappe, schreibe_kasse, KASSE_PFAD
+    wb_werte = load_workbook(xlsx, data_only=True)
+    neu_kasse = kasse_aus_mappe(wb_werte)
+    if neu_kasse is not None:
+        alt_anfang, alt_b = lade_kasse()
+        anfang, b = neu_kasse
+        if len(b) < len(alt_b):
+            print(f"\nKasse: ACHTUNG – die Mappe hat {len(b)} Buchungen, die Datenbasis {len(alt_b)}. "
+                  "Nicht übernommen (alte Kopie?). Bitte prüfen.")
+        elif (anfang, b) != (alt_anfang, alt_b):
+            if os.path.exists(KASSE_PFAD):
+                sichern(KASSE_PFAD)
+            schreibe_kasse(anfang, b)
+            print(f"\nKasse: {len(b)} Buchungen übernommen (vorher {len(alt_b)}).")
+        else:
+            print("\nKasse: unverändert.")
+
     # ---- Design ----
     if "Design" in wb.sheetnames:
         dg = wb["Design"]

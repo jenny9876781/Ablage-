@@ -424,9 +424,23 @@ for i, (h, w) in enumerate(KA_SP, start=1):
     c.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
     c.border = RAHMEN
     ka.column_dimensions[get_column_letter(i)].width = w
+# Einträge kommen aus daten/kasse.csv – die Kasse ist Buchführung und wird nie leer neu angelegt.
+import datetime as _dtk
+from lib import lade_kasse, zahl as _zahl
+_anfang, _buchungen = lade_kasse()
 ka.cell(row=5, column=3, value="Anfangsbestand Kasse")
-ka.cell(row=5, column=8, value=0).number_format = EUR
-for r in range(6, 56):
+ka.cell(row=5, column=8, value=_anfang).number_format = EUR
+for _i, _b in enumerate(_buchungen):
+    _r = 6 + _i
+    try:
+        ka.cell(row=_r, column=1, value=_dtk.date.fromisoformat(_b["Datum"])).number_format = "DD.MM.YYYY"
+    except ValueError:
+        ka.cell(row=_r, column=1, value=_b["Datum"] or None)
+    ka.cell(row=_r, column=2, value=int(_b["Beleg_Nr"]) if _b["Beleg_Nr"].isdigit() else (_b["Beleg_Nr"] or None))
+    ka.cell(row=_r, column=3, value=_b["Vorgang_Kaeufer"] or None)
+    ka.cell(row=_r, column=4, value=_zahl(_b["Einnahme"]))
+    ka.cell(row=_r, column=7, value=_zahl(_b["Ausgabe"]))
+for r in range(6, max(56, 6 + len(_buchungen) + 30)):
     ka.cell(row=r, column=5, value=f'=IF(D{r}="","",D{r}-D{r}/{1+USt_SATZ})').number_format = EUR
     ka.cell(row=r, column=6, value=f'=IF(D{r}="","",D{r}/{1+USt_SATZ})').number_format = EUR
     ka.cell(row=r, column=8, value=f'=H{r-1}+IF(D{r}="",0,D{r})-IF(G{r}="",0,G{r})').number_format = EUR

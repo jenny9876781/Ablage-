@@ -9,7 +9,7 @@ if (!defined('ABSPATH')) { exit; }
  */
 class Kikripp_DB {
 
-    const SCHEMA_VERSION = 6;   // 6: Position mit preis_original und festpreis (1.8.0)
+    const SCHEMA_VERSION = 7;   // 6: Position mit preis_original und festpreis (1.8.0) · 7: Warte auf Rückinfo (1.9.0)
 
     /** 1.6.0: So viele Tage trägt ein Artikel nach dem Import, mit dem er sichtbar wurde, das Schild NEU. */
     const NEU_TAGE = 14;
@@ -62,6 +62,9 @@ class Kikripp_DB {
             mail_versandt TINYINT(1) NOT NULL DEFAULT 0,
             kontakt_weg TINYINT(1) NOT NULL DEFAULT 0,
             testdaten TINYINT(1) NOT NULL DEFAULT 0,
+            warte_seit VARCHAR(19) NOT NULL DEFAULT '',
+            warte_notiz VARCHAR(255) NOT NULL DEFAULT '',
+            warte_bis VARCHAR(10) NOT NULL DEFAULT '',
             PRIMARY KEY (id),
             KEY status (status, ablauf)
         ) ENGINE=InnoDB $coll;");
@@ -105,7 +108,7 @@ class Kikripp_DB {
         $sql = "SELECT p.artnr,
                        SUM(CASE WHEN p.status = 'bezahlt' THEN p.menge ELSE 0 END) AS bezahlt,
                        SUM(CASE WHEN p.status = 'reserviert'
-                                     AND ((v.status = 'offen' AND v.ablauf > %s)
+                                     AND ((v.status = 'offen' AND (v.ablauf > %s OR v.warte_seit <> ''))
                                           OR v.status = 'bestellt')
                                 THEN p.menge ELSE 0 END) AS reserviert
                 FROM $p p INNER JOIN $v v ON v.id = p.vorgang_id
@@ -597,6 +600,35 @@ class Kikripp_DB {
             if ((int) gmdate('N', $t) <= 5) { $gezaehlt++; }
         }
         return gmdate('Y-m-d', $t) . ' 23:59:59';
+    }
+
+    /**
+     * 1.9.0: „Warte auf Rückinfo“ – der Vorgang ruht, bis die Rückmeldung da ist oder die Wiedervorlage
+     * erreicht ist. Eine offene Reservierung läuft solange nicht ab (die Frist steht).
+     */
+    public static function warten_setzen($id, $notiz, $bis = '') {
+        global $wpdb;
+        $v = self::vorgang($id);
+        if (!$v || in_array($v['status'], ['storniert'], true)) { return false; }
+        $bis = preg_match('/^\d{4}-\d{2}-\d{2}$/', (string) $bis) ? $bis : '';
+        return $wpdb->update(self::t_vorgang(), [
+            'warte_seit'  => trim((string) ($v['warte_seit'] ?? '')) !== '' ? $v['warte_seit'] : current_time('mysql'),
+            'warte_notiz' => substr(trim((string) $notiz), 0, 255),
+            'warte_bis'   => $bis,
+        ], ['id' => (int) $id]) !== false;
+    }
+
+    /** Rückinfo ist da: Warten beenden. Bei offener Reservierung wird die Frist um die Wartezeit verlängert. */
+    public static function warten_beenden($id) {
+        global $wpdb;
+        $v = self::vorgang($id);
+        if (!$v || trim((string) ($v['warte_seit'] ?? '')) === '') { return false; }
+        $felder = ['warte_seit' => '', 'warte_notiz' => '', 'warte_bis' => ''];
+        if ($v['status'] === 'offen') {
+            $pause = max(0, strtotime(current_time('mysql')) - strtotime($v['warte_seit']));
+            $felder['ablauf'] = gmdate('Y-m-d H:i:s', strtotime($v['ablauf']) + $pause);
+        }
+        return $wpdb->update(self::t_vorgang(), $felder, ['id' => (int) $id]) !== false;
     }
 
     public static function vorgang_verlaengern($id) {

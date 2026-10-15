@@ -1088,6 +1088,18 @@ ist die Merkliste; erledigte Punkte hier abhaken, nicht löschen.
       Tests: 383 Logik, 91 Browser, 16 mobil, neu `browsertest_geschenke.py` (16, Server mit KIK_TEST_NOVEMBER=1).
       Erwartete Importmeldung: „109 neu, 497 aktualisiert“. Ablauftext „So läuft es ab“ (Option) nennt die
       Geschenke noch nicht – ggf. im November ergänzen.
+- [x] **15.10.2026: Kasse dauerhaft + Plugin 1.9.0.** **Kasse:** eigene Datenbasis `daten/kasse.csv`
+      (`lib.lade_kasse/kasse_aus_mappe/schreibe_kasse`), Excel-Blatt „Kasse“ wird daraus gefüllt,
+      `rueckeinlesen.py` liest es mit zurück, **kürzt aber nie** (weniger Buchungen in der Mappe → Warnung, nichts
+      übernommen). `pruefen.py` vergleicht Mappe und CSV. Vorher wurde das Blatt bei jedem Bau leer erzeugt –
+      die Nutzerin hatte es zum Glück in den geschickten Dateien noch nicht befüllt. Buchungen: 13.10. 4000117
+      Kleinknecht 100 €, 13.10. 4000118 Dura 465 €, 15.10. 4000129 Ranja Fischer 70 €.
+      Excel 15.10.: BA10-03 Beschreibung, NU04-20 Panton Kindergröße, GA01-03 entfällt, **GA01-04 320 € Fix, ok,
+      Im_Katalog nein bis 20.10.** (Erinnerung steht).
+      **Plugin 1.9.0:** Reiter „Warte auf Rückinfo“ – Vorgang-Felder `warte_seit/warte_notiz/warte_bis`
+      (SCHEMA 7). Wartend: keine Aufgaben, eigener Reiter, offene Reservierung hält (belegung zählt sie trotz
+      Ablauf), „Rückinfo da“ verlängert die Frist um die Wartezeit. Wiedervorlage erreicht → Aufgabe „nachfassen“
+      in Zu tun. **Nichts klappt mehr von selbst auf** – offen ist nur der Vorgang aus #vorgang-N nach dem Speichern.
 - [x] **14.10.2026: Weihnachtsdeko NU01-23 bis -52 (Bündel „Weihnachten“), Garten GA01-19 bis -21.** 33 neu (639).
       Deko alle `Preis_geprüft = offen`, Im_Katalog nein (Schätzpreise). GA01-19 Rutsche offen/nein. **GA01-20
       gelbes Spielhaus 150 € und GA01-21 weißes Spielhaus 350 € VHB: Preis vereinbart, sofort sichtbar – die Nutzerin

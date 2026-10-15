@@ -275,7 +275,7 @@
  {
   "nr": "BA10-03",
   "titel": "Sessel mit Bezug, weiß lackiert",
-  "beschr": "Relaxsessel Alcantara, Alu, hellgrauer Bezug, ohne Nackenkissen",
+  "beschr": "Relaxsessel Alcantara, Alu, hellgrauer Bezug, mit Nackenkissen; Sitzteil ausziehbar als Fußauflage;  Lehne verstellbar",
   "kat": "Möbel",
   "raum": "Ruheraum",
   "zustand": "gebraucht",
@@ -4096,8 +4096,8 @@
  },
  {
   "nr": "NU04-20",
-  "titel": "Vitra Panton Chair schwarz, Erwachsenengröße",
-  "beschr": "Panton Chair von Vitra, Entwurf Verner Panton: Freischwinger aus einem Stück Kunststoff, schwarz matt, S-förmig geschwungen. Erwachsenengröße.",
+  "titel": "Vitra Panton Chair schwarz, Kindergröße",
+  "beschr": "Panton Chair von Vitra, Entwurf Verner Panton: Freischwinger aus einem Stück Kunststoff, schwarz matt, S-förmig geschwungen. Kindergröße.",
   "kat": "Möbel",
   "raum": "Schlafraum",
   "zustand": "gebraucht",
@@ -8480,7 +8480,7 @@
   "mengenhinweis": "",
   "foto": "F-536",
   "sortierung": 403,
-  "aktiv": true,
+  "aktiv": false,
   "im_katalog": false
  },
  {
@@ -8493,8 +8493,8 @@
   "masse": "",
   "menge": 1,
   "einheit": "Stück",
-  "preis": 250.0,
-  "basis": "VHB",
+  "preis": 320.0,
+  "basis": "Fix",
   "versand": "nur Abholung",
   "marke": "",
   "buendel": "Außenbereich",

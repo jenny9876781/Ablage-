@@ -1049,5 +1049,36 @@ pruefe('Fehlermeldung steht auch direkt am Vorgang', substr_count($seite, 'Zusat
 pruefe('Katalogpreis neben dem Festpreis', strpos($seite, 'Festpreis)</span>') !== false, true);
 $_GET = []; $GLOBALS['ist_admin'] = false;
 
+titel('48. Warte auf Rückinfo (1.9.0)');
+artikel_anlegen('WR-001', 2, 80.0, 'Schrank');
+$wv = Kikripp_DB::reservieren(kontakt('Warte Kunde'), ['WR-001' => 1]);
+$heute = gmdate('Y-m-d', current_time('timestamp'));
+pruefe('warten setzen', Kikripp_DB::warten_setzen($wv, 'Kunde klärt Transporter', '2099-01-01'), true);
+$g = Kikripp_DB::vorgang($wv);
+pruefe('Reiter „Warte auf Rückinfo“', Kikripp_Ablauf::stand($g, Kikripp_Ablauf::aufgaben([$g]))['reiter'], 'warten');
+pruefe('keine Aufgabe, solange gewartet wird', Kikripp_Ablauf::aufgaben([$g]), []);
+pruefe('Schritt nennt Notiz und Wiedervorlage', Kikripp_Ablauf::stand($g, [])['schritt'], 'wartet auf Rückinfo: Kunde klärt Transporter · Wiedervorlage 01.01.2099');
+// Frist abgelaufen, aber Warten hält die Reservierung
+global $wpdb;
+$wpdb->update(Kikripp_DB::t_vorgang(), ['ablauf' => '2020-01-01 00:00:00'], ['id' => $wv]);
+pruefe('Reservierung hält trotz abgelaufener Frist', katalog_nach('WR-001')['frei'], 1);
+Kikripp_DB::warten_setzen($wv, 'Kunde klärt Transporter', $heute);
+$g = Kikripp_DB::vorgang($wv);
+$a = Kikripp_Ablauf::aufgaben([$g]);
+pruefe('Wiedervorlage fällig → Aufgabe', strpos($a[0]['text'] ?? '', 'Wiedervorlage: noch keine Rückinfo („Kunde klärt Transporter“)') === 0, true);
+pruefe('… und zurück in „Zu tun“', Kikripp_Ablauf::stand($g, $a)['reiter'], 'zu_tun');
+pruefe('warte_seit bleibt beim erneuten Setzen', Kikripp_DB::vorgang($wv)['warte_seit'], $g['warte_seit']);
+$wpdb->update(Kikripp_DB::t_vorgang(), ['warte_seit' => gmdate('Y-m-d H:i:s', time() - 2 * 86400), 'ablauf' => gmdate('Y-m-d H:i:s', time() + 86400)], ['id' => $wv]);
+Kikripp_DB::warten_beenden($wv);
+$g = Kikripp_DB::vorgang($wv);
+pruefe('Rückinfo da: Felder leer', $g['warte_seit'] . $g['warte_notiz'] . $g['warte_bis'], '');
+pruefe('Frist um die Wartezeit verlängert (≈ 3 Tage)', abs(strtotime($g['ablauf']) - (time() + 3 * 86400)) < 120, true);
+$GLOBALS['ist_admin'] = true; $_GET = ['reiter' => 'alle'];
+ob_start(); Kikripp_Admin::seite_reservierungen(); $seite = ob_get_clean();
+pruefe('Reiter „Warte auf Rückinfo“ auf der Seite', strpos($seite, 'Warte auf Rückinfo') !== false, true);
+pruefe('Formular „warte auf Rückinfo“', strpos($seite, 'value="kikripp_warten"') !== false, true);
+pruefe('nichts klappt von selbst auf', preg_match('/<tr id="details-\d+" class="kik-details">/', $seite), 0);
+$_GET = []; $GLOBALS['ist_admin'] = false;
+
 printf("\n== Ergebnis: %d Prüfungen, %d Fehler ==\n", $geprueft, $fehler);
 exit($fehler > 0 ? 1 : 0);

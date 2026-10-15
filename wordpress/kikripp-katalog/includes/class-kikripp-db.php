@@ -9,7 +9,7 @@ if (!defined('ABSPATH')) { exit; }
  */
 class Kikripp_DB {
 
-    const SCHEMA_VERSION = 7;   // 6: Position mit preis_original und festpreis (1.8.0) · 7: Warte auf Rückinfo (1.9.0)
+    const SCHEMA_VERSION = 8;   // 6: Position mit preis_original und festpreis (1.8.0) · 7: Warte auf Rückinfo (1.9.0) · 8: kommissioniert (1.10.0)
 
     /** 1.6.0: So viele Tage trägt ein Artikel nach dem Import, mit dem er sichtbar wurde, das Schild NEU. */
     const NEU_TAGE = 14;
@@ -79,6 +79,7 @@ class Kikripp_DB {
             bezahlt_am DATETIME NULL,
             preis_original DECIMAL(10,2) NULL,
             festpreis DECIMAL(10,2) NULL,
+            kommissioniert VARCHAR(19) NOT NULL DEFAULT '',
             PRIMARY KEY (id),
             KEY vorgang_id (vorgang_id),
             KEY artnr (artnr, status)
@@ -629,6 +630,35 @@ class Kikripp_DB {
             $felder['ablauf'] = gmdate('Y-m-d H:i:s', strtotime($v['ablauf']) + $pause);
         }
         return $wpdb->update(self::t_vorgang(), $felder, ['id' => (int) $id]) !== false;
+    }
+
+    /**
+     * 1.10.0: Kommissionieren – eine Position (oder mit $position_id = 0 alle laufenden Positionen)
+     * als bereitgestellt abhaken bzw. den Haken wieder wegnehmen. Stornierte Positionen werden hier
+     * nicht angefasst; für sie gibt es zurueckgeraeumt().
+     */
+    public static function kommissionieren($vorgang_id, $position_id, $an) {
+        global $wpdb;
+        $v = self::vorgang($vorgang_id);
+        if (!$v || $v['status'] === 'storniert') { return false; }
+        $wert = $an ? current_time('mysql') : '';
+        $sql = 'UPDATE ' . self::t_position() . " SET kommissioniert = %s WHERE vorgang_id = %d AND status <> 'storniert'";
+        $args = [$wert, (int) $vorgang_id];
+        if ((int) $position_id > 0) { $sql .= ' AND id = %d'; $args[] = (int) $position_id; }
+        if ($an) { $sql .= " AND kommissioniert = ''"; }     // erster Haken bleibt mit seiner Zeit stehen
+        return $wpdb->query($wpdb->prepare($sql, $args)) !== false;
+    }
+
+    /** 1.10.0: Ware einer Stornierung ist zurückgeräumt – Haken an allem entfernen, was zurück muss. */
+    public static function zurueckgeraeumt($vorgang_id) {
+        global $wpdb;
+        $v = self::vorgang($vorgang_id);
+        if (!$v) { return 0; }
+        $n = 0;
+        foreach (Kikripp_Ablauf::zurueckraeumen($v) as $p) {
+            $n += (int) $wpdb->update(self::t_position(), ['kommissioniert' => ''], ['id' => (int) $p['id']]);
+        }
+        return $n;
     }
 
     public static function vorgang_verlaengern($id) {

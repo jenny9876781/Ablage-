@@ -81,6 +81,7 @@ class Kikripp_Ablauf {
             $code = strtok((string) $p['artnr'], '-');
             $raum = trim((string) ($d['raum'] ?? ''));
             $out[] = [
+                'id' => (int) ($p['id'] ?? 0), 'kommi' => trim((string) ($p['kommissioniert'] ?? '')) !== '',
                 'artnr' => $p['artnr'], 'menge' => (int) $p['menge'], 'preis' => Kikripp_DB::pos_stueck($p),
                 'betrag' => Kikripp_DB::pos_betrag($p),
                 'titel' => (string) ($d['titel'] ?? ''), 'einheit' => (string) ($d['einheit'] ?? 'Stück'),
@@ -112,6 +113,63 @@ class Kikripp_Ablauf {
     public static function wiedervorlage_faellig($v, $heute) {
         $bis = (string) ($v['warte_bis'] ?? '');
         return self::wartet($v) && $bis !== '' && $bis <= $heute;
+    }
+
+    /**
+     * 1.10.0: Kommissionier-Stand. x von y laufenden Positionen abgehakt; stand = ja | teilweise | nein,
+     * „nein“ nur bei Vorgängen, die noch bereitgestellt werden müssen (sonst leer).
+     */
+    public static function kommi($v, $jetzt = null) {
+        $jetzt = $jetzt ?? current_time('timestamp');
+        $x = 0; $y = 0;
+        foreach ($v['positionen'] as $p) {
+            if ($p['status'] === 'storniert') { continue; }
+            $y++;
+            if (trim((string) ($p['kommissioniert'] ?? '')) !== '') { $x++; }
+        }
+        $laeuft = trim((string) ($v['abgeholt_am'] ?? '')) === '' && (in_array($v['status'], ['bestellt', 'bezahlt'], true)
+            || ($v['status'] === 'offen' && (strtotime($v['ablauf']) >= $jetzt || self::wartet($v))));
+        $stand = $y > 0 && $x === $y ? 'ja' : ($x > 0 ? 'teilweise' : ($laeuft && $y > 0 ? 'nein' : ''));
+        return ['x' => $x, 'y' => $y, 'stand' => $stand];
+    }
+
+    /** Kurztext für die Liste: „📦 kommissioniert“ / „📦 teilweise (2/5)“ / ''. */
+    public static function kommi_text($k) {
+        if ($k['stand'] === 'ja') { return '📦 kommissioniert'; }
+        if ($k['stand'] === 'teilweise') { return '📦 teilweise (' . $k['x'] . '/' . $k['y'] . ')'; }
+        return '';
+    }
+
+    /**
+     * 1.10.0: Positionen, die schon kommissioniert waren und nicht mehr abgeholt werden –
+     * einzeln storniert, Vorgang storniert oder Reservierung abgelaufen. Die Ware muss zurück.
+     */
+    public static function zurueckraeumen($v, $jetzt = null) {
+        $jetzt = $jetzt ?? current_time('timestamp');
+        $alles = $v['status'] === 'storniert'
+            || ($v['status'] === 'offen' && strtotime($v['ablauf']) < $jetzt && !self::wartet($v));
+        return array_values(array_filter($v['positionen'], function ($p) use ($alles) {
+            return trim((string) ($p['kommissioniert'] ?? '')) !== '' && ($alles || $p['status'] === 'storniert');
+        }));
+    }
+
+    /** 1.10.0: Suchtext vereinheitlichen – klein, ä = ae, ß = ss, Leerraum einfach. */
+    public static function norm($t) {
+        $t = function_exists('mb_strtolower') ? mb_strtolower((string) $t, 'UTF-8') : strtolower((string) $t);
+        $t = strtr($t, ['ä' => 'ae', 'ö' => 'oe', 'ü' => 'ue', 'ß' => 'ss', 'é' => 'e', 'è' => 'e']);
+        return trim(preg_replace('/\s+/u', ' ', $t));
+    }
+
+    /** Alles, wonach ein Vorgang gefunden werden kann – schon vereinheitlicht. */
+    public static function such_text($v) {
+        $heu = [$v['name'], $v['firma'] ?? '', $v['email'], $v['telefon'], preg_replace('/\D/', '', (string) $v['telefon']),
+                $v['rechnungsnr'] ?? '', $v['notiz'] ?? '', $v['ort'] ?? '', $v['warte_notiz'] ?? ''];
+        foreach ($v['positionen'] as $p) {
+            $d = json_decode((string) ($p['daten'] ?? ''), true);
+            $heu[] = $p['artnr'];
+            $heu[] = is_array($d) ? (string) ($d['titel'] ?? '') : '';
+        }
+        return self::norm(implode(' | ', array_filter($heu, function ($t) { return trim((string) $t) !== ''; })));
     }
 
     /** In welchen Reiter gehört ein Vorgang? */
@@ -158,6 +216,7 @@ class Kikripp_Ablauf {
         } elseif ($v['status'] === 'storniert' && $kontakt) {
             $knopf = ['kontakt', 'Kontaktdaten löschen'];
         }
+        if (self::zurueckraeumen($v, $jetzt)) { $knopf = ['geraeumt', 'Ware zurückgeräumt']; }   // 1.10.0
         if ($warn) {
             usort($warn, function ($a, $b) { return $a['rang'] <=> $b['rang']; });
             return ['reiter' => 'zu_tun', 'farbe' => $warn[0]['rang'] <= 1 ? 'rot' : 'blau',
@@ -190,15 +249,21 @@ class Kikripp_Ablauf {
         return ['reiter' => 'zu_tun', 'farbe' => 'blau', 'schritt' => 'beim Interessenten melden', 'rang' => 3, 'knopf' => $knopf];
     }
 
-    /** Passt ein Vorgang zum Suchbegriff? Name, Firma, Mail, Telefon, Rechnungsnr., Artikelnummer, #Nummer. */
+    /**
+     * Passt ein Vorgang zum Suchbegriff? Name, Firma, Mail, Telefon, Rechnungsnr., Notiz, Artikelnummer,
+     * Artikelbezeichnung (1.10.0), #Nummer. Groß/klein egal, Müller = Mueller. Mehrere Wörter: alle müssen passen.
+     * Dieselbe Regel steht als JavaScript in der Liste (kikSuche) – beide gleich halten.
+     */
     public static function passt($v, $suche) {
-        $klein = function ($t) { return function_exists('mb_strtolower') ? mb_strtolower($t) : strtolower($t); };
-        $suche = $klein(trim((string) $suche));
+        $suche = self::norm($suche);
         if ($suche === '') { return true; }
-        if (preg_match('/^#?(\d+)$/', $suche, $m) && (int) $m[1] === (int) $v['id']) { return true; }
-        $heu = [$v['name'], $v['firma'] ?? '', $v['email'], $v['telefon'], $v['rechnungsnr'] ?? '', $v['notiz'] ?? '', $v['ort'] ?? ''];
-        foreach ($v['positionen'] as $p) { $heu[] = $p['artnr']; }
-        return strpos($klein(implode(' | ', $heu)), $suche) !== false;
+        if (preg_match('/^#(\d+)$/', $suche, $m)) { return (int) $m[1] === (int) $v['id']; }
+        if (preg_match('/^\d+$/', $suche) && (int) $suche === (int) $v['id']) { return true; }
+        $heu = self::such_text($v);
+        foreach (explode(' ', $suche) as $wort) {
+            if (strpos($heu, $wort) === false) { return false; }
+        }
+        return true;
     }
 
     // ------------------------------------------------------------ C: Zu erledigen
@@ -221,6 +286,22 @@ class Kikripp_Ablauf {
             $tag = substr((string) ($v['abholung'] ?? ''), 0, 10);
             $abgeholt = trim((string) ($v['abgeholt_am'] ?? '')) !== '';
             $kontakt = (int) ($v['kontakt_weg'] ?? 0) === 0 && trim((string) $v['name']) !== '';
+            $raeumen = self::zurueckraeumen($v, $jetzt);       // 1.10.0
+            if ($raeumen) {
+                $neu($v, 'Storniert, war schon kommissioniert – Ware zurückräumen: '
+                    . implode(', ', array_map(function ($p) { return $p['artnr']; }, $raeumen)) . '.', 'warn', 2);
+            }
+            // 1.10.0: Abholung heute/nächster Werktag, aber noch nicht (ganz) kommissioniert?
+            $k = self::kommi($v, $jetzt);
+            $bereit = function ($v, $wort) use ($k, $tag, $heute, $neu) {
+                $wann = 'Abholung ' . ($tag === $heute ? 'heute' : self::termin_text($v['abholung'], true));
+                if ($k['stand'] === 'ja') {
+                    $neu($v, $wann . ' – kommissioniert, steht bereit.', 'info', 6);
+                } else {
+                    $neu($v, $wann . ' – ' . ($k['stand'] === 'teilweise' ? 'erst ' . $k['x'] . ' von ' . $k['y'] . ' Positionen' : 'noch nicht')
+                        . ' kommissioniert → ' . $wort . ' bereitstellen.', 'warn', 1);
+                }
+            };
             if (self::wartet($v)) {                     // 1.9.0: ruht bis zur Rückinfo oder Wiedervorlage
                 if (self::wiedervorlage_faellig($v, $heute)) {
                     $notiz = trim((string) ($v['warte_notiz'] ?? ''));
@@ -248,8 +329,7 @@ class Kikripp_Ablauf {
                         } elseif ($tag < $heute) {
                             $neu($v, 'Abholtermin war am ' . self::datum_text($tag) . ' – abgeholt? Bitte vermerken.', 'warn', 1);
                         } elseif ($tag <= $morgen) {
-                            $neu($v, 'Abholung ' . ($tag === $heute ? 'heute' : self::termin_text($v['abholung'], true))
-                                . ' – Geschenk bereitstellen.', 'info', 6);
+                            $bereit($v, 'Geschenk');
                         }
                         break;
                     }
@@ -263,6 +343,7 @@ class Kikripp_Ablauf {
                         $neu($v, 'Seit ' . self::tage_zwischen($v['rechnung_am'], $heute) . ' Tagen unbezahlt – Zahlungserinnerung schicken.', 'warn', 4);
                     }
                     if ($tag === '') { $neu($v, 'Abholtermin eintragen.', 'warn', 2); }
+                    elseif ($tag >= $heute && $tag <= $morgen) { $bereit($v, 'Ware'); }
                     break;
                 case 'bezahlt':
                     if ($abgeholt) {
@@ -273,8 +354,7 @@ class Kikripp_Ablauf {
                     } elseif ($tag === '') {
                         $neu($v, 'Bezahlt, aber noch kein Abholtermin eingetragen.', 'warn', 2);
                     } elseif ($tag <= $morgen) {
-                        $neu($v, 'Abholung ' . ($tag === $heute ? 'heute' : self::termin_text($v['abholung'], true))
-                            . ' – Ware bereitstellen.', 'info', 6);
+                        $bereit($v, 'Ware');
                     }
                     break;
                 case 'storniert':
@@ -523,6 +603,31 @@ class Kikripp_Ablauf {
 
     // ------------------------------------------------------------ A: Abholplan
 
+    // ------------------------------------------------------------ 1.10.0: Kommissionieren
+
+    const KOMMI_FILTER = ['' => 'alle', 'ja' => 'ja', 'teilweise' => 'teilweise', 'nein' => 'noch nicht'];
+
+    /** Häkchen „kommissioniert“ für eine Position ($pid) oder für alle Positionen ($pid = 0). */
+    public static function kommi_feld($v, $pid, $an, $text = '') {
+        $id = (int) $v['id'];
+        return '<label style="white-space:nowrap" title="kommissioniert (bereitgestellt)"><input type="checkbox" class="kik-kommi-' . $id
+            . '" data-pid="' . (int) $pid . '" data-url="' . esc_attr(Kikripp_Admin::aktion_url('kommi', $id)) . '"'
+            . ($an ? ' checked' : '') . ' onchange="kikKommi(this,' . $id . ')">' . ($text !== '' ? ' ' . esc_html($text) : '') . '</label>';
+    }
+
+    /** Speichert ein Häkchen sofort im Hintergrund und aktualisiert die Anzeige ohne neu zu laden. */
+    public static function kommi_js() {
+        return '<script>function kikKommi(el,id){var pid=el.getAttribute("data-pid"),an=el.checked?1:0;el.disabled=true;'
+            . 'fetch(el.getAttribute("data-url")+"&pid="+pid+"&an="+an+"&ajax=1",{credentials:"same-origin"})'
+            . '.then(function(r){return r.json();}).then(function(d){if(!d||!d.ok)throw 0;'
+            . 'document.querySelectorAll(".kik-kommi-"+id).forEach(function(c){var p=c.getAttribute("data-pid");'
+            . 'if(p==="0"){c.checked=d.stand==="ja";}else if(pid==="0"){c.checked=!!an;}});'
+            . 'var b=document.getElementById("kommi-badge-"+id);if(b)b.textContent=d.text;'
+            . 'var z=document.getElementById("vorgang-"+id);if(z){z.setAttribute("data-kommi",d.stand);}'
+            . '}).catch(function(){el.checked=!an;alert("Das Häkchen konnte nicht gespeichert werden. Bitte die Seite neu laden.");})'
+            . '.finally(function(){el.disabled=false;});}</script>';
+    }
+
     /** Anstehende Abholungen: bestellt oder bezahlt, Termin gesetzt, noch nicht abgeholt. */
     public static function anstehend(array $vorgaenge) {
         $liste = array_filter($vorgaenge, function ($v) {
@@ -545,14 +650,16 @@ class Kikripp_Ablauf {
             . 'Rechnung ' . (trim((string) $v['rechnungsnr']) !== '' ? esc_html($v['rechnungsnr']) : '<em>fehlt</em>')
             . (!empty($v['demontage']) ? ' · <strong>Demontage</strong>' : '') . '</div>'
             . '<div style="font-weight:600;color:' . ($bezahlt ? '#00a32a' : '#d63638') . '">'
-            . ($bezahlt ? '✓ bezahlt' : '✗ NOCH NICHT BEZAHLT') . '</div></div>';
+            . ($bezahlt ? '✓ bezahlt' : '✗ NOCH NICHT BEZAHLT')
+            . '<br><span id="kommi-badge-' . (int) $v['id'] . '" style="color:#50575e;font-weight:400">' . esc_html(self::kommi_text(self::kommi($v))) . '</span></div></div>';
         if (trim((string) ($v['notiz'] ?? '')) !== '') {
             $h .= '<div style="margin:6px 0;padding:4px 8px;background:#fcf9e8">Notiz: ' . esc_html($v['notiz']) . '</div>';
         }
         $h .= '<table style="width:100%;border-collapse:collapse;margin-top:6px;font-size:13px">'
-            . '<tr style="text-align:left;color:#555"><th style="width:28px">☐</th><th>Menge</th><th>Art.-Nr.</th><th>Bezeichnung</th><th>Raum (Post-it)</th></tr>';
+            . '<tr style="text-align:left;color:#555"><th style="width:28px" title="kommissioniert">📦</th><th>Menge</th><th>Art.-Nr.</th><th>Bezeichnung</th><th>Raum (Post-it)</th></tr>';
         foreach (self::positionen($v) as $p) {
-            $h .= '<tr style="border-top:1px solid #eee"><td style="font-size:16px">☐</td><td>' . $p['menge'] . ' ' . esc_html($p['einheit'])
+            $haken = $druck ? ($p['kommi'] ? '☑' : '☐') : self::kommi_feld($v, $p['id'], $p['kommi']);
+            $h .= '<tr style="border-top:1px solid #eee"><td style="font-size:16px">' . $haken . '</td><td>' . $p['menge'] . ' ' . esc_html($p['einheit'])
                 . '</td><td><strong>' . esc_html($p['artnr']) . '</strong></td><td>' . esc_html($p['titel'])
                 . '</td><td>' . esc_html($p['raum']) . '</td></tr>';
         }
@@ -571,12 +678,25 @@ class Kikripp_Ablauf {
         if (!current_user_can('manage_options')) { return; }
         $alle = Kikripp_DB::vorgaenge();
         $heute = self::heute();
+        $filter = sanitize_key($_GET['kommi'] ?? '');
+        if (!isset(self::KOMMI_FILTER[$filter])) { $filter = ''; }
         $nach_tag = [];
-        foreach (self::anstehend($alle) as $v) { $nach_tag[substr($v['abholung'], 0, 10)][] = $v; }
+        foreach (self::anstehend($alle) as $v) {
+            if ($filter !== '' && self::kommi($v)['stand'] !== $filter) { continue; }
+            $nach_tag[substr($v['abholung'], 0, 10)][] = $v;
+        }
         echo '<div class="wrap"><h1>Abholplan</h1>';
         echo '<p style="color:#555;max-width:900px">Alle bestellten und bezahlten Vorgänge mit Abholtermin, die noch nicht abgeholt sind. '
-           . 'Rot = noch nicht bezahlt. Vor dem Abholtag „Tag drucken“ – das ist die Liste zum Bereitstellen.</p>';
-        if (!$nach_tag) { echo '<p>Keine Abholungen geplant.</p>'; }
+           . 'Rot = noch nicht bezahlt. Vor dem Abholtag „Tag drucken“ – das ist die Liste zum Bereitstellen. '
+           . 'Häkchen 📦 = Position ist kommissioniert (bereitgestellt).</p>';
+        echo '<p>Kommissioniert: ';
+        foreach (self::KOMMI_FILTER as $schluessel => $name) {
+            $url = admin_url('admin.php?page=kikripp-abholplan' . ($schluessel !== '' ? '&kommi=' . $schluessel : ''));
+            echo $schluessel === $filter ? '<strong>' . esc_html($name) . '</strong>' : '<a href="' . esc_url($url) . '">' . esc_html($name) . '</a>';
+            echo $schluessel !== 'nein' ? ' · ' : '';
+        }
+        echo '</p>';
+        if (!$nach_tag) { echo '<p>' . ($filter !== '' ? 'Keine Abholungen mit diesem Filter.' : 'Keine Abholungen geplant.') . '</p>'; }
         foreach ($nach_tag as $tag => $liste) {
             $t = strtotime($tag . ' 12:00:00 UTC');
             $titel = self::WOCHENTAGE[(int) gmdate('N', $t)] . ', ' . self::datum_text($tag);
@@ -588,6 +708,7 @@ class Kikripp_Ablauf {
                . esc_url($druck) . '">🖨 Tag drucken</a></h2>';
             foreach ($liste as $v) { echo self::karte($v); }
         }
+        echo self::kommi_js();
         $ohne = array_filter($alle, function ($v) {
             return in_array($v['status'], ['bestellt', 'bezahlt'], true) && trim((string) ($v['abholung'] ?? '')) === ''
                 && trim((string) ($v['abgeholt_am'] ?? '')) === '';

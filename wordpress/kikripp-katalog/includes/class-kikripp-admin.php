@@ -137,12 +137,18 @@ class Kikripp_Admin {
             $zahl[$stand[$v['id']]['reiter']]++; $zahl['alle']++;
         }
 
-        // Suche
+        // Suche (1.10.0: filtert beim Tippen, auch nach Bezeichnung, Müller = Mueller) und Filter „kommissioniert“
         $suche = sanitize_text_field(wp_unslash($_GET['suche'] ?? ''));
-        echo '<form method="get" style="float:right;margin:8px 0"><input type="hidden" name="page" value="kikripp-reservierungen">'
-           . '<input type="search" name="suche" value="' . esc_attr($suche) . '" placeholder="Name, Firma, Rechnungsnr., Artikelnr. …" style="width:280px"> '
-           . '<button class="button">Suchen</button>'
-           . ($suche !== '' ? ' <a href="' . esc_url(admin_url('admin.php?page=kikripp-reservierungen')) . '">zurücksetzen</a>' : '')
+        $filter = sanitize_key($_GET['kommi'] ?? '');
+        if (!isset(Kikripp_Ablauf::KOMMI_FILTER[$filter])) { $filter = ''; }
+        $optionen = '';
+        foreach (Kikripp_Ablauf::KOMMI_FILTER as $schluessel => $name) {
+            $optionen .= '<option value="' . esc_attr($schluessel) . '"' . ($filter === $schluessel ? ' selected' : '') . '>' . esc_html($name) . '</option>';
+        }
+        echo '<form method="get" style="float:right;margin:8px 0" onsubmit="kikFilter();return false"><input type="hidden" name="page" value="kikripp-reservierungen">'
+           . '<input type="search" id="kik-suche" name="suche" value="' . esc_attr($suche) . '" placeholder="Name, Artikel, Rechnungsnr., Telefon …" style="width:280px" oninput="kikFilter()" autocomplete="off"> '
+           . '<label style="margin-left:6px">📦 Kommissioniert: <select id="kik-kommi" name="kommi" onchange="kikFilter()">' . $optionen . '</select></label> '
+           . '<a href="#" id="kik-zurueck" onclick="kikZuruecksetzen();return false"' . ($suche === '' && $filter === '' ? ' style="display:none"' : '') . '>zurücksetzen</a>'
            . '</form>';
 
         // Zu erledigen – auf dieser Seite zugeklappt, der Reiter „Zu tun“ zeigt dasselbe
@@ -154,26 +160,23 @@ class Kikripp_Admin {
 
         $reiter = sanitize_key($_GET['reiter'] ?? 'zu_tun');
         if (!isset(self::REITER[$reiter])) { $reiter = 'zu_tun'; }
-        echo '<nav class="nav-tab-wrapper" style="clear:both;margin-bottom:10px">';
+        echo '<nav class="nav-tab-wrapper" id="kik-reiter" style="clear:both;margin-bottom:10px">';
         foreach (self::REITER as $schluessel => $name) {
             $aktiv = $suche === '' && $schluessel === $reiter;
-            echo '<a class="nav-tab' . ($aktiv ? ' nav-tab-active' : '') . '" href="'
-               . esc_url(admin_url('admin.php?page=kikripp-reservierungen&reiter=' . $schluessel)) . '">'
+            echo '<a class="nav-tab' . ($aktiv ? ' nav-tab-active' : '') . '" data-reiter="' . esc_attr($schluessel) . '" href="'
+               . esc_url(admin_url('admin.php?page=kikripp-reservierungen&reiter=' . $schluessel . ($filter !== '' ? '&kommi=' . $filter : ''))) . '">'
                . esc_html($name) . ' <span style="color:' . ($schluessel === 'zu_tun' && $zahl[$schluessel] ? '#2271b1;font-weight:600' : '#646970') . '">('
                . $zahl[$schluessel] . ')</span></a>';
         }
         echo '</nav>';
 
-        if ($suche !== '') {
-            $sichtbar = array_filter($vorgaenge, function ($v) use ($suche) { return Kikripp_Ablauf::passt($v, $suche); });
-            echo '<p>Suchergebnis für „' . esc_html($suche) . '“ in allen Reitern: ' . count($sichtbar) . ' Vorgang/Vorgänge.</p>';
-        } else {
-            $sichtbar = array_filter($vorgaenge, function ($v) use ($reiter, $stand) {
-                return $reiter === 'alle' || $stand[$v['id']]['reiter'] === $reiter;
-            });
-        }
+        // Alle Vorgänge stehen auf der Seite – zuerst die des Reiters in seiner Reihenfolge, dahinter (versteckt)
+        // die übrigen, damit die Suche beim Tippen über alle Reiter findet, ohne neu zu laden.
+        $im_reiter = function ($v) use ($reiter, $stand) { return $reiter === 'alle' || $stand[$v['id']]['reiter'] === $reiter; };
+        $vorne = array_values(array_filter($vorgaenge, $im_reiter));
+        $hinten = array_values(array_filter($vorgaenge, function ($v) use ($im_reiter) { return !$im_reiter($v); }));
         // Reihenfolge: Zu tun nach Dringlichkeit, Warten nach Abholtermin, Abgeschlossen neueste zuerst
-        usort($sichtbar, function ($a, $b) use ($stand, $reiter) {
+        usort($vorne, function ($a, $b) use ($stand, $reiter) {
             $sa = $stand[$a['id']]; $sb = $stand[$b['id']];
             if (in_array($reiter, ['zahlung', 'abholung'], true)) {
                 $ta = ($a['abholung'] ?? '') ?: '9999'; $tb = ($b['abholung'] ?? '') ?: '9999';
@@ -183,37 +186,81 @@ class Kikripp_Admin {
             if ($reiter === 'zu_tun') { return [$sa['rang'], $a['id']] <=> [$sb['rang'], $b['id']]; }
             return $b['id'] <=> $a['id'];
         });
+        usort($hinten, function ($a, $b) { return $b['id'] <=> $a['id']; });
 
         echo '<p style="margin:4px 0 8px"><a href="' . esc_url(admin_url('admin.php?page=kikripp-abholplan')) . '" class="button">Abholplan</a> '
            . '<a href="' . esc_url(admin_url('admin.php?page=kikripp-auswertung')) . '" class="button">Auswertung</a> '
            . '<a href="' . esc_url(wp_nonce_url(admin_url('admin-post.php?action=kikripp_export'), 'kikripp_export')) . '" class="button">Alle Reservierungen als CSV exportieren</a></p>';
 
-        if (empty($sichtbar)) {
-            echo '<p>' . (empty($vorgaenge) ? 'Es liegen noch keine Reservierungen vor.'
-                : ($reiter === 'zu_tun' && $suche === '' ? 'Nichts zu tun. 👍' : 'Hier ist nichts.')) . '</p></div>';
+        if (empty($vorgaenge)) {
+            echo '<p>Es liegen noch keine Reservierungen vor.</p></div>';
             return;
         }
 
+        // Was ist beim ersten Anzeigen sichtbar? Dieselbe Regel wie kikFilter() im Browser.
+        $zeigen = function ($v) use ($im_reiter, $suche, $filter) {
+            if ($filter !== '' && Kikripp_Ablauf::kommi($v)['stand'] !== $filter) { return false; }
+            return $suche !== '' ? Kikripp_Ablauf::passt($v, $suche) : $im_reiter($v);
+        };
+        $treffer = count(array_filter($vorgaenge, $zeigen));
+        echo '<p id="kik-treffer"' . ($suche === '' ? ' style="display:none"' : '') . '>'
+           . ($suche !== '' ? 'Suchergebnis für „' . esc_html($suche) . '“ in allen Reitern: ' . $treffer . ' Vorgang/Vorgänge.' : '') . '</p>';
+        echo '<p id="kik-leer"' . ($treffer ? ' style="display:none"' : '') . '>'
+           . ($reiter === 'zu_tun' && $suche === '' && $filter === '' ? 'Nichts zu tun. 👍' : 'Hier ist nichts.') . '</p>';
+
         echo '<style>.kik-tab td{vertical-align:middle}.kik-tab tr.kik-zeile td{border-top:1px solid #dcdcde}'
            . '.kik-tab .kik-details td{background:#f6f7f7;border-top:0}.kik-tab .kik-auf{white-space:nowrap}'
-           . '.kik-tab td.kik-balken{width:4px;padding:0}</style>';
-        echo '<table class="widefat kik-tab"><thead><tr><th class="kik-balken"></th><th>Nr.</th><th>Käufer</th><th>Artikel</th><th>Summe</th>'
+           . '.kik-tab td.kik-balken{width:4px;padding:0}.kik-tab .kik-such{display:none;font-size:11px;color:#646970}'
+           . '.kik-tab.kik-suchmodus .kik-such{display:block}.kik-kommi-badge{font-size:11px;color:#50575e}</style>';
+        echo '<table class="widefat kik-tab' . ($suche !== '' ? ' kik-suchmodus' : '') . '" id="kik-tabelle"' . ($treffer ? '' : ' style="display:none"')
+           . '><thead><tr><th class="kik-balken"></th><th>Nr.</th><th>Käufer</th><th>Artikel</th><th>Summe</th>'
            . '<th>Abholung</th><th>Rechnung</th><th>Nächster Schritt</th><th style="text-align:right">Aktion</th></tr></thead><tbody>';
-        foreach ($sichtbar as $v) { echo self::zeile_html($v, $stand[$v['id']], $jetzt); }
+        foreach (array_merge($vorne, $hinten) as $v) {
+            echo self::zeile_html($v, $stand[$v['id']], $jetzt, $im_reiter($v), $zeigen($v));
+        }
         echo '</tbody></table>';
+        echo Kikripp_Ablauf::kommi_js();
         echo '<script>'
            . 'function kikAuf(id,zeigen){var d=document.getElementById("details-"+id),l=document.getElementById("auf-"+id);if(!d)return;'
            . 'var an=zeigen===undefined?d.hidden:zeigen;d.hidden=!an;if(l)l.textContent=an?"zuklappen ▴":"bearbeiten ▾";}'
            . 'function kikKopieren(id){var t=document.getElementById(id);if(!t)return;'
            . 'if(navigator.clipboard){navigator.clipboard.writeText(t.value);}else{t.style.display="block";t.select();document.execCommand("copy");t.style.display="none";}'
            . 'var m=document.getElementById(id+"-ok");if(m){m.style.display="inline";setTimeout(function(){m.style.display="none";},2000);}}'
-           . 'var h=location.hash.match(/^#vorgang-(\d+)$/);if(h){kikAuf(h[1],true);}'
+           . 'var h=location.hash.match(/^#vorgang-(\d+)$/);if(h){var z=document.getElementById("vorgang-"+h[1]);'
+           . 'if(z&&z.style.display==="none"){z.style.display="";document.getElementById("kik-tabelle").style.display="";'
+           . 'document.getElementById("kik-leer").style.display="none";var d=document.getElementById("details-"+h[1]);if(d)d.style.display="";'
+           . 'if(z.scrollIntoView)z.scrollIntoView();}kikAuf(h[1],true);}'
+           // 1.10.0: Live-Suche und Filter „kommissioniert“ – dieselbe Regel wie Kikripp_Ablauf::passt()
+           . 'function kikNorm(t){return (t||"").toLowerCase().replace(/ä/g,"ae").replace(/ö/g,"oe").replace(/ü/g,"ue").replace(/ß/g,"ss")'
+           . '.replace(/[éè]/g,"e").replace(/\\s+/g," ").trim();}'
+           . 'function kikPasst(z,q){if(q==="")return true;var id=z.getAttribute("data-id"),m=q.match(/^#(\\d+)$/);if(m)return m[1]===id;'
+           . 'if(/^\\d+$/.test(q)&&String(parseInt(q,10))===id)return true;var heu=z.getAttribute("data-such");'
+           . 'return q.split(" ").every(function(w){return heu.indexOf(w)>=0;});}'
+           . 'function kikFilter(){var q=kikNorm(document.getElementById("kik-suche").value),k=document.getElementById("kik-kommi").value,n=0;'
+           . 'document.querySelectorAll("#kik-tabelle tr.kik-zeile").forEach(function(z){'
+           . 'var an=(k===""||z.getAttribute("data-kommi")===k)&&(q!==""?kikPasst(z,q):z.getAttribute("data-im-reiter")==="1");'
+           . 'z.style.display=an?"":"none";var d=document.getElementById("details-"+z.getAttribute("data-id"));if(d)d.style.display=an?"":"none";if(an)n++;});'
+           . 'document.getElementById("kik-tabelle").style.display=n?"":"none";document.getElementById("kik-tabelle").classList.toggle("kik-suchmodus",q!=="");'
+           . 'var t=document.getElementById("kik-treffer");t.style.display=q!==""?"":"none";'
+           . 't.textContent=q!==""?"Suchergebnis in allen Reitern: "+n+" Vorgang/Vorgänge.":"";'
+           . 'var l=document.getElementById("kik-leer");l.style.display=n?"none":"";l.textContent="Hier ist nichts.";'
+           . 'document.getElementById("kik-zurueck").style.display=(q!==""||k!=="")?"":"none";'
+           . 'document.querySelectorAll("#kik-reiter .nav-tab").forEach(function(a){'
+           . 'a.classList.toggle("nav-tab-active",q===""&&a.getAttribute("data-reiter")===' . wp_json_encode($reiter) . ');'
+           . 'var u=new URL(a.href);if(k)u.searchParams.set("kommi",k);else u.searchParams.delete("kommi");a.href=u.toString();});'
+           . 'try{var u=new URL(location.href);if(q)u.searchParams.set("suche",document.getElementById("kik-suche").value);else u.searchParams.delete("suche");'
+           . 'if(k)u.searchParams.set("kommi",k);else u.searchParams.delete("kommi");'
+           . 'u.searchParams.delete("kikripp_meldung");u.searchParams.delete("kikripp_fehler");u.searchParams.delete("kikripp_vorgang");'
+           . 'history.replaceState(null,"",u.toString());}catch(e){}}'
+           . 'function kikZuruecksetzen(){document.getElementById("kik-suche").value="";document.getElementById("kik-kommi").value="";kikFilter();'
+           . 'document.getElementById("kik-suche").focus();}'
+           . 'document.addEventListener("keydown",function(e){if(e.key==="Escape"&&document.activeElement&&document.activeElement.id==="kik-suche"){kikZuruecksetzen();}});'
            . '</script>';
         echo '</div>';
     }
 
     /** Eine kompakte Zeile plus aufklappbare Details. */
-    private static function zeile_html($v, $st, $jetzt) {
+    private static function zeile_html($v, $st, $jetzt, $im_reiter = true, $zeigen = true) {
         $id = (int) $v['id'];
         $farbe = Kikripp_Ablauf::FARBE[$st['farbe']];
         $blass = $st['farbe'] === 'hell';
@@ -229,6 +276,8 @@ class Kikripp_Admin {
             : (trim((string) ($v['abholwunsch'] ?? '')) !== '' ? '<span style="color:#8c8f94">Wunsch: ' . esc_html(Kikripp_Mail::abholung_text($v)) . '</span>' : '—');
         // 1.9.0: nichts klappt von selbst auf – offen ist nur der Vorgang, an dem gerade gearbeitet wurde (#vorgang-N)
         $offen = false;
+        $kommi = Kikripp_Ablauf::kommi($v, $jetzt);       // 1.10.0
+        $versteckt = $zeigen ? '' : 'display:none;';
 
         $knopf = '';
         if ($st['knopf']) {
@@ -245,11 +294,16 @@ class Kikripp_Admin {
             }
         }
 
-        $h = '<tr id="vorgang-' . $id . '" class="kik-zeile"' . ($blass ? ' style="color:#8c8f94"' : '') . '>'
+        $stil = $versteckt . ($blass ? 'color:#8c8f94' : '');
+        $h = '<tr id="vorgang-' . $id . '" class="kik-zeile" data-id="' . $id . '" data-im-reiter="' . ($im_reiter ? '1' : '0') . '"'
+           . ' data-kommi="' . esc_attr($kommi['stand']) . '" data-such="' . esc_attr(Kikripp_Ablauf::such_text($v)) . '"'
+           . ($stil !== '' ? ' style="' . $stil . '"' : '') . '>'
            . '<td class="kik-balken" style="background:' . $farbe . '"></td>'
-           . '<td><strong>#' . $id . '</strong>' . (!empty($v['testdaten']) ? '<br><em style="font-size:11px">Test</em>' : '') . '</td>'
-           . '<td>' . $wer . '</td>'
-           . '<td title="' . esc_attr($titel) . '">' . count($pos) . ' Pos. · ' . $stueck . ' Stück</td>'
+           . '<td><strong>#' . $id . '</strong>' . (!empty($v['testdaten']) ? '<br><em style="font-size:11px">Test</em>' : '')
+           . '<span class="kik-such">' . esc_html(self::REITER[$st['reiter']] ?? '') . '</span></td>'
+           . '<td>' . $wer . (trim((string) $v['telefon']) !== '' ? '<span class="kik-such">☎ ' . esc_html($v['telefon']) . '</span>' : '') . '</td>'
+           . '<td title="' . esc_attr($titel) . '">' . count($pos) . ' Pos. · ' . $stueck . ' Stück'
+           . '<br><span class="kik-kommi-badge" id="kommi-badge-' . $id . '">' . esc_html(Kikripp_Ablauf::kommi_text($kommi)) . '</span></td>'
            . '<td style="white-space:nowrap">' . esc_html(Kikripp_Mail::eur(Kikripp_Ablauf::summe($v))) . '</td>'
            . '<td>' . $abholung . (!empty($v['demontage']) ? '<br><span style="font-size:11px">Demontage</span>' : '') . '</td>'
            . '<td>' . (trim((string) ($v['rechnungsnr'] ?? '')) !== '' ? esc_html($v['rechnungsnr']) : '—') . '</td>'
@@ -275,11 +329,22 @@ class Kikripp_Admin {
             . ($v['status'] === 'offen' ? ' · reserviert bis ' . esc_html(mysql2date('d.m.Y', $v['ablauf'])) : '') . '</div></div>';
         $d .= '<div style="min-width:240px">';
         $offen_oder_bestellt = in_array($v['status'], ['offen', 'bestellt'], true);
+        // 1.10.0: Häkchen „kommissioniert“, solange die Ware noch abgeholt wird
+        $kommi_moeglich = $v['status'] !== 'storniert' && trim((string) ($v['abgeholt_am'] ?? '')) === '';
+        if ($kommi_moeglich && count(Kikripp_Ablauf::positionen($v)) > 1) {
+            $d .= '<div style="font-size:12px;margin-bottom:2px">' . Kikripp_Ablauf::kommi_feld($v, 0, $kommi['stand'] === 'ja', 'alle kommissioniert') . '</div>';
+        }
         foreach ($v['positionen'] as $p) {
             $daten = json_decode((string) ($p['daten'] ?? ''), true);
             $t = esc_html((int) $p['menge'] . ' × ' . $p['artnr'] . ' ' . (is_array($daten) ? ($daten['titel'] ?? '') : ''))
                . ' · ' . esc_html(Kikripp_Mail::eur(Kikripp_DB::pos_betrag($p)));
-            if ($p['status'] === 'storniert') { $d .= '<s style="color:#8c8f94">' . $t . '</s><br>'; continue; }
+            $haken = trim((string) ($p['kommissioniert'] ?? '')) !== '';
+            if ($p['status'] === 'storniert') {
+                $d .= '<s style="color:#8c8f94">' . $t . '</s>'
+                    . ($haken ? ' <span style="color:#d63638;font-size:11px">📦 war kommissioniert – zurückräumen</span>' : '') . '<br>';
+                continue;
+            }
+            if ($kommi_moeglich) { $d .= Kikripp_Ablauf::kommi_feld($v, (int) $p['id'], $haken) . ' '; }
             $d .= $t;
             if (($p['preis_original'] ?? null) !== null && $p['preis_original'] !== '') {
                 $d .= ' <span style="font-size:11px;color:#646970">(Katalog <s>' . esc_html(Kikripp_Mail::eur((float) $p['preis_original'] * (int) $p['menge'])) . '</s>'
@@ -328,7 +393,7 @@ class Kikripp_Admin {
         }
         if ($v['status'] !== 'storniert') { $d .= self::bearbeiten_html($v); }
 
-        $h .= '<tr id="details-' . $id . '" class="kik-details"' . ($offen ? '' : ' hidden') . '><td class="kik-balken" style="background:' . $farbe
+        $h .= '<tr id="details-' . $id . '" class="kik-details"' . ($offen ? '' : ' hidden') . ($versteckt !== '' ? ' style="' . $versteckt . '"' : '') . '><td class="kik-balken" style="background:' . $farbe
             . '"></td><td colspan="8">' . $d . '</td></tr>';
         return $h;
     }
@@ -527,6 +592,17 @@ class Kikripp_Admin {
             case 'rueckinfo':
                 Kikripp_DB::warten_beenden($id);
                 self::zurueck('kikripp-reservierungen', sprintf('Rückinfo zu Vorgang #%d ist da – er steht wieder im normalen Ablauf.', $id), false, 'vorgang-' . $id, 'alle');
+            case 'kommi':                                  // 1.10.0: Häkchen kommissioniert (im Hintergrund)
+                Kikripp_DB::kommissionieren($id, (int) ($_GET['pid'] ?? 0), !empty($_GET['an']));
+                $v = Kikripp_DB::vorgang($id);
+                $k = $v ? Kikripp_Ablauf::kommi($v) : ['stand' => '', 'x' => 0, 'y' => 0];
+                if (!empty($_GET['ajax'])) {
+                    wp_send_json(['ok' => (bool) $v, 'stand' => $k['stand'], 'x' => $k['x'], 'y' => $k['y'], 'text' => Kikripp_Ablauf::kommi_text($k)]);
+                }
+                self::zurueck('kikripp-reservierungen', sprintf('Vorgang #%d: %d von %d Positionen kommissioniert.', $id, $k['x'], $k['y']), false, 'vorgang-' . $id);
+            case 'geraeumt':
+                $n = Kikripp_DB::zurueckgeraeumt($id);
+                self::zurueck('kikripp-reservierungen', sprintf('Vorgang #%d: Ware zurückgeräumt (%d Position(en)).', $id, $n), false, 'vorgang-' . $id);
             case 'nicht_abgeholt':
                 Kikripp_DB::abgeholt_setzen($id, '');
                 self::zurueck('kikripp-reservierungen', sprintf('„abgeholt“ bei Vorgang #%d zurückgenommen.', $id), false, 'vorgang-' . $id);

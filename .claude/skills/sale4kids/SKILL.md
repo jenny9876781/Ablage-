@@ -1088,6 +1088,19 @@ ist die Merkliste; erledigte Punkte hier abhaken, nicht löschen.
       Tests: 383 Logik, 91 Browser, 16 mobil, neu `browsertest_geschenke.py` (16, Server mit KIK_TEST_NOVEMBER=1).
       Erwartete Importmeldung: „109 neu, 497 aktualisiert“. Ablauftext „So läuft es ab“ (Option) nennt die
       Geschenke noch nicht – ggf. im November ergänzen.
+- [x] **15.10.2026: Plugin 1.10.0 – Kommissionieren + Suche.** Position-Spalte `kommissioniert` (Zeitstempel, SCHEMA 8).
+      Häkchen je Position (+ „alle kommissioniert“) in den Details und im Abholplan, speichert im Hintergrund
+      (`aktion was=kommi&pid&an&ajax=1` → JSON). Zeile zeigt „📦 kommissioniert“ / „📦 teilweise (x/y)“. Filter
+      „Kommissioniert: alle/ja/teilweise/noch nicht“ (GET `kommi`) in Reservierungen (mit Reiter + Suche kombinierbar)
+      und im Abholplan; Druck zeigt ☑/☐. Aufgaben: Abholung heute/nächster Werktag und nicht (ganz) kommissioniert
+      → **Warnung** (rot, Zu tun; vorher nur Info), kommissioniert → Info „steht bereit“. Storno/abgelaufen mit Haken
+      → „Ware zurückräumen: ArtNr“, Knopf „Ware zurückgeräumt“ (`zurueckgeraeumt()` nimmt die Haken weg).
+      **Kein** Feld „Abgestellt wo?“ (zentraler Abholplatz). **Suche:** bleibt im Feld oben rechts, filtert beim Tippen
+      (alle Vorgänge stehen auf der Seite, fremde Reiter versteckt), auch nach Artikelbezeichnung, ä=ae/ß=ss,
+      Groß/klein egal, mehrere Wörter = alle müssen passen, Telefon auch ohne Leerzeichen; Treffer zeigen Reiter +
+      Telefon; Esc setzt zurück. `Kikripp_Ablauf::passt()` und JS `kikPasst()` gleich halten. Kein Suchfeld in der
+      WordPress-Leiste (Nutzerin will es nicht). Tests: 482 Logik (Abschnitt 49), 91 Browser, neu
+      `browsertest_admin.py` (20, Seite aus `KIK_SEITE_HTML=… php test-logik.php`).
 - [x] **15.10.2026: Kasse dauerhaft + Plugin 1.9.0.** **Kasse:** eigene Datenbasis `daten/kasse.csv`
       (`lib.lade_kasse/kasse_aus_mappe/schreibe_kasse`), Excel-Blatt „Kasse“ wird daraus gefüllt,
       `rueckeinlesen.py` liest es mit zurück, **kürzt aber nie** (weniger Buchungen in der Mappe → Warnung, nichts

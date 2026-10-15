@@ -651,8 +651,12 @@ pruefe('5 Tage unbezahlt → Zahlungserinnerung', strpos($texte($fall(['rechnung
 pruefe('4 Tage unbezahlt → noch nicht', $texte($fall(['rechnungsnr' => '1', 'rechnung_am' => '2026-10-15', 'abholung' => '2026-10-27 09:00'])), '');
 pruefe('Abholung morgen, unbezahlt → Warnung', strpos($texte($fall(['rechnungsnr' => '1', 'rechnung_am' => '2026-10-19',
     'abholung' => '2026-10-20 10:30'])), 'noch nicht bezahlt') !== false, true);
-pruefe('bezahlt, Abholung morgen → bereitstellen (Info)', Kikripp_Ablauf::aufgaben([$fall(['status' => 'bezahlt',
-    'abholung' => '2026-10-20 10:30'])], $jetzt)[0]['art'] ?? '', 'info');
+$kp = [['id' => 1, 'artnr' => 'X-1', 'menge' => 1, 'preis_netto' => 10, 'status' => 'bezahlt', 'kommissioniert' => '2026-10-19 08:00:00', 'daten' => '']];
+pruefe('bezahlt, Abholung morgen, kommissioniert → nur Info', Kikripp_Ablauf::aufgaben([$fall(['status' => 'bezahlt',
+    'abholung' => '2026-10-20 10:30', 'positionen' => $kp])], $jetzt)[0]['art'] ?? '', 'info');
+pruefe('bezahlt, Abholung morgen, nicht kommissioniert → Aufgabe (1.10.0)', $texte($fall(['status' => 'bezahlt',
+    'abholung' => '2026-10-20 10:30', 'positionen' => [array_merge($kp[0], ['kommissioniert' => ''])]])),
+    'Abholung Di 20.10., 10:30 Uhr – noch nicht kommissioniert → Ware bereitstellen.');
 pruefe('bezahlt, Termin vorbei, nicht abgeholt', strpos($texte($fall(['status' => 'bezahlt', 'abholung' => '2026-10-13 09:00'])), 'abgeholt?') !== false, true);
 pruefe('Privat: Kontaktdaten erst nach 14 Tagen löschen', $texte($fall(['status' => 'bezahlt', 'abgeholt_am' => '2026-10-13'])), '');
 pruefe('Privat nach 14 Tagen: löschen', strpos($texte($fall(['status' => 'bezahlt', 'abgeholt_am' => '2026-10-05'])), 'Kontaktdaten löschen') !== false, true);
@@ -751,7 +755,7 @@ foreach (['Umsatz bezahlt:' => 'Kennzahlen', 'Zu erledigen:' => 'Aufgabenliste',
 }
 $_GET = ['reiter' => 'fertig'];
 ob_start(); Kikripp_Admin::seite_reservierungen(); $seite = ob_get_clean();
-pruefe('Reiter „Abgeschlossen“ blendet bestellte Vorgänge aus', strpos($seite, 'id="vorgang-' . $va . '"') === false, true);
+pruefe('Reiter „Abgeschlossen“ blendet bestellte Vorgänge aus', (bool) preg_match('/id="vorgang-' . $va . '"[^>]*style="display:none;/', $seite), true);
 $_GET = [];
 $vw = Kikripp_DB::reservieren(array_merge(kontakt('Wunsch Person'), ['abholwunsch' => '2026-10-27']), ['AB-001' => 1]);
 ob_start(); Kikripp_Admin::seite_reservierungen(); $seite = ob_get_clean();
@@ -826,8 +830,10 @@ pruefe('Abholung morgen unbezahlt → Zu tun, rot', $x['reiter'] . '|' . $x['far
 $x = $st($fall(['status' => 'bezahlt', 'abholung' => '2026-10-27 09:00']));
 pruefe('bezahlt → Wartet auf Abholung, Knopf abgeholt', $x['reiter'] . '|' . $x['knopf'][0], 'abholung|abgeholt');
 pruefe('… mit Termin', $x['schritt'], 'bezahlt – Abholung Di 27.10., 09:00 Uhr');
+$x = $st($fall(['status' => 'bezahlt', 'abholung' => '2026-10-20 09:00', 'positionen' => $kp]));
+pruefe('bezahlt, Abholung morgen, kommissioniert bleibt in Wartet', $x['reiter'], 'abholung');
 $x = $st($fall(['status' => 'bezahlt', 'abholung' => '2026-10-20 09:00']));
-pruefe('bezahlt, Abholung morgen bleibt in Wartet (nur Hinweis)', $x['reiter'], 'abholung');
+pruefe('… nicht kommissioniert → Zu tun, rot (1.10.0)', $x['reiter'] . '|' . $x['farbe'], 'zu_tun|rot');
 $x = $st($fall(['status' => 'bezahlt', 'abholung' => '2026-10-13 09:00']));
 pruefe('Termin vorbei, nicht abgeholt → Zu tun, rot', $x['reiter'] . '|' . $x['farbe'], 'zu_tun|rot');
 $x = $st($fall(['status' => 'bezahlt', 'abgeholt_am' => '2026-10-16']));
@@ -863,7 +869,7 @@ pruefe('Farben nur Blau/Rot/Grau', preg_match_all('/background:(#[0-9a-f]{6})"><
 $_GET = ['suche' => 'Sonja'];
 ob_start(); Kikripp_Admin::seite_reservierungen(); $seite = ob_get_clean();
 pruefe('Suche über alle Reiter', strpos($seite, 'Suchergebnis für „Sonja“') !== false && strpos($seite, 'id="vorgang-' . $va . '"') !== false, true);
-pruefe('bei Suche ist kein Reiter aktiv', strpos($seite, 'nav-tab-active') === false, true);
+pruefe('bei Suche ist kein Reiter aktiv', strpos($seite, 'class="nav-tab nav-tab-active"') === false, true);
 $_GET = [];
 $GLOBALS['ist_admin'] = false;
 
@@ -954,7 +960,7 @@ $t = implode(' | ', array_column(Kikripp_Ablauf::aufgaben([$gf([])], $jetzt), 't
 pruefe('Geschenk: keine Rechnung verlangt', strpos($t, 'Rechnung') === false, true);
 pruefe('Geschenk: Abholtermin verlangt', strpos($t, 'Geschenk – Abholtermin eintragen') !== false, true);
 pruefe('Geschenk mit Termin morgen: kein „unbezahlt“', implode(' | ', array_column(Kikripp_Ablauf::aufgaben(
-    [$gf(['abholung' => '2026-10-20 10:30'])], $jetzt), 'text')), 'Abholung Di 20.10., 10:30 Uhr – Geschenk bereitstellen.');
+    [$gf(['abholung' => '2026-10-20 10:30'])], $jetzt), 'text')), 'Abholung Di 20.10., 10:30 Uhr – noch nicht kommissioniert → Geschenk bereitstellen.');
 $st = Kikripp_Ablauf::stand($gf(['abholung' => '2026-10-27 09:00']), [], $jetzt);
 pruefe('Geschenk mit Termin: Hauptknopf „abgeholt“', $st['knopf'][0] . '|' . $st['reiter'], 'abgeholt|abholung');
 $st = Kikripp_Ablauf::stand($gf([]), [], $jetzt);
@@ -1078,6 +1084,92 @@ ob_start(); Kikripp_Admin::seite_reservierungen(); $seite = ob_get_clean();
 pruefe('Reiter „Warte auf Rückinfo“ auf der Seite', strpos($seite, 'Warte auf Rückinfo') !== false, true);
 pruefe('Formular „warte auf Rückinfo“', strpos($seite, 'value="kikripp_warten"') !== false, true);
 pruefe('nichts klappt von selbst auf', preg_match('/<tr id="details-\d+" class="kik-details">/', $seite), 0);
+$_GET = []; $GLOBALS['ist_admin'] = false;
+
+titel('49. Kommissionieren und Suche (1.10.0)');
+artikel_anlegen('KO-001', 4, 40.0, 'Garderobe Eiche');
+artikel_anlegen('KO-002', 2, 25.0, 'Kinderstuhl');
+$kv = Kikripp_DB::reservieren(array_merge(kontakt('Sabine Müller'), ['telefon' => '0171 / 555 12 34']), ['KO-001' => 2, 'KO-002' => 1]);
+Kikripp_DB::vorgang_status($kv, 'bezahlt');
+$g = Kikripp_DB::vorgang($kv);
+pruefe('am Anfang: noch nicht kommissioniert', Kikripp_Ablauf::kommi($g), ['x' => 0, 'y' => 2, 'stand' => 'nein']);
+Kikripp_DB::kommissionieren($kv, (int) $g['positionen'][0]['id'], true);
+$g = Kikripp_DB::vorgang($kv);
+pruefe('eine Position abgehakt → teilweise (1/2)', Kikripp_Ablauf::kommi_text(Kikripp_Ablauf::kommi($g)), '📦 teilweise (1/2)');
+$zeit = $g['positionen'][0]['kommissioniert'];
+Kikripp_DB::kommissionieren($kv, 0, true);
+$g = Kikripp_DB::vorgang($kv);
+pruefe('„alle“ abgehakt → kommissioniert', Kikripp_Ablauf::kommi_text(Kikripp_Ablauf::kommi($g)), '📦 kommissioniert');
+pruefe('erster Haken behält seine Zeit', $g['positionen'][0]['kommissioniert'], $zeit);
+Kikripp_DB::kommissionieren($kv, (int) $g['positionen'][1]['id'], false);
+pruefe('Haken wieder weg → teilweise', Kikripp_Ablauf::kommi(Kikripp_DB::vorgang($kv))['stand'], 'teilweise');
+Kikripp_DB::kommissionieren($kv, 0, true);
+// Abholung morgen: kommissioniert → nur Hinweis
+$morgen = Kikripp_Ablauf::naechster_werktag(Kikripp_Ablauf::heute());
+Kikripp_DB::vorgang_bearbeiten($kv, ['abholung' => $morgen . ' 10:00']);
+$a = Kikripp_Ablauf::aufgaben([Kikripp_DB::vorgang($kv)]);
+pruefe('Abholung morgen, kommissioniert → Info „steht bereit“', ($a[0]['art'] ?? '') . '|' . (strpos($a[0]['text'] ?? '', 'steht bereit') !== false ? 'ja' : 'nein'), 'info|ja');
+// Teilstorno einer kommissionierten Position → zurückräumen
+$g = Kikripp_DB::vorgang($kv);
+Kikripp_DB::position_stornieren($kv, (int) $g['positionen'][1]['id']);
+$g = Kikripp_DB::vorgang($kv);
+$a = Kikripp_Ablauf::aufgaben([$g]);
+pruefe('storniert, war kommissioniert → Aufgabe zurückräumen', $a[0]['text'] ?? '', 'Storniert, war schon kommissioniert – Ware zurückräumen: KO-002.');
+pruefe('Hauptknopf „Ware zurückgeräumt“', Kikripp_Ablauf::stand($g, $a)['knopf'][0], 'geraeumt');
+pruefe('Rest bleibt kommissioniert (1/1)', Kikripp_Ablauf::kommi($g)['stand'], 'ja');
+pruefe('zurückgeräumt: ein Haken weg', Kikripp_DB::zurueckgeraeumt($kv), 1);
+pruefe('… danach keine Aufgabe mehr zum Zurückräumen', strpos(implode('|', array_column(Kikripp_Ablauf::aufgaben([Kikripp_DB::vorgang($kv)]), 'text')), 'zurückräumen'), false);
+// ganzer Vorgang storniert
+$kv2 = Kikripp_DB::reservieren(kontakt('Storno Kunde'), ['KO-001' => 1]);
+Kikripp_DB::kommissionieren($kv2, 0, true);
+Kikripp_DB::vorgang_status($kv2, 'storniert');
+$g2 = Kikripp_DB::vorgang($kv2);
+$a = Kikripp_Ablauf::aufgaben([$g2]);
+pruefe('Vorgang storniert → zurückräumen, Zu tun', Kikripp_Ablauf::stand($g2, $a)['reiter'] . '|' . (strpos($a[0]['text'] ?? '', 'KO-001') !== false ? 'ja' : 'nein'), 'zu_tun|ja');
+pruefe('stornierter Vorgang lässt sich nicht mehr abhaken', Kikripp_DB::kommissionieren($kv2, 0, true), false);
+Kikripp_DB::zurueckgeraeumt($kv2);
+pruefe('nach dem Zurückräumen: Storniert / abgelaufen', Kikripp_Ablauf::stand(Kikripp_DB::vorgang($kv2), [])['reiter'], 'erledigt');
+// abgelaufene Reservierung mit Haken
+$kv3 = Kikripp_DB::reservieren(kontakt('Ablauf Kunde'), ['KO-002' => 1]);
+Kikripp_DB::kommissionieren($kv3, 0, true);
+$wpdb->update(Kikripp_DB::t_vorgang(), ['ablauf' => '2020-01-01 00:00:00'], ['id' => $kv3]);
+pruefe('abgelaufene Reservierung, kommissioniert → zurückräumen', count(Kikripp_Ablauf::zurueckraeumen(Kikripp_DB::vorgang($kv3))), 1);
+Kikripp_DB::vorgang_loeschen($kv3);
+
+// Suche
+$g = Kikripp_DB::vorgang($kv);
+foreach (['mueller' => 'Mueller statt Müller', 'MÜLLER' => 'groß geschrieben', 'garderobe' => 'Bezeichnung', 'Eiche Sabine' => 'zwei Wörter',
+          '01715551234' => 'Telefon ohne Leerzeichen', 'ko-001' => 'Artikelnummer klein'] as $q => $was) {
+    pruefe("Suche findet: $was", Kikripp_Ablauf::passt($g, $q), true);
+}
+pruefe('Suche: Bezeichnung einer stornierten Position zählt auch', Kikripp_Ablauf::passt($g, 'Kinderstuhl'), true);
+pruefe('Suche: falsches zweites Wort → nichts', Kikripp_Ablauf::passt($g, 'Eiche Schmidt'), false);
+
+// Seite
+$GLOBALS['ist_admin'] = true; $_GET = ['reiter' => 'abholung'];
+ob_start(); Kikripp_Admin::seite_reservierungen(); $seite = ob_get_clean();
+pruefe('Häkchen je Position', strpos($seite, 'class="kik-kommi-' . $kv . '"') !== false, true);
+pruefe('Kennzeichen in der Zeile', strpos($seite, 'id="kommi-badge-' . $kv . '">📦 kommissioniert<') !== false, true);
+pruefe('Suchtext an der Zeile (mit Bezeichnung)', (bool) preg_match('/data-such="[^"]*garderobe eiche/', $seite), true);
+pruefe('Filter „Kommissioniert“', strpos($seite, 'id="kik-kommi"') !== false && strpos($seite, '>noch nicht</option>') !== false, true);
+pruefe('Live-Suche beim Tippen', strpos($seite, 'oninput="kikFilter()"') !== false, true);
+pruefe('alle Vorgänge stehen auf der Seite (für die Suche)', strpos($seite, 'id="vorgang-' . $kv2 . '"') !== false, true);
+if (getenv('KIK_SEITE_HTML')) { file_put_contents(getenv('KIK_SEITE_HTML'), $seite); }
+pruefe('Telefon und Reiter stehen für die Suche bereit', strpos($seite, '☎ 0171 / 555 12 34') !== false && strpos($seite, 'class="kik-such">Wartet auf Abholung') !== false, true);
+$_GET = ['reiter' => 'alle', 'kommi' => 'nein'];
+ob_start(); Kikripp_Admin::seite_reservierungen(); $seite = ob_get_clean();
+pruefe('Filter „noch nicht“ blendet Kommissionierte aus', (bool) preg_match('/id="vorgang-' . $kv . '"[^>]*style="display:none;/', $seite), true);
+pruefe('… Filter bleibt beim Reiterwechsel', strpos($seite, 'reiter=zu_tun&kommi=nein') !== false, true);
+$_GET = ['suche' => 'Mueller'];
+ob_start(); Kikripp_Admin::seite_reservierungen(); $seite = ob_get_clean();
+pruefe('Suche „Mueller“ zeigt Frau Müller', (bool) preg_match('/id="vorgang-' . $kv . '"(?![^>]*display:none)[^>]*>/', $seite), true);
+$_GET = ['kommi' => 'ja'];
+ob_start(); Kikripp_Ablauf::seite_abholplan(); $plan = ob_get_clean();
+pruefe('Abholplan: Filter und Häkchen', strpos($plan, 'Kommissioniert:') !== false && strpos($plan, 'class="kik-kommi-' . $kv . '"') !== false, true);
+$_GET = ['kommi' => 'nein'];
+ob_start(); Kikripp_Ablauf::seite_abholplan(); $plan = ob_get_clean();
+pruefe('Abholplan „noch nicht“: Kommissionierte ausgeblendet', strpos($plan, 'class="kik-kommi-' . $kv . '"'), false);
+pruefe('Druck: ☑ bei kommissioniert', strpos(Kikripp_Ablauf::druck_html($morgen), '☑') !== false, true);
 $_GET = []; $GLOBALS['ist_admin'] = false;
 
 printf("\n== Ergebnis: %d Prüfungen, %d Fehler ==\n", $geprueft, $fehler);

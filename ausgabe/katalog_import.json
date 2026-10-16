@@ -10581,7 +10581,7 @@
   "foto": "F-695",
   "sortierung": 503,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "BU01-09",
@@ -10602,7 +10602,7 @@
   "foto": "F-696",
   "sortierung": 504,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "BU01-10",
@@ -10623,7 +10623,7 @@
   "foto": "F-697",
   "sortierung": 505,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "BU01-11",
@@ -10644,7 +10644,7 @@
   "foto": "F-698",
   "sortierung": 506,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "BU01-12",
@@ -10686,7 +10686,7 @@
   "foto": "F-700",
   "sortierung": 508,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "BU01-14",
@@ -12744,7 +12744,7 @@
   "foto": "F-747",
   "sortierung": 606,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "GA01-20",

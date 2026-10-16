@@ -1102,6 +1102,8 @@ ist die Merkliste; erledigte Punkte hier abhaken, nicht löschen.
       BA09-10 Kapselmaschine 60 (Marke nicht belegt), GA01-22 Thule Jogger 95 (Karton nicht dabei). Fotos F-778 bis
       F-784 (Chat-Bilder über uploads/manuell, Kapselmaschine aus der Word), F-780 Fußballer-Sticker maskiert.
       Importmeldung: „7 neu, 639 aktualisiert. 29 Artikel … NEU“. Nachtrag 29 Fotos.
+      Nachgeschoben 16.10.: Rutsche GA01-19 + die 5 auf „ok“ gesetzten aus dem 12.10.-Stapel (BU01-08 bis -11, -13) sichtbar;
+      43 Spielzeuge noch „offen“ → bleiben verborgen. Zweiter Nachtrag 6 Fotos, Meldung „0 neu, 646 aktualisiert, 6 NEU“.
 - [x] **15.10.2026: Plugin 1.10.0 – Kommissionieren + Suche.** Position-Spalte `kommissioniert` (Zeitstempel, SCHEMA 8).
       Häkchen je Position (+ „alle kommissioniert“) in den Details und im Abholplan, speichert im Hintergrund
       (`aktion was=kommi&pid&an&ajax=1` → JSON). Zeile zeigt „📦 kommissioniert“ / „📦 teilweise (x/y)“. Filter

@@ -31,7 +31,7 @@ sonst mitten im Aufbau erwischen.
 
 **a) Speicherplatz der Website prüfen — der wichtigste Punkt.**
 In einem Multisite-Netzwerk hat jede Website ein Platzkonto, standardmäßig **100 MB**. Die
-Fotos brauchen **84 MB**, und auf kikripp.de liegen schon Bilder der bestehenden Seite. Reicht
+Fotos brauchen **89 MB**, und auf kikripp.de liegen schon Bilder der bestehenden Seite. Reicht
 das Konto nicht, bricht das Hochladen mittendrin ab mit einer Meldung über die
 Speicherplatzbegrenzung — und du weißt nicht, welche Bilder durch sind.
 
@@ -83,8 +83,8 @@ sich später nur wieder zentral abschalten.
 ## 2. Fotos in die Mediathek
 
 Du bekommst die Fotos in **vier Paketen** (`kikripp-fotos-1von4.zip` bis `-4von4.zip`),
-weil 84 MB auf einmal für den Versand zu viel sind. Entpacke sie auf deinem Rechner — alle
-vier in denselben Ordner `fotos`. Zusammen sind es genau **418 Bilder, 84 MB**. Geh in WordPress auf **Medien → Datei hinzufügen** und
+weil 89 MB auf einmal für den Versand zu viel sind. Entpacke sie auf deinem Rechner — alle
+vier in denselben Ordner `fotos`. Zusammen sind es genau **446 Bilder, 89 MB**. Geh in WordPress auf **Medien → Datei hinzufügen** und
 zieh die Bilder in das Feld — am besten in Paketen von hundert, nicht alle auf einmal. Das
 dauert; lass das Browserfenster offen, bis jedes Paket durch ist.
 
@@ -107,10 +107,10 @@ auf Importieren. Der Import dauert **ein paar Sekunden**, nicht Minuten.
 
 Danach steht oben eine Meldung. **So muss sie aussehen:**
 
-    Import abgeschlossen: 639 neu, 0 aktualisiert.
+    Import abgeschlossen: 646 neu, 0 aktualisiert.
 
 Kein weiterer Satz dahinter — das heißt: jeder Artikel hat sein Foto gefunden. Im Katalog
-sichtbar sind davon **421**; die übrigen stehen bewusst auf „nicht im Katalog".
+sichtbar sind davon **449**; die übrigen stehen bewusst auf „nicht im Katalog".
 
 Steht dahinter noch *„… Artikel ohne gefundenes Foto"*, nennt die Meldung die fehlenden
 Bilder beim Namen. Die lädst du in die Mediathek nach und importierst einfach noch einmal.

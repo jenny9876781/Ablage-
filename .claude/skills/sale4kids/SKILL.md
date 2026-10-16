@@ -1088,6 +1088,20 @@ ist die Merkliste; erledigte Punkte hier abhaken, nicht löschen.
       Tests: 383 Logik, 91 Browser, 16 mobil, neu `browsertest_geschenke.py` (16, Server mit KIK_TEST_NOVEMBER=1).
       Erwartete Importmeldung: „109 neu, 497 aktualisiert“. Ablauftext „So läuft es ab“ (Option) nennt die
       Geschenke noch nicht – ggf. im November ergänzen.
+- [x] **16.10.2026: Prüfung „Artikel aus dem Katalog geflogen?“ – kein Fehler.** Export (47 Vorgänge) + letzte
+      Importdatei mit dem echten Plugin-Code nachgerechnet (Skript `sim.php` im Scratchpad: test-kette-Kopf +
+      Vorgänge aus CSV einfügen + `katalog_artikel()`): bezahlte Stücke senken die angezeigte Menge, sie stehen
+      **nicht** als „reserviert“ da (NU01-15 4→3, NE01-26 7→6); GA01-12 mit 4 von 4 verkauft fällt raus. Keine
+      Überbuchung, 32 Artikel korrekt ausverkauft. **So zuerst antworten, wenn die Nutzerin „verfügbar trotz
+      Bestellung“ meldet.** Excel 16.10. per rueckeinlesen (100 Änderungen geprüft, Kasse unverändert): 8 Deko
+      entfällt, NU01-21 Miffy entfällt, Deko- und Spielzeugpreise geprüft (Spielzeug bleibt bis November verborgen),
+      NE04-16 = 6 insgesamt. **BE10-01 = 1 Set (4 Leuchten) 400 € an Rebholz #49** – Menge bewusst 4 → 1, passt zur
+      Position im Vorgang. BE10-04 Marke MDF Italia. Weihnachtsdeko sichtbar (22; NU01-35 ohne Foto bleibt verborgen).
+      Neu: BE01-09 Ring-Pendelleuchte 120 (**BE01-08 ist Weitere_ArtNr von NU01-04!**), NE05-18 Sideboard 300 VHB,
+      BA09-07 Toshiba Mikrowelle 20, BA09-08 Senseo 15, BA09-09 Bosch Side-by-Side 150 (Wasseranschluss),
+      BA09-10 Kapselmaschine 60 (Marke nicht belegt), GA01-22 Thule Jogger 95 (Karton nicht dabei). Fotos F-778 bis
+      F-784 (Chat-Bilder über uploads/manuell, Kapselmaschine aus der Word), F-780 Fußballer-Sticker maskiert.
+      Importmeldung: „7 neu, 639 aktualisiert. 29 Artikel … NEU“. Nachtrag 29 Fotos.
 - [x] **15.10.2026: Plugin 1.10.0 – Kommissionieren + Suche.** Position-Spalte `kommissioniert` (Zeitstempel, SCHEMA 8).
       Häkchen je Position (+ „alle kommissioniert“) in den Details und im Abholplan, speichert im Hintergrund
       (`aktion was=kommi&pid&an&ajax=1` → JSON). Zeile zeigt „📦 kommissioniert“ / „📦 teilweise (x/y)“. Filter

@@ -1203,7 +1203,10 @@ ist die Merkliste; erledigte Punkte hier abhaken, nicht löschen.
       Liebherr 30 € (F-815/F-816 aufgehellt). Kladdig = F-786 (Chatbild = IMG_2873), Malkittel V08 = F-812.
       **Vereinbart, noch nicht gebaut (Plugin 1.10.1, zusammen mit Freitag):** Einstellungsfeld
       „Höchstzahl Geschenke je Reservierung“ (`kikripp_geschenke_max`, Vorgabe 5) und ein Satz für Kitas/
-      Vereine bei den Geschenken. Hinweis in der Merkliste zu Geschenken: Vorschlag gemacht, Antwort offen.
+      Vereine bei den Geschenken **und in der Leiste**: „Kitas, Schulen und Vereine: für größere Mengen bitte
+      direkt melden.“ Dazu in der Leiste, sobald etwas vorgemerkt ist: „Zu verschenken: x von 5 – kostenlos
+      dazu“ mit Link „Geschenke ansehen“ (filtert auf Kategorie „zu verschenken“). **Freigegeben 19.10., am
+      Fr 23.10. zusammen mit Import/Nachtrag bauen** (Version hochzählen, alle Tests, paketieren).
 - [ ] **Ende November 2026: Höchstzahl Geschenke je Reservierung mit der Nutzerin neu besprechen**
       (Vorschlag: ab ca. 01.12. auf 20 oder frei, damit bis 10.12. alles abgeholt wird).
 - [x] Plugin 1.2.1 (06.10.): Einstellung „Fußzeile ausblenden“ (Standard an) – Body-Klasse

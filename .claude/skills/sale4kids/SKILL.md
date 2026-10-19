@@ -1184,6 +1184,21 @@ ist die Merkliste; erledigte Punkte hier abhaken, nicht löschen.
       Neuheiten“. Importmeldung: „x Artikel sind ab heute 14 Tage als NEU markiert.“ Bestehende Artikel werden
       beim ersten Import mit 1.6.0 **nicht** neu (kein Stempel). Testserver: `KIK_TEST_NEU=NR1,NR2`.
       NE03-12 auf 6 Stück (5 graue = NE04-16).
+- [ ] **19.10.2026: Excel + Reservierungen + NU05/NU06/NU01 – nur Excel ausgeliefert, Livegang FREITAG 23.10.**
+      Excel der Nutzerin (NU01-12 Maße, BA08-20 37, BU12-17 4 = 2 schwarz + 2 grau) und 4 Kassenbuchungen
+      übernommen; Kasse 4000129 heißt **Tanja** Fischer (Betrag 70 € ≠ Vorgang 24 mit 55 € – nicht geklärt).
+      Reservierungsexport (54 Vorgänge) erstmals per Ablauf D geschrieben: 39 verkauft, 30 teilverkauft,
+      57 reserviert. „bar“/„Sammel RG“ standen im Feld Rechnungsnr → geleert, Hinweis in der Bemerkung.
+      29 neue Zeilen (675), Fotos F-785 bis F-814: NU06-08 bis -12 (Tiguan ist Spielzeug, geht aber
+      **jetzt** online – Wunsch der Nutzerin), NU01-53 bis -56 (Post-its: -54 = 50er-Lichterkette,
+      -55 = Baum, -56 = 20er; im Word falsch nummeriert), NU05-09 bis -18, Geschenke NU05-V01 bis -V10
+      (Im_Katalog nein bis November; V08 Malschutzkittel ohne Foto). F-809 (grüner Kittel) als MÅLA
+      902.104.90 angenommen; F-812 (rosa) laut Nutzerin Kladd Prickar → weitere Ansicht von V06.
+      **Alle 19 neuen Verkaufsartikel stehen auf `Preis_geprüft = offen`, Im_Katalog ja** – pruefen.py
+      meldet das bis dahin als Fehler (gewollt). Plan: Nutzerin bestätigt Preise bis Do 22.10. per Excel,
+      **Fr 23.10.** Ablauf B → dann **weitere Fotos (kommen noch!)** → Importdatei + Nachtrag
+      gegen `git show 2dcf53d:ausgabe/katalog_import.json` (letzter ausgelieferter Import, heute bewusst
+      nicht neu gebaut). Geschenke-Grenze zählt Positionen, nicht Stück – so gewollt (bestätigt 19.10.).
 - [x] Plugin 1.2.1 (06.10.): Einstellung „Fußzeile ausblenden“ (Standard an) – Body-Klasse
       `kikripp-ohne-fusszeile` nur auf der Katalogseite, CSS für Block-Themes
       (`footer.wp-block-template-part`) und klassische Themes (`#colophon`, `.site-footer`).

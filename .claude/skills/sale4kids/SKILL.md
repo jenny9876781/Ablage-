@@ -1199,6 +1199,13 @@ ist die Merkliste; erledigte Punkte hier abhaken, nicht löschen.
       **Fr 23.10.** Ablauf B → dann **weitere Fotos (kommen noch!)** → Importdatei + Nachtrag
       gegen `git show 2dcf53d:ausgabe/katalog_import.json` (letzter ausgelieferter Import, heute bewusst
       nicht neu gebaut). Geschenke-Grenze zählt Positionen, nicht Stück – so gewollt (bestätigt 19.10.).
+      Nachtrag 19.10.: 19 Preise bestätigt (ok), NU05-18 5 €. BU13-09 Kühl-Gefrier-Kombi 40 €, BU13-10
+      Liebherr 30 € (F-815/F-816 aufgehellt). Kladdig = F-786 (Chatbild = IMG_2873), Malkittel V08 = F-812.
+      **Vereinbart, noch nicht gebaut (Plugin 1.10.1, zusammen mit Freitag):** Einstellungsfeld
+      „Höchstzahl Geschenke je Reservierung“ (`kikripp_geschenke_max`, Vorgabe 5) und ein Satz für Kitas/
+      Vereine bei den Geschenken. Hinweis in der Merkliste zu Geschenken: Vorschlag gemacht, Antwort offen.
+- [ ] **Ende November 2026: Höchstzahl Geschenke je Reservierung mit der Nutzerin neu besprechen**
+      (Vorschlag: ab ca. 01.12. auf 20 oder frei, damit bis 10.12. alles abgeholt wird).
 - [x] Plugin 1.2.1 (06.10.): Einstellung „Fußzeile ausblenden“ (Standard an) – Body-Klasse
       `kikripp-ohne-fusszeile` nur auf der Katalogseite, CSS für Block-Themes
       (`footer.wp-block-template-part`) und klassische Themes (`#colophon`, `.site-footer`).

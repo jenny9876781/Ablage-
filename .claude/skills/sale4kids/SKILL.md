@@ -1207,6 +1207,22 @@ ist die Merkliste; erledigte Punkte hier abhaken, nicht löschen.
       direkt melden.“ Dazu in der Leiste, sobald etwas vorgemerkt ist: „Zu verschenken: x von 5 – kostenlos
       dazu“ mit Link „Geschenke ansehen“ (filtert auf Kategorie „zu verschenken“). **Freigegeben 19.10., am
       Fr 23.10. zusammen mit Import/Nachtrag bauen** (Version hochzählen, alle Tests, paketieren).
+- [x] **21.10.2026: Plugin 1.11.0 + 19.10.-Stapel live + neue Fotos.** Plugin: **bestellte Stücke verlassen den
+      Katalog wie bezahlte** (`belegung()` liefert zusätzlich `bestellt`, `katalog_artikel()` zieht sie von der Menge
+      ab; `frei()` unverändert, sie bleiben gesperrt), Storno bringt sie zurück. Anlass: Vorgesetzter störte sich an
+      vielen „reserviert“. „Warte auf Rückinfo“ bleibt unverändert (Nutzerin wollte keine Freigabe per Wiedervorlage).
+      Reservierte Karten: Knopf **„Interesse? Melden Sie sich“** (mailto an `kontakt_email`, Betreff mit ArtNr).
+      1.10.1 mitgebaut: Einstellungsfeld „Höchstzahl Geschenke je Reservierung“, Kita-Satz an Geschenk-Karten und in
+      der Leiste, Leiste „Zu verschenken: x von N – Geschenke ansehen“ (nur wenn Geschenke im Katalog). Tests 490 Logik,
+      91 Browser, 16 mobil, 24 Geschenke, Liste ok. Import 16.10. war eingespielt (Reservierungen auf BA09-08/-09,
+      BU01-13). Excel 21.10.: BA08-34 entfällt, NU05-V03 13 Stück übernommen; **offen: BA07-03 Verkauft 1 / BU04-14
+      Verkauft 0 + Preis 30 (Seltmann, RG 4000130) – nicht übernommen, Nutzerin fragen, welches Regal er hat** (falls
+      BA07-03: in WordPress Position tauschen). Kasse Tanja Fischer 70 € ok (Ware außerhalb Katalog). GA01-04 sichtbar,
+      NU01-35 Foto F-817 sichtbar, NU03-02 Foto F-818. Fotos F-817 bis F-869: 50 neue Zeilen (721) NU05-19 bis -52,
+      NE05-19/-20 (Stokke Baby Set 4 schwarz/2 weiß), NU07-09 bis -18 – alle **Preis geschätzt, offen, Im_Katalog nein**.
+      **Offen:** F-840 (weiße Schale, Post-it unlesbar, NU05-38?), F-843/F-844 PlanToys-Kipper (Post-it „07-14“,
+      kollidiert mit NU07-14), F-863 Montessori-Körper + Buch (Nummer?), NU05-26 fehlt, Tonieboxen F-819/F-820
+      (Raum, Anzahl Figuren, Regal dabei?). Importmeldung: „75 neu, 646 aktualisiert … 23 NEU“, Nachtrag 24 Fotos.
 - [ ] **Ende November 2026: Höchstzahl Geschenke je Reservierung mit der Nutzerin neu besprechen**
       (Vorschlag: ab ca. 01.12. auf 20 oder frei, damit bis 10.12. alles abgeholt wird).
 - [x] Plugin 1.2.1 (06.10.): Einstellung „Fußzeile ausblenden“ (Standard an) – Body-Klasse

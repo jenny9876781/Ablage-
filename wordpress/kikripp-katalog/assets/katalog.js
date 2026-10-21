@@ -186,8 +186,8 @@
       merk = {}; listeOffen = false; leiste(); knoepfe();
     });
     el('k-anfragen').addEventListener('click', formular);
-    el('k-merk').addEventListener('click', function () {
-      if (!auswahl().length) { return; }
+    el('k-merk').addEventListener('click', function (e) {
+      if (!auswahl().length || (e.target.classList && e.target.classList.contains('geschenke-link'))) { return; }
       listeOffen = !listeOffen; leiste();
     });
     el('k-zu').addEventListener('click', schliessen);
@@ -301,7 +301,7 @@
           'id="m-' + sicher(a.nr) + '" data-menge="' + sicher(a.nr) + '" aria-label="Stückzahl ' + sicher(a.nr) + '">' +
           '<button data-res="' + sicher(a.nr) + '"' + (merk[a.nr] ? ' class="drin"' : '') + '>' + knopfText(a.nr) + '</button>' +
         '</div>'
-      : '';
+      : interesse(a);
     return '<div class="karte' + (frei ? '' : ' weg') + '">' +
       '<div class="bild">' + bild + '<span class="nr">' + sicher(a.nr) + '</span>' + abzeichen +
         (a.marke ? '<span class="markenschild">' + sicher(a.marke) + '</span>' : '') +
@@ -319,11 +319,23 @@
       '</div>' +
       (geschenk(a)
         ? '<div class="preis geschenk"><b>zu verschenken</b><small>kostenlos · nur Abholung · höchstens ' +
-            GESCHENKE_MAX + ' Geschenke je Reservierung</small></div>'
+            GESCHENKE_MAX + ' Geschenke je Reservierung</small><small class="kita">' + KITA + '</small></div>'
         : '<div class="preis"><b>' + eur(brutto(a.preis)) + vhb + '</b>' +
           '<small>' + (UST > 0 ? 'inkl. USt · netto ' + eur(a.preis) : sicher(STEUER || 'Endpreis')) +
           ' · je ' + sicher(a.einheit) + '</small></div>') +
       auswahl + '</div></div>';
+  }
+
+  /** 1.11.0: Reservierte Artikel – Interesse per Mail melden, damit sichtbar wird, ob es weitere Interessenten gibt. */
+  function interesse(a) {
+    if (!ANBIETER.email) { return ''; }
+    var betreff = 'Interesse an ' + a.nr + ' ' + a.titel;
+    var text = 'Guten Tag,\n\nich interessiere mich für den Artikel ' + a.nr + ' (' + a.titel + '), ' +
+      'der im Katalog gerade reserviert ist. Bitte melden Sie sich, falls er wieder frei wird.\n\n' +
+      'Name:\nTelefon:\n';
+    return '<div class="interesse"><a href="mailto:' + sicher(ANBIETER.email) + '?subject=' +
+      encodeURIComponent(betreff) + '&amp;body=' + encodeURIComponent(text) + '">Interesse? Melden Sie sich</a>' +
+      '<small>Wir merken Sie vor, falls der Artikel wieder frei wird.</small></div>';
   }
 
   function knopfText(nr) {
@@ -389,6 +401,16 @@
     }).filter(Boolean);
   }
 
+  var KITA = 'Kitas, Schulen und Vereine: für größere Mengen bitte direkt melden.';
+
+  /** 1.10.1: Hinweis in der Leiste, sobald etwas vorgemerkt ist und es Geschenke im Katalog gibt. */
+  function geschenkHinweis(w) {
+    if (IST_ADMIN || !ARTIKEL.some(geschenk)) { return ''; }
+    var n = w.filter(function (p) { return geschenk(p.a); }).length;
+    return '<br><span class="geschenke-info">Zu verschenken: ' + n + ' von ' + GESCHENKE_MAX + ' – kostenlos dazu · ' +
+      '<a href="#" class="geschenke-link">Geschenke ansehen</a> · ' + KITA + '</span>';
+  }
+
   function leiste() {
     var w = auswahl();
     var stueck = 0, netto = 0;
@@ -400,10 +422,11 @@
       ? stueck + ' Stück vorgemerkt · <b>' + betrag(netto) + '</b>' +
         (UST > 0 ? ' <span style="opacity:.8">inkl. USt</span>' : '') +
         (fehlt > 0.004 ? '<br><span class="mindest">Mindestbestellwert ' + eur(MINDEST) +
-          ' – es fehlen noch ' + eur(fehlt) + '</span>' : '')
+          ' – es fehlen noch ' + eur(fehlt) + '</span>' : '') + geschenkHinweis(w)
       : 'Noch nichts vorgemerkt – Stückzahl eintragen und auf „reservieren“ klicken.' +
         (IST_ADMIN ? ' Sie sind als Verwaltung angemeldet: Mindestbestellwert und Geschenke-Grenze gelten für Sie nicht.'
-          : (MINDEST > 0 ? ' Mindestbestellwert ' + eur(MINDEST) + ' (gilt nicht für Artikel „zu verschenken“).' : ''));
+          : (MINDEST > 0 ? ' Mindestbestellwert ' + eur(MINDEST) + ' (gilt nicht für Artikel „zu verschenken“).' : '') +
+            (ARTIKEL.some(geschenk) ? ' ' + KITA : ''));
     el('k-anfragen').disabled = stueck === 0 || fehlt > 0.004;
     // Ohne Auswahl braucht die Leiste auf dem Telefon keine Knoepfe (siehe katalog.css).
     var l = wurzel.querySelector('.leiste');
@@ -421,6 +444,18 @@
         '<button class="weg" data-weg="' + sicher(p.a.nr) + '" aria-label="Entfernen">×</button></div>';
     }).join('') : '';
   }
+
+  // „Geschenke ansehen“: Katalog auf die Kategorie „zu verschenken“ filtern
+  document.addEventListener('click', function (e) {
+    if (!e.target || !e.target.classList || !e.target.classList.contains('geschenke-link')) { return; }
+    e.preventDefault(); e.stopPropagation();
+    var kat = el('k-kat'), g = ARTIKEL.filter(geschenk)[0];
+    if (!kat || !g) { return; }
+    kat.value = g.kat; el('k-q').value = '';
+    el('k-frei').checked = true;
+    render();
+    el('k-raster').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
 
   // Merkliste: Menge ändern oder Artikel entfernen
   document.addEventListener('change', function (e) {

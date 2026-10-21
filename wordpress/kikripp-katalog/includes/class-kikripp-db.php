@@ -111,7 +111,9 @@ class Kikripp_DB {
                        SUM(CASE WHEN p.status = 'reserviert'
                                      AND ((v.status = 'offen' AND (v.ablauf > %s OR v.warte_seit <> ''))
                                           OR v.status = 'bestellt')
-                                THEN p.menge ELSE 0 END) AS reserviert
+                                THEN p.menge ELSE 0 END) AS reserviert,
+                       SUM(CASE WHEN p.status = 'reserviert' AND v.status = 'bestellt'
+                                THEN p.menge ELSE 0 END) AS bestellt
                 FROM $p p INNER JOIN $v v ON v.id = p.vorgang_id
                 WHERE 1=1 $wo
                 GROUP BY p.artnr";
@@ -120,7 +122,8 @@ class Kikripp_DB {
         foreach ((array) $zeilen as $z) {
             $out[$z['artnr']] = [
                 'bezahlt'    => (int) $z['bezahlt'],
-                'reserviert' => (int) $z['reserviert'],
+                'reserviert' => (int) $z['reserviert'],      // enthält die bestellten Stücke
+                'bestellt'   => (int) $z['bestellt'],
             ];
         }
         return $out;
@@ -129,6 +132,8 @@ class Kikripp_DB {
     /**
      * Artikel für den Katalog, angereichert um die Verfügbarkeit.
      * Vollständig bezahlte Artikel fallen heraus – sie sind verkauft.
+     * 1.11.0: Bestellte Stücke zählen dafür wie verkauft – die Zusage ist da, nur Rechnung und
+     * Zahlung fehlen noch. Wird die Bestellung storniert, sind sie sofort wieder im Katalog.
      */
     public static function katalog_artikel() {
         global $wpdb;
@@ -141,15 +146,16 @@ class Kikripp_DB {
         foreach ((array) $zeilen as $z) {
             $daten = json_decode($z['daten'], true);
             if (!is_array($daten)) { $daten = []; }
-            $b = $belegung[$z['artnr']] ?? ['bezahlt' => 0, 'reserviert' => 0];
+            $b = $belegung[$z['artnr']] ?? ['bezahlt' => 0, 'reserviert' => 0, 'bestellt' => 0];
             $menge = (int) $z['menge'];
-            $rest  = max(0, $menge - $b['bezahlt']);          // noch nicht verkauft
-            if ($rest <= 0) { continue; }                      // bezahlt = aus dem Katalog
-            $frei = max(0, $rest - $b['reserviert']);
+            $rest  = max(0, $menge - $b['bezahlt'] - $b['bestellt']);   // weder verkauft noch bestellt
+            if ($rest <= 0) { continue; }                      // bezahlt oder bestellt = aus dem Katalog
+            $offen = max(0, $b['reserviert'] - $b['bestellt']);
+            $frei = max(0, $rest - $offen);
             $daten['nr']         = $z['artnr'];
             $daten['menge']      = $rest;
             $daten['frei']       = $frei;
-            $daten['reserviert'] = min($b['reserviert'], $rest);
+            $daten['reserviert'] = min($offen, $rest);
             $daten['preis']      = (float) $z['preis_netto'];
             $daten['status']     = $frei > 0 ? 'verfügbar' : 'reserviert';
             $seit = (string) ($daten['neu_seit'] ?? '');

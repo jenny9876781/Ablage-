@@ -1102,6 +1102,12 @@ class Kikripp_Admin {
              . '<p class="description">Darunter lässt sich die Reservierung nicht abschicken. 0 = kein Mindestwert.</p></td></tr>',
              esc_attr(get_option('kikripp_mindestwert', 0)));
 
+        printf('<tr><th scope="row"><label for="k_geschenke">Höchstzahl Geschenke je Reservierung</label></th><td>'
+             . '<input type="number" id="k_geschenke" name="geschenke_max" min="1" max="999" step="1" value="%d" class="small-text"> Artikel'
+             . '<p class="description">So viele verschiedene Artikel „zu verschenken“ darf eine Reservierung enthalten. '
+             . 'Gezählt werden Positionen, nicht Stück. Für die Verwaltung gilt die Grenze nicht.</p></td></tr>',
+             Kikripp_REST::geschenke_max());
+
         printf('<tr><th scope="row"><label for="k_besicht">Besichtigung ab</label></th><td>'
              . '<input type="number" id="k_besicht" name="besichtigung_ab" min="0" step="1" value="%s" class="small-text"> € Stückpreis'
              . '<p class="description">Artikel ab diesem Preis tragen im Katalog „Besichtigung möglich“, und das '
@@ -1230,6 +1236,7 @@ class Kikripp_Admin {
         update_option('kikripp_passwortschutz', isset($_POST['passwortschutz']) ? 1 : 0);
         update_option('kikripp_frist_werktage', max(1, (int) ($_POST['frist_werktage'] ?? 3)));
         update_option('kikripp_mindestwert', max(0, (float) ($_POST['mindestwert'] ?? 0)));
+        update_option('kikripp_geschenke_max', min(999, max(1, (int) ($_POST['geschenke_max'] ?? 5))));
         update_option('kikripp_besichtigung_ab', max(0, (float) ($_POST['besichtigung_ab'] ?? 0)));
         $schluss = sanitize_text_field(wp_unslash($_POST['abholschluss'] ?? ''));
         update_option('kikripp_abholschluss', preg_match('/^\d{4}-\d{2}-\d{2}$/', $schluss) ? $schluss : '');

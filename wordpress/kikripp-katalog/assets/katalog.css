@@ -68,7 +68,13 @@
 /* Karten */
 .kikripp .raster { display: grid; grid-template-columns: repeat(auto-fill, minmax(248px, 1fr)); gap: 16px; padding: 20px 0 40px; }
 .kikripp .karte { background: var(--grund); border: 1px solid var(--linie); border-radius: 3px; overflow: hidden; display: flex; flex-direction: column; }
-.kikripp .karte.weg { opacity: .55; }
+.kikripp .karte.weg .bild, .kikripp .karte.weg .txt > :not(.interesse) { opacity: .55; }
+/* 1.11.0: Interesse an reservierten Artikeln – bleibt voll sichtbar */
+.kikripp .interesse { margin-top: 11px; }
+.kikripp .interesse a { display: block; text-align: center; padding: 9px 6px; border: 1px solid var(--rot, #C8102E);
+  border-radius: 3px; color: var(--rot, #C8102E); text-decoration: none; font-weight: 600; }
+.kikripp .interesse a:hover { background: var(--rot, #C8102E); color: #fff; }
+.kikripp .interesse small { display: block; margin-top: 5px; font-size: 12px; color: #666; text-align: center; }
 .kikripp .bild { position: relative; height: 186px; background: var(--papier); overflow: hidden; }
 /* contain statt cover: Hochformatfotos (Regale, Schraenke) werden ganz gezeigt statt auf
    einen Querstreifen beschnitten. Der Rand bleibt papierfarben. */
@@ -280,3 +286,8 @@ body.kikripp-ohne-menue #masthead .main-navigation,
 body.kikripp-ohne-menue #main-header #et-top-navigation,
 body.kikripp-ohne-menue .ast-builder-menu,
 body.kikripp-ohne-menue .ast-header-social-wrap { display: none !important; }
+
+/* 1.10.1: Geschenke-Hinweis in der Leiste und an der Karte */
+.kikripp .geschenke-info { font-size: 13px; opacity: .9; }
+.kikripp .geschenke-info a { color: inherit; text-decoration: underline; }
+.kikripp .preis.geschenk small.kita { display: block; margin-top: 3px; }

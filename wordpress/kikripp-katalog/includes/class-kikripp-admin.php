@@ -14,6 +14,7 @@ class Kikripp_Admin {
         add_action('admin_post_kikripp_vorgang', [__CLASS__, 'vorgang_speichern']);
         add_action('admin_post_kikripp_zusatz', [__CLASS__, 'zusatz_speichern']);
         add_action('admin_post_kikripp_preis', [__CLASS__, 'preis_speichern']);
+        add_action('admin_post_kikripp_tausch', [__CLASS__, 'tausch_speichern']);
         add_action('admin_post_kikripp_warten', [__CLASS__, 'warten_speichern']);
         add_action('admin_post_kikripp_bestellung', [__CLASS__, 'bestellung']);
         add_action('admin_notices', [__CLASS__, 'hinweis_passwort']);
@@ -360,6 +361,14 @@ class Kikripp_Admin {
                     . '<select name="art"><option value="stueck">je Stück</option><option value="gesamt">Festpreis für ' . (int) $p['menge'] . ' Stück</option></select> '
                     . '<button class="button button-small">ändern</button></form></details>';
             }
+            // 1.11.1: Artikel tauschen – in jedem Status, auch nach Bezahlung und Abholung
+            $d .= ' <details style="display:inline-block;font-size:11px"><summary style="cursor:pointer;color:#2271b1">Artikel tauschen</summary>'
+                . '<form method="post" action="' . esc_url(admin_url('admin-post.php')) . '" style="margin:4px 0">'
+                . wp_nonce_field('kikripp_tausch_' . $id, '_wpnonce', true, false)
+                . '<input type="hidden" name="action" value="kikripp_tausch"><input type="hidden" name="id" value="' . $id . '">'
+                . '<input type="hidden" name="pid" value="' . (int) $p['id'] . '">'
+                . 'statt ' . esc_html($p['artnr']) . ': <input type="text" name="artnr" placeholder="z. B. BA07-03" style="width:90px"> '
+                . '<button class="button button-small" onclick="return confirm(\'Artikel tauschen? Preis und Menge bleiben gleich.\')">tauschen</button></form></details>';
             if ($offen_oder_bestellt && count($v['positionen']) > 1) {
                 $d .= ' <a href="' . esc_url(self::aktion_url('pos', $id, ['pid' => (int) $p['id']])) . '" style="font-size:11px" onclick="return confirm(\'Nur diese Position stornieren?\')">stornieren</a>';
             }
@@ -528,6 +537,19 @@ class Kikripp_Admin {
         }
         self::zurueck('kikripp-reservierungen', sprintf('Preis in Vorgang #%d geändert. Neue Summe: %s.', $id,
             Kikripp_Mail::eur(Kikripp_Ablauf::summe(Kikripp_DB::vorgang($id)))), false, 'vorgang-' . $id);
+    }
+
+    public static function tausch_speichern() {
+        if (!current_user_can('manage_options')) { wp_die('Keine Berechtigung.'); }
+        $id = (int) ($_POST['id'] ?? 0);
+        check_admin_referer('kikripp_tausch_' . $id);
+        $nr = sanitize_text_field(wp_unslash($_POST['artnr'] ?? ''));
+        $ok = Kikripp_DB::position_tauschen($id, (int) ($_POST['pid'] ?? 0), $nr);
+        if (is_wp_error($ok)) {
+            self::zurueck('kikripp-reservierungen', 'Nicht getauscht: ' . $ok->get_error_message(), true, 'vorgang-' . $id);
+        }
+        self::zurueck('kikripp-reservierungen', sprintf('Artikel in Vorgang #%d getauscht. Der alte Artikel ist im Katalog wieder frei.', $id),
+            false, 'vorgang-' . $id);
     }
 
     public static function zusatz_speichern() {

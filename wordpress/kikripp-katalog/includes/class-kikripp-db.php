@@ -470,6 +470,35 @@ class Kikripp_DB {
     }
 
     /**
+     * 1.11.1: Artikel einer Position tauschen – der Käufer hat ein anderes Stück mitgenommen als reserviert.
+     * Geht in jedem Status außer storniert, auch nach Bezahlung und Abholung. Preis und Menge bleiben,
+     * nur die Artikelnummer wechselt; der alte Artikel ist damit wieder frei, der neue belegt.
+     * Die Notiz am Vorgang hält den Tausch fest („21.10.: BU04-14 → BA07-03 getauscht“).
+     */
+    public static function position_tauschen($vorgang_id, $position_id, $neu_artnr) {
+        global $wpdb;
+        $v = self::vorgang($vorgang_id);
+        if (!$v) { return new WP_Error('fehlt', 'Vorgang nicht gefunden.'); }
+        if ($v['status'] === 'storniert') { return new WP_Error('gesperrt', 'Der Vorgang ist storniert.'); }
+        $p = null;
+        foreach ($v['positionen'] as $x) { if ((int) $x['id'] === (int) $position_id) { $p = $x; } }
+        if (!$p || $p['status'] === 'storniert') { return new WP_Error('position', 'Position nicht gefunden.'); }
+        $neu = strtoupper(trim((string) $neu_artnr));
+        if ($neu === '' || $neu === strtoupper($p['artnr'])) { return new WP_Error('nr', 'Bitte eine andere Artikelnummer eintragen.'); }
+        $da = $wpdb->get_var($wpdb->prepare('SELECT artnr FROM ' . self::t_artikel() . ' WHERE artnr = %s AND aktiv = 1', $neu));
+        if (!$da) { return new WP_Error('nr', 'Artikel ' . $neu . ' gibt es nicht oder er ist stillgelegt.'); }
+        $frei = self::frei($da);
+        if ($frei < (int) $p['menge']) {
+            return new WP_Error('frei', sprintf('Von %s sind nur %d Stück frei, die Position hat %d.', $da, $frei, (int) $p['menge']));
+        }
+        $wpdb->update(self::t_position(), ['artnr' => $da], ['id' => (int) $position_id]);
+        $text = gmdate('d.m.', current_time('timestamp')) . ': ' . $p['artnr'] . ' → ' . $da . ' getauscht';
+        $alt = trim((string) ($v['notiz'] ?? ''));
+        $wpdb->update(self::t_vorgang(), ['notiz' => ltrim($alt . ' · ' . $text, ' ·')], ['id' => (int) $vorgang_id]);
+        return true;
+    }
+
+    /**
      * Rabatt-Angabe der Zusatzbestellung lesen: „10 %“ / „10%“ -> ['prozent', 10], „= 40“ / „=40 €“ -> ['gesamt', 40],
      * leer -> null, Unlesbares -> WP_Error.
      */

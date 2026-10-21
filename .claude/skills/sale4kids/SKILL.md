@@ -1220,9 +1220,16 @@ ist die Merkliste; erledigte Punkte hier abhaken, nicht löschen.
       BA07-03: in WordPress Position tauschen). Kasse Tanja Fischer 70 € ok (Ware außerhalb Katalog). GA01-04 sichtbar,
       NU01-35 Foto F-817 sichtbar, NU03-02 Foto F-818. Fotos F-817 bis F-869: 50 neue Zeilen (721) NU05-19 bis -52,
       NE05-19/-20 (Stokke Baby Set 4 schwarz/2 weiß), NU07-09 bis -18 – alle **Preis geschätzt, offen, Im_Katalog nein**.
-      **Offen:** F-840 (weiße Schale, Post-it unlesbar, NU05-38?), F-843/F-844 PlanToys-Kipper (Post-it „07-14“,
-      kollidiert mit NU07-14), F-863 Montessori-Körper + Buch (Nummer?), NU05-26 fehlt, Tonieboxen F-819/F-820
-      (Raum, Anzahl Figuren, Regal dabei?). Importmeldung: „75 neu, 646 aktualisiert … 23 NEU“, Nachtrag 24 Fotos.
+      Antworten 21.10. eingearbeitet: NU05-38 IKEA-Schale (F-840), **NU05-46A** Montessori-Körper + Boooox (Post-it
+      sagte 46, die Holzbuchstaben tragen aber schon NU05-46), **NU07-14A** PlanToys-Kipper (F-843, Ansicht F-844),
+      NU05-26 gibt es nicht. Tonieboxen in NE01: NE01-27 rot / NE01-28 schwarz je mit 5 Figuren 45 €, NE01-29
+      weitere Figuren (2–3, ohne Foto, nachzählen) 8 €/Stück; Regal nicht dabei. **NU07 und Tonies gehen nach
+      Preisfreigabe sofort online, nicht erst im November.** Alle neuen weiterhin offen/Im_Katalog nein, bis die Excel
+      mit geprüften Preisen kommt (dann ok + Im_Katalog ja). **Regaltausch Seltmann gebaut: Plugin 1.11.1 „Artikel
+      tauschen“** je Position in jedem Status außer storniert (`Kikripp_DB::position_tauschen`, prüft `frei()` des neuen
+      Artikels, Notiz „TT.MM.: ALT → NEU getauscht“); Nutzerin tauscht in Vorgang Seltmann BU04-14 → BA07-03. In der
+      CSV: Verkaufsdaten auf BA07-03 umgezogen, BU04-14 30 €, stark gebraucht, sichtbar. 498 Logik-Tests.
+      Importmeldung: „81 neu, 646 aktualisiert … 23 NEU“, Nachtrag 24 Fotos (gegen Import 2dcf53d).
 - [ ] **Ende November 2026: Höchstzahl Geschenke je Reservierung mit der Nutzerin neu besprechen**
       (Vorschlag: ab ca. 01.12. auf 20 oder frei, damit bis 10.12. alles abgeholt wird).
 - [x] Plugin 1.2.1 (06.10.): Einstellung „Fußzeile ausblenden“ (Standard an) – Body-Klasse

@@ -133,5 +133,13 @@ pruefe("Server nimmt 5 Geschenke ohne Mindestwert an", a.get("ok") is True, f"({
 a = post(dict(kontakt, artikel={billig[2]: 1}, dauer=5000), admin=True)
 pruefe("Server: Verwaltung darf unter Mindestwert reservieren", a.get("ok") is True, f"({a!r})")
 
+kurz = {"name": "Barverkauf vor Ort", "telefon": "0171 2345678"}
+a = post(dict(kurz, artikel={billig[3]: 1}, dauer=5000), admin=True)
+pruefe("Server: Verwaltung reserviert nur mit Name und Telefon (1.11.2)", a.get("ok") is True, f"({a!r})")
+a = post(dict(kurz, artikel={billig[4]: 1}, dauer=5000))
+pruefe("Server: Kunde braucht weiter Anschrift", not a.get("ok"), f"({a!r})")
+a = post(dict(name="Ohne Telefon", artikel={billig[4]: 1}, dauer=5000), admin=True)
+pruefe("Server: Verwaltung braucht weiter Telefon", not a.get("ok"), f"({a!r})")
+
 print(f"\n== Geschenke-Browsertest: {proben} Prüfungen, {len(fehler)} Fehler ==")
 sys.exit(1 if fehler else 0)

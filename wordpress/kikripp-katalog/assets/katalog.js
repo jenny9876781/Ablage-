@@ -501,6 +501,8 @@
       '<p class="s">Die Artikel bleiben ' + FRIST + ' Werktage für Sie reserviert. Nach Eingang Ihrer Reservierung ' +
       'melden wir uns bei Ihnen. Eine Reservierung ist noch kein Kaufvertrag – dieser kommt mit Ihrer unterschriebenen ' +
       'Bestellung zustande. Sie können die Reservierung jederzeit formlos zurücknehmen.</p>' +
+      (IST_ADMIN ? '<div class="meldung">Sie sind als Verwaltung angemeldet: <b>Name und Telefon genügen</b>, ' +
+        'alles andere darf leer bleiben.</div>' : '') +
       '<div class="pos">' + zeilen +
         '<div style="border-top:1px solid #dcdcdc;margin-top:8px;padding-top:8px">' +
         '<b>' + stueck + ' Stück gesamt</b><b>' + betrag(netto) + (UST > 0 && netto > 0 ? ' inkl. USt' : '') + '</b></div></div>' +
@@ -547,6 +549,12 @@
     if (el('k-bes')) {
       el('k-bes').addEventListener('change', function () { el('k-bes-wahl').hidden = !this.checked; });
     }
+    if (IST_ADMIN) {   // 1.11.2: Verwaltung – nur Name und Telefon sind Pflicht, die übrigen Sternchen fallen weg
+      ['k-strasse', 'k-plz', 'k-ort', 'k-mail', 'k-abhol'].forEach(function (id) {
+        var l = wurzel.querySelector('label[for="' + id + '"]');
+        if (l) { l.textContent = l.textContent.replace(/\s*\*$/, '') + ' (freiwillig)'; }
+      });
+    }
     el('k-abbrechen').addEventListener('click', schliessen);
     el('k-senden').addEventListener('click', senden);
     var erstes = el('k-name'); if (erstes) { erstes.focus({ preventScroll: true }); }
@@ -584,11 +592,13 @@
     };
     function fehler(t) { meldung.innerHTML = '<div class="meldung schlecht">' + t + '</div>'; }
     if (!nutzlast.name) { fehler('Bitte geben Sie Ihren Namen an.'); return; }
-    if (!nutzlast.strasse || !nutzlast.ort || !/^\d{4,5}$/.test(nutzlast.plz)) {
+    // 1.11.2: angemeldet (Verwaltung, Barverkauf vor Ort) genügen Name und Telefon
+    var adminKurz = IST_ADMIN && !nutzlast.strasse && !nutzlast.ort && !nutzlast.plz;
+    if (!adminKurz && (!nutzlast.strasse || !nutzlast.ort || !/^\d{4,5}$/.test(nutzlast.plz))) {
       fehler('Bitte geben Sie Ihre vollständige Anschrift an (Straße, Postleitzahl, Ort) – sie wird für die Rechnung gebraucht.');
       return;
     }
-    if (!nutzlast.email) { fehler('Bitte geben Sie eine E-Mail-Adresse an.'); return; }
+    if (!nutzlast.email && !IST_ADMIN) { fehler('Bitte geben Sie eine E-Mail-Adresse an.'); return; }
     if (nutzlast.telefon.replace(/\D/g, '').length < 6) {
       fehler('Bitte geben Sie eine Telefonnummer an, unter der wir Sie erreichen. Wir melden uns nach der ' +
         'Reservierung bei Ihnen.');
@@ -597,7 +607,7 @@
     if (besichtigung && (!nutzlast.besichtigung_tag || !nutzlast.besichtigung_zeit)) {
       fehler('Bitte wählen Sie für die Besichtigung einen Donnerstag und eine Uhrzeit.'); return;
     }
-    if (!nutzlast.abholwunsch && !nutzlast.demontage) {
+    if (!nutzlast.abholwunsch && !nutzlast.demontage && !IST_ADMIN) {
       fehler('Bitte wählen Sie einen Wunschtermin für die Abholung oder kreuzen Sie an, dass eine Demontage nötig ist.');
       return;
     }

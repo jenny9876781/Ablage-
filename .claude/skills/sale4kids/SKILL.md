@@ -989,7 +989,7 @@ ist die Merkliste; erledigte Punkte hier abhaken, nicht löschen.
       bestellt + Abholtermin → Bestellung erstellen → bezahlt; nach Abwicklung Kontaktdaten
       löschen. Wöchentliche Updates bis Ende November, Spielzeug im November.
 - [ ] Zurückgestellt: WordPress-Update, Katalogseite aus der XML-Sitemap nehmen.
-- [ ] **Urlaubsvertretung: einfache Anleitung für die Kollegin (63, wenig technikaffin)** – zurückgestellt
+- [x] **Urlaubsvertretung: einfache Anleitung für die Kollegin (63, wenig technikaffin)** – ERLEDIGT 21.10. (siehe unten) – zurückgestellt
       am 09.10. (Ablauf kann sich noch ändern). **Erinnerung an die Nutzerin am Mi 21.10.2026**; Urlaub
       ab Ende Oktober. Brainstorming steht: (a) 1-seitiger laminierter Spickzettel + Word-Anleitung mit
       einem großen Screenshot je Schritt, rote Nummern/Pfeile, Kundendaten geschwärzt; (b) Aufbau nach
@@ -1230,6 +1230,15 @@ ist die Merkliste; erledigte Punkte hier abhaken, nicht löschen.
       Artikels, Notiz „TT.MM.: ALT → NEU getauscht“); Nutzerin tauscht in Vorgang Seltmann BU04-14 → BA07-03. In der
       CSV: Verkaufsdaten auf BA07-03 umgezogen, BU04-14 30 €, stark gebraucht, sichtbar. 498 Logik-Tests.
       Importmeldung: „81 neu, 646 aktualisiert … 23 NEU“, Nachtrag 24 Fotos (gegen Import 2dcf53d).
+- [x] **21.10.2026: Urlaubsvertretung 26.–30.10. (zurück 02.11.).** Entscheidungen: gemeinsamer Login (Empfehlung:
+      Passwort danach ändern), kein Drucker vor Ort, kein Quittungsblock, keine Notfallnummer, Kollegin kennt den
+      Abholablauf; Barzahlung wird im Nachgang auf der Rechnung quittiert. Nutzerin stellt selbst Frist auf **7 Werktage**
+      und ein **Hinweisband** ein (danach zurück auf 3 / leeren). `scripts/build_vertretung_docx.py` →
+      `ausgabe/V1_Anleitung_Vertretung.docx` (3 Seiten, 14 pt, „du“): geplante Abholung, spontaner Kunde in 8 Schritten
+      mit Bildern vom Testserver (`assets/vertretung/`), Kassenliste. **Plugin 1.11.2:** angemeldete Verwaltung braucht
+      im Reservierungsformular nur Name + Telefon (Anschrift, Mail, Abholtermin freiwillig; Server + Browser,
+      Hinweis im Formular, „(freiwillig)“ an den Feldern) – für Barverkauf vor Ort. Tests: 498 Logik, 91 Browser,
+      16 mobil, 27 Geschenke (3 neue Serverprüfungen).
 - [ ] **Ende November 2026: Höchstzahl Geschenke je Reservierung mit der Nutzerin neu besprechen**
       (Vorschlag: ab ca. 01.12. auf 20 oder frei, damit bis 10.12. alles abgeholt wird).
 - [x] Plugin 1.2.1 (06.10.): Einstellung „Fußzeile ausblenden“ (Standard an) – Body-Klasse

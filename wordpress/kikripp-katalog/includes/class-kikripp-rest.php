@@ -168,11 +168,14 @@ class Kikripp_REST {
             'demontage' => !empty($anfrage->get_param('demontage')),
         ];
         if ($kontakt['name'] === '') { return self::fehler('Bitte geben Sie Ihren Namen an.'); }
-        if ($kontakt['strasse'] === '' || $kontakt['ort'] === '' || !preg_match('/^\d{4,5}$/', $kontakt['plz'])) {
+        // 1.11.2: Verwaltung (z. B. Barverkauf vor Ort) braucht nur Name und Telefon; Anschrift und Mail sind freiwillig.
+        $anschrift_leer = $kontakt['strasse'] === '' && $kontakt['ort'] === '' && $kontakt['plz'] === '';
+        if (!($admin && $anschrift_leer)
+            && ($kontakt['strasse'] === '' || $kontakt['ort'] === '' || !preg_match('/^\d{4,5}$/', $kontakt['plz']))) {
             return self::fehler('Bitte geben Sie Ihre vollständige Anschrift an (Straße, Postleitzahl, Ort) – '
                 . 'sie wird für die Rechnung gebraucht.');
         }
-        if (!is_email($kontakt['email'])) { return self::fehler('Bitte geben Sie eine gültige E-Mail-Adresse an.'); }
+        if (!($admin && $kontakt['email'] === '') && !is_email($kontakt['email'])) { return self::fehler('Bitte geben Sie eine gültige E-Mail-Adresse an.'); }
         // Telefon ist Pflicht: nach der Reservierung rufen wir an.
         if (strlen(preg_replace('/\D/', '', $kontakt['telefon'])) < 6) {
             return self::fehler('Bitte geben Sie eine Telefonnummer an, unter der wir Sie erreichen.');
@@ -237,7 +240,7 @@ class Kikripp_REST {
                 }
                 $kontakt['abholwunsch'] .= ' ' . $zeit;
             }
-        } elseif (!$kontakt['demontage']) {
+        } elseif (!$kontakt['demontage'] && !$admin) {
             return self::fehler('Bitte wählen Sie einen Wunschtermin für die Abholung (montags oder dienstags) '
                 . 'oder kreuzen Sie an, dass eine Demontage nötig ist.');
         }

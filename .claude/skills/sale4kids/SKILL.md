@@ -1249,6 +1249,10 @@ ist die Merkliste; erledigte Punkte hier abhaken, nicht löschen.
       fragen; NU05-38 = 11 Stück (22.10.), IKEA-Nr. 401.772.28 online nicht gefunden. NU05-26 laut Nutzerin „Holzbecher mit
       Stiften im Karton“ – Foto fehlt: in der Upload-Folge fehlt IMG_2889 genau zwischen NU05-25 (2888) und -27 (2890), anfordern.
       Importdatei ändert sich nur bei unsichtbaren Artikeln (Meldung weiter „81 neu, 646 aktualisiert“).
+- [ ] **02.11.2026 nach dem Urlaub:** Frist zurück auf 3 Werktage, Hinweisband leeren, WordPress-Passwort ändern
+      (gemeinsamer Login), Kassenliste der Kollegin abarbeiten (Rechnungen „bar erhalten am …“, bezahlt/abgeholt setzen,
+      Vor-Ort-Reservierungen mit Nachricht „Barverkauf vor Ort“). Stand 22.10.: Frist 7 + Hinweisband gesetzt, Anleitung
+      übergeben. Offen: Excel mit 60 Preisen (Rückgabe der Nutzerin), danach Import + Foto-Nachtrag F-817 bis F-882.
 - [ ] **Ende November 2026: Höchstzahl Geschenke je Reservierung mit der Nutzerin neu besprechen**
       (Vorschlag: ab ca. 01.12. auf 20 oder frei, damit bis 10.12. alles abgeholt wird).
 - [x] Plugin 1.2.1 (06.10.): Einstellung „Fußzeile ausblenden“ (Standard an) – Body-Klasse

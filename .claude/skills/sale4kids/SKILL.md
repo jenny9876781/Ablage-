@@ -1239,6 +1239,15 @@ ist die Merkliste; erledigte Punkte hier abhaken, nicht löschen.
       im Reservierungsformular nur Name + Telefon (Anschrift, Mail, Abholtermin freiwillig; Server + Browser,
       Hinweis im Formular, „(freiwillig)“ an den Feldern) – für Barverkauf vor Ort. Tests: 498 Logik, 91 Browser,
       16 mobil, 27 Geschenke (3 neue Serverprüfungen).
+- [x] **22.10.2026: Word „Änderungen Artikelstamm“ (vom 21.10.) eingearbeitet** – Beschreibungen/Mengen/Maße für
+      NU05-19 bis -52, NU07-09 bis -15, NU07-14A (Maße aus Word „NU07-14: 30 x 19“ = Kipper), NU05-36 sind
+      **A4-Hefte** (nicht Bastelkarton), NU05-37 Karton A5-Hefte, NU05-45 = 3 IKEA Lustigt (Preis je Stück),
+      NU05-31 7 Blöcke Plastilin als Set, NU05-34 Preis-Vorschlag 18 €. Abweichungen bewusst NICHT übernommen:
+      Tonies im Word als NE01-16/-17 – die Nummern sind belegt (Pflanze, Wandregal Berg), bleiben NE01-27/-28;
+      Montessori im Word als NU05-46 – bleibt NU05-46A (Holzbuchstaben tragen NU05-46). **Offen:** NU05-26 steht im
+      Word (LYRA/Betzold/Pelikan-Stifte in Montessori-Holzbechern), aber ohne Foto/Zeile – nicht angelegt, Nutzerin
+      fragen; NU05-38 Menge fehlt im Word („insgesamt …“), IKEA-Nr. 401.772.28 online nicht gefunden.
+      Importdatei ändert sich nur bei unsichtbaren Artikeln (Meldung weiter „81 neu, 646 aktualisiert“).
 - [ ] **Ende November 2026: Höchstzahl Geschenke je Reservierung mit der Nutzerin neu besprechen**
       (Vorschlag: ab ca. 01.12. auf 20 oder frei, damit bis 10.12. alles abgeholt wird).
 - [x] Plugin 1.2.1 (06.10.): Einstellung „Fußzeile ausblenden“ (Standard an) – Body-Klasse

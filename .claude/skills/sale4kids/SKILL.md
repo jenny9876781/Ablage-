@@ -1246,7 +1246,8 @@ ist die Merkliste; erledigte Punkte hier abhaken, nicht löschen.
       Tonies im Word als NE01-16/-17 – die Nummern sind belegt (Pflanze, Wandregal Berg), bleiben NE01-27/-28;
       Montessori im Word als NU05-46 – bleibt NU05-46A (Holzbuchstaben tragen NU05-46). **Offen:** NU05-26 steht im
       Word (LYRA/Betzold/Pelikan-Stifte in Montessori-Holzbechern), aber ohne Foto/Zeile – nicht angelegt, Nutzerin
-      fragen; NU05-38 Menge fehlt im Word („insgesamt …“), IKEA-Nr. 401.772.28 online nicht gefunden.
+      fragen; NU05-38 = 11 Stück (22.10.), IKEA-Nr. 401.772.28 online nicht gefunden. NU05-26 laut Nutzerin „Holzbecher mit
+      Stiften im Karton“ – Foto fehlt: in der Upload-Folge fehlt IMG_2889 genau zwischen NU05-25 (2888) und -27 (2890), anfordern.
       Importdatei ändert sich nur bei unsichtbaren Artikeln (Meldung weiter „81 neu, 646 aktualisiert“).
 - [ ] **Ende November 2026: Höchstzahl Geschenke je Reservierung mit der Nutzerin neu besprechen**
       (Vorschlag: ab ca. 01.12. auf 20 oder frei, damit bis 10.12. alles abgeholt wird).

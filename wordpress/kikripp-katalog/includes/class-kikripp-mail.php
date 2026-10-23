@@ -122,7 +122,7 @@ class Kikripp_Mail {
             if (strlen($w) > 10) { $teiltext .= ', ' . substr($w, 11) . ' Uhr'; }
             $teile[] = $teiltext;
         }
-        if (!empty($v['demontage'])) { $teile[] = 'Demontage nötig – Termin Fr nachmittag / Sa vormittag nach Vereinbarung'; }
+        if (!empty($v['demontage'])) { $teile[] = 'Termin nach Vereinbarung (Nachmittag oder Demontage)'; }
         return $teile ? implode('; ', $teile) : '—';
     }
 

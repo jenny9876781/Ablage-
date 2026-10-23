@@ -55,6 +55,20 @@ function kikripp_ablauf_123() {
         . 'Erstattung in unser Eigentum zurück.';
 }
 
+/**
+ * Ablauftext 1.12.0 (23.10.2026): Besichtigung und Abholung montags bis donnerstags vormittags,
+ * Nachmittag/Demontage nach Vereinbarung, Geschenke nur kostenlos zu einem Einkauf.
+ */
+function kikripp_ablauf_1120() {
+    return 'Ihre Auswahl bleibt 3 Werktage reserviert, nach Eingang melden wir uns bei Ihnen. '
+        . 'Mindestbestellwert 50 €. Artikel ab 100 € können Sie montags bis donnerstags von 8 bis 12 Uhr nach '
+        . 'Vereinbarung besichtigen. Der Kaufvertrag kommt mit der unterschriebenen Bestellung zustande.' . "\n"
+        . 'Bezahlung: generell per Überweisung gegen Rechnung vor der Abholung. Abholung montags bis donnerstags '
+        . 'von 8 bis 12 Uhr, Nachmittagstermine und Demontage nach Vereinbarung (bitte Werkzeug mitbringen). '
+        . 'Abholung spätestens bis 10.12.2026, danach geht nicht abgeholte Ware ohne Erstattung in unser Eigentum zurück.' . "\n"
+        . 'Artikel „zu verschenken“ gibt es kostenlos zu Ihrem Einkauf.';
+}
+
 /** Ablauf als Fließtext (Fassung 1.2.2, Wunsch 06.10.2026: kürzer, „melden wir uns“). */
 function kikripp_ablauf_122() {
     return 'Ihre Auswahl bleibt 3 Werktage reserviert, nach Eingang melden wir uns bei Ihnen. '

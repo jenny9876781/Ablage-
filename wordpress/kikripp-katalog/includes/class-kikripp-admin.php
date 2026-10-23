@@ -306,7 +306,7 @@ class Kikripp_Admin {
            . '<td title="' . esc_attr($titel) . '">' . count($pos) . ' Pos. · ' . $stueck . ' Stück'
            . '<br><span class="kik-kommi-badge" id="kommi-badge-' . $id . '">' . esc_html(Kikripp_Ablauf::kommi_text($kommi)) . '</span></td>'
            . '<td style="white-space:nowrap">' . esc_html(Kikripp_Mail::eur(Kikripp_Ablauf::summe($v))) . '</td>'
-           . '<td>' . $abholung . (!empty($v['demontage']) ? '<br><span style="font-size:11px">Demontage</span>' : '') . '</td>'
+           . '<td>' . $abholung . (!empty($v['demontage']) ? '<br><span style="font-size:11px">nach Vereinbarung</span>' : '') . '</td>'
            . '<td>' . (trim((string) ($v['rechnungsnr'] ?? '')) !== '' ? esc_html($v['rechnungsnr']) : '—') . '</td>'
            . '<td style="color:' . $farbe . ';font-weight:' . ($blass ? '400' : '600') . '">' . esc_html($st['schritt']) . '</td>'
            . '<td class="kik-auf" style="text-align:right">' . $knopf
@@ -666,7 +666,8 @@ class Kikripp_Admin {
         $schluss = (string) get_option('kikripp_abholschluss', '');
         $schluss_text = $schluss ? gmdate('d.m.Y', strtotime($schluss . ' 12:00:00 UTC')) : '';
 
-        $zeilen = ''; $summe = 0.0;
+        $zeilen = ''; $summe = 0.0; $zugaben = 0;
+        $nur_geschenke = Kikripp_Ablauf::geschenk($v);
         foreach ($v['positionen'] as $p) {
             if ($p['status'] === 'storniert') { continue; }
             $d = json_decode((string) $p['daten'], true);
@@ -678,11 +679,14 @@ class Kikripp_Admin {
             $orig = ($p['preis_original'] ?? null) !== null && $p['preis_original'] !== '' && (float) $p['preis_original'] * (int) $p['menge'] > $wert + 0.004;
             // 1.8.0: vereinbarter Preis – der Katalogpreis steht durchgestrichen darüber
             $einzel = $fest ? 'Festpreis' : $e(Kikripp_Mail::eur($p['preis_netto']));
+            $zugabe = $wert <= 0.0 && !$nur_geschenke;          // 1.12.0
+            if ($zugabe) { $zugaben++; }
             if ($orig) { $einzel = '<s style="color:#777">' . $e(Kikripp_Mail::eur($p['preis_original'])) . '</s><br>' . $einzel; }
+            if ($zugabe) { $einzel = '–'; }
             $zeilen .= '<tr><td>' . $e($p['artnr']) . '</td><td>' . $e($titel) . '</td><td class="r">'
                 . (int) $p['menge'] . ' ' . $e($einheit) . '</td><td class="r">' . $einzel
                 . '</td><td class="r">' . ($orig ? '<s style="color:#777">' . $e(Kikripp_Mail::eur((float) $p['preis_original'] * (int) $p['menge'])) . '</s><br>' : '')
-                . $e(Kikripp_Mail::eur($wert)) . '</td></tr>';
+                . ($zugabe ? 'kostenlos zu Ihrem Einkauf' : $e(Kikripp_Mail::eur($wert))) . '</td></tr>';
         }
         $summenzeile = $ust > 0
             ? '<tr class="s"><td colspan="4">Summe netto</td><td class="r">' . $e(Kikripp_Mail::eur($summe)) . '</td></tr>'
@@ -738,10 +742,12 @@ class Kikripp_Admin {
             . '<tr><td>' . implode('<br>', array_map($e, $anschrift)) . '</td><td>' . implode('<br>', array_map($e, $kontakt)) . '</td></tr></table>'
             . '<table><tr><th>Art.-Nr.</th><th>Bezeichnung</th><th class="r">Menge</th><th class="r">Einzelpreis</th><th class="r">Gesamt</th></tr>'
             . $zeilen . $summenzeile . '</table>'
+            . ($zugaben ? '<p class="klein">Artikel „kostenlos zu Ihrem Einkauf“ erhalten Sie als Zugabe ohne Berechnung. '
+              . 'Wird der Kauf storniert, entfallen auch die Zugaben.</p>' : '')
             . ($termine ? '<p>' . implode('<br>', array_map($e, $termine)) . '</p>' : '')
             . '<p><b>Zahlung:</b> ' . $e($zahlung) . '</p>'
-            . '<p><b>Abholung:</b> durch den Käufer, montags und dienstags von 08:00 bis 11:00 Uhr; Demontage nach '
-            . 'Vereinbarung auch Freitagnachmittag oder Samstagvormittag. Werkzeug ist mitzubringen.'
+            . '<p><b>Abholung:</b> durch den Käufer, montags bis donnerstags von 08:00 bis 12:00 Uhr; Nachmittagstermine '
+            . 'und Demontage nach Vereinbarung. Werkzeug ist mitzubringen.'
             . ($schluss_text ? ' Die Ware ist bis spätestens <b>' . $e($schluss_text) . '</b> abzuholen. Nicht abgeholte Ware geht '
               . 'ohne Erstattung in das Eigentum der ' . $e($firma) . ' zurück.' : '') . '</p>'
             . $gewaehr
@@ -1113,6 +1119,17 @@ class Kikripp_Admin {
              . '<p class="description">Erscheint als Band über dem Katalog. Zum Livegang das Feld leeren.</p></td></tr>',
              esc_attr(get_option('kikripp_hinweisband', '')));
 
+        printf('<tr><th scope="row"><label for="k_band_bis">Hinweisband anzeigen bis</label></th><td>'
+             . '<input type="date" id="k_band_bis" name="hinweis_bis" value="%s">'
+             . '<p class="description">Nach diesem Tag verschwindet das Band von selbst. Leer = bis Sie es löschen.</p></td></tr>',
+             esc_attr(get_option('kikripp_hinweis_bis', '')));
+
+        printf('<tr><th scope="row"><label for="k_rueck">Rückmeldung erst ab</label></th><td>'
+             . '<input type="date" id="k_rueck" name="rueckmeldung_ab" value="%s">'
+             . '<p class="description">Bei Abwesenheit: Bis zu diesem Tag steht im Formular und in der Bestätigung '
+             . '„Wir sind bis … nicht im Haus und melden uns ab dem … bei Ihnen.“ Ab dem Tag wieder der normale Satz. Leer = aus.</p></td></tr>',
+             esc_attr(get_option('kikripp_rueckmeldung_ab', '')));
+
         printf('<tr><th scope="row"><label for="k_frist">Reservierung gilt</label></th><td>'
              . '<input type="number" id="k_frist" name="frist_werktage" min="1" max="30" value="%d" class="small-text"> Werktage (Mo–Fr)'
              . '<p class="description">Danach wird der Artikel automatisch wieder frei – außer der Vorgang steht auf '
@@ -1133,12 +1150,17 @@ class Kikripp_Admin {
         printf('<tr><th scope="row"><label for="k_besicht">Besichtigung ab</label></th><td>'
              . '<input type="number" id="k_besicht" name="besichtigung_ab" min="0" step="1" value="%s" class="small-text"> € Stückpreis'
              . '<p class="description">Artikel ab diesem Preis tragen im Katalog „Besichtigung möglich“, und das '
-             . 'Formular fragt nach einem Besichtigungstermin am Donnerstagvormittag.</p></td></tr>',
+             . 'Formular fragt nach einem Besichtigungstermin (montags bis donnerstags, vormittags).</p></td></tr>',
              esc_attr(get_option('kikripp_besichtigung_ab', 0)));
+
+        printf('<tr><th scope="row"><label for="k_termine_ab">Termine frühestens ab</label></th><td>'
+             . '<input type="date" id="k_termine_ab" name="termine_ab" value="%s">'
+             . '<p class="description">Erster Tag, den das Formular für Besichtigung und Abholung anbietet. Leer = ab morgen.</p></td></tr>',
+             esc_attr(get_option('kikripp_termine_ab', '')));
 
         printf('<tr><th scope="row"><label for="k_schluss">Abholung bis</label></th><td>'
              . '<input type="date" id="k_schluss" name="abholschluss" value="%s">'
-             . '<p class="description">Letzter Abholtag. Das Formular bietet nur Montage und Dienstage bis dahin an.</p></td></tr>',
+             . '<p class="description">Letzter Abholtag. Das Formular bietet Montag bis Donnerstag bis dahin an, vormittags 8 bis 12 Uhr.</p></td></tr>',
              esc_attr(get_option('kikripp_abholschluss', '')));
 
         printf('<tr><th scope="row"><label for="k_ablauf">So läuft es ab</label></th><td>'
@@ -1260,6 +1282,10 @@ class Kikripp_Admin {
         update_option('kikripp_mindestwert', max(0, (float) ($_POST['mindestwert'] ?? 0)));
         update_option('kikripp_geschenke_max', min(999, max(1, (int) ($_POST['geschenke_max'] ?? 5))));
         update_option('kikripp_besichtigung_ab', max(0, (float) ($_POST['besichtigung_ab'] ?? 0)));
+        foreach (['hinweis_bis', 'rueckmeldung_ab', 'termine_ab'] as $feld) {      // 1.12.0
+            $wert = sanitize_text_field(wp_unslash($_POST[$feld] ?? ''));
+            update_option('kikripp_' . $feld, preg_match('/^\d{4}-\d{2}-\d{2}$/', $wert) ? $wert : '');
+        }
         $schluss = sanitize_text_field(wp_unslash($_POST['abholschluss'] ?? ''));
         update_option('kikripp_abholschluss', preg_match('/^\d{4}-\d{2}-\d{2}$/', $schluss) ? $schluss : '');
         update_option('kikripp_ablauftext', sanitize_textarea_field(wp_unslash($_POST['ablauftext'] ?? '')));

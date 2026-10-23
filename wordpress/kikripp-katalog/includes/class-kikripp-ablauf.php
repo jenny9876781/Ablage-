@@ -106,6 +106,21 @@ class Kikripp_Ablauf {
         return $pos !== [] && self::summe($v) <= 0.0;
     }
 
+    /** 1.12.0: Geschenke (0 €) neben mindestens einem Kaufartikel – „kostenlos zu Ihrem Einkauf“. */
+    public static function zugaben($v) {
+        if (self::geschenk($v)) { return []; }
+        return array_values(array_filter(self::positionen($v), function ($p) { return $p['betrag'] <= 0.0; }));
+    }
+
+    /** 1.12.0: Alle Kaufartikel storniert, aber Geschenke noch reserviert? Dann ist die Zugabe ohne Kauf. */
+    public static function geschenke_ohne_kauf($v) {
+        if (!self::geschenk($v)) { return false; }
+        foreach ($v['positionen'] as $p) {
+            if ($p['status'] === 'storniert' && (float) $p['preis_netto'] > 0) { return true; }
+        }
+        return false;
+    }
+
     /** 1.9.0: wartet der Vorgang auf eine Rückinfo? */
     public static function wartet($v) { return trim((string) ($v['warte_seit'] ?? '')) !== ''; }
 
@@ -302,6 +317,9 @@ class Kikripp_Ablauf {
                         . ' kommissioniert → ' . $wort . ' bereitstellen.', 'warn', 1);
                 }
             };
+            if (self::geschenke_ohne_kauf($v) && !$abgeholt && in_array($v['status'], ['offen', 'bestellt'], true)) {
+                $neu($v, 'Kauf storniert, nur noch Geschenke reserviert – Geschenke gibt es nur zu einem Einkauf, bitte klären.', 'warn', 2);
+            }
             if (self::wartet($v)) {                     // 1.9.0: ruht bis zur Rückinfo oder Wiedervorlage
                 if (self::wiedervorlage_faellig($v, $heute)) {
                     $notiz = trim((string) ($v['warte_notiz'] ?? ''));
@@ -469,6 +487,10 @@ class Kikripp_Ablauf {
                  'vielen Dank für deine Reservierung! Anbei findest du die Rechnung und deine Bestellung.',
                  'vielen Dank für eure Reservierung! Anbei findet ihr die Rechnung und eure Bestellung.')
             . "\n\n"
+            . (self::zugaben($v) ? $w('Kostenlos zu Ihrem Einkauf erhalten Sie außerdem: ', 'Kostenlos zu deinem Einkauf bekommst du außerdem: ',
+                                      'Kostenlos zu eurem Einkauf bekommt ihr außerdem: ')
+                . implode(', ', array_map(function ($p) { return $p['artnr'] . ' ' . $p['titel'] . ($p['menge'] > 1 ? ' (' . $p['menge'] . ' Stück)' : ''); },
+                    self::zugaben($v))) . ".\n\n" : '')
             . $w('Bitte überweisen Sie den Rechnungsbetrag zeitnah unter Angabe der Rechnungsnummer auf das angegebene Konto. '
                  . 'Die Bestellung senden Sie uns bitte unterschrieben per Scan zurück oder unterschreiben sie bei der Abholung.',
                  'Bitte überweise den Rechnungsbetrag zeitnah unter Angabe der Rechnungsnummer auf das angegebene Konto. '
@@ -541,7 +563,7 @@ class Kikripp_Ablauf {
             . (trim((string) $v['telefon']) !== '' ? 'Telefon: ' . $v['telefon'] . "\n" : '')
             . (trim((string) $v['rechnungsnr']) !== '' ? 'Rechnung: ' . $v['rechnungsnr'] . "\n" : '')
             . "Bezahlt (beim Eintragen in Outlook): $bezahlt\n"
-            . (!empty($v['demontage']) ? "Demontage nötig\n" : '')
+            . (!empty($v['demontage']) ? "Termin nach Vereinbarung (Nachmittag/Demontage)\n" : '')
             . (trim((string) ($v['notiz'] ?? '')) !== '' ? 'Notiz: ' . $v['notiz'] . "\n" : '')
             . "\nArtikel:\n" . implode("\n", $zeilen);
         $ort = (string) get_option('kikripp_abholadresse', '');
@@ -648,7 +670,7 @@ class Kikripp_Ablauf {
             . ' <span style="color:#555">#' . (int) $v['id'] . '</span><br>'
             . (trim((string) $v['telefon']) !== '' ? 'Tel. ' . esc_html($v['telefon']) . ' · ' : '')
             . 'Rechnung ' . (trim((string) $v['rechnungsnr']) !== '' ? esc_html($v['rechnungsnr']) : '<em>fehlt</em>')
-            . (!empty($v['demontage']) ? ' · <strong>Demontage</strong>' : '') . '</div>'
+            . (!empty($v['demontage']) ? ' · <strong>nach Vereinbarung</strong>' : '') . '</div>'
             . '<div style="font-weight:600;color:' . ($bezahlt ? '#00a32a' : '#d63638') . '">'
             . ($bezahlt ? '✓ bezahlt' : '✗ NOCH NICHT BEZAHLT')
             . '<br><span id="kommi-badge-' . (int) $v['id'] . '" style="color:#50575e;font-weight:400">' . esc_html(self::kommi_text(self::kommi($v))) . '</span></div></div>';

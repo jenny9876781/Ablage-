@@ -9,8 +9,9 @@
 
   var ARTIKEL = [], UST = 0.19, HINWEIS = '', FRIST = 3, IST_ADMIN = false;
   var RECHT = '', ABHOLUNG = '', ANBIETER = {}, STEUER = '', ABLAUF = '';
-  var MINDEST = 0, GESCHENKE_MAX = 5, BES_AB = 0, SCHLUSS = '', HEUTE = '';
-  var BES_ZEITEN = ['08:00', '08:30', '09:00', '09:30', '10:00', '10:30'];
+  var MINDEST = 0, GESCHENKE_MAX = 5, BES_AB = 0, SCHLUSS = '', HEUTE = '', TERMINE_AB = '', RUECK = '';
+  var BES_ZEITEN = ['08:00', '08:30', '09:00', '09:30', '10:00', '10:30', '11:00', '11:30'];   // 1.12.0: bis 12 Uhr
+  var TERMIN_TAGE = [1, 2, 3, 4];                                                               // Mo–Do
   var formularSeit = 0;
   var merk = {};                       // ArtNr -> gewünschte Stückzahl
 
@@ -27,8 +28,8 @@
   function absatz(s) { return sicher(s).replace(/\r?\n/g, '<br>'); }
   function el(id) { return document.getElementById(id); }
   function brutto(p) { return p * (1 + UST); }
-  /** Betrag einer Zeile – Geschenke (Preis 0) heißen „geschenkt“ statt „0,00 €“. */
-  function betrag(netto) { return netto > 0 ? eur(brutto(netto)) : 'geschenkt'; }
+  /** Betrag einer Zeile – Geschenke (Preis 0) heißen „kostenlos“ statt „0,00 €“. */
+  function betrag(netto) { return netto > 0 ? eur(brutto(netto)) : 'kostenlos'; }
   function geschenk(a) { return !(a.preis > 0); }
 
   // Datumsrechnung immer in UTC und ab dem Serverdatum - die Uhr des Besuchers kann falsch gehen.
@@ -45,10 +46,21 @@
     var aus = [];
     if (!HEUTE) { return aus; }
     var d = tag(HEUTE), ende = SCHLUSS ? tag(SCHLUSS) : new Date(d.getTime() + 70 * 864e5);
-    for (d = new Date(d.getTime() + 864e5); d <= ende && aus.length < 40; d = new Date(d.getTime() + 864e5)) {
+    // 1.12.0: frühestens ab „Termine ab“ (Einstellung), sonst ab morgen
+    if (TERMINE_AB && TERMINE_AB > HEUTE) { d = new Date(tag(TERMINE_AB).getTime() - 864e5); }
+    for (d = new Date(d.getTime() + 864e5); d <= ende && aus.length < 60; d = new Date(d.getTime() + 864e5)) {
       if (wochentage.indexOf(d.getUTCDay()) >= 0) { aus.push(iso(d)); }
     }
     return aus;
+  }
+
+  /** 1.12.0: „Wir melden uns …“ – während der Abwesenheit mit Datum, sonst wie bisher. */
+  function rueckmeldung(standard) {
+    if (!RUECK) { return standard; }
+    var d = new Date(tag(RUECK).getTime() - 864e5);
+    while (d.getUTCDay() === 0 || d.getUTCDay() === 6) { d = new Date(d.getTime() - 864e5); }
+    return 'Wir sind bis ' + datumText(iso(d)).slice(4) + ' nicht im Haus und melden uns ab dem ' +
+      datumText(RUECK).slice(4) + ' bei Ihnen.';
   }
 
   function hole(pfad, optionen) {
@@ -110,6 +122,8 @@
       GESCHENKE_MAX = a.daten.geschenke_max || 5;
       BES_AB = a.daten.besichtigung_ab || 0;
       SCHLUSS = a.daten.abholschluss || '';
+      TERMINE_AB = a.daten.termine_ab || '';
+      RUECK = a.daten.rueckmeldung_ab || '';
       HEUTE = a.daten.heute || iso(new Date());
       HINWEIS = a.daten.hinweis || '';
       FRIST = a.daten.frist || 3;
@@ -318,8 +332,9 @@
         (a.buendel ? '<span class="bnd">Sammlung ' + sicher(a.buendel) + '</span>' : '') +
       '</div>' +
       (geschenk(a)
-        ? '<div class="preis geschenk"><b>zu verschenken</b><small>kostenlos · nur Abholung · höchstens ' +
-            GESCHENKE_MAX + ' Geschenke je Reservierung</small><small class="kita">' + KITA + '</small></div>'
+        ? '<div class="preis geschenk"><b>Kostenlos zu Ihrem Einkauf</b><small>' +
+            (MINDEST > 0 ? 'ab einem Einkauf von ' + eur(MINDEST) + ' · ' : 'nur zusammen mit einem Kauf · ') +
+            'nur Abholung · höchstens ' + GESCHENKE_MAX + ' Geschenke je Reservierung</small><small class="kita">' + KITA + '</small></div>'
         : '<div class="preis"><b>' + eur(brutto(a.preis)) + vhb + '</b>' +
           '<small>' + (UST > 0 ? 'inkl. USt · netto ' + eur(a.preis) : sicher(STEUER || 'Endpreis')) +
           ' · je ' + sicher(a.einheit) + '</small></div>') +
@@ -407,7 +422,7 @@
   function geschenkHinweis(w) {
     if (IST_ADMIN || !ARTIKEL.some(geschenk)) { return ''; }
     var n = w.filter(function (p) { return geschenk(p.a); }).length;
-    return '<br><span class="geschenke-info">Zu verschenken: ' + n + ' von ' + GESCHENKE_MAX + ' – kostenlos dazu · ' +
+    return '<br><span class="geschenke-info">Zu verschenken: ' + n + ' von ' + GESCHENKE_MAX + ' – kostenlos zu Ihrem Einkauf · ' +
       '<a href="#" class="geschenke-link">Geschenke ansehen</a> · ' + KITA + '</span>';
   }
 
@@ -415,19 +430,23 @@
     var w = auswahl();
     var stueck = 0, netto = 0;
     w.forEach(function (p) { stueck += p.menge; netto += p.menge * p.a.preis; });
-    // Geschenke zählen nicht zum Mindestbestellwert; nur Geschenke = kein Mindestwert.
+    // Geschenke zählen nicht zum Mindestbestellwert. 1.12.0: Geschenke nur zusammen mit einem Kauf.
+    var nurGeschenke = !IST_ADMIN && stueck > 0 && netto <= 0;
     // Die Verwaltung (angemeldet) reserviert im Namen von Kunden ohne Mindestbestellwert.
     var fehlt = MINDEST > 0 && netto > 0 && !IST_ADMIN ? MINDEST - brutto(netto) : 0;
     el('k-merk').innerHTML = stueck
       ? stueck + ' Stück vorgemerkt · <b>' + betrag(netto) + '</b>' +
         (UST > 0 ? ' <span style="opacity:.8">inkl. USt</span>' : '') +
         (fehlt > 0.004 ? '<br><span class="mindest">Mindestbestellwert ' + eur(MINDEST) +
-          ' – es fehlen noch ' + eur(fehlt) + '</span>' : '') + geschenkHinweis(w)
+          ' – es fehlen noch ' + eur(fehlt) + '</span>' : '') +
+        (nurGeschenke ? '<br><span class="mindest">Geschenke gibt es nur kostenlos zu Ihrem Einkauf' +
+          (MINDEST > 0 ? ' (ab ' + eur(MINDEST) + ')' : '') + ' – bitte wählen Sie noch Artikel zum Kauf dazu.</span>' : '') +
+        geschenkHinweis(w)
       : 'Noch nichts vorgemerkt – Stückzahl eintragen und auf „reservieren“ klicken.' +
         (IST_ADMIN ? ' Sie sind als Verwaltung angemeldet: Mindestbestellwert und Geschenke-Grenze gelten für Sie nicht.'
           : (MINDEST > 0 ? ' Mindestbestellwert ' + eur(MINDEST) + ' (gilt nicht für Artikel „zu verschenken“).' : '') +
             (ARTIKEL.some(geschenk) ? ' ' + KITA : ''));
-    el('k-anfragen').disabled = stueck === 0 || fehlt > 0.004;
+    el('k-anfragen').disabled = stueck === 0 || fehlt > 0.004 || nurGeschenke;
     // Ohne Auswahl braucht die Leiste auf dem Telefon keine Knoepfe (siehe katalog.css).
     var l = wurzel.querySelector('.leiste');
     if (l) { l.className = stueck ? 'leiste' : 'leiste leer'; }
@@ -489,17 +508,17 @@
     var zeilen = w.map(function (p) {
       netto += p.menge * p.a.preis; stueck += p.menge; teuerster = Math.max(teuerster, p.a.preis);
       return '<div><span>' + p.menge + ' × ' + sicher(p.a.nr) + ' ' + sicher(p.a.titel) + '</span>' +
-             '<span>' + betrag(p.menge * p.a.preis) + '</span></div>';
+             '<span>' + (p.a.preis > 0 ? betrag(p.menge * p.a.preis) : 'kostenlos zu Ihrem Einkauf') + '</span></div>';
     }).join('');
     var mitBesichtigung = BES_AB > 0 && teuerster >= BES_AB;
-    var donnerstage = tage([4]).map(function (d) { return [d, datumText(d)]; });
-    var abholtage = tage([1, 2]).map(function (d) { return [d, datumText(d)]; });
+    var bestage = tage(TERMIN_TAGE).map(function (d) { return [d, datumText(d)]; });
+    var abholtage = bestage;
 
     el('k-formular').innerHTML =
       '<div class="dlg" id="k-dlg">' +
       '<h3>Reservierung abschicken</h3>' +
-      '<p class="s">Die Artikel bleiben ' + FRIST + ' Werktage für Sie reserviert. Nach Eingang Ihrer Reservierung ' +
-      'melden wir uns bei Ihnen. Eine Reservierung ist noch kein Kaufvertrag – dieser kommt mit Ihrer unterschriebenen ' +
+      '<p class="s">Die Artikel bleiben ' + FRIST + ' Werktage für Sie reserviert. ' +
+      rueckmeldung('Nach Eingang Ihrer Reservierung melden wir uns bei Ihnen.') + ' Eine Reservierung ist noch kein Kaufvertrag – dieser kommt mit Ihrer unterschriebenen ' +
       'Bestellung zustande. Sie können die Reservierung jederzeit formlos zurücknehmen.</p>' +
       (IST_ADMIN ? '<div class="meldung">Sie sind als Verwaltung angemeldet: <b>Name und Telefon genügen</b>, ' +
         'alles andere darf leer bleiben.</div>' : '') +
@@ -517,18 +536,19 @@
       '<small class="hint">Wir melden uns nach der Reservierung – bitte unbedingt angeben.</small></div>' +
       (mitBesichtigung
         ? '<div class="feld"><label class="chk2"><input type="checkbox" id="k-bes"> Ich möchte die Artikel vorab besichtigen ' +
-          '(donnerstags 08:00–11:00 Uhr)</label>' +
-          '<div class="zwei" id="k-bes-wahl" hidden><div>' + auswahlFeld('k-bes-tag', donnerstage, 'Donnerstag wählen') + '</div>' +
+          '(montags bis donnerstags 08:00–12:00 Uhr)</label>' +
+          '<div class="zwei" id="k-bes-wahl" hidden><div>' + auswahlFeld('k-bes-tag', bestage, 'Tag wählen (Mo–Do)') + '</div>' +
           '<div>' + auswahlFeld('k-bes-zeit', BES_ZEITEN.map(function (z) { return [z, z + ' Uhr']; }), 'Uhrzeit wählen') + '</div></div></div>'
         : (BES_AB > 0 ? '<p class="hint-bes">Eine Besichtigung bieten wir für Artikel ab ' + eur(BES_AB) + ' an.</p>' : '')) +
       '<div class="feld"><label for="k-abhol">Gewünschter Abholtermin *</label>' +
-        '<div class="zwei"><div>' + auswahlFeld('k-abhol', abholtage, 'Montag oder Dienstag wählen') + '</div>' +
+        '<div class="zwei"><div>' + auswahlFeld('k-abhol', abholtage, 'Tag wählen (Mo–Do)') + '</div>' +
         '<div>' + auswahlFeld('k-abhol-zeit', BES_ZEITEN.map(function (z) { return [z, z + ' Uhr']; }), 'Uhrzeit (optional)') +
         '</div></div>' +
-        '<small class="hint">Abholung montags und dienstags 08:00–11:00 Uhr' +
+        '<small class="hint">Abholung montags bis donnerstags 08:00–12:00 Uhr' +
+        (TERMINE_AB && TERMINE_AB > HEUTE ? ', frühestens ab ' + datumText(TERMINE_AB).slice(4) : '') +
         (SCHLUSS ? ', spätestens ' + datumText(SCHLUSS).slice(4) : '') + '. Abgeholt wird nach Zahlungseingang.</small>' +
-        '<label class="chk2"><input type="checkbox" id="k-demontage"> Demontage nötig – Termin Freitagnachmittag ' +
-        'oder Samstagvormittag nach Vereinbarung</label></div>' +
+        '<label class="chk2"><input type="checkbox" id="k-demontage"> Termin am Nachmittag oder Demontage nötig – ' +
+        'nach Vereinbarung</label></div>' +
       '<div class="feld"><label for="k-text">Nachricht (optional)</label><textarea id="k-text" rows="2"></textarea></div>' +
       // Unsichtbares Feld gegen Formular-Roboter. Menschen sehen es nicht und lassen es leer.
       '<div class="hp" aria-hidden="true"><label for="k-webseite">Webseite</label>' +
@@ -568,7 +588,7 @@
     var zeilen = letzteAuswahl.map(function (p) {
       netto += p.menge * p.preis; stueck += p.menge;
       return '<div class="zeile"><span>' + p.menge + ' × ' + sicher(p.nr) + ' ' +
-             sicher(p.titel) + '</span><b>' + betrag(p.menge * p.preis) + '</b></div>';
+             sicher(p.titel) + '</span><b>' + (p.preis > 0 ? betrag(p.menge * p.preis) : 'kostenlos zu Ihrem Einkauf') + '</b></div>';
     }).join('');
     return zeilen + '<div class="zeile summe"><span>' + stueck + ' Stück gesamt</span><b>' +
            betrag(netto) + (UST > 0 && netto > 0 ? ' inkl. USt' : '') + '</b></div>';
@@ -605,10 +625,10 @@
       return;
     }
     if (besichtigung && (!nutzlast.besichtigung_tag || !nutzlast.besichtigung_zeit)) {
-      fehler('Bitte wählen Sie für die Besichtigung einen Donnerstag und eine Uhrzeit.'); return;
+      fehler('Bitte wählen Sie für die Besichtigung einen Tag (Montag bis Donnerstag) und eine Uhrzeit.'); return;
     }
     if (!nutzlast.abholwunsch && !nutzlast.demontage && !IST_ADMIN) {
-      fehler('Bitte wählen Sie einen Wunschtermin für die Abholung oder kreuzen Sie an, dass eine Demontage nötig ist.');
+      fehler('Bitte wählen Sie einen Wunschtermin für die Abholung oder kreuzen Sie „nach Vereinbarung“ an.');
       return;
     }
 
@@ -622,7 +642,7 @@
           var k = a.daten.kontakt || {};
           el('k-formular').innerHTML =
             '<div class="meldung gut"><strong>Vielen Dank – Ihre Reservierung ist eingegangen.</strong><br>' +
-            'Wir melden uns in den nächsten Tagen bei Ihnen.' +
+            rueckmeldung('Wir melden uns in den nächsten Tagen bei Ihnen.') +
             '<div class="beleg">' +
               '<div class="zeile"><span>Vorgangsnummer</span><b>' + a.daten.vorgang + '</b></div>' +
               (a.daten.bis ? '<div class="zeile"><span>Reserviert bis</span><b>' + datumText(a.daten.bis) + '</b></div>' : '') +
@@ -632,7 +652,7 @@
               '<div class="zeile"><span>Abholung gewünscht</span><b>' +
                 (nutzlast.abholwunsch ? datumText(nutzlast.abholwunsch) +
                   (nutzlast.abholwunsch_zeit ? ', ' + sicher(nutzlast.abholwunsch_zeit) + ' Uhr' : '') : '') +
-                (nutzlast.demontage ? (nutzlast.abholwunsch ? ' · ' : '') + 'Demontage nach Vereinbarung' : '') + '</b></div>' +
+                (nutzlast.demontage ? (nutzlast.abholwunsch ? ' · ' : '') + 'Termin nach Vereinbarung' : '') + '</b></div>' +
               (k.email || k.telefon
                 ? '<div class="zeile"><span>Wir erreichen Sie unter</span><b>' +
                   [k.email, k.telefon].filter(Boolean).map(sicher).join(' · ') + '</b></div>'

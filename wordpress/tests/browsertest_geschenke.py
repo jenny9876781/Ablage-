@@ -6,7 +6,7 @@ Der Testserver muss mit KIK_TEST_NOVEMBER=1 laufen, damit die vorbereiteten Posi
     rm -f /tmp/kikripp-web.sqlite /tmp/kikripp-optionen.json /tmp/kikripp-mails.log
     cd wordpress/tests && KIK_TEST_NOVEMBER=1 KIK_TEST_NEU=NE04-17,NE03-12 php -S 127.0.0.1:8801 -t /tmp/kikweb server.php &
 """
-import sys, json, urllib.request
+import sys, json, re, urllib.request
 from playwright.sync_api import sync_playwright
 
 CHROME = "/opt/pw-browsers/chromium-1194/chrome-linux/chrome"
@@ -27,6 +27,7 @@ except Exception as e:
     sys.exit(f"Testserver auf {BASIS} nicht erreichbar: {e}")
 geschenke = [a["nr"] for a in daten["artikel"] if a["preis"] <= 0 and a["frei"] > 0]
 billig = [a["nr"] for a in daten["artikel"] if 0 < a["preis"] < 10 and a["frei"] > 0]
+teuer = [a["nr"] for a in daten["artikel"] if 60 <= a["preis"] < 400 and a["frei"] > 1]
 if len(geschenke) < 6:
     sys.exit("Zu wenige Geschenke im Katalog – läuft der Server mit KIK_TEST_NOVEMBER=1?")
 pruefe("Höchstzahl kommt vom Server", daten.get("geschenke_max") == 5, f"({daten.get('geschenke_max')!r})")
@@ -63,7 +64,7 @@ with sync_playwright() as p:
     karten = seite.locator(".karte")
     pruefe("Filter zeigt nur Geschenke", karten.count() == len(geschenke), f"({karten.count()} statt {len(geschenke)})")
     text = karten.first.inner_text()
-    pruefe("Preisfeld sagt „zu verschenken“", "zu verschenken" in text and "0,00" not in text, f"({text[-120:]!r})")
+    pruefe("Preisfeld sagt „Kostenlos zu Ihrem Einkauf“ (1.12.0)", "kostenlos zu ihrem einkauf" in text.lower() and not re.search(r"(?<![0-9])0,00", text), f"({text[-160:]!r})")
     seite.screenshot(path="/tmp/kikweb/g01-geschenke.png")
 
     print("\n1b) NEU-Schild und Sortierung")
@@ -81,13 +82,13 @@ with sync_playwright() as p:
     pruefe("Sortierung nach Preis zieht NEU nicht vor", erste not in ("NE03-12", "NE04-17"), f"({erste!r})")
     seite.select_option("#k-sort", ""); seite.select_option("#k-kat", "zu verschenken"); seite.wait_for_timeout(300)
 
-    print("\n2) Nur Geschenke: kein Mindestbestellwert, höchstens 5")
+    print("\n2) Nur Geschenke: vormerken ja, abschicken nein (1.12.0), höchstens 5")
     for nr in geschenke[:5]:
         seite.locator(f'button[data-res="{nr}"]').click(); seite.wait_for_timeout(150)
     merk = seite.inner_text("#k-merk")
-    pruefe("Leiste sagt „geschenkt“ statt 0,00 €", "geschenkt" in merk and "0,00" not in merk, f"({merk!r})")
-    pruefe("kein Hinweis auf Mindestbestellwert", "es fehlen" not in merk)
-    pruefe("Abschicken freigegeben", not seite.locator("#k-anfragen").is_disabled())
+    pruefe("Leiste sagt „kostenlos“ statt 0,00 €", "kostenlos" in merk and not re.search(r"(?<![0-9])0,00", merk), f"({merk!r})")
+    pruefe("Leiste erklärt: nur zu Ihrem Einkauf", "nur kostenlos zu Ihrem Einkauf" in merk, f"({merk!r})")
+    pruefe("Abschicken gesperrt ohne Kauf", seite.locator("#k-anfragen").is_disabled())
     seite.locator(f'button[data-res="{geschenke[5]}"]').click(); seite.wait_for_timeout(300)
     pruefe("sechstes Geschenk abgewiesen", seite.locator(f'button[data-res="{geschenke[5]}"]').inner_text() == "reservieren")
     pruefe("Meldung erklärt die Grenze", meldungen and "höchstens 5" in meldungen[-1], f"({meldungen!r})")
@@ -100,12 +101,16 @@ with sync_playwright() as p:
     pruefe("unter 50 € Kaufwert gesperrt", seite.locator("#k-anfragen").is_disabled())
     seite.locator("#k-leeren").click(); seite.wait_for_timeout(200)
 
-    print("\n4) Abschicken nur Geschenke")
+    print("\n4) Geschenke + Kauf ab 50 €: abschicken")
     for nr in geschenke[:2]:
         seite.locator(f'button[data-res="{nr}"]').click(); seite.wait_for_timeout(150)
+    seite.select_option("#k-kat", ""); seite.fill("#k-q", teuer[0]); seite.wait_for_timeout(300)
+    seite.locator(f'button[data-res="{teuer[0]}"]').click(); seite.wait_for_timeout(300)
+    pruefe("mit Kauf ab 50 € freigegeben", not seite.locator("#k-anfragen").is_disabled())
     seite.click("#k-anfragen"); seite.wait_for_selector("#k-dlg", timeout=5000)
     dlg = seite.inner_text("#k-dlg")
-    pruefe("Formular zeigt „geschenkt“", "geschenkt" in dlg and "\n0,00" not in dlg, f"({dlg[300:700]!r})")
+    pruefe("Formular zeigt „kostenlos zu Ihrem Einkauf“", "kostenlos zu Ihrem Einkauf" in dlg and "\n0,00" not in dlg, f"({dlg[300:700]!r})")
+    pruefe("Formular: Termine Mo–Do", all(t.strip()[:3] in ("Mo,", "Di,", "Mi,", "Do,") for t in seite.locator("#k-abhol option").all_inner_texts()[1:]))
     pruefe("keine Seitenfehler", not konsole, f"({konsole!r})")
 
     print("\n4b) Verwaltung angemeldet: kein Mindestbestellwert (1.7.0)")
@@ -128,7 +133,11 @@ pruefe("Server lehnt 6 Geschenke ab", not a.get("ok") and "höchstens 5" in (a.g
 a = post(dict(kontakt, artikel={billig[0]: 1, geschenke[0]: 1}, dauer=5000))
 pruefe("Server: Kaufanteil unter Mindestwert abgelehnt", not a.get("ok"), f"({a!r})")
 a = post(dict(kontakt, artikel={nr: 1 for nr in geschenke[:5]}, dauer=5000))
-pruefe("Server nimmt 5 Geschenke ohne Mindestwert an", a.get("ok") is True, f"({a!r})")
+pruefe("Server lehnt Geschenke ohne Kauf ab (1.12.0)", not a.get("ok") and "Einkauf" in json.dumps(a, ensure_ascii=False), f"({a!r})")
+a = post(dict(kontakt, artikel=dict({nr: 1 for nr in geschenke[:5]}, **{teuer[1]: 1}), dauer=5000))
+pruefe("Server nimmt 5 Geschenke mit Kauf ab 50 € an", a.get("ok") is True, f"({a!r})")
+a = post(dict(kontakt, artikel={geschenke[6]: 1}, dauer=5000), admin=True)
+pruefe("Server: Verwaltung darf Geschenke ohne Kauf reservieren", a.get("ok") is True, f"({a!r})")
 
 a = post(dict(kontakt, artikel={billig[2]: 1}, dauer=5000), admin=True)
 pruefe("Server: Verwaltung darf unter Mindestwert reservieren", a.get("ok") is True, f"({a!r})")

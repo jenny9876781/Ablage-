@@ -72,13 +72,15 @@ class Kikripp_REST {
             'artikel'  => Kikripp_DB::katalog_artikel(),
             'ust'      => (float) get_option('kikripp_ust_prozent', 19) / 100,
             'steuer'   => (string) get_option('kikripp_steuerhinweis', ''),
-            'hinweis'  => (string) get_option('kikripp_hinweisband', ''),
+            'hinweis'  => self::hinweisband(),
             'frist'    => Kikripp_DB::frist_werktage(),
             'ablauf'   => (string) get_option('kikripp_ablauftext', ''),
             'mindestwert'     => (float) get_option('kikripp_mindestwert', 0),
             'geschenke_max'   => self::geschenke_max(),
             'besichtigung_ab' => (float) get_option('kikripp_besichtigung_ab', 0),
             'abholschluss'    => (string) get_option('kikripp_abholschluss', ''),
+            'termine_ab'      => self::termine_ab(),
+            'rueckmeldung_ab' => self::rueckmeldung_ab(),
             'heute'    => substr(current_time('mysql'), 0, 10),
             'admin'    => Kikripp_Zugang::ist_admin(),
             'recht'    => (string) get_option('kikripp_rechtstext', ''),
@@ -108,8 +110,28 @@ class Kikripp_REST {
         return $eigen !== '' ? $eigen : (string) get_option('kikripp_mail_an', '');
     }
 
-    /** Halbstündliche Besichtigungszeiten am Donnerstagvormittag. */
-    const BESICHTIGUNG_ZEITEN = ['08:00', '08:30', '09:00', '09:30', '10:00', '10:30'];
+    /** 1.12.0: halbstündliche Zeiten für Besichtigung und Abholung, vormittags 8 bis 12 Uhr. */
+    const BESICHTIGUNG_ZEITEN = ['08:00', '08:30', '09:00', '09:30', '10:00', '10:30', '11:00', '11:30'];
+    /** 1.12.0: Besichtigung und Abholung montags bis donnerstags (ISO-Wochentage). */
+    const TERMIN_TAGE = [1, 2, 3, 4];
+
+    /** 1.12.0: frühester Tag für Besichtigung und Abholung ('' = ab morgen). */
+    public static function termine_ab() {
+        return (string) get_option('kikripp_termine_ab', '');
+    }
+
+    /** 1.12.0: Bis zu diesem Tag (ausschließlich) melden wir uns erst später – '' wenn vorbei oder nicht gesetzt. */
+    public static function rueckmeldung_ab() {
+        $ab = (string) get_option('kikripp_rueckmeldung_ab', '');
+        return ($ab !== '' && $ab > substr(current_time('mysql'), 0, 10)) ? $ab : '';
+    }
+
+    /** 1.12.0: Hinweisband mit Enddatum – nach dem Tag „anzeigen bis“ bleibt es leer. */
+    public static function hinweisband() {
+        $bis = (string) get_option('kikripp_hinweis_bis', '');
+        if ($bis !== '' && $bis < substr(current_time('mysql'), 0, 10)) { return ''; }
+        return (string) get_option('kikripp_hinweisband', '');
+    }
 
     private static function fehler($meldung, $code = 400) {
         return self::ohne_cache(new WP_REST_Response(['ok' => false, 'meldung' => $meldung], $code));
@@ -192,12 +214,17 @@ class Kikripp_REST {
                 if ((float) $a['preis'] <= 0) { $geschenke++; }
             }
         }
-        // 1.5.0: Geschenke (Preis 0) zählen nicht zum Mindestbestellwert – eine Reservierung nur aus
-        // Geschenken geht immer durch ($summe = 0). Je Reservierung höchstens GESCHENKE_MAX Positionen.
+        // 1.5.0: Geschenke (Preis 0) zählen nicht zum Mindestbestellwert – seit 1.12.0 nur zusammen
+        // mit einem Kauf (siehe unten). Je Reservierung höchstens GESCHENKE_MAX Positionen.
         $max = self::geschenke_max();
         if (!$admin && $geschenke > $max) {
             return self::fehler(sprintf('Je Reservierung können höchstens %d Artikel „zu verschenken“ dabei sein. '
                 . 'Ihre Auswahl enthält %d.', $max, $geschenke));
+        }
+        // 1.12.0: Geschenke gibt es nur zusammen mit einem Kauf (der Kauf muss den Mindestbestellwert erreichen)
+        if (!$admin && $geschenke > 0 && $summe <= 0) {
+            return self::fehler('Artikel „zu verschenken“ gibt es nur kostenlos zu Ihrem Einkauf. '
+                . 'Bitte wählen Sie noch mindestens einen Artikel zum Kauf dazu.');
         }
         $mindest = (float) get_option('kikripp_mindestwert', 0);
         if (!$admin && $summe > 0 && $summe < $mindest) {
@@ -207,42 +234,44 @@ class Kikripp_REST {
 
         $heute = self::datum(substr(current_time('mysql'), 0, 10));
         $schluss = self::datum((string) get_option('kikripp_abholschluss', '')) ?: PHP_INT_MAX;
+        $frueh = max($heute, self::datum(self::termine_ab()) ?: 0);   // 1.12.0: Termine frühestens ab
 
-        // Besichtigung: nur bei Artikeln ab der Grenze, nur donnerstags, halbstündlich 8 bis 10:30 Uhr
+        // Besichtigung: nur bei Artikeln ab der Grenze, montags bis donnerstags, halbstündlich 8 bis 11:30 Uhr
         $kontakt['besichtigung'] = '';
         $ab = (float) get_option('kikripp_besichtigung_ab', 0);
         if (!empty($anfrage->get_param('besichtigung')) && $teuerster >= $ab) {
             $tag = self::datum((string) $anfrage->get_param('besichtigung_tag'));
             $zeit = (string) $anfrage->get_param('besichtigung_zeit');
-            if (!$tag || (int) gmdate('N', $tag) !== 4 || $tag < $heute || $tag > $schluss
+            if (!$tag || !in_array((int) gmdate('N', $tag), self::TERMIN_TAGE, true) || $tag < $frueh || $tag > $schluss
                 || !in_array($zeit, self::BESICHTIGUNG_ZEITEN, true)) {
-                return self::fehler('Bitte wählen Sie für die Besichtigung einen Donnerstag und eine Uhrzeit '
-                    . 'zwischen 08:00 und 10:30 Uhr.');
+                return self::fehler('Bitte wählen Sie für die Besichtigung einen Tag von Montag bis Donnerstag'
+                    . ($frueh > $heute ? ' ab dem ' . gmdate('d.m.Y', $frueh) : '') . ' und eine Uhrzeit zwischen 08:00 und 11:30 Uhr.');
             }
             $kontakt['besichtigung'] = gmdate('Y-m-d', $tag) . ' ' . $zeit;
         }
 
-        // Abholwunsch: Montag oder Dienstag bis zum Abholschluss. Bei Demontage nach Vereinbarung.
+        // Abholwunsch: Montag bis Donnerstag zwischen „Termine ab“ und Abholschluss. Sonst nach Vereinbarung.
         $kontakt['abholwunsch'] = '';
         $abhol = (string) $anfrage->get_param('abholwunsch');
         if ($abhol !== '') {
             $t = self::datum($abhol);
-            if (!$t || !in_array((int) gmdate('N', $t), [1, 2], true) || $t < $heute || $t > $schluss) {
-                return self::fehler('Abgeholt werden kann montags und dienstags bis zum '
+            if (!$t || !in_array((int) gmdate('N', $t), self::TERMIN_TAGE, true) || $t < $frueh || $t > $schluss) {
+                return self::fehler('Abgeholt werden kann montags bis donnerstags'
+                    . ($frueh > $heute ? ' ab dem ' . gmdate('d.m.Y', $frueh) : '') . ' bis zum '
                     . ($schluss < PHP_INT_MAX ? gmdate('d.m.Y', $schluss) : 'Ende des Verkaufs') . '.');
             }
             $kontakt['abholwunsch'] = gmdate('Y-m-d', $t);
-            // Uhrzeit ist freiwillig – dieselben halben Stunden wie bei der Besichtigung (8 bis 11 Uhr)
+            // Uhrzeit ist freiwillig – dieselben halben Stunden wie bei der Besichtigung (8 bis 12 Uhr)
             $zeit = (string) $anfrage->get_param('abholwunsch_zeit');
             if ($zeit !== '') {
                 if (!in_array($zeit, self::BESICHTIGUNG_ZEITEN, true)) {
-                    return self::fehler('Bitte wählen Sie für die Abholung eine Uhrzeit zwischen 08:00 und 10:30 Uhr.');
+                    return self::fehler('Bitte wählen Sie für die Abholung eine Uhrzeit zwischen 08:00 und 11:30 Uhr.');
                 }
                 $kontakt['abholwunsch'] .= ' ' . $zeit;
             }
         } elseif (!$kontakt['demontage'] && !$admin) {
-            return self::fehler('Bitte wählen Sie einen Wunschtermin für die Abholung (montags oder dienstags) '
-                . 'oder kreuzen Sie an, dass eine Demontage nötig ist.');
+            return self::fehler('Bitte wählen Sie einen Wunschtermin für die Abholung (montags bis donnerstags) '
+                . 'oder kreuzen Sie „Termin nach Vereinbarung“ an.');
         }
 
         $id = Kikripp_DB::reservieren($kontakt, $wunsch);

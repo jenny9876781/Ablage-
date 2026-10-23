@@ -146,10 +146,13 @@ automatisch eingetragen; du prüfst sie nur.
 | Reservierungen melden an | `jennyp@kikripp.de` — **interne** Meldung. Auf kikripp.de kommt nur hier etwas an, und auch das verzögert und im Spam-Ordner |
 | Kontaktadresse für Interessenten | `saldi4kids@outlook.com` — diese Adresse **sehen die Käufer** im Anbieter-Block und in der Bestätigung |
 | Hinweisband | Text über dem Katalog, derzeit die Ankündigung zum Spielzeug im November |
+| Hinweisband anzeigen bis | letzter Tag, an dem das Band erscheint (leer = dauerhaft) |
+| Rückmeldung erst ab | bei Abwesenheit: erster Tag, an dem wir uns wieder melden (leer = aus) |
 | Reservierung gilt | 3 Werktage (Montag bis Freitag) |
 | Mindestbestellwert | 50 € |
 | Höchstzahl Geschenke je Reservierung | 5 (im November ggf. erhöhen) |
 | Besichtigung ab | 100 € Stückpreis |
+| Termine frühestens ab | erster Tag für Besichtigung und Abholung (Mo–Do, 8–12 Uhr) |
 | Abholung bis | 10.12.2026 |
 | So läuft es ab | der Kasten über den Artikeln; jede Zeile ein Punkt |
 | Umsatzsteuer | 0 % — steuerfreie Lieferung |

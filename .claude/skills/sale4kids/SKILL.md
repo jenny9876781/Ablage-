@@ -1253,6 +1253,23 @@ ist die Merkliste; erledigte Punkte hier abhaken, nicht löschen.
       (gemeinsamer Login), Kassenliste der Kollegin abarbeiten (Rechnungen „bar erhalten am …“, bezahlt/abgeholt setzen,
       Vor-Ort-Reservierungen mit Nachricht „Barverkauf vor Ort“). Stand 22.10.: Frist 7 + Hinweisband gesetzt, Anleitung
       übergeben. Offen: Excel mit 60 Preisen (Rückgabe der Nutzerin), danach Import + Foto-Nachtrag F-817 bis F-882.
+- [x] **23.10.2026: Excel eingelesen + Plugin 1.12.0.** Excel: 93 Preise ok, 16 entfallen (u. a. NE05-04 Vitra Panton rot,
+      BU03-04, TE02-08, NU01-53/-55, mehrere neue NU05), Kasse +7 (14). Sichtbar neu: 20 Nicht-Spielzeug-Artikel vom
+      21./22.10.; **alles mit Kategorie Spielzeug (auch Tonies NE01-27–38, NU07, NU05-Bücher/-Spiele) erst im November**.
+      Importmeldung „91 neu, 646 aktualisiert … 41 NEU“, Nachtrag 42 Fotos (gegen 2dcf53d). **Offen:** NU05-V09/-V10 haben
+      jetzt 5 € Preis, aber Kategorie „zu verschenken“ – Nutzerin fragen (verkaufen oder verschenken?).
+      **Plugin 1.12.0:** (1) Geschenke nur zusammen mit einem Kauf (Server: `$geschenke > 0 && $summe <= 0` → Fehler, Admin
+      ausgenommen; Browser: vormerken ja, Abschicken gesperrt mit Hinweis), Wortlaut „Kostenlos zu Ihrem Einkauf (ab 50 €)“,
+      Formular/Beleg „kostenlos zu Ihrem Einkauf“, Bestellung Zugabe-Zeile + Satz „Wird der Kauf storniert, entfallen auch
+      die Zugaben“, Mail nennt Zugaben, Aufgabe „Kauf storniert, nur noch Geschenke“ (`Kikripp_Ablauf::zugaben/
+      geschenke_ohne_kauf`). Variante a: Geschenke laufen mit der Reservierung ab (gleicher Vorgang). (2) Besichtigung und
+      Abholung **Mo–Do 08:00–11:30** (`Kikripp_REST::TERMIN_TAGE`, `BESICHTIGUNG_ZEITEN`), Einstellung **„Termine
+      frühestens ab“** (`kikripp_termine_ab`, Nutzerin setzt 04.11.), Häkchen „Termin am Nachmittag oder Demontage nötig –
+      nach Vereinbarung“ (Feld `demontage` bleibt), Fr/Sa entfallen. (3) **„Rückmeldung erst ab“** (`kikripp_rueckmeldung_ab`,
+      02.11.): Formular und Bestätigung „Wir sind bis … nicht im Haus und melden uns ab dem … bei Ihnen.“, endet von selbst.
+      (4) **„Hinweisband anzeigen bis“** (`kikripp_hinweis_bis`). (5) Ablauftext `kikripp_ablauf_1120()` ersetzt nur den
+      unveränderten 1.2.3-Text (`kikripp_umstellen_1120`). Tests 515 Logik, 91 Browser, 16 mobil, Geschenke 31 (1 rot nur
+      wegen NU05-V09/-V10), Liste ok.
 - [ ] **Ende November 2026: Höchstzahl Geschenke je Reservierung mit der Nutzerin neu besprechen**
       (Vorschlag: ab ca. 01.12. auf 20 oder frei, damit bis 10.12. alles abgeholt wird).
 - [x] Plugin 1.2.1 (06.10.): Einstellung „Fußzeile ausblenden“ (Standard an) – Body-Klasse

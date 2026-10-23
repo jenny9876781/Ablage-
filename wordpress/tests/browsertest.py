@@ -244,7 +244,7 @@ with sync_playwright() as p:
            "keine Bestätigungsmail" in seite.inner_text(".datenschutz"),
            f"({seite.inner_text('.datenschutz')!r})")
     abhol = [t.strip() for t in seite.locator("#k-abhol option").all_inner_texts()[1:]]
-    pruefe("Abholtermine nur montags und dienstags", abhol and all(t[:3] in ("Mo,", "Di,") for t in abhol),
+    pruefe("Abholtermine nur montags bis donnerstags (1.12.0)", abhol and all(t[:3] in ("Mo,", "Di,", "Mi,", "Do,") for t in abhol),
            f"({abhol[:4]})")
     pruefe("letzter Abholtag ist der 10.12.2026 oder früher",
            abhol and abhol[-1][-4:] == "2026" and tuple(map(int, abhol[-1][4:9].split(".")[::-1])) <= (12, 10),
@@ -283,7 +283,7 @@ with sync_playwright() as p:
            "Abholung" in seite.inner_text("#k-meldung"), f"({seite.inner_text('#k-meldung')!r})")
     seite.select_option("#k-abhol", index=1)
     zeiten = [t.strip() for t in seite.locator("#k-abhol-zeit option").all_inner_texts()[1:]]
-    pruefe("Abholung: Uhrzeiten 08:00 bis 10:30", zeiten[:1] == ["08:00 Uhr"] and zeiten[-1:] == ["10:30 Uhr"], f"({zeiten})")
+    pruefe("Abholung: Uhrzeiten 08:00 bis 11:30 (1.12.0)", zeiten[:1] == ["08:00 Uhr"] and zeiten[-1:] == ["11:30 Uhr"], f"({zeiten})")
     seite.select_option("#k-abhol-zeit", "09:30")
     if seite.locator("#k-bes").count():
         seite.check("#k-bes")

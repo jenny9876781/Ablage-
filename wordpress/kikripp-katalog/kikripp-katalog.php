@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Kikripp Artikelkatalog
  * Description: Artikelkatalog mit Reservierung für die Betriebsauflösung der Kikripp GmbH. Artikel werden importiert, Reservierungen im Backend verwaltet.
- * Version:     1.11.2
+ * Version:     1.12.0
  * Author:      Kikripp GmbH
  * Text Domain: kikripp-katalog
  * Requires at least: 5.8
@@ -13,7 +13,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-define('KIKRIPP_VERSION', '1.11.2');
+define('KIKRIPP_VERSION', '1.12.0');
 define('KIKRIPP_PFAD', plugin_dir_path(__FILE__));
 define('KIKRIPP_URL', plugin_dir_url(__FILE__));
 
@@ -130,8 +130,20 @@ function kikripp_umstellen_130($stand) {
 
 /** 1.3.1: Vortagserinnerung 11:00 statt 14:00 (nur wenn noch die alte Vorgabe steht), Zusatz „Barrierefrei“. */
 function kikripp_umstellen_131($stand) {
-    if (version_compare($stand, '1.3.1', '>=')) { return; }
+    if (version_compare($stand, '1.3.1', '>=')) { kikripp_umstellen_1120($stand); return; }
     if (get_option('kikripp_erinnerung_zeit', '') === '14:00') { update_option('kikripp_erinnerung_zeit', '11:00'); }
     add_option('kikripp_termin_zusatz', 'Barrierefrei');
     update_option('kikripp_plugin_version', '1.3.1');
+    kikripp_umstellen_1120('1.3.1');
+}
+
+/**
+ * 1.12.0: Ablauftext auf Mo–Do 8–12 Uhr und „kostenlos zu Ihrem Einkauf“ – nur wenn noch der
+ * unveränderte Text von 1.2.3 drinsteht. Selbst geänderte Texte bleiben; die Nutzerin bekommt den Wortlaut.
+ */
+function kikripp_umstellen_1120($stand) {
+    if (version_compare($stand, '1.12.0', '>=')) { return; }
+    $ablauf = trim(str_replace("\r", '', (string) get_option('kikripp_ablauftext', '')));
+    if ($ablauf === trim(kikripp_ablauf_123())) { update_option('kikripp_ablauftext', kikripp_ablauf_1120()); }
+    update_option('kikripp_plugin_version', '1.12.0');
 }

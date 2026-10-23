@@ -1249,6 +1249,18 @@ ist die Merkliste; erledigte Punkte hier abhaken, nicht löschen.
       fragen; NU05-38 = 11 Stück (22.10.), IKEA-Nr. 401.772.28 online nicht gefunden. NU05-26 laut Nutzerin „Holzbecher mit
       Stiften im Karton“ – Foto fehlt: in der Upload-Folge fehlt IMG_2889 genau zwischen NU05-25 (2888) und -27 (2890), anfordern.
       Importdatei ändert sich nur bei unsichtbaren Artikeln (Meldung weiter „81 neu, 646 aktualisiert“).
+- [ ] **Stand 23.10.2026 abends: alles eingespielt** (Nutzerin): Plugin 1.12.0, Einstellungen (Termine ab 04.11.,
+      Rückmeldung ab 02.11., Hinweisband bis 01.11.), Regaltausch Seltmann, Foto-Nachtrag 42, Import „91 neu, 646 aktualisiert“.
+      Letzter ausgelieferter Import = `ausgabe/katalog_import.json` von Commit 597522a → **Basis für den nächsten Nachtrag**
+      (`git show 597522a:ausgabe/katalog_import.json`).
+- [ ] **Anfang November 2026 (Nutzerin meldet sich):**
+      1. Spielzeug online: alle Artikel mit Kategorie „Spielzeug“ und Preis_geprüft ok auf Im_Katalog = ja (alte vom 12.10.
+         BA04/BU01/BU02/BU04, Tonies NE01-27 bis -38, NU07-09 bis -18 inkl. -14A, NU05-Bücher/-Spiele), Fotopaket-Nachtrag.
+      2. Geschenke („zu verschenken“) online stellen; vorher **NU05-V09/-V10 klären** (5 € Preis, aber Kategorie
+         „zu verschenken“ – verkaufen oder verschenken?). Geschenke-Browsertest ist bis dahin wegen dieser zwei rot (65 statt 63).
+      3. Hinweisband zum Spielzeug („kommt im November“) entfernen bzw. neu formulieren.
+      4. Kasten „So läuft es ab“ prüfen (Mo–Do 8–12, Geschenke zum Einkauf) – falls er nicht automatisch ersetzt wurde.
+      5. Ende November: Höchstzahl Geschenke je Reservierung neu besprechen (siehe unten).
 - [ ] **02.11.2026 nach dem Urlaub:** Frist zurück auf 3 Werktage, Hinweisband leeren, WordPress-Passwort ändern
       (gemeinsamer Login), Kassenliste der Kollegin abarbeiten (Rechnungen „bar erhalten am …“, bezahlt/abgeholt setzen,
       Vor-Ort-Reservierungen mit Nachricht „Barverkauf vor Ort“). Stand 22.10.: Frist 7 + Hinweisband gesetzt, Anleitung

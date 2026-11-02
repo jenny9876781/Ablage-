@@ -1246,5 +1246,41 @@ $GLOBALS['ist_admin'] = true; ob_start(); Kikripp_Admin::seite_einstellungen(); 
 pruefe('Einstellungen: drei neue Datumsfelder', strpos($eins, 'name="hinweis_bis"') !== false && strpos($eins, 'name="rueckmeldung_ab"') !== false
     && strpos($eins, 'name="termine_ab"') !== false, true);
 
+titel('51. Umzug: Daten exportieren und importieren (1.13.0)');
+global $wpdb;
+update_option('kikripp_hinweisband', 'Umzugstest');
+$art_neu = json_decode($wpdb->get_var($wpdb->prepare('SELECT daten FROM ' . Kikripp_DB::t_artikel() . ' WHERE artnr = %s', 'Z-KAUF')), true);
+$art_neu['neu_seit'] = '2026-11-01 10:00:00';
+$wpdb->update(Kikripp_DB::t_artikel(), ['daten' => wp_json_encode($art_neu)], ['artnr' => 'Z-KAUF']);
+$ex = Kikripp_Umzug::export_daten();
+$anz_v = count($ex['vorgaenge']); $anz_p = count($ex['positionen']);
+pruefe('Export: Format und Schema', $ex['format'] . '|' . $ex['schema'], 'kikripp-umzug|' . Kikripp_DB::SCHEMA_VERSION);
+pruefe('Export: Vorgänge und Positionen dabei', $anz_v > 5 && $anz_p > 5, true);
+pruefe('Export: Einstellung dabei', $ex['optionen']['hinweisband'], 'Umzugstest');
+pruefe('Export: NEU-Stempel dabei', $ex['neu_seit']['Z-KAUF'] ?? '', '2026-11-01 10:00:00');
+$json = wp_json_encode($ex);
+$vor = Kikripp_DB::vorgang($vz);
+pruefe('Import ohne Häkchen bei vorhandenen Daten abgelehnt', is_wp_error(Kikripp_Umzug::import_daten(json_decode($json, true))), true);
+pruefe('falsches Format abgelehnt', is_wp_error(Kikripp_Umzug::import_daten(['format' => 'x'], true)), true);
+$alt = $ex; $alt['schema'] = 1;
+pruefe('andere Schema-Version abgelehnt', is_wp_error(Kikripp_Umzug::import_daten($alt, true)), true);
+// „neue Seite“: Daten weg, Einstellung anders, Stempel weg
+$wpdb->query('DELETE FROM ' . Kikripp_DB::t_position()); $wpdb->query('DELETE FROM ' . Kikripp_DB::t_vorgang());
+update_option('kikripp_hinweisband', '');
+unset($art_neu['neu_seit']); $wpdb->update(Kikripp_DB::t_artikel(), ['daten' => wp_json_encode($art_neu)], ['artnr' => 'Z-KAUF']);
+$b = Kikripp_Umzug::import_daten(json_decode($json, true));
+pruefe('Import: alle Vorgänge', $b['vorgaenge'] . '/' . $b['vorgaenge_soll'], $anz_v . '/' . $anz_v);
+pruefe('Import: alle Positionen', $b['positionen'] . '/' . $b['positionen_soll'], $anz_p . '/' . $anz_p);
+pruefe('Import: Vorgangsnummer und Inhalt gleich', Kikripp_DB::vorgang($vz)['name'] . '|' . count(Kikripp_DB::vorgang($vz)['positionen']),
+    $vor['name'] . '|' . count($vor['positionen']));
+pruefe('Import: Einstellung zurück', get_option('kikripp_hinweisband'), 'Umzugstest');
+pruefe('Import: NEU-Stempel zurück', json_decode($wpdb->get_var($wpdb->prepare('SELECT daten FROM ' . Kikripp_DB::t_artikel() . ' WHERE artnr = %s', 'Z-KAUF')), true)['neu_seit'] ?? '', '2026-11-01 10:00:00');
+pruefe('Import: Katalog rechnet wie vorher', katalog_nach('Z-KAUF')['frei'] ?? null, katalog_nach('Z-KAUF')['frei'] ?? null);
+$b2 = Kikripp_Umzug::import_daten(json_decode($json, true), true);
+pruefe('zweiter Import mit Häkchen ersetzt (keine Doppelten)', (int) $wpdb->get_var('SELECT COUNT(*) FROM ' . Kikripp_DB::t_vorgang()), $anz_v);
+update_option('kikripp_hinweisband', '');
+$GLOBALS['ist_admin'] = true; ob_start(); Kikripp_Umzug::seite(); $us = ob_get_clean(); $GLOBALS['ist_admin'] = false;
+pruefe('Umzugsseite mit Export- und Import-Knopf', strpos($us, 'kikripp_umzug_export') !== false && strpos($us, 'kikripp_umzug_import') !== false, true);
+
 printf("\n== Ergebnis: %d Prüfungen, %d Fehler ==\n", $geprueft, $fehler);
 exit($fehler > 0 ? 1 : 0);

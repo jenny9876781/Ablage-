@@ -1263,7 +1263,21 @@ ist die Merkliste; erledigte Punkte hier abhaken, nicht löschen.
       „Artikelkatalog“ ([kikripp_katalog]), Impressum, Datenschutz (Texte von der alten Seite kopieren), Einstellungen wie
       WEBSHOP_EINRICHTEN.md; (4) alle Fotos (komplettes Fotopaket, nicht Nachtrag!), Artikel-Import, Reservierungen-Import;
       (5) Hoster stellt Domain kikripp.de auf den neuen Server um (Cloudflare/SSL prüfen lassen). Zusätzlich Hoster um
-      Komplettsicherung (Dateien + DB) des alten Servers bitten. Offen: muss der Rest von kikripp.de (Kita-Seiten) weiterlaufen?
+      Komplettsicherung (Dateien + DB) des alten Servers bitten.
+      **Vorbereitet 02.11. abends (Plugin 1.13.0):** neue Seite **Artikelkatalog → Umzug** (`includes/class-kikripp-umzug.php`):
+      „Daten exportieren“ = JSON mit allen Vorgängen + Positionen (Original-IDs), 30 Einstellungen (`Kikripp_Umzug::OPTIONEN`,
+      inkl. Passwort-Hash, ohne Versionen) und NEU-Stempeln; „Daten importieren“ ersetzt Vorgänge/Positionen (Häkchen nötig,
+      wenn schon welche da sind), prüft Format + SCHEMA_VERSION, setzt Einstellungen und NEU-Stempel auf vorhandene Artikel.
+      PHP-7.4-tauglich (alter Server). 530 Logik-Tests. Ausgeliefert: Plugin 1.13.0, `katalog_import.json` (Stand 02.11.,
+      Spielzeug + 64 neue noch verborgen), Fotopaket komplett in 4 Teilen `kikripp-fotos-1von4.zip` … (487 Fotos, 98 MB).
+      **Ablauf 03.11.:** (1) alte Seite: Plugin 1.13.0 hochladen → Umzug → Daten exportieren (Datei aufheben!); Texte von
+      Impressum/Datenschutz kopieren. (2) neue Seite: Adresse + Admin-Login klären (Domain zeigt noch auf den alten
+      Server → vermutlich nur über eine Hoster-Adresse erreichbar; Website-Adresse in WordPress muss vor/bei der
+      Domain-Umstellung auf https://www.kikripp.de stehen – Hoster fragen). Plugin installieren + aktivieren, Seiten
+      „Artikelkatalog“ (Kurzbefehl [kikripp_katalog], Slug artikelkatalog), „Impressum“, „Datenschutz“ anlegen,
+      Permalinks „Beitragsname“. (3) Mediathek: 4 Foto-Pakete. (4) Artikel importieren (Meldung „801 neu, 0 aktualisiert“,
+      jedes sichtbare Artikel mit Foto). (5) Umzug → Daten importieren. (6) Einstellungen prüfen (Impressum-/Datenschutz-
+      Links!), Katalog testen. (7) Hoster: Domain umstellen, SSL/Cloudflare. Danach WEBSHOP_EINRICHTEN-Prüfliste. Offen: muss der Rest von kikripp.de (Kita-Seiten) weiterlaufen?
       → Chef entscheidet, ggf. WordPress-Dienstleister. **Auf dem alten Server nichts updaten** (WordPress/Plugins), außer
       unserem Plugin für den Export.
 - [ ] **02.11.2026: Excel + neue Fotos (Stapel läuft, Beschreibungen folgen).** Excel eingelesen: BU05-02 entfällt,

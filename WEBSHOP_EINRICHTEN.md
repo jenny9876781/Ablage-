@@ -84,7 +84,7 @@ sich später nur wieder zentral abschalten.
 
 Du bekommst die Fotos in **vier Paketen** (`kikripp-fotos-1von4.zip` bis `-4von4.zip`),
 weil 98 MB auf einmal für den Versand zu viel sind. Entpacke sie auf deinem Rechner — alle
-vier in denselben Ordner `fotos`. Zusammen sind es genau **488 Bilder, 98 MB**. Geh in WordPress auf **Medien → Datei hinzufügen** und
+vier in denselben Ordner `fotos`. Zusammen sind es genau **487 Bilder, 98 MB**. Geh in WordPress auf **Medien → Datei hinzufügen** und
 zieh die Bilder in das Feld — am besten in Paketen von hundert, nicht alle auf einmal. Das
 dauert; lass das Browserfenster offen, bis jedes Paket durch ist.
 
@@ -107,10 +107,10 @@ auf Importieren. Der Import dauert **ein paar Sekunden**, nicht Minuten.
 
 Danach steht oben eine Meldung. **So muss sie aussehen:**
 
-    Import abgeschlossen: 737 neu, 0 aktualisiert.
+    Import abgeschlossen: 801 neu, 0 aktualisiert.
 
 Kein weiterer Satz dahinter — das heißt: jeder Artikel hat sein Foto gefunden. Im Katalog
-sichtbar sind davon **491**; die übrigen stehen bewusst auf „nicht im Katalog".
+sichtbar sind davon **490**; die übrigen stehen bewusst auf „nicht im Katalog".
 
 Steht dahinter noch *„… Artikel ohne gefundenes Foto"*, nennt die Meldung die fehlenden
 Bilder beim Namen. Die lädst du in die Mediathek nach und importierst einfach noch einmal.

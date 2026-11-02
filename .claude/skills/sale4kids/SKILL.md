@@ -1268,8 +1268,11 @@ ist die Merkliste; erledigte Punkte hier abhaken, nicht löschen.
       unserem Plugin für den Export.
 - [ ] **02.11.2026: Excel + neue Fotos (Stapel läuft, Beschreibungen folgen).** Excel eingelesen: BU05-02 entfällt,
       NU05-40 „4 Stück“, NE01-27 Menge 2, Kasse +3 (17). Fotos F-883 bis F-886 (Post-its BU01-38?, -39, -40, -41?; F-883
-      Spiegelung maskiert). Noch keine Zeilen angelegt – auf Beschreibungen/weitere Fotos und Preisprüfung warten, dann
-      **einmal** bauen. **Livegang zusammen mit Spielzeug nach dem Umzug auf dem neuen Server.**
+      Spiegelung maskiert). **Gebaut 02.11.:** 2 Word-Listen + Fotos F-883 bis F-939 → 64 neue Zeilen (801): BU01-22 bis -45
+      (Deko, Babytragen, Wesco-Schminktische, Trommel …; ohne Foto: BU01-26, -35, -38, -42, -43, -44, -45 → OFFEN),
+      NU04-23 bis -62 (ohne -41; Word „Nu05-50“/„Nu05-57“ = laut Post-it NU04-50/-57), NE01-39 Tonie Clown (F-900).
+      Alle Preis geschätzt, offen, Im_Katalog nein. Nutzerin prüft Preise in der Excel. **Livegang zusammen mit Spielzeug
+      nach dem Umzug auf dem neuen Server.**
 - [ ] **Anfang November 2026 (Nutzerin meldet sich):**
       1. Spielzeug online: alle Artikel mit Kategorie „Spielzeug“ und Preis_geprüft ok auf Im_Katalog = ja (alte vom 12.10.
          BA04/BU01/BU02/BU04, Tonies NE01-27 bis -38, NU07-09 bis -18 inkl. -14A, NU05-Bücher/-Spiele), Fotopaket-Nachtrag.

@@ -1253,6 +1253,23 @@ ist die Merkliste; erledigte Punkte hier abhaken, nicht löschen.
       Rückmeldung ab 02.11., Hinweisband bis 01.11.), Regaltausch Seltmann, Foto-Nachtrag 42, Import „91 neu, 646 aktualisiert“.
       Letzter ausgelieferter Import = `ausgabe/katalog_import.json` von Commit 597522a → **Basis für den nächsten Nachtrag**
       (`git show 597522a:ausgabe/katalog_import.json`).
+- [ ] **02.11.2026: SERVERUMZUG – morgen (03.11.) gemeinsam.** PHP-7.4-Sicherheitslücke: Hoster (All-Inkl, kasserver) hat
+      den alten Webspace wieder aktiviert, **spätestens 08.11. offline**. Neuer Account mit **leerem WordPress** + Datenbank ist
+      angelegt (Zugangsdaten hat die Nutzerin; sie stehen bewusst NICHT hier – Nutzerin soll das KAS-Passwort danach ändern).
+      Der Hoster übernimmt keine Verantwortung für WordPress. kikripp.de ist ein **Multisite-Netzwerk** → kostenlose
+      All-in-One-WP-Migration/Duplicator können das nicht. **Plan (Nutzerin einverstanden):** nur den Katalog neu aufbauen:
+      (1) Plugin 1.13.0 mit **„Reservierungen exportieren/importieren“** (vollständige Vorgänge + Positionen + Kontaktdaten +
+      Notizen als JSON) bauen; (2) alte Seite: Plugin aktualisieren, Export herunterladen; (3) neues WP: Plugin, Seiten
+      „Artikelkatalog“ ([kikripp_katalog]), Impressum, Datenschutz (Texte von der alten Seite kopieren), Einstellungen wie
+      WEBSHOP_EINRICHTEN.md; (4) alle Fotos (komplettes Fotopaket, nicht Nachtrag!), Artikel-Import, Reservierungen-Import;
+      (5) Hoster stellt Domain kikripp.de auf den neuen Server um (Cloudflare/SSL prüfen lassen). Zusätzlich Hoster um
+      Komplettsicherung (Dateien + DB) des alten Servers bitten. Offen: muss der Rest von kikripp.de (Kita-Seiten) weiterlaufen?
+      → Chef entscheidet, ggf. WordPress-Dienstleister. **Auf dem alten Server nichts updaten** (WordPress/Plugins), außer
+      unserem Plugin für den Export.
+- [ ] **02.11.2026: Excel + neue Fotos (Stapel läuft, Beschreibungen folgen).** Excel eingelesen: BU05-02 entfällt,
+      NU05-40 „4 Stück“, NE01-27 Menge 2, Kasse +3 (17). Fotos F-883 bis F-886 (Post-its BU01-38?, -39, -40, -41?; F-883
+      Spiegelung maskiert). Noch keine Zeilen angelegt – auf Beschreibungen/weitere Fotos und Preisprüfung warten, dann
+      **einmal** bauen. **Livegang zusammen mit Spielzeug nach dem Umzug auf dem neuen Server.**
 - [ ] **Anfang November 2026 (Nutzerin meldet sich):**
       1. Spielzeug online: alle Artikel mit Kategorie „Spielzeug“ und Preis_geprüft ok auf Im_Katalog = ja (alte vom 12.10.
          BA04/BU01/BU02/BU04, Tonies NE01-27 bis -38, NU07-09 bis -18 inkl. -14A, NU05-Bücher/-Spiele), Fotopaket-Nachtrag.

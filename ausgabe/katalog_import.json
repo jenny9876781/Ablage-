@@ -14142,7 +14142,7 @@
   "masse": "",
   "menge": 1,
   "einheit": "Konvolut",
-  "preis": 5.0,
+  "preis": 0,
   "basis": "Fix",
   "versand": "nur Abholung",
   "marke": "",
@@ -14163,7 +14163,7 @@
   "masse": "",
   "menge": 1,
   "einheit": "Konvolut",
-  "preis": 5.0,
+  "preis": 0,
   "basis": "Fix",
   "versand": "nur Abholung",
   "marke": "",
@@ -15578,7 +15578,7 @@
   "mengenhinweis": "Nur als Set. Die Leinwände sind nicht auf dem Foto.",
   "foto": "",
   "sortierung": 741,
-  "aktiv": true,
+  "aktiv": false,
   "im_katalog": false
  },
  {
@@ -15767,7 +15767,7 @@
   "mengenhinweis": "",
   "foto": "",
   "sortierung": 750,
-  "aktiv": true,
+  "aktiv": false,
   "im_katalog": false
  },
  {
@@ -15814,8 +15814,8 @@
  },
  {
   "nr": "BU01-38",
-  "titel": "Wehrfritz Trommel mit Rohr",
-  "beschr": "Große Trommel mit Rohr von Wehrfritz, ca. 75 cm lang, ca. 30 cm hoch.",
+  "titel": "Wehrfritz Klangröhren-Trommel mit Schlägeln",
+  "beschr": "Musikinstrument von Wehrfritz: Holzgestell mit farbigen Klangröhren und Rohr, dazu zwei Schlägel. Ca. 75 cm lang, ca. 30 cm hoch.",
   "kat": "Kita-Ausstattung",
   "raum": "Flur",
   "zustand": "gebraucht",
@@ -15828,7 +15828,7 @@
   "marke": "Wehrfritz",
   "buendel": "",
   "mengenhinweis": "",
-  "foto": "",
+  "foto": "F-940",
   "sortierung": 753,
   "aktiv": true,
   "im_katalog": false

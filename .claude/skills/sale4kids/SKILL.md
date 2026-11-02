@@ -1271,13 +1271,14 @@ ist die Merkliste; erledigte Punkte hier abhaken, nicht löschen.
       Spiegelung maskiert). **Gebaut 02.11.:** 2 Word-Listen + Fotos F-883 bis F-939 → 64 neue Zeilen (801): BU01-22 bis -45
       (Deko, Babytragen, Wesco-Schminktische, Trommel …; ohne Foto: BU01-26, -35, -38, -42, -43, -44, -45 → OFFEN),
       NU04-23 bis -62 (ohne -41; Word „Nu05-50“/„Nu05-57“ = laut Post-it NU04-50/-57), NE01-39 Tonie Clown (F-900).
-      Alle Preis geschätzt, offen, Im_Katalog nein. Nutzerin prüft Preise in der Excel. **Livegang zusammen mit Spielzeug
+      Alle Preis geschätzt, offen, Im_Katalog nein. Nutzerin prüft Preise in der Excel. Nachtrag 02.11.: BU01-26 und
+      BU01-35 entfallen, BU01-38 Foto F-940 (Klangröhren-Instrument); Fotos fehlen noch für BU01-42, -43, -44, -45.
+      **NU05-V09/-V10 sind zu verschenken → Preis 0 (geklärt).** **Livegang zusammen mit Spielzeug
       nach dem Umzug auf dem neuen Server.**
 - [ ] **Anfang November 2026 (Nutzerin meldet sich):**
       1. Spielzeug online: alle Artikel mit Kategorie „Spielzeug“ und Preis_geprüft ok auf Im_Katalog = ja (alte vom 12.10.
          BA04/BU01/BU02/BU04, Tonies NE01-27 bis -38, NU07-09 bis -18 inkl. -14A, NU05-Bücher/-Spiele), Fotopaket-Nachtrag.
-      2. Geschenke („zu verschenken“) online stellen; vorher **NU05-V09/-V10 klären** (5 € Preis, aber Kategorie
-         „zu verschenken“ – verkaufen oder verschenken?). Geschenke-Browsertest ist bis dahin wegen dieser zwei rot (65 statt 63).
+      2. Geschenke („zu verschenken“) online stellen. NU05-V09/-V10 geklärt (02.11.: verschenken, Preis 0).
       3. Hinweisband zum Spielzeug („kommt im November“) entfernen bzw. neu formulieren.
       4. Kasten „So läuft es ab“ prüfen (Mo–Do 8–12, Geschenke zum Einkauf) – falls er nicht automatisch ersetzt wurde.
       5. Ende November: Höchstzahl Geschenke je Reservierung neu besprechen (siehe unten).

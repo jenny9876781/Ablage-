@@ -24,3 +24,4 @@ stand: 2026-11-03
 - [[praxisprojekt/baustein-5-strategie]] – Vorbereitung (TT23)
 - [[praxisprojekt/baustein-6-fazit]] – Vorbereitung (TT23)
 - [[praxisprojekt/gespraech-betrieb]] – Leitfaden + Ergebnis Gespräch GF/Team
+- [[praxisprojekt/stand-uebergabe]] – **Hier weitermachen:** Stand + was noch fehlt

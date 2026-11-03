@@ -10,3 +10,4 @@ stand: 2026-11-03
 - 2026-11-03 – kandidaten.md (4 Kandidaten), Favorit markiert: Projekt-Zeit-/Kostenbericht.
 - 2026-11-03 – Bausteine 1–3 als Entwurf, Bausteine 4–6 als Gerüst mit [offen].
 - 2026-11-03 – startcheck.md (Lint-Runde) + Mitbringliste TT23.
+- 2026-11-03 – stand-uebergabe.md angelegt: Stand der Sitzung + Liste, was für TT23 noch gebraucht wird.

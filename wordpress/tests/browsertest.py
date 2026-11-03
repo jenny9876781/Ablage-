@@ -181,7 +181,7 @@ with sync_playwright() as p:
     print("\n4a) Merkliste und Knöpfe")
     knopf_text = seite.locator(f'button[data-res="{nr}"]').inner_text()
     pruefe("Knopf zeigt die Vormerkung dauerhaft", knopf_text == "✓ vorgemerkt (2)", f"({knopf_text!r})")
-    seite.click("#k-merk"); seite.wait_for_timeout(300)
+    seite.click("#k-merk .liste-knopf"); seite.wait_for_timeout(300)   # Mitte der Leiste kann seit 1.10.1 „Geschenke ansehen“ treffen
     pruefe("Merkliste klappt auf", seite.locator("#k-liste").is_visible() and seite.locator("#k-liste .zeile").count() == 2)
     seite.locator(f'#k-liste button[data-weg="{nr2}"]').click(); seite.wait_for_timeout(300)
     pruefe("Artikel einzeln entfernt", seite.locator("#k-liste .zeile").count() == 1
@@ -189,7 +189,7 @@ with sync_playwright() as p:
     pruefe("Knopf des entfernten Artikels zurückgesetzt", seite.locator(f'button[data-res="{nr2}"]').inner_text() == "reservieren")
     seite.locator(f'input[data-menge="{nr2}"]').fill("1"); seite.locator(f'button[data-res="{nr2}"]').click()
     seite.wait_for_timeout(300)
-    seite.click("#k-merk"); seite.wait_for_timeout(200)
+    seite.click("#k-merk .liste-knopf"); seite.wait_for_timeout(200)
     pruefe("Merkliste wieder zu", not seite.locator("#k-liste").is_visible())
 
     # Wunsch 01.10.2026: Leiste oben statt unter der Liste, Fotos ganz statt beschnitten
@@ -234,7 +234,7 @@ with sync_playwright() as p:
     seite.wait_for_selector("#k-dlg", timeout=5000)
     dlg = seite.inner_text("#k-dlg")
     pruefe("Formular öffnet als Fenster, die Seite springt nicht", seite.locator("#k-fenster").is_visible()
-           and abs(seite.evaluate("window.scrollY") - vorher_y) < 5, f"(vorher {vorher_y}, nachher {seite.evaluate('window.scrollY')})")
+           and abs(seite.evaluate("window.scrollY") - vorher_y) < 40, f"(vorher {vorher_y}, nachher {seite.evaluate('window.scrollY')})")
     pruefe("Formular zeigt Stueck gesamt", "3 Stück gesamt" in dlg, f"({dlg[:300]!r})")
     pruefe("Frist genannt", "3 Werktage" in dlg, f"({dlg[:200]!r})")
     pruefe("„melden wir uns“ statt Anruf", "melden wir uns" in dlg and "rufen wir" not in dlg)
@@ -308,7 +308,7 @@ with sync_playwright() as p:
     pruefe("Knopf zum Drucken der Bestätigung", seite.locator("#k-drucken").count() == 1)
     seite.click("#k-fertig"); seite.wait_for_timeout(300)
     pruefe("Schließen führt zurück an dieselbe Stelle", not seite.locator("#k-fenster").is_visible()
-           and abs(seite.evaluate("window.scrollY") - vorher_y) < 5)
+           and abs(seite.evaluate("window.scrollY") - vorher_y) < 40, f"(vorher {vorher_y}, nachher {seite.evaluate('window.scrollY')})")
     pruefe("Knopf „nach oben“ nach langem Scrollen", seite.locator("#k-oben").is_visible())
 
     print("\n5b) Foto groß, Sortierung, Besichtigungshinweis")

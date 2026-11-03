@@ -15936,7 +15936,7 @@
   "foto": "F-942",
   "sortierung": 758,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "BU01-44",
@@ -15957,7 +15957,7 @@
   "foto": "F-943",
   "sortierung": 759,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "BU01-45",

@@ -291,3 +291,13 @@ body.kikripp-ohne-menue .ast-header-social-wrap { display: none !important; }
 .kikripp .geschenke-info { font-size: 13px; opacity: .9; }
 .kikripp .geschenke-info a { color: inherit; text-decoration: underline; }
 .kikripp .preis.geschenk small.kita { display: block; margin-top: 3px; }
+
+/* 1.14.0: Block-Themes (z. B. Twenty Twenty-Five) halten Inhalte auf ~650 px. Der Katalog darf breiter sein. */
+.is-layout-constrained > .kikripp,
+.wp-block-post-content > .kikripp,
+.entry-content > .kikripp {
+  max-width: min(1200px, calc(100vw - 32px)) !important;
+  width: 100%;
+  margin-left: auto !important;
+  margin-right: auto !important;
+}

@@ -1324,6 +1324,17 @@ ist die Merkliste; erledigte Punkte hier abhaken, nicht löschen.
       dann Umzug-Import (Datei von 03.11. früh, aus 1.13.0 – ohne `sichtbar`, deshalb vorher HEUTE-Import, damit die
       188 nicht gestempelt werden). Freitag: `katalog_import.json` (674) → 188 bekommen NEU. SCHRITT1-Datei verworfen.
       Erinnerung trig_01CKtpRTJa3TZqDuAnmCF8UX auf Fr 06.11. 08:15 umgeschrieben. test.txt im public-Ordner später löschen.
+- [ ] **03.11. abends: UMZUG ERLEDIGT.** Neues WP: Plugin 1.13.1, 671 Fotos, Import HEUTE (801 neu, 486 sichtbar, alle mit
+      Foto), Umzug-Import (65/65 Reservierungen, 181/181 Positionen, 27 Einstellungen), Permalinks „Beitragsname“, Seite
+      „Artikelkatalog“ mit [kikripp_katalog] – Katalog läuft (397 Positionen angezeigt). Offen: Seiten Impressum/Datenschutz
+      (Slugs impressum/datenschutz, Texte aus Word), Banner neu, „Termine frühestens ab“ = 11.11.2026, Plugin 1.14.0 einspielen.
+      **Plugin 1.14.0:** Abholung + Besichtigung Mo–Mi 08:00–11:30, **Do 08:00–14:30** (`Kikripp_REST::zeiten_am()`,
+      `ZEITEN_DONNERSTAG`; JS `zeitenAm()` füllt die Uhrzeit nach dem gewählten Tag), Texte/Bestellung/Ablauftext
+      (`kikripp_ablauf_1140`, ersetzt den unveränderten 1120-Text), CSS: Katalog in Block-Themes bis 1200 px breit.
+      Geprüft im Formular mit termine_ab 11.11.: 18 Tage Mi 11.11.–Do 10.12., Wochentage/Daten korrekt, Do bis 14:30;
+      Server lehnt Mi 14:00, Di 10.11., Fr ab. 536 Logik-Tests grün. **Bekannt:** browsertest.py „Merkliste klappt auf“
+      schlägt fehl – auch mit dem Stand vor 1.14.0, also kein Rückschritt; später untersuchen.
+      **Freitag 06.11.:** `ausgabe/katalog_import-06.11.json` (= katalog_import.json, 674 sichtbar) importieren → 188 NEU.
 - [ ] **Anfang November 2026 (Nutzerin meldet sich):**
       1. Spielzeug online: alle Artikel mit Kategorie „Spielzeug“ und Preis_geprüft ok auf Im_Katalog = ja (alte vom 12.10.
          BA04/BU01/BU02/BU04, Tonies NE01-27 bis -38, NU07-09 bis -18 inkl. -14A, NU05-Bücher/-Spiele), Fotopaket-Nachtrag.

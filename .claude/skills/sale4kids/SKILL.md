@@ -1341,6 +1341,14 @@ ist die Merkliste; erledigte Punkte hier abhaken, nicht löschen.
       (nur Twenty Twenty-Five), Website-Zustand „Gut“. **Feinschliff nach Freitag:** weniger Weißraum/doppelter Titel oben,
       Kikripp-Logo (Datei erfragen), Kopfzeilenfarben, Fußzeile mit Adresse/Impressum/Datenschutz – Schritt für Schritt.
       Altes Kikripp-Theme ist nicht umgezogen (exakter Nachbau = Webdesigner).
+- [x] **03.11. abends: Design-Feinschliff erledigt** (Twenty Twenty-Five): Zusätzliches CSS = `assets/kikripp-zusatz.css`
+      + Zeile `footer.wp-block-template-part { display: none; }` (Footer überall aus – TT5-Footer hatte Dummy-Links).
+      Logo `assets/kikripp-logo.png` im Template-Teil **„Header“** (nicht „Header mit großem Titel“), Website-Icon
+      `assets/kikripp-icon.png` (Bollen), Menü Artikelkatalog/Datenschutz/Impressum sichtbar (Option „Menü ausblenden“
+      aus), Begrüßungstext als H2 + Absatz über dem Shortcode (ohne „!“, Wunsch der Nutzerin). Impressum: § 5 DDG,
+      § 18 Abs. 2 MStV, ODR-Absatz entfernt (Hinweis gegeben, kein Rechtsrat). Vorher: BU01-43/-44 je 40 € ok →
+      `katalog_import-06.11.json` (676 sichtbar) + `kikripp-fotos-nachtrag-06.11.zip` (F-942/F-943) für Freitag.
+      Browsertest-Fix: Merkliste über `.liste-knopf` öffnen (Leistenmitte trifft „Geschenke ansehen“).
 - [ ] **Anfang November 2026 (Nutzerin meldet sich):**
       1. Spielzeug online: alle Artikel mit Kategorie „Spielzeug“ und Preis_geprüft ok auf Im_Katalog = ja (alte vom 12.10.
          BA04/BU01/BU02/BU04, Tonies NE01-27 bis -38, NU07-09 bis -18 inkl. -14A, NU05-Bücher/-Spiele), Fotopaket-Nachtrag.

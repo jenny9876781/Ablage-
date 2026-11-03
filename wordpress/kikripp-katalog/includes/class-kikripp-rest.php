@@ -112,6 +112,14 @@ class Kikripp_REST {
 
     /** 1.12.0: halbstündliche Zeiten für Besichtigung und Abholung, vormittags 8 bis 12 Uhr. */
     const BESICHTIGUNG_ZEITEN = ['08:00', '08:30', '09:00', '09:30', '10:00', '10:30', '11:00', '11:30'];
+    /** 1.14.0: donnerstags durchgehend 8 bis 15 Uhr. */
+    const ZEITEN_DONNERSTAG = ['08:00', '08:30', '09:00', '09:30', '10:00', '10:30', '11:00', '11:30',
+                               '12:00', '12:30', '13:00', '13:30', '14:00', '14:30'];
+
+    /** 1.14.0: wählbare Uhrzeiten an einem Tag (Zeitstempel 12:00 UTC). */
+    public static function zeiten_am($tag) {
+        return (int) gmdate('N', $tag) === 4 ? self::ZEITEN_DONNERSTAG : self::BESICHTIGUNG_ZEITEN;
+    }
     /** 1.12.0: Besichtigung und Abholung montags bis donnerstags (ISO-Wochentage). */
     const TERMIN_TAGE = [1, 2, 3, 4];
 
@@ -243,9 +251,10 @@ class Kikripp_REST {
             $tag = self::datum((string) $anfrage->get_param('besichtigung_tag'));
             $zeit = (string) $anfrage->get_param('besichtigung_zeit');
             if (!$tag || !in_array((int) gmdate('N', $tag), self::TERMIN_TAGE, true) || $tag < $frueh || $tag > $schluss
-                || !in_array($zeit, self::BESICHTIGUNG_ZEITEN, true)) {
+                || !in_array($zeit, self::zeiten_am($tag), true)) {
                 return self::fehler('Bitte wählen Sie für die Besichtigung einen Tag von Montag bis Donnerstag'
-                    . ($frueh > $heute ? ' ab dem ' . gmdate('d.m.Y', $frueh) : '') . ' und eine Uhrzeit zwischen 08:00 und 11:30 Uhr.');
+                    . ($frueh > $heute ? ' ab dem ' . gmdate('d.m.Y', $frueh) : '')
+                    . ' und eine Uhrzeit (Mo–Mi 08:00–11:30, Do 08:00–14:30 Uhr).');
             }
             $kontakt['besichtigung'] = gmdate('Y-m-d', $tag) . ' ' . $zeit;
         }
@@ -261,11 +270,11 @@ class Kikripp_REST {
                     . ($schluss < PHP_INT_MAX ? gmdate('d.m.Y', $schluss) : 'Ende des Verkaufs') . '.');
             }
             $kontakt['abholwunsch'] = gmdate('Y-m-d', $t);
-            // Uhrzeit ist freiwillig – dieselben halben Stunden wie bei der Besichtigung (8 bis 12 Uhr)
+            // Uhrzeit ist freiwillig – dieselben halben Stunden wie bei der Besichtigung (Mo–Mi bis 12, Do bis 15 Uhr)
             $zeit = (string) $anfrage->get_param('abholwunsch_zeit');
             if ($zeit !== '') {
-                if (!in_array($zeit, self::BESICHTIGUNG_ZEITEN, true)) {
-                    return self::fehler('Bitte wählen Sie für die Abholung eine Uhrzeit zwischen 08:00 und 11:30 Uhr.');
+                if (!in_array($zeit, self::zeiten_am($t), true)) {
+                    return self::fehler('Bitte wählen Sie für die Abholung eine Uhrzeit (Mo–Mi 08:00–11:30, Do 08:00–14:30 Uhr).');
                 }
                 $kontakt['abholwunsch'] .= ' ' . $zeit;
             }

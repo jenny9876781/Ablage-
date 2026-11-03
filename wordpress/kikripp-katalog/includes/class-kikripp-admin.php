@@ -746,8 +746,8 @@ class Kikripp_Admin {
               . 'Wird der Kauf storniert, entfallen auch die Zugaben.</p>' : '')
             . ($termine ? '<p>' . implode('<br>', array_map($e, $termine)) . '</p>' : '')
             . '<p><b>Zahlung:</b> ' . $e($zahlung) . '</p>'
-            . '<p><b>Abholung:</b> durch den Käufer, montags bis donnerstags von 08:00 bis 12:00 Uhr; Nachmittagstermine '
-            . 'und Demontage nach Vereinbarung. Werkzeug ist mitzubringen.'
+            . '<p><b>Abholung:</b> durch den Käufer, montags bis mittwochs von 08:00 bis 12:00 Uhr, donnerstags von 08:00 bis '
+            . '15:00 Uhr; weitere Termine und Demontage nach Vereinbarung. Werkzeug ist mitzubringen.'
             . ($schluss_text ? ' Die Ware ist bis spätestens <b>' . $e($schluss_text) . '</b> abzuholen. Nicht abgeholte Ware geht '
               . 'ohne Erstattung in das Eigentum der ' . $e($firma) . ' zurück.' : '') . '</p>'
             . $gewaehr
@@ -1150,17 +1150,17 @@ class Kikripp_Admin {
         printf('<tr><th scope="row"><label for="k_besicht">Besichtigung ab</label></th><td>'
              . '<input type="number" id="k_besicht" name="besichtigung_ab" min="0" step="1" value="%s" class="small-text"> € Stückpreis'
              . '<p class="description">Artikel ab diesem Preis tragen im Katalog „Besichtigung möglich“, und das '
-             . 'Formular fragt nach einem Besichtigungstermin (montags bis donnerstags, vormittags).</p></td></tr>',
+             . 'Formular fragt nach einem Besichtigungstermin (Mo–Mi 8–12 Uhr, Do 8–15 Uhr).</p></td></tr>',
              esc_attr(get_option('kikripp_besichtigung_ab', 0)));
 
         printf('<tr><th scope="row"><label for="k_termine_ab">Termine frühestens ab</label></th><td>'
              . '<input type="date" id="k_termine_ab" name="termine_ab" value="%s">'
-             . '<p class="description">Erster Tag, den das Formular für Besichtigung und Abholung anbietet. Leer = ab morgen.</p></td></tr>',
+             . '<p class="description">Erster Tag, den das Formular für Besichtigung und Abholung anbietet (Mo–Mi 8–12, Do 8–15 Uhr). Leer = ab morgen.</p></td></tr>',
              esc_attr(get_option('kikripp_termine_ab', '')));
 
         printf('<tr><th scope="row"><label for="k_schluss">Abholung bis</label></th><td>'
              . '<input type="date" id="k_schluss" name="abholschluss" value="%s">'
-             . '<p class="description">Letzter Abholtag. Das Formular bietet Montag bis Donnerstag bis dahin an, vormittags 8 bis 12 Uhr.</p></td></tr>',
+             . '<p class="description">Letzter Abholtag. Das Formular bietet bis dahin Mo–Mi 8–12 Uhr und Do 8–15 Uhr an.</p></td></tr>',
              esc_attr(get_option('kikripp_abholschluss', '')));
 
         printf('<tr><th scope="row"><label for="k_ablauf">So läuft es ab</label></th><td>'

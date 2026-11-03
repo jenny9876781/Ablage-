@@ -10,7 +10,14 @@
   var ARTIKEL = [], UST = 0.19, HINWEIS = '', FRIST = 3, IST_ADMIN = false;
   var RECHT = '', ABHOLUNG = '', ANBIETER = {}, STEUER = '', ABLAUF = '';
   var MINDEST = 0, GESCHENKE_MAX = 5, BES_AB = 0, SCHLUSS = '', HEUTE = '', TERMINE_AB = '', RUECK = '';
-  var BES_ZEITEN = ['08:00', '08:30', '09:00', '09:30', '10:00', '10:30', '11:00', '11:30'];   // 1.12.0: bis 12 Uhr
+  var BES_ZEITEN = ['08:00', '08:30', '09:00', '09:30', '10:00', '10:30', '11:00', '11:30'];   // 1.12.0: Mo–Mi bis 12 Uhr
+  var ZEITEN_DO = BES_ZEITEN.concat(['12:00', '12:30', '13:00', '13:30', '14:00', '14:30']);  // 1.14.0: Do bis 15 Uhr
+  /** 1.14.0: Uhrzeiten zum gewählten Tag (Donnerstag länger). */
+  function zeitenAm(iso) { return iso && tag(iso).getUTCDay() === 4 ? ZEITEN_DO : BES_ZEITEN; }
+  function zeitOptionen(iso, leer) {
+    return '<option value="">' + leer + '</option>' + zeitenAm(iso).map(function (z) {
+      return '<option value="' + z + '">' + z + ' Uhr</option>'; }).join('');
+  }
   var TERMIN_TAGE = [1, 2, 3, 4];                                                               // Mo–Do
   var formularSeit = 0;
   var merk = {};                       // ArtNr -> gewünschte Stückzahl
@@ -536,7 +543,7 @@
       '<small class="hint">Wir melden uns nach der Reservierung – bitte unbedingt angeben.</small></div>' +
       (mitBesichtigung
         ? '<div class="feld"><label class="chk2"><input type="checkbox" id="k-bes"> Ich möchte die Artikel vorab besichtigen ' +
-          '(montags bis donnerstags 08:00–12:00 Uhr)</label>' +
+          '(Mo–Mi 08:00–12:00 Uhr, Do 08:00–15:00 Uhr)</label>' +
           '<div class="zwei" id="k-bes-wahl" hidden><div>' + auswahlFeld('k-bes-tag', bestage, 'Tag wählen (Mo–Do)') + '</div>' +
           '<div>' + auswahlFeld('k-bes-zeit', BES_ZEITEN.map(function (z) { return [z, z + ' Uhr']; }), 'Uhrzeit wählen') + '</div></div></div>'
         : (BES_AB > 0 ? '<p class="hint-bes">Eine Besichtigung bieten wir für Artikel ab ' + eur(BES_AB) + ' an.</p>' : '')) +
@@ -544,7 +551,7 @@
         '<div class="zwei"><div>' + auswahlFeld('k-abhol', abholtage, 'Tag wählen (Mo–Do)') + '</div>' +
         '<div>' + auswahlFeld('k-abhol-zeit', BES_ZEITEN.map(function (z) { return [z, z + ' Uhr']; }), 'Uhrzeit (optional)') +
         '</div></div>' +
-        '<small class="hint">Abholung montags bis donnerstags 08:00–12:00 Uhr' +
+        '<small class="hint">Abholung Mo–Mi 08:00–12:00 Uhr, Do 08:00–15:00 Uhr' +
         (TERMINE_AB && TERMINE_AB > HEUTE ? ', frühestens ab ' + datumText(TERMINE_AB).slice(4) : '') +
         (SCHLUSS ? ', spätestens ' + datumText(SCHLUSS).slice(4) : '') + '. Abgeholt wird nach Zahlungseingang.</small>' +
         '<label class="chk2"><input type="checkbox" id="k-demontage"> Termin am Nachmittag oder Demontage nötig – ' +
@@ -569,6 +576,16 @@
     if (el('k-bes')) {
       el('k-bes').addEventListener('change', function () { el('k-bes-wahl').hidden = !this.checked; });
     }
+    // 1.14.0: Uhrzeiten passen sich dem gewählten Tag an (donnerstags bis 15 Uhr)
+    [['k-bes-tag', 'k-bes-zeit', 'Uhrzeit wählen'], ['k-abhol', 'k-abhol-zeit', 'Uhrzeit (optional)']].forEach(function (f) {
+      var tagFeld = el(f[0]), zeitFeld = el(f[1]);
+      if (!tagFeld || !zeitFeld) { return; }
+      tagFeld.addEventListener('change', function () {
+        var alt = zeitFeld.value;
+        zeitFeld.innerHTML = zeitOptionen(tagFeld.value, f[2]);
+        if (zeitenAm(tagFeld.value).indexOf(alt) >= 0) { zeitFeld.value = alt; }
+      });
+    });
     if (IST_ADMIN) {   // 1.11.2: Verwaltung – nur Name und Telefon sind Pflicht, die übrigen Sternchen fallen weg
       ['k-strasse', 'k-plz', 'k-ort', 'k-mail', 'k-abhol'].forEach(function (id) {
         var l = wurzel.querySelector('label[for="' + id + '"]');

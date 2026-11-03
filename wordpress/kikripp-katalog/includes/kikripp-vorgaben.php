@@ -55,6 +55,17 @@ function kikripp_ablauf_123() {
         . 'Erstattung in unser Eigentum zurück.';
 }
 
+/** Ablauftext 1.14.0 (03.11.2026): donnerstags durchgehend 8 bis 15 Uhr. */
+function kikripp_ablauf_1140() {
+    return 'Ihre Auswahl bleibt 3 Werktage reserviert, nach Eingang melden wir uns bei Ihnen. '
+        . 'Mindestbestellwert 50 €. Artikel ab 100 € können Sie montags bis mittwochs von 8 bis 12 Uhr und donnerstags von '
+        . '8 bis 15 Uhr nach Vereinbarung besichtigen. Der Kaufvertrag kommt mit der unterschriebenen Bestellung zustande.' . "\n"
+        . 'Bezahlung: generell per Überweisung gegen Rechnung vor der Abholung. Abholung montags bis mittwochs von 8 bis 12 Uhr '
+        . 'und donnerstags von 8 bis 15 Uhr, weitere Termine und Demontage nach Vereinbarung (bitte Werkzeug mitbringen). '
+        . 'Abholung spätestens bis 10.12.2026, danach geht nicht abgeholte Ware ohne Erstattung in unser Eigentum zurück.' . "\n"
+        . 'Artikel „zu verschenken“ gibt es kostenlos zu Ihrem Einkauf.';
+}
+
 /**
  * Ablauftext 1.12.0 (23.10.2026): Besichtigung und Abholung montags bis donnerstags vormittags,
  * Nachmittag/Demontage nach Vereinbarung, Geschenke nur kostenlos zu einem Einkauf.

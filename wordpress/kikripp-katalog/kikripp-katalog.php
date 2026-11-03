@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Kikripp Artikelkatalog
  * Description: Artikelkatalog mit Reservierung für die Betriebsauflösung der Kikripp GmbH. Artikel werden importiert, Reservierungen im Backend verwaltet.
- * Version:     1.13.1
+ * Version:     1.14.0
  * Author:      Kikripp GmbH
  * Text Domain: kikripp-katalog
  * Requires at least: 5.8
@@ -13,7 +13,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-define('KIKRIPP_VERSION', '1.13.1');
+define('KIKRIPP_VERSION', '1.14.0');
 define('KIKRIPP_PFAD', plugin_dir_path(__FILE__));
 define('KIKRIPP_URL', plugin_dir_url(__FILE__));
 
@@ -144,8 +144,17 @@ function kikripp_umstellen_131($stand) {
  * unveränderte Text von 1.2.3 drinsteht. Selbst geänderte Texte bleiben; die Nutzerin bekommt den Wortlaut.
  */
 function kikripp_umstellen_1120($stand) {
-    if (version_compare($stand, '1.12.0', '>=')) { return; }
+    if (version_compare($stand, '1.12.0', '>=')) { kikripp_umstellen_1140($stand); return; }
     $ablauf = trim(str_replace("\r", '', (string) get_option('kikripp_ablauftext', '')));
     if ($ablauf === trim(kikripp_ablauf_123())) { update_option('kikripp_ablauftext', kikripp_ablauf_1120()); }
     update_option('kikripp_plugin_version', '1.12.0');
+    kikripp_umstellen_1140('1.12.0');
+}
+
+/** 1.14.0: Ablauftext mit „donnerstags 8 bis 15 Uhr“ – nur wenn der Text von 1.12.0 noch unverändert ist. */
+function kikripp_umstellen_1140($stand) {
+    if (version_compare($stand, '1.14.0', '>=')) { return; }
+    $ablauf = trim(str_replace("\r", '', (string) get_option('kikripp_ablauftext', '')));
+    if ($ablauf === trim(kikripp_ablauf_1120())) { update_option('kikripp_ablauftext', kikripp_ablauf_1140()); }
+    update_option('kikripp_plugin_version', '1.14.0');
 }

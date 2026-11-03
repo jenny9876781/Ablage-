@@ -137,7 +137,9 @@ def pruefe_import(vorhanden):
     sichtbar = [a for a in liste if a["aktiv"] and a["im_katalog"]]
     OK(f"{len(sichtbar)} Positionen werden im Katalog angezeigt")
 
-    krumm = [a["nr"] for a in sichtbar if not isinstance(a["preis"], (int, float)) or a["preis"] <= 0]
+    # Preis 0 ist seit 1.5.0 erlaubt – aber nur für Artikel „zu verschenken“
+    krumm = [a["nr"] for a in sichtbar if not isinstance(a["preis"], (int, float)) or a["preis"] < 0
+             or (a["preis"] == 0 and a.get("kat") != "zu verschenken")]
     if krumm: F(f"Preis fehlt oder ist null: {krumm[:8]}")
     else:     OK("jede sichtbare Position hat einen Preis größer null")
     ohne = [a["nr"] for a in sichtbar if not isinstance(a["menge"], int) or a["menge"] < 1]

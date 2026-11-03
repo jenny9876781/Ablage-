@@ -1335,6 +1335,12 @@ ist die Merkliste; erledigte Punkte hier abhaken, nicht löschen.
       Server lehnt Mi 14:00, Di 10.11., Fr ab. 536 Logik-Tests grün. **Bekannt:** browsertest.py „Merkliste klappt auf“
       schlägt fehl – auch mit dem Stand vor 1.14.0, also kein Rückschritt; später untersuchen.
       **Freitag 06.11.:** `ausgabe/katalog_import-06.11.json` (= katalog_import.json, 674 sichtbar) importieren → 188 NEU.
+- [x] **03.11. abends Nacharbeiten:** Plugin 1.14.0 eingespielt, Termine ab 11.11.2026, Hinweisband (Spielzeug ab Fr) bis
+      05.11., Frist 3, Rückmeldung-ab leer. Seiten Impressum + Datenschutz (aus Word), „Sample Page“ gelöscht, Startseite =
+      Artikelkatalog (Einstellungen → Lesen). test.txt gelöscht, KAS-Passwort geändert, Akismet + inaktive Themes gelöscht
+      (nur Twenty Twenty-Five), Website-Zustand „Gut“. **Feinschliff nach Freitag:** weniger Weißraum/doppelter Titel oben,
+      Kikripp-Logo (Datei erfragen), Kopfzeilenfarben, Fußzeile mit Adresse/Impressum/Datenschutz – Schritt für Schritt.
+      Altes Kikripp-Theme ist nicht umgezogen (exakter Nachbau = Webdesigner).
 - [ ] **Anfang November 2026 (Nutzerin meldet sich):**
       1. Spielzeug online: alle Artikel mit Kategorie „Spielzeug“ und Preis_geprüft ok auf Im_Katalog = ja (alte vom 12.10.
          BA04/BU01/BU02/BU04, Tonies NE01-27 bis -38, NU07-09 bis -18 inkl. -14A, NU05-Bücher/-Spiele), Fotopaket-Nachtrag.

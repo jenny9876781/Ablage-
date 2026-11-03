@@ -46,10 +46,11 @@ class Kikripp_Umzug {
             $wert = get_option('kikripp_' . $name, null);
             if ($wert !== null) { $optionen[$name] = $wert; }
         }
-        $neu = [];
-        foreach ((array) $wpdb->get_results('SELECT artnr, daten FROM ' . Kikripp_DB::t_artikel(), ARRAY_A) as $a) {
+        $neu = []; $sichtbar = [];
+        foreach ((array) $wpdb->get_results('SELECT artnr, daten, aktiv, im_katalog FROM ' . Kikripp_DB::t_artikel(), ARRAY_A) as $a) {
             $d = json_decode((string) $a['daten'], true);
             if (is_array($d) && !empty($d['neu_seit'])) { $neu[$a['artnr']] = $d['neu_seit']; }
+            if ((int) $a['aktiv'] === 1 && (int) $a['im_katalog'] === 1) { $sichtbar[] = $a['artnr']; }
         }
         return [
             'format'     => self::FORMAT,
@@ -61,6 +62,7 @@ class Kikripp_Umzug {
             'vorgaenge'  => (array) $wpdb->get_results('SELECT * FROM ' . Kikripp_DB::t_vorgang() . ' ORDER BY id', ARRAY_A),
             'positionen' => (array) $wpdb->get_results('SELECT * FROM ' . Kikripp_DB::t_position() . ' ORDER BY id', ARRAY_A),
             'neu_seit'   => $neu,
+            'sichtbar'   => $sichtbar,     // auf der alten Seite sichtbar – nur deren NEU-Stand wird übernommen
         ];
     }
 
@@ -95,13 +97,16 @@ class Kikripp_Umzug {
         foreach ((array) ($d['optionen'] ?? []) as $name => $wert) {
             if (in_array($name, self::OPTIONEN, true)) { update_option('kikripp_' . $name, $wert); $o++; }
         }
-        // NEU-Stempel auf die bereits importierten Artikel übertragen
+        // NEU-Stempel auf die bereits importierten Artikel übertragen. Artikel, die erst auf der neuen Seite
+        // sichtbar werden (z. B. das Spielzeug im November), behalten ihren frischen NEU-Stempel aus dem Import.
         $stempel = (array) ($d['neu_seit'] ?? []);
+        $alt_sichtbar = isset($d['sichtbar']) ? array_flip((array) $d['sichtbar']) : null;
         $n = 0;
         $artikel = (array) $wpdb->get_results('SELECT artnr, daten FROM ' . Kikripp_DB::t_artikel(), ARRAY_A);
         foreach ($artikel as $a) {
             $daten = json_decode((string) $a['daten'], true);
             if (!is_array($daten)) { $daten = []; }
+            if ($alt_sichtbar !== null && !isset($alt_sichtbar[$a['artnr']])) { continue; }
             $soll = isset($stempel[$a['artnr']]) ? (string) $stempel[$a['artnr']] : '';
             if ((string) ($daten['neu_seit'] ?? '') === $soll) { continue; }
             if ($soll === '') { unset($daten['neu_seit']); } else { $daten['neu_seit'] = $soll; }

@@ -1276,6 +1276,14 @@ pruefe('Import: Vorgangsnummer und Inhalt gleich', Kikripp_DB::vorgang($vz)['nam
 pruefe('Import: Einstellung zurück', get_option('kikripp_hinweisband'), 'Umzugstest');
 pruefe('Import: NEU-Stempel zurück', json_decode($wpdb->get_var($wpdb->prepare('SELECT daten FROM ' . Kikripp_DB::t_artikel() . ' WHERE artnr = %s', 'Z-KAUF')), true)['neu_seit'] ?? '', '2026-11-01 10:00:00');
 pruefe('Import: Katalog rechnet wie vorher', katalog_nach('Z-KAUF')['frei'] ?? null, katalog_nach('Z-KAUF')['frei'] ?? null);
+// Artikel, der auf der alten Seite unsichtbar war und erst jetzt sichtbar wird, behält seinen frischen NEU-Stempel
+$dz = json_decode($json, true);
+$dz['sichtbar'] = array_values(array_diff($dz['sichtbar'], ['Z-GES']));
+$frisch = json_decode($wpdb->get_var($wpdb->prepare('SELECT daten FROM ' . Kikripp_DB::t_artikel() . ' WHERE artnr = %s', 'Z-GES')), true);
+$frisch['neu_seit'] = '2026-11-03 09:00:00'; $wpdb->update(Kikripp_DB::t_artikel(), ['daten' => wp_json_encode($frisch)], ['artnr' => 'Z-GES']);
+Kikripp_Umzug::import_daten($dz, true);
+pruefe('neu sichtbarer Artikel behält frischen NEU-Stempel', json_decode($wpdb->get_var($wpdb->prepare('SELECT daten FROM ' . Kikripp_DB::t_artikel() . ' WHERE artnr = %s', 'Z-GES')), true)['neu_seit'] ?? '', '2026-11-03 09:00:00');
+pruefe('Export enthält Liste der sichtbaren Artikel', in_array('Z-KAUF', $ex['sichtbar'], true), true);
 $b2 = Kikripp_Umzug::import_daten(json_decode($json, true), true);
 pruefe('zweiter Import mit Häkchen ersetzt (keine Doppelten)', (int) $wpdb->get_var('SELECT COUNT(*) FROM ' . Kikripp_DB::t_vorgang()), $anz_v);
 update_option('kikripp_hinweisband', '');

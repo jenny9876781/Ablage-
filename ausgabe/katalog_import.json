@@ -668,7 +668,7 @@
   "mengenhinweis": "",
   "foto": "F-150",
   "sortierung": 31,
-  "aktiv": true,
+  "aktiv": false,
   "im_katalog": true
  },
  {
@@ -3062,7 +3062,7 @@
   "mengenhinweis": "",
   "foto": "F-118",
   "sortierung": 145,
-  "aktiv": true,
+  "aktiv": false,
   "im_katalog": true
  },
  {
@@ -6653,7 +6653,7 @@
   "mengenhinweis": "",
   "foto": "F-388",
   "sortierung": 316,
-  "aktiv": true,
+  "aktiv": false,
   "im_katalog": true
  },
  {
@@ -8186,7 +8186,7 @@
   "mengenhinweis": "",
   "foto": "F-497",
   "sortierung": 389,
-  "aktiv": true,
+  "aktiv": false,
   "im_katalog": true
  },
  {
@@ -10665,7 +10665,7 @@
   "foto": "F-699",
   "sortierung": 507,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "BU01-13",
@@ -10707,7 +10707,7 @@
   "foto": "F-701",
   "sortierung": 509,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "BU01-15",
@@ -10728,7 +10728,7 @@
   "foto": "F-702",
   "sortierung": 510,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "BU01-16",
@@ -10749,7 +10749,7 @@
   "foto": "F-704",
   "sortierung": 511,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "BU01-17",
@@ -10770,7 +10770,7 @@
   "foto": "F-703",
   "sortierung": 512,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "BU01-18",
@@ -10791,7 +10791,7 @@
   "foto": "F-706",
   "sortierung": 513,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "BU01-19",
@@ -10812,7 +10812,7 @@
   "foto": "F-707",
   "sortierung": 514,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "BU01-20",
@@ -10833,7 +10833,7 @@
   "foto": "F-708",
   "sortierung": 515,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "BU01-21",
@@ -10854,7 +10854,7 @@
   "foto": "F-709",
   "sortierung": 516,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "BU02-20",
@@ -10875,7 +10875,7 @@
   "foto": "F-717",
   "sortierung": 517,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "BU02-21",
@@ -10896,7 +10896,7 @@
   "foto": "F-718",
   "sortierung": 518,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "BU04-16",
@@ -10917,7 +10917,7 @@
   "foto": "F-719",
   "sortierung": 519,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "BU04-17",
@@ -10938,7 +10938,7 @@
   "foto": "F-722",
   "sortierung": 520,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "BU04-18",
@@ -10959,7 +10959,7 @@
   "foto": "F-726",
   "sortierung": 521,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "BU04-19",
@@ -10980,7 +10980,7 @@
   "foto": "F-720",
   "sortierung": 522,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "BU04-20",
@@ -11001,7 +11001,7 @@
   "foto": "F-721",
   "sortierung": 523,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "BU04-21",
@@ -11022,7 +11022,7 @@
   "foto": "F-727",
   "sortierung": 524,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "BU04-22",
@@ -11043,7 +11043,7 @@
   "foto": "F-725",
   "sortierung": 525,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "BU04-23",
@@ -11064,7 +11064,7 @@
   "foto": "F-728",
   "sortierung": 526,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "BU04-24",
@@ -11085,7 +11085,7 @@
   "foto": "F-723",
   "sortierung": 527,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "BU04-27",
@@ -11106,7 +11106,7 @@
   "foto": "F-724",
   "sortierung": 528,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "BA04-23",
@@ -11127,7 +11127,7 @@
   "foto": "F-661",
   "sortierung": 529,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "BA04-24",
@@ -11148,7 +11148,7 @@
   "foto": "F-662",
   "sortierung": 530,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "BA04-25",
@@ -11169,7 +11169,7 @@
   "foto": "F-663",
   "sortierung": 531,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "BA04-26",
@@ -11211,7 +11211,7 @@
   "foto": "F-665",
   "sortierung": 533,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "BA04-28",
@@ -11232,7 +11232,7 @@
   "foto": "F-666",
   "sortierung": 534,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "BA04-29",
@@ -11253,7 +11253,7 @@
   "foto": "F-667",
   "sortierung": 535,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "BA04-30",
@@ -11274,7 +11274,7 @@
   "foto": "F-668",
   "sortierung": 536,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "BA04-31",
@@ -11295,7 +11295,7 @@
   "foto": "F-669",
   "sortierung": 537,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "BA04-32",
@@ -11316,7 +11316,7 @@
   "foto": "F-670",
   "sortierung": 538,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "BA04-33",
@@ -11337,7 +11337,7 @@
   "foto": "F-671",
   "sortierung": 539,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "BA04-34",
@@ -11358,7 +11358,7 @@
   "foto": "F-672",
   "sortierung": 540,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "BA04-35",
@@ -11379,7 +11379,7 @@
   "foto": "F-673",
   "sortierung": 541,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "BA04-36",
@@ -11400,7 +11400,7 @@
   "foto": "F-674",
   "sortierung": 542,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "BA04-37",
@@ -11421,7 +11421,7 @@
   "foto": "F-675",
   "sortierung": 543,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "BA04-38",
@@ -11442,7 +11442,7 @@
   "foto": "F-676",
   "sortierung": 544,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "BA04-39",
@@ -11463,7 +11463,7 @@
   "foto": "F-677",
   "sortierung": 545,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "BA04-40",
@@ -11484,7 +11484,7 @@
   "foto": "F-678",
   "sortierung": 546,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "BA04-41",
@@ -11547,7 +11547,7 @@
   "foto": "F-679",
   "sortierung": 549,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "BA04-44",
@@ -11568,7 +11568,7 @@
   "foto": "F-680",
   "sortierung": 550,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "BA04-V01",
@@ -14655,7 +14655,7 @@
   "foto": "F-855",
   "sortierung": 697,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "NU05-41",
@@ -14739,7 +14739,7 @@
   "foto": "F-859",
   "sortierung": 701,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "NU05-45",
@@ -14781,7 +14781,7 @@
   "foto": "F-862",
   "sortierung": 703,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "NU05-47",
@@ -14802,7 +14802,7 @@
   "foto": "F-864",
   "sortierung": 704,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "NU05-48",
@@ -14823,7 +14823,7 @@
   "foto": "F-865",
   "sortierung": 705,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "NU05-49",
@@ -14865,7 +14865,7 @@
   "foto": "F-867",
   "sortierung": 707,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "NU05-51",
@@ -14886,7 +14886,7 @@
   "foto": "F-868",
   "sortierung": 708,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "NU05-52",
@@ -14907,7 +14907,7 @@
   "foto": "F-869",
   "sortierung": 709,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "NE05-19",
@@ -14970,7 +14970,7 @@
   "foto": "F-842",
   "sortierung": 712,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "NU07-10",
@@ -14991,7 +14991,7 @@
   "foto": "F-846",
   "sortierung": 713,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "NU07-11",
@@ -15012,7 +15012,7 @@
   "foto": "F-847",
   "sortierung": 714,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "NU07-12",
@@ -15033,7 +15033,7 @@
   "foto": "F-845",
   "sortierung": 715,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "NU07-13",
@@ -15054,7 +15054,7 @@
   "foto": "F-848",
   "sortierung": 716,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "NU07-14",
@@ -15075,7 +15075,7 @@
   "foto": "F-849",
   "sortierung": 717,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "NU07-15",
@@ -15096,7 +15096,7 @@
   "foto": "F-850",
   "sortierung": 718,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "NU07-16",
@@ -15117,7 +15117,7 @@
   "foto": "F-851",
   "sortierung": 719,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "NU07-17",
@@ -15138,7 +15138,7 @@
   "foto": "F-852",
   "sortierung": 720,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "NU07-18",
@@ -15159,7 +15159,7 @@
   "foto": "F-853",
   "sortierung": 721,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "NU05-38",
@@ -15201,7 +15201,7 @@
   "foto": "F-863",
   "sortierung": 723,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "NU07-14A",
@@ -15222,7 +15222,7 @@
   "foto": "F-843",
   "sortierung": 724,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "NE01-27",
@@ -15243,7 +15243,7 @@
   "foto": "F-872",
   "sortierung": 725,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "NE01-28",
@@ -15264,7 +15264,7 @@
   "foto": "F-873",
   "sortierung": 726,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "NE01-29",
@@ -15285,7 +15285,7 @@
   "foto": "F-874",
   "sortierung": 727,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "NE01-30",
@@ -15306,7 +15306,7 @@
   "foto": "F-875",
   "sortierung": 728,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "NE01-31",
@@ -15327,7 +15327,7 @@
   "foto": "F-871",
   "sortierung": 729,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "NE01-32",
@@ -15348,7 +15348,7 @@
   "foto": "F-877",
   "sortierung": 730,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "NE01-33",
@@ -15369,7 +15369,7 @@
   "foto": "F-880",
   "sortierung": 731,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "NE01-34",
@@ -15390,7 +15390,7 @@
   "foto": "F-878",
   "sortierung": 732,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "NE01-35",
@@ -15411,7 +15411,7 @@
   "foto": "F-879",
   "sortierung": 733,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "NE01-36",
@@ -15432,7 +15432,7 @@
   "foto": "F-876",
   "sortierung": 734,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "NE01-37",
@@ -15453,7 +15453,7 @@
   "foto": "F-882",
   "sortierung": 735,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "NE01-38",
@@ -15474,70 +15474,70 @@
   "foto": "F-881",
   "sortierung": 736,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "BU01-22",
-  "titel": "IKEA Marietorp Bilderrahmen schwarz, 70 × 31 cm, 2 Stück",
-  "beschr": "Zwei IKEA-Bilderrahmen Marietorp in Schwarz, 70 × 31 cm.",
+  "titel": "IKEA Marietorp Bilderrahmen schwarz, 70 × 31 cm",
+  "beschr": "IKEA-Bilderrahmen Marietorp in Schwarz, 70 × 31 cm.",
   "kat": "Deko",
   "raum": "Flur",
   "zustand": "gut",
   "masse": "70 x 31 cm",
-  "menge": 1,
-  "einheit": "Set",
+  "menge": 2,
+  "einheit": "Stück",
   "preis": 8.0,
   "basis": "Fix",
   "versand": "nur Abholung",
   "marke": "IKEA",
   "buendel": "",
-  "mengenhinweis": "Nur als Set wie abgebildet.",
+  "mengenhinweis": "2 Stück, Preis je Stück.",
   "foto": "F-887",
   "sortierung": 737,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "BU01-23",
-  "titel": "IKEA Knoppäng Bilderrahmen schwarz, 21 × 30 cm, 2 Stück",
-  "beschr": "Zwei IKEA-Bilderrahmen Knoppäng in Schwarz, 21 × 30 cm.",
+  "titel": "IKEA Knoppäng Bilderrahmen schwarz, 21 × 30 cm",
+  "beschr": "IKEA-Bilderrahmen Knoppäng in Schwarz, 21 × 30 cm.",
   "kat": "Deko",
   "raum": "Flur",
   "zustand": "gut",
   "masse": "21 x 30 cm",
-  "menge": 1,
-  "einheit": "Set",
+  "menge": 2,
+  "einheit": "Stück",
   "preis": 6.0,
   "basis": "Fix",
   "versand": "nur Abholung",
   "marke": "IKEA",
   "buendel": "",
-  "mengenhinweis": "Nur als Set wie abgebildet.",
+  "mengenhinweis": "2 Stück, Preis je Stück.",
   "foto": "F-888",
   "sortierung": 738,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "BU01-24",
-  "titel": "Bilderrahmen schwarz glänzend, 6 Stück",
-  "beschr": "Sechs Bilderrahmen in glänzendem Schwarz.",
+  "titel": "Bilderrahmen schwarz glänzend",
+  "beschr": "Bilderrahmen in glänzendem Schwarz.",
   "kat": "Deko",
   "raum": "Flur",
   "zustand": "gebraucht",
   "masse": "",
-  "menge": 1,
-  "einheit": "Set",
-  "preis": 8.0,
+  "menge": 6,
+  "einheit": "Stück",
+  "preis": 5.0,
   "basis": "Fix",
   "versand": "nur Abholung",
   "marke": "",
   "buendel": "",
-  "mengenhinweis": "Nur als Set. Teilweise leicht verkratzt.",
+  "mengenhinweis": "6 Stück, Preis je Stück. Teilweise leicht verkratzt.",
   "foto": "F-889",
   "sortierung": 739,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "BU01-25",
@@ -15558,7 +15558,7 @@
   "foto": "F-890",
   "sortierung": 740,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "BU01-26",
@@ -15599,7 +15599,7 @@
   "mengenhinweis": "",
   "foto": "F-891",
   "sortierung": 742,
-  "aktiv": true,
+  "aktiv": false,
   "im_katalog": false
  },
  {
@@ -15620,7 +15620,7 @@
   "mengenhinweis": "",
   "foto": "F-892",
   "sortierung": 743,
-  "aktiv": true,
+  "aktiv": false,
   "im_katalog": false
  },
  {
@@ -15642,7 +15642,7 @@
   "foto": "F-893",
   "sortierung": 744,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "BU01-30",
@@ -15663,7 +15663,7 @@
   "foto": "F-894",
   "sortierung": 745,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "BU01-31",
@@ -15675,7 +15675,7 @@
   "masse": "",
   "menge": 1,
   "einheit": "Set",
-  "preis": 15.0,
+  "preis": 20.0,
   "basis": "Fix",
   "versand": "nur Abholung",
   "marke": "",
@@ -15684,7 +15684,7 @@
   "foto": "F-895",
   "sortierung": 746,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "BU01-32",
@@ -15705,7 +15705,7 @@
   "foto": "F-896",
   "sortierung": 747,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "BU01-33",
@@ -15726,7 +15726,7 @@
   "foto": "F-897",
   "sortierung": 748,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "BU01-34",
@@ -15738,7 +15738,7 @@
   "masse": "",
   "menge": 1,
   "einheit": "Stück",
-  "preis": 40.0,
+  "preis": 30.0,
   "basis": "Fix",
   "versand": "nur Abholung",
   "marke": "Artipoppe",
@@ -15747,7 +15747,7 @@
   "foto": "F-898",
   "sortierung": 749,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "BU01-35",
@@ -15780,7 +15780,7 @@
   "masse": "",
   "menge": 1,
   "einheit": "Set",
-  "preis": 15.0,
+  "preis": 25.0,
   "basis": "Fix",
   "versand": "nur Abholung",
   "marke": "",
@@ -15789,7 +15789,7 @@
   "foto": "F-899",
   "sortierung": 751,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "BU01-37",
@@ -15810,7 +15810,7 @@
   "foto": "F-883",
   "sortierung": 752,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "BU01-38",
@@ -15831,7 +15831,7 @@
   "foto": "F-940",
   "sortierung": 753,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "BU01-39",
@@ -15852,28 +15852,28 @@
   "foto": "F-884",
   "sortierung": 754,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "BU01-40",
-  "titel": "Trillerpfeifen, 4 Packungen à 12 Stück",
-  "beschr": "48 Trillerpfeifen in 4 Packungen, originalverpackt.",
+  "titel": "Trillerpfeifen, Packung à 12 Stück",
+  "beschr": "Trillerpfeifen, 12 Stück je Packung, originalverpackt.",
   "kat": "Verbrauchsmaterial",
   "raum": "Flur",
   "zustand": "neuwertig",
   "masse": "",
-  "menge": 1,
-  "einheit": "Set",
-  "preis": 10.0,
+  "menge": 4,
+  "einheit": "Packung",
+  "preis": 2.5,
   "basis": "Fix",
   "versand": "nur Abholung",
   "marke": "",
   "buendel": "",
-  "mengenhinweis": "Nur als Set wie abgebildet.",
+  "mengenhinweis": "4 Packungen, Preis je Packung (12 Stück).",
   "foto": "F-885",
   "sortierung": 755,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "BU01-41",
@@ -15893,7 +15893,7 @@
   "mengenhinweis": "Nur als Set wie abgebildet.",
   "foto": "F-886",
   "sortierung": 756,
-  "aktiv": true,
+  "aktiv": false,
   "im_katalog": false
  },
  {
@@ -15912,15 +15912,15 @@
   "marke": "Wesco",
   "buendel": "",
   "mengenhinweis": "",
-  "foto": "",
+  "foto": "F-941",
   "sortierung": 757,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "BU01-43",
-  "titel": "Wesco Kinderspielgerät",
-  "beschr": "Kinderspielgerät von Wesco, 60 × 35 × 73 cm.",
+  "titel": "Wesco Kinder-Waschtisch (Spielgerät)",
+  "beschr": "Spielgerät von Wesco: Kinder-Waschtisch mit Brause und Netzablage, 60 × 35 × 73 cm.",
   "kat": "Kita-Ausstattung",
   "raum": "Flur",
   "zustand": "gut",
@@ -15933,7 +15933,7 @@
   "marke": "Wesco",
   "buendel": "",
   "mengenhinweis": "",
-  "foto": "",
+  "foto": "F-942",
   "sortierung": 758,
   "aktiv": true,
   "im_katalog": false
@@ -15954,7 +15954,7 @@
   "marke": "",
   "buendel": "",
   "mengenhinweis": "",
-  "foto": "",
+  "foto": "F-943",
   "sortierung": 759,
   "aktiv": true,
   "im_katalog": false
@@ -15977,7 +15977,7 @@
   "mengenhinweis": "Nur als Set wie abgebildet.",
   "foto": "",
   "sortierung": 760,
-  "aktiv": true,
+  "aktiv": false,
   "im_katalog": false
  },
  {
@@ -15999,7 +15999,7 @@
   "foto": "F-900",
   "sortierung": 761,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "NU04-23",
@@ -16020,7 +16020,7 @@
   "foto": "F-901",
   "sortierung": 762,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "NU04-24",
@@ -16032,7 +16032,7 @@
   "masse": "",
   "menge": 1,
   "einheit": "Set",
-  "preis": 10.0,
+  "preis": 20.0,
   "basis": "Fix",
   "versand": "nur Abholung",
   "marke": "",
@@ -16041,7 +16041,7 @@
   "foto": "F-902",
   "sortierung": 763,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "NU04-25",
@@ -16062,7 +16062,7 @@
   "foto": "F-903",
   "sortierung": 764,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "NU04-26",
@@ -16082,7 +16082,7 @@
   "mengenhinweis": "Nur als Set wie abgebildet.",
   "foto": "F-904",
   "sortierung": 765,
-  "aktiv": true,
+  "aktiv": false,
   "im_katalog": false
  },
  {
@@ -16095,7 +16095,7 @@
   "masse": "",
   "menge": 1,
   "einheit": "Set",
-  "preis": 8.0,
+  "preis": 15.0,
   "basis": "Fix",
   "versand": "nur Abholung",
   "marke": "",
@@ -16104,7 +16104,7 @@
   "foto": "F-905",
   "sortierung": 766,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "NU04-28",
@@ -16116,7 +16116,7 @@
   "masse": "",
   "menge": 1,
   "einheit": "Set",
-  "preis": 8.0,
+  "preis": 15.0,
   "basis": "Fix",
   "versand": "nur Abholung",
   "marke": "",
@@ -16125,7 +16125,7 @@
   "foto": "F-906",
   "sortierung": 767,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "NU04-29",
@@ -16137,7 +16137,7 @@
   "masse": "",
   "menge": 1,
   "einheit": "Set",
-  "preis": 10.0,
+  "preis": 15.0,
   "basis": "Fix",
   "versand": "nur Abholung",
   "marke": "",
@@ -16146,7 +16146,7 @@
   "foto": "F-907",
   "sortierung": 768,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "NU04-30",
@@ -16158,7 +16158,7 @@
   "masse": "",
   "menge": 1,
   "einheit": "Set",
-  "preis": 12.0,
+  "preis": 15.0,
   "basis": "Fix",
   "versand": "nur Abholung",
   "marke": "",
@@ -16167,7 +16167,7 @@
   "foto": "F-908",
   "sortierung": 769,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "NU04-31",
@@ -16179,7 +16179,7 @@
   "masse": "",
   "menge": 1,
   "einheit": "Set",
-  "preis": 12.0,
+  "preis": 20.0,
   "basis": "Fix",
   "versand": "nur Abholung",
   "marke": "",
@@ -16188,7 +16188,7 @@
   "foto": "F-909",
   "sortierung": 770,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "NU04-32",
@@ -16200,7 +16200,7 @@
   "masse": "",
   "menge": 1,
   "einheit": "Set",
-  "preis": 8.0,
+  "preis": 15.0,
   "basis": "Fix",
   "versand": "nur Abholung",
   "marke": "",
@@ -16209,7 +16209,7 @@
   "foto": "F-910",
   "sortierung": 771,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "NU04-33",
@@ -16221,7 +16221,7 @@
   "masse": "",
   "menge": 1,
   "einheit": "Set",
-  "preis": 10.0,
+  "preis": 15.0,
   "basis": "Fix",
   "versand": "nur Abholung",
   "marke": "",
@@ -16230,7 +16230,7 @@
   "foto": "F-911",
   "sortierung": 772,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "NU04-34",
@@ -16242,7 +16242,7 @@
   "masse": "",
   "menge": 1,
   "einheit": "Set",
-  "preis": 12.0,
+  "preis": 15.0,
   "basis": "Fix",
   "versand": "nur Abholung",
   "marke": "",
@@ -16251,7 +16251,7 @@
   "foto": "F-912",
   "sortierung": 773,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "NU04-35",
@@ -16272,7 +16272,7 @@
   "foto": "F-913",
   "sortierung": 774,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "NU04-36",
@@ -16284,7 +16284,7 @@
   "masse": "",
   "menge": 1,
   "einheit": "Set",
-  "preis": 8.0,
+  "preis": 15.0,
   "basis": "Fix",
   "versand": "nur Abholung",
   "marke": "",
@@ -16293,7 +16293,7 @@
   "foto": "F-914",
   "sortierung": 775,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "NU04-37",
@@ -16305,7 +16305,7 @@
   "masse": "",
   "menge": 1,
   "einheit": "Set",
-  "preis": 6.0,
+  "preis": 12.0,
   "basis": "Fix",
   "versand": "nur Abholung",
   "marke": "",
@@ -16314,7 +16314,7 @@
   "foto": "F-921",
   "sortierung": 776,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "NU04-38",
@@ -16326,7 +16326,7 @@
   "masse": "",
   "menge": 1,
   "einheit": "Set",
-  "preis": 6.0,
+  "preis": 12.0,
   "basis": "Fix",
   "versand": "nur Abholung",
   "marke": "",
@@ -16335,7 +16335,7 @@
   "foto": "F-916",
   "sortierung": 777,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "NU04-39",
@@ -16347,7 +16347,7 @@
   "masse": "",
   "menge": 1,
   "einheit": "Set",
-  "preis": 6.0,
+  "preis": 10.0,
   "basis": "Fix",
   "versand": "nur Abholung",
   "marke": "",
@@ -16356,7 +16356,7 @@
   "foto": "F-917",
   "sortierung": 778,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "NU04-40",
@@ -16368,7 +16368,7 @@
   "masse": "",
   "menge": 1,
   "einheit": "Set",
-  "preis": 8.0,
+  "preis": 10.0,
   "basis": "Fix",
   "versand": "nur Abholung",
   "marke": "",
@@ -16377,7 +16377,7 @@
   "foto": "F-918",
   "sortierung": 779,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "NU04-42",
@@ -16389,7 +16389,7 @@
   "masse": "",
   "menge": 1,
   "einheit": "Set",
-  "preis": 8.0,
+  "preis": 10.0,
   "basis": "Fix",
   "versand": "nur Abholung",
   "marke": "",
@@ -16398,7 +16398,7 @@
   "foto": "F-915",
   "sortierung": 780,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "NU04-43",
@@ -16410,7 +16410,7 @@
   "masse": "",
   "menge": 1,
   "einheit": "Set",
-  "preis": 8.0,
+  "preis": 25.0,
   "basis": "Fix",
   "versand": "nur Abholung",
   "marke": "",
@@ -16419,7 +16419,7 @@
   "foto": "F-927",
   "sortierung": 781,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "NU04-44",
@@ -16431,7 +16431,7 @@
   "masse": "",
   "menge": 1,
   "einheit": "Set",
-  "preis": 10.0,
+  "preis": 20.0,
   "basis": "Fix",
   "versand": "nur Abholung",
   "marke": "",
@@ -16440,7 +16440,7 @@
   "foto": "F-925",
   "sortierung": 782,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "NU04-45",
@@ -16452,7 +16452,7 @@
   "masse": "",
   "menge": 1,
   "einheit": "Set",
-  "preis": 10.0,
+  "preis": 25.0,
   "basis": "Fix",
   "versand": "nur Abholung",
   "marke": "",
@@ -16461,7 +16461,7 @@
   "foto": "F-926",
   "sortierung": 783,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "NU04-46",
@@ -16482,7 +16482,7 @@
   "foto": "F-920",
   "sortierung": 784,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "NU04-47",
@@ -16494,7 +16494,7 @@
   "masse": "",
   "menge": 1,
   "einheit": "Set",
-  "preis": 8.0,
+  "preis": 20.0,
   "basis": "Fix",
   "versand": "nur Abholung",
   "marke": "",
@@ -16503,7 +16503,7 @@
   "foto": "F-923",
   "sortierung": 785,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "NU04-48",
@@ -16515,7 +16515,7 @@
   "masse": "",
   "menge": 1,
   "einheit": "Set",
-  "preis": 10.0,
+  "preis": 25.0,
   "basis": "Fix",
   "versand": "nur Abholung",
   "marke": "",
@@ -16524,7 +16524,7 @@
   "foto": "F-924",
   "sortierung": 786,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "NU04-49",
@@ -16536,7 +16536,7 @@
   "masse": "",
   "menge": 1,
   "einheit": "Set",
-  "preis": 10.0,
+  "preis": 25.0,
   "basis": "Fix",
   "versand": "nur Abholung",
   "marke": "",
@@ -16545,7 +16545,7 @@
   "foto": "F-928",
   "sortierung": 787,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "NU04-50",
@@ -16565,7 +16565,7 @@
   "mengenhinweis": "Nur als Set wie abgebildet.",
   "foto": "F-936",
   "sortierung": 788,
-  "aktiv": true,
+  "aktiv": false,
   "im_katalog": false
  },
  {
@@ -16578,7 +16578,7 @@
   "masse": "Korb 32 x 34 x 32 cm",
   "menge": 1,
   "einheit": "Set",
-  "preis": 20.0,
+  "preis": 35.0,
   "basis": "Fix",
   "versand": "nur Abholung",
   "marke": "",
@@ -16587,7 +16587,7 @@
   "foto": "F-919",
   "sortierung": 789,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "NU04-52",
@@ -16599,7 +16599,7 @@
   "masse": "",
   "menge": 1,
   "einheit": "Set",
-  "preis": 8.0,
+  "preis": 20.0,
   "basis": "Fix",
   "versand": "nur Abholung",
   "marke": "",
@@ -16608,7 +16608,7 @@
   "foto": "F-929",
   "sortierung": 790,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "NU04-53",
@@ -16620,7 +16620,7 @@
   "masse": "",
   "menge": 1,
   "einheit": "Set",
-  "preis": 8.0,
+  "preis": 18.0,
   "basis": "Fix",
   "versand": "nur Abholung",
   "marke": "",
@@ -16629,7 +16629,7 @@
   "foto": "F-938",
   "sortierung": 791,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "NU04-54",
@@ -16641,7 +16641,7 @@
   "masse": "",
   "menge": 1,
   "einheit": "Set",
-  "preis": 8.0,
+  "preis": 20.0,
   "basis": "Fix",
   "versand": "nur Abholung",
   "marke": "",
@@ -16650,7 +16650,7 @@
   "foto": "F-930",
   "sortierung": 792,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "NU04-55",
@@ -16670,7 +16670,7 @@
   "mengenhinweis": "Nur als Set wie abgebildet.",
   "foto": "F-922",
   "sortierung": 793,
-  "aktiv": true,
+  "aktiv": false,
   "im_katalog": false
  },
  {
@@ -16683,7 +16683,7 @@
   "masse": "ca. 65 cm hoch",
   "menge": 1,
   "einheit": "Set",
-  "preis": 12.0,
+  "preis": 15.0,
   "basis": "Fix",
   "versand": "nur Abholung",
   "marke": "",
@@ -16692,7 +16692,7 @@
   "foto": "F-937",
   "sortierung": 794,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "NU04-57",
@@ -16704,7 +16704,7 @@
   "masse": "50 x 34 x 16 cm",
   "menge": 1,
   "einheit": "Set",
-  "preis": 15.0,
+  "preis": 40.0,
   "basis": "Fix",
   "versand": "nur Abholung",
   "marke": "",
@@ -16713,7 +16713,7 @@
   "foto": "F-935",
   "sortierung": 795,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "NU04-58",
@@ -16725,7 +16725,7 @@
   "masse": "30 x 56 x 20 cm",
   "menge": 1,
   "einheit": "Set",
-  "preis": 15.0,
+  "preis": 40.0,
   "basis": "Fix",
   "versand": "nur Abholung",
   "marke": "",
@@ -16734,7 +16734,7 @@
   "foto": "F-934",
   "sortierung": 796,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "NU04-59",
@@ -16755,7 +16755,7 @@
   "foto": "F-939",
   "sortierung": 797,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "NU04-60",
@@ -16776,7 +16776,7 @@
   "foto": "F-933",
   "sortierung": 798,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "NU04-61",
@@ -16788,7 +16788,7 @@
   "masse": "",
   "menge": 1,
   "einheit": "Set",
-  "preis": 10.0,
+  "preis": 20.0,
   "basis": "Fix",
   "versand": "nur Abholung",
   "marke": "",
@@ -16797,7 +16797,7 @@
   "foto": "F-931",
   "sortierung": 799,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "NU04-62",
@@ -16809,7 +16809,7 @@
   "masse": "",
   "menge": 1,
   "einheit": "Set",
-  "preis": 10.0,
+  "preis": 20.0,
   "basis": "Fix",
   "versand": "nur Abholung",
   "marke": "",
@@ -16818,6 +16818,6 @@
   "foto": "F-932",
   "sortierung": 800,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  }
 ]

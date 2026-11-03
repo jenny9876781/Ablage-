@@ -1289,6 +1289,18 @@ ist die Merkliste; erledigte Punkte hier abhaken, nicht löschen.
       BU01-35 entfallen, BU01-38 Foto F-940 (Klangröhren-Instrument); Fotos fehlen noch für BU01-42, -43, -44, -45.
       **NU05-V09/-V10 sind zu verschenken → Preis 0 (geklärt).** **Livegang zusammen mit Spielzeug
       nach dem Umzug auf dem neuen Server.**
+- [ ] **03.11.2026 Stand Umzug:** Hoster nicht erreichbar → Mail geschickt (Domain kikripp.de umstellen, alten Server
+      nicht löschen, WP-Benutzername). Neuer Account: Domain kikripp.de → /kikripp.de/public/, PHP 8.4, frisches WP
+      (Datenbank d048d2af, Präfix tub2b_). Alte Seite: Plugin 1.13.0 eingespielt, Umzug exportiert (65 Reservierungen,
+      737 Artikel), Impressum/Datenschutz als Word, XML-Export. BackWPup auf dem alten Server nicht installierbar.
+      **Plugin 1.13.1:** Export enthält `sichtbar` (auf der alten Seite sichtbare Artikel); beim Import werden NEU-Stempel
+      nur für diese übernommen – neu sichtbare (Spielzeug) behalten den frischen Stempel. **Vor der Domain-Umstellung auf
+      der alten Seite 1.13.1 einspielen und NEU exportieren** (dann sind auch die Reservierungen von heute dabei).
+      Excel 03.11.: 57 Preise ok, entfällt BU04-03, NU01-15 (Rest; 1 verkauft), BU03-02, BE10-06, BU01-27, -28, -41, -45,
+      NU04-26, -50, -55; BU01-22/-23/-24/-40 jetzt Stückware. Fotos BU01-42/-43/-44 = F-941/-942/-943. **Sichtbar ab
+      Umzug: 611** (alles Spielzeug inkl. Tonies/NU07/NU04 + neue BU01). Noch offen/verborgen: BU01-43, BU01-44 (Preis offen);
+      Geschenke („zu verschenken“) weiter verborgen bis Freigabe. Ausgeliefert: Plugin 1.13.1, katalog_import.json,
+      Fotopaket komplett 5 Teile (608 Fotos, 128 MB).
 - [ ] **Anfang November 2026 (Nutzerin meldet sich):**
       1. Spielzeug online: alle Artikel mit Kategorie „Spielzeug“ und Preis_geprüft ok auf Im_Katalog = ja (alte vom 12.10.
          BA04/BU01/BU02/BU04, Tonies NE01-27 bis -38, NU07-09 bis -18 inkl. -14A, NU05-Bücher/-Spiele), Fotopaket-Nachtrag.

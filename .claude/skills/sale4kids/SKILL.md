@@ -1302,6 +1302,14 @@ ist die Merkliste; erledigte Punkte hier abhaken, nicht löschen.
       **Geschenke freigegeben (03.11.): 63 sichtbar** (NE04-V01/-V02 ohne Foto bleiben verborgen) → **674 sichtbar**.
       Ausgeliefert (endgültig für den Umzug): Plugin 1.13.1, katalog_import.json, Fotopaket 6 Teile (671 Fotos, 143 MB).
       Nutzerin ist von den vielen Versionen verwirrt → **nur noch eine Plugin-Version für den Umzug (1.13.1), keine neue.
+- [ ] **03.11.2026 nachmittags: Warten auf Domain-Umstellung.** Versuch, das neue WP vorab über
+      `https://w0225640.kasserver.com/kikripp.de/public` zu erreichen, ging nicht (404 – die KAS-Adresse zeigt nicht auf
+      den Webspace). siteurl/home in tub2b_options wieder auf `https://kikripp.de` (zurückgestellt, geprüft). WP-Dateien
+      liegen in /kikripp.de/public/, admin_email jennyp@kikripp.de (Passwort über „Passwort vergessen“). Nutzerin ist mit
+      Technik überfordert: **nur Ein-Klick-Schritte mit Bildschirmfoto, keine Erklärungen.** Plan: Hoster stellt um
+      (spätestens 08.11.) → vorher auf alter Seite Plugin 1.13.1 + Umzug-Export → dann neues WP einrichten (Plugin, Seiten,
+      Fotos 6 Pakete, Artikel-Import, Umzug-Import, Einstellungen, danach Artikel-Import NICHT nötig, Adresse stimmt).
+      Erinnerung per send_later Fr 06.11. 08:15 (trig_01CKtpRTJa3TZqDuAnmCF8UX).
 - [ ] **Anfang November 2026 (Nutzerin meldet sich):**
       1. Spielzeug online: alle Artikel mit Kategorie „Spielzeug“ und Preis_geprüft ok auf Im_Katalog = ja (alte vom 12.10.
          BA04/BU01/BU02/BU04, Tonies NE01-27 bis -38, NU07-09 bis -18 inkl. -14A, NU05-Bücher/-Spiele), Fotopaket-Nachtrag.

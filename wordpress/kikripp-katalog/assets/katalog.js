@@ -553,9 +553,13 @@
         '</div></div>' +
         '<small class="hint">Abholung Mo–Mi 08:00–12:00 Uhr, Do 08:00–15:00 Uhr' +
         (TERMINE_AB && TERMINE_AB > HEUTE ? ', frühestens ab ' + datumText(TERMINE_AB).slice(4) : '') +
-        (SCHLUSS ? ', spätestens ' + datumText(SCHLUSS).slice(4) : '') + '. Abgeholt wird nach Zahlungseingang.</small>' +
+        (SCHLUSS ? ', spätestens ' + datumText(SCHLUSS).slice(4) : '') + '. Bei Überweisung wird nach Zahlungseingang abgeholt.</small>' +
         '<label class="chk2"><input type="checkbox" id="k-demontage"> Termin am Nachmittag oder Demontage nötig – ' +
         'nach Vereinbarung</label></div>' +
+      // 1.15.0: Bezahlung
+      '<div class="feld"><label>Bezahlung' + (IST_ADMIN ? ' (freiwillig)' : ' *') + '</label>' +
+        '<label class="chk2"><input type="radio" name="k-zahl" value="ueberweisung"> Überweisung vorab – die Rechnung kommt per E-Mail</label>' +
+        '<label class="chk2"><input type="radio" name="k-zahl" value="bar"> Bar bei Abholung – die Rechnung erhalten Sie vor Ort</label></div>' +
       '<div class="feld"><label for="k-text">Nachricht (optional)</label><textarea id="k-text" rows="2"></textarea></div>' +
       // Unsichtbares Feld gegen Formular-Roboter. Menschen sehen es nicht und lassen es leer.
       '<div class="hp" aria-hidden="true"><label for="k-webseite">Webseite</label>' +
@@ -623,6 +627,7 @@
       plz: wert('k-plz'), ort: wert('k-ort'),
       email: wert('k-mail'), telefon: wert('k-tel'), nachricht: wert('k-text'),
       besichtigung: besichtigung, besichtigung_tag: wert('k-bes-tag'), besichtigung_zeit: wert('k-bes-zeit'),
+      zahlart: (wurzel.querySelector('input[name="k-zahl"]:checked') || {}).value || '',
       abholwunsch: wert('k-abhol'), abholwunsch_zeit: wert('k-abhol') ? wert('k-abhol-zeit') : '', demontage: !!(el('k-demontage') && el('k-demontage').checked),
       webseite: wert('k-webseite'), dauer: Date.now() - formularSeit,
       artikel: merk
@@ -643,6 +648,9 @@
     }
     if (besichtigung && (!nutzlast.besichtigung_tag || !nutzlast.besichtigung_zeit)) {
       fehler('Bitte wählen Sie für die Besichtigung einen Tag (Montag bis Donnerstag) und eine Uhrzeit.'); return;
+    }
+    if (!nutzlast.zahlart && !IST_ADMIN) {
+      fehler('Bitte wählen Sie, wie Sie bezahlen möchten: Überweisung vorab oder bar bei Abholung.'); return;
     }
     if (!nutzlast.abholwunsch && !nutzlast.demontage && !IST_ADMIN) {
       fehler('Bitte wählen Sie einen Wunschtermin für die Abholung oder kreuzen Sie „nach Vereinbarung“ an.');
@@ -670,6 +678,8 @@
                 (nutzlast.abholwunsch ? datumText(nutzlast.abholwunsch) +
                   (nutzlast.abholwunsch_zeit ? ', ' + sicher(nutzlast.abholwunsch_zeit) + ' Uhr' : '') : '') +
                 (nutzlast.demontage ? (nutzlast.abholwunsch ? ' · ' : '') + 'Termin nach Vereinbarung' : '') + '</b></div>' +
+              (nutzlast.zahlart ? '<div class="zeile"><span>Bezahlung</span><b>' +
+                (nutzlast.zahlart === 'bar' ? 'bar bei Abholung (Rechnung vor Ort)' : 'Überweisung vorab (Rechnung per E-Mail)') + '</b></div>' : '') +
               (k.email || k.telefon
                 ? '<div class="zeile"><span>Wir erreichen Sie unter</span><b>' +
                   [k.email, k.telefon].filter(Boolean).map(sicher).join(' · ') + '</b></div>'

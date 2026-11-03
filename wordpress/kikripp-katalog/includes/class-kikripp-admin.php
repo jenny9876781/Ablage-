@@ -288,10 +288,11 @@ class Kikripp_Admin {
             } else {
                 $frage = ['storniert' => 'Vorgang stornieren? Die Artikel sind dann wieder im Katalog.',
                           'kontakt' => 'Kontaktdaten zu diesem Vorgang endgültig löschen?',
-                          'abgeholt' => ($v['status'] === 'bezahlt' || Kikripp_Ablauf::geschenk($v)) ? '' : 'Noch nicht als bezahlt vermerkt. Trotzdem abgeholt?'][$was] ?? '';
+                          'abgeholt' => ($v['status'] === 'bezahlt' || Kikripp_Ablauf::geschenk($v)) ? '' : 'Noch nicht als bezahlt vermerkt. Trotzdem abgeholt?',
+                          'barabholung' => Kikripp_Mail::eur(Kikripp_Ablauf::summe($v)) . ' bar erhalten und Ware übergeben?'][$was] ?? '';
                 $knopf = '<a class="button' . (in_array($was, ['kontakt', 'storniert'], true) ? '' : ' button-primary') . '" href="'
                     . esc_url(self::aktion_url($was, $id)) . '"' . ($frage !== '' ? ' onclick="return confirm(\'' . esc_js($frage) . '\')"' : '') . '>'
-                    . ($was === 'abgeholt' ? '✓ ' : '') . esc_html($text) . '</a>';
+                    . (in_array($was, ['abgeholt', 'barabholung'], true) ? '✓ ' : '') . esc_html($text) . '</a>';
             }
         }
 
@@ -305,7 +306,9 @@ class Kikripp_Admin {
            . '<td>' . $wer . (trim((string) $v['telefon']) !== '' ? '<span class="kik-such">☎ ' . esc_html($v['telefon']) . '</span>' : '') . '</td>'
            . '<td title="' . esc_attr($titel) . '">' . count($pos) . ' Pos. · ' . $stueck . ' Stück'
            . '<br><span class="kik-kommi-badge" id="kommi-badge-' . $id . '">' . esc_html(Kikripp_Ablauf::kommi_text($kommi)) . '</span></td>'
-           . '<td style="white-space:nowrap">' . esc_html(Kikripp_Mail::eur(Kikripp_Ablauf::summe($v))) . '</td>'
+           . '<td style="white-space:nowrap">' . esc_html(Kikripp_Mail::eur(Kikripp_Ablauf::summe($v)))
+           . (($v['zahlart'] ?? '') === 'bar' ? '<br><span style="font-size:11px;background:#fcf0c3;padding:0 4px;border-radius:2px">💶 bar</span>'
+              : (($v['zahlart'] ?? '') === 'ueberweisung' ? '<br><span style="font-size:11px;color:#50575e">Überweisung</span>' : '')) . '</td>'
            . '<td>' . $abholung . (!empty($v['demontage']) ? '<br><span style="font-size:11px">nach Vereinbarung</span>' : '') . '</td>'
            . '<td>' . (trim((string) ($v['rechnungsnr'] ?? '')) !== '' ? esc_html($v['rechnungsnr']) : '—') . '</td>'
            . '<td style="color:' . $farbe . ';font-weight:' . ($blass ? '400' : '600') . '">' . esc_html($st['schritt']) . '</td>'
@@ -430,6 +433,10 @@ class Kikripp_Admin {
            . '<label style="font-size:12px">Rechnungsnr.<br><input type="text" name="rechnungsnr" value="' . esc_attr((string) ($v['rechnungsnr'] ?? '')) . '" style="width:110px"></label>'
            . '<label style="font-size:12px">Rechnung vom<br><input type="date" name="rechnung_am" value="' . esc_attr((string) ($v['rechnung_am'] ?? '')) . '"></label>'
            . '<label style="font-size:12px;flex:1;min-width:200px">Notiz (intern)<br><input type="text" name="notiz" value="' . esc_attr((string) ($v['notiz'] ?? '')) . '" style="width:100%"></label>'
+           . '<label style="font-size:12px">Bezahlung<br><select name="zahlart">'
+           . '<option value=""' . selected('', (string) ($v['zahlart'] ?? ''), false) . '>nicht angegeben</option>'
+           . '<option value="ueberweisung"' . selected('ueberweisung', (string) ($v['zahlart'] ?? ''), false) . '>Überweisung vorab</option>'
+           . '<option value="bar"' . selected('bar', (string) ($v['zahlart'] ?? ''), false) . '>bar bei Abholung</option></select></label>'
            . '<label style="font-size:12px"><input type="checkbox" name="du" value="1"' . checked(1, (int) ($v['du'] ?? 0), false) . '> per Du</label>'
            . '<button class="button button-primary">Speichern</button></form>';
         // 1.9.0: Warte auf Rückinfo
@@ -454,12 +461,14 @@ class Kikripp_Admin {
             $h .= '<form method="post" action="' . esc_url(admin_url('admin-post.php')) . '" style="margin-top:8px;font-size:12px">'
                 . wp_nonce_field('kikripp_zusatz_' . $id, '_wpnonce', true, false)
                 . '<input type="hidden" name="action" value="kikripp_zusatz"><input type="hidden" name="id" value="' . $id . '">'
-                . 'Zusatzbestellung (eigene Rechnung, gleicher Abholtermin, ohne Mindestbestellwert): '
+                . (in_array($v['status'], ['offen', 'bestellt'], true)
+                    ? '<b>Artikel hinzufügen</b> (gleiche Bestellung und Rechnung' . (trim((string) $v['rechnungsnr']) !== '' ? ' – danach Rechnung in DATEV korrigieren' : '') . '): '
+                    : '<b>Zusatzbestellung</b> (Vorgang ist bezahlt – eigener Vorgang mit eigener Rechnung, gleicher Abholtermin): ')
                 . '<input type="text" name="artikel" placeholder="z. B. BU01-10 x 3, NE04-19" style="width:240px"> '
                 . 'Preis <input type="text" name="rabatt_wert" inputmode="decimal" placeholder="leer = Katalog" style="width:100px"> '
                 . '<select name="rabatt_art"><option value="">– bitte wählen –</option><option value="gesamt">€ Festpreis gesamt</option>'
                 . '<option value="stueck">€ je Stück</option><option value="prozent">% Rabatt</option></select> '
-                . '<button class="button">Zusatz anlegen</button></form>';
+                . '<button class="button">hinzufügen</button></form>';
         }
         if (trim((string) ($v['abholtermin'] ?? '')) !== '') {
             $h .= '<div style="font-size:11px;color:#777;margin-top:4px">Früher eingetragen: ' . esc_html($v['abholtermin']) . '</div>';
@@ -480,7 +489,10 @@ class Kikripp_Admin {
         }
         if (in_array($v['status'], ['bestellt', 'bezahlt'], true)) {
             if (trim((string) ($v['abgeholt_am'] ?? '')) === '') {
-                $knoepfe[] = '<a class="button" href="' . esc_url(self::aktion_url('abgeholt', $id)) . '"'
+                $knoepfe[] = (Kikripp_Ablauf::bar($v) && $v['status'] === 'bestellt')
+                    ? '<a class="button button-primary" href="' . esc_url(self::aktion_url('barabholung', $id)) . '" onclick="return confirm(\''
+                        . esc_js(Kikripp_Mail::eur(Kikripp_Ablauf::summe($v)) . ' bar erhalten und Ware übergeben?') . '\')">✓ abgeholt + bar bezahlt</a>'
+                    : '<a class="button" href="' . esc_url(self::aktion_url('abgeholt', $id)) . '"'
                     . (($v['status'] === 'bezahlt' || Kikripp_Ablauf::geschenk($v)) ? '' : ' onclick="return confirm(\'Noch nicht als bezahlt vermerkt. Trotzdem abgeholt (wird dabei als bezahlt vermerkt)?\')"')
                     . '>✓ abgeholt</a>';
             } else {
@@ -505,6 +517,7 @@ class Kikripp_Admin {
             'rechnung_am' => sanitize_text_field(wp_unslash($_POST['rechnung_am'] ?? '')),
             'notiz'       => sanitize_text_field(wp_unslash($_POST['notiz'] ?? '')),
             'du'          => !empty($_POST['du']),
+            'zahlart'     => sanitize_key($_POST['zahlart'] ?? ''),
         ]);
         self::zurueck('kikripp-reservierungen', sprintf('Vorgang #%d gespeichert.', $id) .
             ($abholung !== '' ? ' Abholung: ' . Kikripp_Ablauf::termin_text($abholung) . ' – jetzt „In Outlook eintragen“.' : ''),
@@ -560,8 +573,20 @@ class Kikripp_Admin {
         if (!$wunsch) {
             self::zurueck('kikripp-reservierungen', 'Bitte eine Artikelnummer eintragen, z. B. „BU01-10“ oder „BU01-10 x 3“.', true, 'vorgang-' . $id);
         }
-        $neu = Kikripp_DB::zusatz_anlegen($id, $wunsch, Kikripp_DB::rabatt_aus_feldern(
-            sanitize_text_field(wp_unslash($_POST['rabatt_wert'] ?? '')), sanitize_key($_POST['rabatt_art'] ?? '')));
+        $rabatt = Kikripp_DB::rabatt_aus_feldern(
+            sanitize_text_field(wp_unslash($_POST['rabatt_wert'] ?? '')), sanitize_key($_POST['rabatt_art'] ?? ''));
+        $basis = Kikripp_DB::vorgang($id);
+        if ($basis && in_array($basis['status'], ['offen', 'bestellt'], true) && trim((string) ($basis['abgeholt_am'] ?? '')) === '') {
+            $b = Kikripp_DB::positionen_hinzufuegen($id, $wunsch, $rabatt);   // 1.15.0: gleiche Bestellung
+            if (is_wp_error($b)) {
+                self::zurueck('kikripp-reservierungen', 'Nicht hinzugefügt: ' . $b->get_error_message(), true, 'vorgang-' . $id);
+            }
+            self::zurueck('kikripp-reservierungen', sprintf('%d Artikel zu Vorgang #%d hinzugefügt. Neue Summe: %s.', $b['anzahl'], $id,
+                Kikripp_Mail::eur(Kikripp_Ablauf::summe(Kikripp_DB::vorgang($id))))
+                . ($b['korrektur'] ? ' Die Rechnung ist schon geschrieben – bitte in DATEV korrigieren und die neue Rechnungsnr. eintragen.' : ''),
+                false, 'vorgang-' . $id);
+        }
+        $neu = Kikripp_DB::zusatz_anlegen($id, $wunsch, $rabatt);
         if (is_wp_error($neu)) {
             self::zurueck('kikripp-reservierungen', 'Zusatz nicht angelegt: ' . $neu->get_error_message(), true, 'vorgang-' . $id);
         }
@@ -608,6 +633,15 @@ class Kikripp_Admin {
             case 'verlaengern':
                 Kikripp_DB::vorgang_verlaengern($id);
                 self::zurueck('kikripp-reservierungen', sprintf('Die Frist für Vorgang #%d wurde verlängert.', $id));
+            case 'barabholung':                            // 1.15.0
+                $vb = Kikripp_DB::vorgang($id);
+                Kikripp_DB::abgeholt_setzen($id, Kikripp_Ablauf::heute());
+                if ($vb) {
+                    Kikripp_DB::vorgang_bearbeiten($id, ['notiz' => ltrim(trim((string) $vb['notiz']) . ' · '
+                        . gmdate('d.m.', current_time('timestamp')) . ': ' . Kikripp_Mail::eur(Kikripp_Ablauf::summe($vb)) . ' bar bezahlt bei Abholung', ' ·')]);
+                }
+                self::zurueck('kikripp-reservierungen', sprintf('Vorgang #%d: abgeholt und bar bezahlt. Jetzt die Rechnung in DATEV schreiben '
+                    . 'und die Rechnungsnr. eintragen.', $id), false, 'vorgang-' . $id);
             case 'abgeholt':
                 Kikripp_DB::abgeholt_setzen($id, Kikripp_Ablauf::heute());
                 self::zurueck('kikripp-reservierungen', sprintf('Vorgang #%d ist abgeholt.', $id), false, 'vorgang-' . $id);
@@ -704,7 +738,9 @@ class Kikripp_Admin {
         foreach (preg_split('/\n\s*\n/', trim((string) get_option('kikripp_rechtstext', ''))) as $absatz) {
             if (trim($absatz) !== '') { $bedingungen .= '<p>' . $e(trim($absatz)) . '</p>'; }
         }
-        $zahlung = 'Die Rechnung wird per E-Mail versandt. Der Betrag ist vorab auf das in der Rechnung angegebene Konto '
+        $zahlung = Kikripp_Ablauf::bar($v)
+            ? 'Barzahlung bei Abholung. Die Rechnung wird bei der Abholung übergeben.'
+            : 'Die Rechnung wird per E-Mail versandt. Der Betrag ist vorab auf das in der Rechnung angegebene Konto '
               . 'zu überweisen; abgeholt wird erst nach Zahlungseingang.';
         $gewaehr = $privat
             ? '<div class="kasten"><b>Gesonderte Vereinbarung zur Verjährung</b>'
@@ -812,7 +848,7 @@ class Kikripp_Admin {
         fputcsv($aus, ['Vorgang', 'Eingegangen', 'Ablauf', 'Status', 'Name', 'Email', 'Telefon',
                        'Mailsuche', 'Nachricht', 'ArtNr', 'Menge', 'Preis_netto', 'Positionsstatus',
                        'Bezahlt_am', 'Firma', 'Strasse', 'PLZ', 'Ort', 'Besichtigung', 'Abholwunsch',
-                       'Abholtermin', 'Abholung', 'Rechnungsnr', 'Rechnung_am', 'Abgeholt_am', 'Notiz'], ';');
+                       'Abholtermin', 'Abholung', 'Rechnungsnr', 'Rechnung_am', 'Abgeholt_am', 'Notiz', 'Zahlart'], ';');
         $firma = get_option('kikripp_firma', 'Kikripp GmbH');
         foreach ($vorgaenge as $v) {
             foreach ($v['positionen'] as $p) {
@@ -829,6 +865,7 @@ class Kikripp_Admin {
                     $v['abholtermin'] ?? '',
                     $v['abholung'] ?? '', $v['rechnungsnr'] ?? '', $v['rechnung_am'] ?? '', $v['abgeholt_am'] ?? '',
                     str_replace(["\r", "\n"], ' ', (string) ($v['notiz'] ?? '')),
+                    Kikripp_Ablauf::zahlart_text($v),
                 ], ';');
             }
         }

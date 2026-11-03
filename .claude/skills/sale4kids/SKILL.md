@@ -1349,6 +1349,18 @@ ist die Merkliste; erledigte Punkte hier abhaken, nicht löschen.
       § 18 Abs. 2 MStV, ODR-Absatz entfernt (Hinweis gegeben, kein Rechtsrat). Vorher: BU01-43/-44 je 40 € ok →
       `katalog_import-06.11.json` (676 sichtbar) + `kikripp-fotos-nachtrag-06.11.zip` (F-942/F-943) für Freitag.
       Browsertest-Fix: Merkliste über `.liste-knopf` öffnen (Leistenmitte trifft „Geschenke ansehen“).
+- [ ] **03./04.11.2026: Plugin 1.15.0 – Barzahlung + Artikel hinzufügen** (Nutzerin spielt es Do 05.11. ein, vor dem
+      Spielzeug-Freitag). SCHEMA 9: Vorgang `zahlart` ('', 'ueberweisung', 'bar') und `rg_korrektur`. Formular:
+      Pflichtauswahl „Überweisung vorab / Bar bei Abholung“ (Verwaltung freiwillig), Beleg + Meldemail zeigen sie, CSV-Export
+      Spalte „Zahlart“. **Bar** (`Kikripp_Ablauf::bar()`): keine „Rechnung schreiben“/„Zahlungserinnerung“/„noch nicht
+      bezahlt“, Knopf **„abgeholt + bar bezahlt“** (Aktion `barabholung`: abgeholt + bezahlt + Notiz), danach Aufgabe
+      „Bar bezahlt – Rechnung in DATEV schreiben“ bis Rechnungsnr. eingetragen; Abholplan „💶 BAR KASSIEREN: x €“, eigene
+      Mailvorlage (Betrag passend mitbringen, Rechnung bei Abholung), Bestellung „Barzahlung bei Abholung“. Kein Höchstbetrag.
+      Zahlart in der Bearbeitungszeile änderbar; Altvorgänge = „nicht angegeben“ (verhalten sich wie bisher).
+      **Artikel hinzufügen** (`Kikripp_DB::positionen_hinzufuegen`): offen/bestellt und nicht abgeholt → gleicher Vorgang;
+      mit Rechnungsnr. → `rg_korrektur=1` + Aufgabe „Rechnung in DATEV korrigieren“ bis neue Nummer; bezahlt/abgeholt →
+      wie bisher eigener Zusatz-Vorgang (übernimmt jetzt auch die Zahlart). Ablauftext `kikripp_ablauf_1150()`.
+      Tests 559 Logik, 94 Browser, 16 mobil, 32 Geschenke, Liste ok.
 - [ ] **Anfang November 2026 (Nutzerin meldet sich):**
       1. Spielzeug online: alle Artikel mit Kategorie „Spielzeug“ und Preis_geprüft ok auf Im_Katalog = ja (alte vom 12.10.
          BA04/BU01/BU02/BU04, Tonies NE01-27 bis -38, NU07-09 bis -18 inkl. -14A, NU05-Bücher/-Spiele), Fotopaket-Nachtrag.

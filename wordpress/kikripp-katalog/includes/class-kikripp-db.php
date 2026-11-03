@@ -9,7 +9,8 @@ if (!defined('ABSPATH')) { exit; }
  */
 class Kikripp_DB {
 
-    const SCHEMA_VERSION = 8;   // 6: Position mit preis_original und festpreis (1.8.0) · 7: Warte auf Rückinfo (1.9.0) · 8: kommissioniert (1.10.0)
+    const SCHEMA_VERSION = 9;   // 9: zahlart, rg_korrektur (1.15.0)
+    const SCHEMA_ALT = 8;   // 6: Position mit preis_original und festpreis (1.8.0) · 7: Warte auf Rückinfo (1.9.0) · 8: kommissioniert (1.10.0)
 
     /** 1.6.0: So viele Tage trägt ein Artikel nach dem Import, mit dem er sichtbar wurde, das Schild NEU. */
     const NEU_TAGE = 14;
@@ -65,6 +66,8 @@ class Kikripp_DB {
             warte_seit VARCHAR(19) NOT NULL DEFAULT '',
             warte_notiz VARCHAR(255) NOT NULL DEFAULT '',
             warte_bis VARCHAR(10) NOT NULL DEFAULT '',
+            zahlart VARCHAR(20) NOT NULL DEFAULT '',
+            rg_korrektur TINYINT(1) NOT NULL DEFAULT 0,
             PRIMARY KEY (id),
             KEY status (status, ablauf)
         ) ENGINE=InnoDB $coll;");
@@ -237,6 +240,7 @@ class Kikripp_DB {
                 'besichtigung' => (string) ($kontakt['besichtigung'] ?? ''),
                 'abholwunsch'  => (string) ($kontakt['abholwunsch'] ?? ''),
                 'demontage'    => !empty($kontakt['demontage']) ? 1 : 0,
+                'zahlart'      => in_array($kontakt['zahlart'] ?? '', ['ueberweisung', 'bar'], true) ? $kontakt['zahlart'] : '',
                 'erstellt'     => $jetzt,
                 'ablauf'       => $ablauf,
                 'status'       => 'offen',
@@ -402,7 +406,13 @@ class Kikripp_DB {
             $a = trim((string) $f['abholung']);
             $neu['abholung'] = preg_match('/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}$/', $a) ? $a : '';
         }
-        if (array_key_exists('rechnungsnr', $f)) { $neu['rechnungsnr'] = substr(trim((string) $f['rechnungsnr']), 0, 40); }
+        if (array_key_exists('rechnungsnr', $f)) {
+            $neu['rechnungsnr'] = substr(trim((string) $f['rechnungsnr']), 0, 40);
+            // 1.15.0: neue Rechnungsnummer nach nachträglich hinzugefügten Artikeln = Rechnung ist korrigiert
+            $alt = self::vorgang($id);
+            if ($alt && (string) $alt['rechnungsnr'] !== $neu['rechnungsnr']) { $neu['rg_korrektur'] = 0; }
+        }
+        if (array_key_exists('zahlart', $f) && in_array($f['zahlart'], ['', 'ueberweisung', 'bar'], true)) { $neu['zahlart'] = $f['zahlart']; }
         if (array_key_exists('rechnung_am', $f)) {
             $r = trim((string) $f['rechnung_am']);
             $neu['rechnung_am'] = preg_match('/^\d{4}-\d{2}-\d{2}$/', $r) ? $r : '';
@@ -536,6 +546,74 @@ class Kikripp_DB {
      * gleichen Kontaktdaten und gleichem Abholtermin, ohne Mindestbestellwert. Geht bei jedem Stand,
      * solange der Vorgang nicht storniert oder schon abgeholt ist. Gibt die neue Nummer zurück.
      */
+    /**
+     * 1.15.0: Artikel in DENSELBEN Vorgang aufnehmen (gleiche Bestellung, gleiche Rechnung) – solange er offen oder
+     * bestellt und nicht abgeholt ist. Ist schon eine Rechnungsnummer eingetragen, wird der Vorgang markiert:
+     * „Rechnung in DATEV korrigieren“, bis eine neue Nummer eingetragen ist. Gibt ['korrektur' => bool] zurück.
+     */
+    public static function positionen_hinzufuegen($id, array $wunsch, $rabatt = null) {
+        global $wpdb;
+        if (is_wp_error($rabatt)) { return $rabatt; }
+        if ($rabatt && $rabatt[0] === 'stueck' && count($wunsch) !== 1) {
+            return new WP_Error('rabatt', 'Ein Stückpreis geht nur bei genau einem Artikel – bei mehreren „Festpreis gesamt“ wählen.');
+        }
+        $v = self::vorgang($id);
+        if (!$v) { return new WP_Error('fehlt', 'Vorgang nicht gefunden.'); }
+        if (!in_array($v['status'], ['offen', 'bestellt'], true) || trim((string) ($v['abgeholt_am'] ?? '')) !== '') {
+            return new WP_Error('separat', 'Der Vorgang ist schon bezahlt oder abgeholt.');
+        }
+        $wpdb->query('START TRANSACTION');
+        $neu = [];
+        foreach ($wunsch as $artnr => $menge) {
+            $menge = (int) $menge;
+            if ($menge <= 0) { continue; }
+            $a = $wpdb->get_row($wpdb->prepare('SELECT artnr, menge, preis_netto FROM ' . self::t_artikel()
+                . ' WHERE artnr = %s AND aktiv = 1 AND im_katalog = 1 FOR UPDATE', $artnr), ARRAY_A);
+            if (!$a) { $wpdb->query('ROLLBACK'); return new WP_Error('unbekannt', sprintf('Artikel %s ist nicht im Katalog.', $artnr)); }
+            $frei = self::frei($a['artnr']);
+            if ($menge > $frei) {
+                $wpdb->query('ROLLBACK');
+                return new WP_Error('zu_wenig', sprintf('Von %s sind nur noch %d Stück frei.', $a['artnr'], max(0, $frei)));
+            }
+            $wpdb->insert(self::t_position(), ['vorgang_id' => (int) $id, 'artnr' => $a['artnr'], 'menge' => $menge,
+                'preis_netto' => (float) $a['preis_netto'], 'status' => 'reserviert']);
+            $neu[] = ['id' => (int) $wpdb->insert_id, 'artnr' => $a['artnr'], 'menge' => $menge];
+        }
+        if (!$neu) { $wpdb->query('ROLLBACK'); return new WP_Error('leer', 'Es wurden keine Artikel angegeben.'); }
+        $wpdb->query('COMMIT');
+        if ($rabatt) { self::rabatt_anwenden($id, array_column($neu, 'id'), $rabatt); }
+        $korrektur = trim((string) $v['rechnungsnr']) !== '';
+        $text = gmdate('d.m.', current_time('timestamp')) . ': hinzugefügt ' . implode(', ', array_map(function ($p) {
+            return $p['artnr'] . ($p['menge'] > 1 ? ' × ' . $p['menge'] : ''); }, $neu)) . ($korrektur ? ' – Rechnung korrigieren' : '');
+        $notiz = trim((string) (self::vorgang($id)['notiz'] ?? ''));
+        $felder = ['notiz' => ltrim($notiz . ' · ' . $text, ' ·')];
+        if ($korrektur) { $felder['rg_korrektur'] = 1; }
+        $wpdb->update(self::t_vorgang(), $felder, ['id' => (int) $id]);
+        return ['korrektur' => $korrektur, 'anzahl' => count($neu)];
+    }
+
+    /** 1.15.0: Rabatt auf bestimmte Positionen eines Vorgangs (aus zusatz_anlegen herausgelöst). */
+    private static function rabatt_anwenden($vorgang_id, array $pos_ids, $rabatt) {
+        $pos = array_values(array_filter(self::vorgang($vorgang_id)['positionen'], function ($p) use ($pos_ids) {
+            return in_array((int) $p['id'], array_map('intval', $pos_ids), true); }));
+        if (!$pos) { return; }
+        if ($rabatt[0] === 'gesamt') {
+            $wert = array_sum(array_map([__CLASS__, 'pos_betrag'], $pos));
+            $rest = round($rabatt[1], 2);
+            foreach ($pos as $i => $p) {
+                $teil = $i === count($pos) - 1 ? $rest
+                    : ($wert > 0 ? round($rabatt[1] * self::pos_betrag($p) / $wert, 2) : round($rabatt[1] / count($pos), 2));
+                $rest = round($rest - $teil, 2);
+                self::preis_setzen($vorgang_id, $p['id'], $teil, 'gesamt');
+            }
+        } else {
+            foreach ($pos as $p) {
+                self::preis_setzen($vorgang_id, $p['id'], $rabatt[0] === 'stueck' ? $rabatt[1]
+                    : round((float) $p['preis_netto'] * (1 - $rabatt[1] / 100), 2), 'stueck');
+            }
+        }
+    }
+
     public static function zusatz_anlegen($basis_id, array $wunsch, $rabatt = null) {
         global $wpdb;
         if (is_wp_error($rabatt)) { return $rabatt; }
@@ -561,6 +639,7 @@ class Kikripp_DB {
             'abholung'    => (string) ($v['abholung'] ?? ''),
             'abholtermin' => (string) ($v['abholtermin'] ?? ''),
             'du'          => (int) ($v['du'] ?? 0),
+            'zahlart'     => (string) ($v['zahlart'] ?? ''),
             'testdaten'   => (int) ($v['testdaten'] ?? 0),
             'notiz'       => sprintf('Zusatz zu #%d – eigene Rechnung', (int) $basis_id),
         ], ['id' => (int) $neu]);

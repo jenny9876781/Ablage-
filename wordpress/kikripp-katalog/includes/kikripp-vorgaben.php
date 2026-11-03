@@ -55,6 +55,12 @@ function kikripp_ablauf_123() {
         . 'Erstattung in unser Eigentum zurück.';
 }
 
+/** Ablauftext 1.15.0 (04.11.2026): Überweisung vorab oder bar bei Abholung. */
+function kikripp_ablauf_1150() {
+    return str_replace('Bezahlung: generell per Überweisung gegen Rechnung vor der Abholung.',
+        'Bezahlung: per Überweisung vorab (Rechnung per E-Mail) oder bar bei Abholung (Rechnung vor Ort).', kikripp_ablauf_1140());
+}
+
 /** Ablauftext 1.14.0 (03.11.2026): donnerstags durchgehend 8 bis 15 Uhr. */
 function kikripp_ablauf_1140() {
     return 'Ihre Auswahl bleibt 3 Werktage reserviert, nach Eingang melden wir uns bei Ihnen. '

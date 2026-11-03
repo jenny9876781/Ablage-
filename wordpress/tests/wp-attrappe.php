@@ -194,6 +194,13 @@ if (!function_exists('add_query_arg')) {
         return $url . $trenner . http_build_query(array_filter((array) $args, function ($w) { return $w !== null; }));
     }
 }
+if (!function_exists('selected')) {
+    function selected($a, $b = true, $ausgeben = true) {
+        $r = ((string) $a === (string) $b) ? ' selected="selected"' : '';
+        if ($ausgeben) { echo $r; }
+        return $r;
+    }
+}
 if (!function_exists('submit_button')) {
     function submit_button($text = 'Speichern') { echo '<p class="submit"><input type="submit" class="button button-primary" value="' . $text . '"></p>'; }
 }

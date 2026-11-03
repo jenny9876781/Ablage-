@@ -571,8 +571,8 @@ titel('29. Umstellung 1.2.0 → 1.2.2: kürzerer Ablauftext');
 update_option('kikripp_plugin_version', '1.2.0');
 update_option('kikripp_ablauftext', str_replace("\n", "\r\n", kikripp_ablauf_120()));   // so speichert ein Formular
 kikripp_umstellen();
-pruefe('alter Text wird über 1.2.2 bis zum Text von 1.12.0 ersetzt', get_option('kikripp_ablauftext'), kikripp_ablauf_1140());
-pruefe('Stand steht auf 1.14.0', get_option('kikripp_plugin_version'), '1.14.0');
+pruefe('alter Text wird über 1.2.2 bis zum Text von 1.15.0 ersetzt', get_option('kikripp_ablauftext'), kikripp_ablauf_1150());
+pruefe('Stand steht auf 1.15.0', get_option('kikripp_plugin_version'), '1.15.0');
 update_option('kikripp_plugin_version', '1.2.0');
 update_option('kikripp_ablauftext', 'Eigener Text der Nutzerin');
 update_option('kikripp_ust_prozent', 7);
@@ -586,12 +586,12 @@ update_option('kikripp_ablauftext', kikripp_ablauf_122());
 update_option('kikripp_rechtstext', str_replace("\n", "\r\n", kikripp_rechtstext_120()));
 delete_option('kikripp_kopf_aus');
 kikripp_umstellen();
-pruefe('Ablauftext von 1.2.2 wird ersetzt', get_option('kikripp_ablauftext'), kikripp_ablauf_1140());
-pruefe('neuer Text: Bezahlung generell gegen Rechnung',
-       strpos(get_option('kikripp_ablauftext'), 'generell per Überweisung gegen Rechnung vor der Abholung') !== false, true);
+pruefe('Ablauftext von 1.2.2 wird ersetzt', get_option('kikripp_ablauftext'), kikripp_ablauf_1150());
+pruefe('neuer Text: Überweisung vorab oder bar bei Abholung (1.15.0)',
+       strpos(get_option('kikripp_ablauftext'), 'per Überweisung vorab (Rechnung per E-Mail) oder bar bei Abholung') !== false, true);
 pruefe('Kaufbedingungen bekommen den Widerrufshinweis', get_option('kikripp_rechtstext'), kikripp_rechtstext_123());
 pruefe('Menü ausblenden ist eingeschaltet', (int) get_option('kikripp_kopf_aus'), 1);
-pruefe('Stand steht auf 1.14.0', get_option('kikripp_plugin_version'), '1.14.0');
+pruefe('Stand steht auf 1.15.0', get_option('kikripp_plugin_version'), '1.15.0');
 update_option('kikripp_plugin_version', '1.2.2');
 update_option('kikripp_ablauftext', 'Eigener Text');
 update_option('kikripp_rechtstext', 'Eigene Bedingungen');
@@ -819,7 +819,7 @@ kikripp_umstellen();
 pruefe('Umstellung setzt die Zufahrt', strpos((string) get_option('kikripp_zufahrt'), 'Peterzeller') !== false, true);
 pruefe('Umstellung: 11:00 Uhr', get_option('kikripp_erinnerung_zeit'), '11:00');
 pruefe('Umstellung: Zusatz Barrierefrei', get_option('kikripp_termin_zusatz'), 'Barrierefrei');
-pruefe('Stand 1.14.0', get_option('kikripp_plugin_version'), '1.14.0');
+pruefe('Stand 1.15.0', get_option('kikripp_plugin_version'), '1.15.0');
 update_option('kikripp_erinnerung_zeit', '14:00');
 update_option('kikripp_plugin_version', '1.3.0');
 kikripp_umstellen();
@@ -1246,7 +1246,7 @@ pruefe('Donnerstag bis 14:30 (1.14.0)', end(Kikripp_REST::zeiten_am(strtotime('2
 pruefe('Mittwoch bis 11:30 (1.14.0)', end(Kikripp_REST::zeiten_am(strtotime('2026-11-11 12:00:00 UTC'))), '11:30');
 // 1.12.0 → 1.14.0: der unveränderte 1.12.0-Text wird ersetzt, ein eigener bleibt
 update_option('kikripp_ablauftext', kikripp_ablauf_1120()); kikripp_umstellen_1140('1.12.0');
-pruefe('Ablauftext 1.12.0 wird auf 1.14.0 umgestellt', get_option('kikripp_ablauftext'), kikripp_ablauf_1140());
+pruefe('Ablauftext 1.12.0 wird auf 1.15.0 umgestellt', get_option('kikripp_ablauftext'), kikripp_ablauf_1150());
 update_option('kikripp_ablauftext', 'Eigener Text'); kikripp_umstellen_1140('1.12.0');
 pruefe('eigener Ablauftext bleibt', get_option('kikripp_ablauftext'), 'Eigener Text');
 $GLOBALS['ist_admin'] = true; ob_start(); Kikripp_Admin::seite_einstellungen(); $eins = ob_get_clean(); $GLOBALS['ist_admin'] = false;
@@ -1296,6 +1296,63 @@ pruefe('zweiter Import mit Häkchen ersetzt (keine Doppelten)', (int) $wpdb->get
 update_option('kikripp_hinweisband', '');
 $GLOBALS['ist_admin'] = true; ob_start(); Kikripp_Umzug::seite(); $us = ob_get_clean(); $GLOBALS['ist_admin'] = false;
 pruefe('Umzugsseite mit Export- und Import-Knopf', strpos($us, 'kikripp_umzug_export') !== false && strpos($us, 'kikripp_umzug_import') !== false, true);
+
+titel('52. Barzahlung und Artikel hinzufügen (1.15.0)');
+artikel_anlegen('B-001', 5, 40.0, 'Stuhl');
+artikel_anlegen('B-002', 5, 25.0, 'Tisch');
+$jetzt52 = strtotime(substr(current_time('mysql'), 0, 10) . ' 10:00:00');
+$vbar = Kikripp_DB::reservieren(array_merge(kontakt('Bar Kunde'), ['zahlart' => 'bar']), ['B-001' => 1]);
+pruefe('Zahlart bar gespeichert', Kikripp_DB::vorgang($vbar)['zahlart'], 'bar');
+$vue = Kikripp_DB::reservieren(array_merge(kontakt('Ueberweiser'), ['zahlart' => 'ueberweisung']), ['B-001' => 1]);
+pruefe('Zahlart Überweisung gespeichert', Kikripp_DB::vorgang($vue)['zahlart'], 'ueberweisung');
+$vohne = Kikripp_DB::reservieren(array_merge(kontakt('Ohne'), ['zahlart' => 'quatsch']), ['B-001' => 1]);
+pruefe('unbekannte Zahlart → leer', Kikripp_DB::vorgang($vohne)['zahlart'], '');
+Kikripp_DB::vorgang_status($vbar, 'bestellt');
+$gb = Kikripp_DB::vorgang($vbar);
+$tx = implode(' | ', array_column(Kikripp_Ablauf::aufgaben([$gb], $jetzt52), 'text'));
+pruefe('bar: keine Aufgabe „Rechnung schreiben“', strpos($tx, 'Rechnung schreiben'), false);
+pruefe('bar: Aufgabe Abholtermin', strpos($tx, 'Barzahler – Abholtermin eintragen') !== false, true);
+Kikripp_DB::vorgang_bearbeiten($vbar, ['abholung' => gmdate('Y-m-d', $jetzt52) . ' 10:00']);
+$gb = Kikripp_DB::vorgang($vbar);
+$st = Kikripp_Ablauf::stand($gb, Kikripp_Ablauf::aufgaben([$gb], $jetzt52), $jetzt52);
+pruefe('bar mit Termin: Knopf „abgeholt + bar bezahlt“', $st['knopf'][0] ?? '', 'barabholung');
+$tx = implode(' | ', array_column(Kikripp_Ablauf::aufgaben([$gb], $jetzt52), 'text'));
+pruefe('bar: kein „noch nicht bezahlt!“', strpos($tx, 'noch nicht bezahlt'), false);
+pruefe('bar: Hinweis „bar kassieren“ am Abholtag', strpos($tx, 'bar kassieren: 40,00') !== false, true);
+list($bt, $bm) = Kikripp_Ablauf::mail_text($gb);
+pruefe('Mail für Barzahler', strpos($bm, 'zahlbar in bar bei Abholung') !== false && strpos($bt, 'Rechnung') === false, true);
+pruefe('Bestellung: Barzahlung bei Abholung', strpos(Kikripp_Admin::bestellung_html($vbar, 'unternehmen'), 'Barzahlung bei Abholung') !== false, true);
+$GLOBALS['ist_admin'] = true; $_GET = []; ob_start(); Kikripp_Ablauf::seite_abholplan(); $plan52 = ob_get_clean(); $GLOBALS['ist_admin'] = false;
+pruefe('Abholplan: BAR KASSIEREN mit Betrag', strpos($plan52, 'BAR KASSIEREN: 40,00') !== false, true);
+// Artikel hinzufügen – gleiche Bestellung
+$h1 = Kikripp_DB::positionen_hinzufuegen($vbar, ['B-002' => 2]);
+pruefe('hinzufügen ohne Rechnung: keine Korrektur', $h1['korrektur'] ?? null, false);
+$gb = Kikripp_DB::vorgang($vbar);
+pruefe('hinzugefügt in denselben Vorgang', count($gb['positionen']) . '|' . Kikripp_Ablauf::summe($gb), '2|90');
+pruefe('Notiz hält das Hinzufügen fest', strpos($gb['notiz'], 'hinzugefügt B-002 × 2') !== false, true);
+pruefe('zu viel → Fehler', is_wp_error(Kikripp_DB::positionen_hinzufuegen($vbar, ['B-002' => 99])), true);
+Kikripp_DB::vorgang_status($vue, 'bestellt');
+Kikripp_DB::vorgang_bearbeiten($vue, ['rechnungsnr' => 'R-1']);
+$h2 = Kikripp_DB::positionen_hinzufuegen($vue, ['B-002' => 1]);
+pruefe('hinzufügen nach Rechnung: Korrektur nötig', $h2['korrektur'], true);
+$tx = implode(' | ', array_column(Kikripp_Ablauf::aufgaben([Kikripp_DB::vorgang($vue)], $jetzt52), 'text'));
+pruefe('Aufgabe „Rechnung in DATEV korrigieren“', strpos($tx, 'Rechnung in DATEV korrigieren') !== false, true);
+Kikripp_DB::vorgang_bearbeiten($vue, ['rechnungsnr' => 'R-1b']);
+pruefe('neue Rechnungsnr. löscht den Korrektur-Hinweis', (int) Kikripp_DB::vorgang($vue)['rg_korrektur'], 0);
+Kikripp_DB::vorgang_bearbeiten($vue, ['rechnungsnr' => 'R-1b']);
+// abgeholt + bar bezahlt
+Kikripp_DB::abgeholt_setzen($vbar, gmdate('Y-m-d', $jetzt52));
+$gb = Kikripp_DB::vorgang($vbar);
+pruefe('bar abgeholt → bezahlt', $gb['status'], 'bezahlt');
+$tx = implode(' | ', array_column(Kikripp_Ablauf::aufgaben([$gb], $jetzt52), 'text'));
+pruefe('bar bezahlt ohne Rechnung → „Rechnung in DATEV schreiben“', strpos($tx, 'Bar bezahlt – Rechnung in DATEV schreiben') !== false, true);
+pruefe('bezahlter Vorgang: hinzufügen abgelehnt (dann Zusatz)', is_wp_error(Kikripp_DB::positionen_hinzufuegen($vbar, ['B-002' => 1])), true);
+Kikripp_DB::vorgang_bearbeiten($vbar, ['rechnungsnr' => 'R-2', 'zahlart' => 'bar']);
+$tx = implode(' | ', array_column(Kikripp_Ablauf::aufgaben([Kikripp_DB::vorgang($vbar)], $jetzt52), 'text'));
+pruefe('nach Rechnungsnr. keine DATEV-Aufgabe mehr', strpos($tx, 'Rechnung in DATEV'), false);
+Kikripp_DB::vorgang_bearbeiten($vohne, ['zahlart' => 'bar']);
+pruefe('Zahlart in der Verwaltung änderbar', Kikripp_DB::vorgang($vohne)['zahlart'], 'bar');
+foreach ([$vbar, $vue, $vohne] as $x) { Kikripp_DB::vorgang_status($x, 'storniert'); }
 
 printf("\n== Ergebnis: %d Prüfungen, %d Fehler ==\n", $geprueft, $fehler);
 exit($fehler > 0 ? 1 : 0);

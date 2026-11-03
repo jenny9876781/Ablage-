@@ -196,7 +196,13 @@ class Kikripp_REST {
             'telefon'   => $text('telefon'),
             'nachricht' => sanitize_textarea_field((string) $anfrage->get_param('nachricht')),
             'demontage' => !empty($anfrage->get_param('demontage')),
+            'zahlart'   => sanitize_key((string) $anfrage->get_param('zahlart')),
         ];
+        // 1.15.0: Bezahlung – Überweisung vorab oder bar bei Abholung (Pflicht, außer für die Verwaltung)
+        if (!in_array($kontakt['zahlart'], ['ueberweisung', 'bar'], true)) {
+            if (!$admin) { return self::fehler('Bitte wählen Sie, wie Sie bezahlen möchten: Überweisung vorab oder bar bei Abholung.'); }
+            $kontakt['zahlart'] = '';
+        }
         if ($kontakt['name'] === '') { return self::fehler('Bitte geben Sie Ihren Namen an.'); }
         // 1.11.2: Verwaltung (z. B. Barverkauf vor Ort) braucht nur Name und Telefon; Anschrift und Mail sind freiwillig.
         $anschrift_leer = $kontakt['strasse'] === '' && $kontakt['ort'] === '' && $kontakt['plz'] === '';

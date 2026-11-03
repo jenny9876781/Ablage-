@@ -45,7 +45,7 @@ def post(koerper, admin=False):
         return json.load(e)
 
 kontakt = {"name": "Test Geschenk", "strasse": "Teststr. 1", "plz": "78048", "ort": "VS",
-           "email": "test@example.de", "telefon": "07721 123456", "demontage": True}
+           "email": "test@example.de", "telefon": "07721 123456", "demontage": True, "zahlart": "ueberweisung"}
 
 with sync_playwright() as p:
     b = p.chromium.launch(executable_path=CHROME)
@@ -130,6 +130,8 @@ with sync_playwright() as p:
 print("\n5) Server")
 a = post(dict(kontakt, artikel={nr: 1 for nr in geschenke[:6]}, dauer=5000))
 pruefe("Server lehnt 6 Geschenke ab", not a.get("ok") and "höchstens 5" in (a.get("fehler") or a.get("meldung") or json.dumps(a, ensure_ascii=False)), f"({a!r})")
+a = post(dict({k: v for k, v in kontakt.items() if k != "zahlart"}, artikel={teuer[2]: 1}, dauer=5000))
+pruefe("Server: ohne Zahlungsart abgelehnt (1.15.0)", not a.get("ok") and "bezahlen" in json.dumps(a, ensure_ascii=False), f"({a!r})")
 a = post(dict(kontakt, artikel={billig[0]: 1, geschenke[0]: 1}, dauer=5000))
 pruefe("Server: Kaufanteil unter Mindestwert abgelehnt", not a.get("ok"), f"({a!r})")
 a = post(dict(kontakt, artikel={nr: 1 for nr in geschenke[:5]}, dauer=5000))

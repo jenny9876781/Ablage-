@@ -121,6 +121,15 @@ class Kikripp_Ablauf {
         return false;
     }
 
+    /** 1.15.0: Zahlt der Käufer bar bei Abholung? (Rechnung erst bei Abholung) */
+    public static function bar($v) { return ($v['zahlart'] ?? '') === 'bar' && !self::geschenk($v); }
+
+    /** 1.15.0: Zahlart lesbar. */
+    public static function zahlart_text($v) {
+        $z = (string) ($v['zahlart'] ?? '');
+        return $z === 'bar' ? 'bar bei Abholung' : ($z === 'ueberweisung' ? 'Überweisung vorab' : 'nicht angegeben');
+    }
+
     /** 1.9.0: wartet der Vorgang auf eine Rückinfo? */
     public static function wartet($v) { return trim((string) ($v['warte_seit'] ?? '')) !== ''; }
 
@@ -221,11 +230,15 @@ class Kikripp_Ablauf {
             $knopf = strtotime($v['ablauf']) < $jetzt ? ['storniert', 'stornieren'] : ['bestellt', 'bestellt'];
         } elseif ($v['status'] === 'bestellt' && self::geschenk($v)) {
             $knopf = trim((string) ($v['abholung'] ?? '')) === '' ? ['aufklappen', 'Termin eintragen'] : ['abgeholt', 'abgeholt'];
+        } elseif ($v['status'] === 'bestellt' && self::bar($v)) {             // 1.15.0
+            $knopf = trim((string) ($v['abholung'] ?? '')) === '' ? ['aufklappen', 'Termin eintragen'] : ['barabholung', 'abgeholt + bar bezahlt'];
         } elseif ($v['status'] === 'bestellt') {
             $knopf = (trim((string) $v['rechnungsnr']) === '' || trim((string) ($v['abholung'] ?? '')) === '')
                 ? ['aufklappen', 'Rechnung / Termin eintragen'] : ['bezahlt', 'bezahlt'];
         } elseif ($v['status'] === 'bezahlt' && !$abgeholt) {
             $knopf = ['abgeholt', 'abgeholt'];
+        } elseif ($v['status'] === 'bezahlt' && self::bar($v) && trim((string) $v['rechnungsnr']) === '') {
+            $knopf = ['aufklappen', 'Rechnungsnr. eintragen'];                // 1.15.0
         } elseif ($v['status'] === 'bezahlt' && $kontakt) {
             $knopf = ['kontakt', 'Kontaktdaten löschen'];
         } elseif ($v['status'] === 'storniert' && $kontakt) {
@@ -243,6 +256,11 @@ class Kikripp_Ablauf {
         if ($v['status'] === 'bestellt' && self::geschenk($v)) {
             return ['reiter' => 'abholung', 'farbe' => 'grau', 'rang' => 50, 'knopf' => $knopf,
                     'schritt' => 'Geschenk – Abholung ' . (self::termin_text($v['abholung'] ?? '', true) ?: 'ohne Termin')];
+        }
+        if ($v['status'] === 'bestellt' && self::bar($v)) {
+            return ['reiter' => 'abholung', 'farbe' => 'grau', 'rang' => 50, 'knopf' => $knopf,
+                    'schritt' => 'bar bei Abholung (' . Kikripp_Mail::eur(self::summe($v)) . ') – Abholung '
+                        . (self::termin_text($v['abholung'] ?? '', true) ?: 'ohne Termin')];
         }
         if ($v['status'] === 'bestellt') {
             $seit = ($v['rechnung_am'] ?? '') !== '' ? self::tage_zwischen($v['rechnung_am'], $heute) : null;
@@ -320,6 +338,9 @@ class Kikripp_Ablauf {
             if (self::geschenke_ohne_kauf($v) && !$abgeholt && in_array($v['status'], ['offen', 'bestellt'], true)) {
                 $neu($v, 'Kauf storniert, nur noch Geschenke reserviert – Geschenke gibt es nur zu einem Einkauf, bitte klären.', 'warn', 2);
             }
+            if (!empty($v['rg_korrektur']) && in_array($v['status'], ['bestellt', 'bezahlt'], true)) {   // 1.15.0
+                $neu($v, 'Artikel nach der Rechnung hinzugefügt – Rechnung in DATEV korrigieren und die neue Rechnungsnr. eintragen.', 'warn', 2);
+            }
             if (self::wartet($v)) {                     // 1.9.0: ruht bis zur Rückinfo oder Wiedervorlage
                 if (self::wiedervorlage_faellig($v, $heute)) {
                     $notiz = trim((string) ($v['warte_notiz'] ?? ''));
@@ -351,6 +372,16 @@ class Kikripp_Ablauf {
                         }
                         break;
                     }
+                    if (self::bar($v)) {                      // 1.15.0: bar bei Abholung – Rechnung erst dann
+                        if ($tag === '') {
+                            $neu($v, 'Barzahler – Abholtermin eintragen.', 'warn', 2);
+                        } elseif ($tag < $heute) {
+                            $neu($v, 'Abholtermin war am ' . self::datum_text($tag) . ' – abgeholt? Bitte „abgeholt + bar bezahlt“.', 'warn', 1);
+                        } elseif ($tag <= $morgen) {
+                            $bereit($v, 'Ware (bar kassieren: ' . Kikripp_Mail::eur(self::summe($v)) . ')');
+                        }
+                        break;
+                    }
                     if ($tag !== '' && $tag <= $morgen) {
                         $neu($v, 'Abholung ' . ($tag < $heute ? 'war am ' . self::datum_text($tag) : ($tag === $heute ? 'heute' : 'am '
                             . self::termin_text($v['abholung'], true))) . ' – noch nicht bezahlt!', 'warn', 0);
@@ -364,6 +395,10 @@ class Kikripp_Ablauf {
                     elseif ($tag >= $heute && $tag <= $morgen) { $bereit($v, 'Ware'); }
                     break;
                 case 'bezahlt':
+                    if ($abgeholt && self::bar($v) && trim((string) $v['rechnungsnr']) === '') {   // 1.15.0
+                        $neu($v, 'Bar bezahlt – Rechnung in DATEV schreiben und die Rechnungsnr. eintragen.', 'warn', 3);
+                        break;
+                    }
                     if ($abgeholt) {
                         $frist = self::privat($v) ? self::tage_zwischen($v['abgeholt_am'], $heute) >= 14 : true;
                         if ($kontakt && $frist) { $neu($v, 'Abgewickelt – Kontaktdaten löschen.', 'info', 9); }
@@ -476,6 +511,31 @@ class Kikripp_Ablauf {
                 . ($adresse !== '' ? "Abholadresse: $adresse\n" : '')
                 . ($zufahrt !== '' ? "$zufahrt\n" : '')
                 . "\n"
+                . $w('Bei Fragen erreichen Sie uns', 'Bei Fragen erreichst du uns', 'Bei Fragen erreicht ihr uns')
+                . " unter $tel oder $mail.\n\n$gruss";
+            return [$betreff, $text];
+        }
+
+        $zugabe_text = self::zugaben($v) ? $w('Kostenlos zu Ihrem Einkauf erhalten Sie außerdem: ', 'Kostenlos zu deinem Einkauf bekommst du außerdem: ',
+                                  'Kostenlos zu eurem Einkauf bekommt ihr außerdem: ')
+            . implode(', ', array_map(function ($p) { return $p['artnr'] . ' ' . $p['titel'] . ($p['menge'] > 1 ? ' (' . $p['menge'] . ' Stück)' : ''); },
+                self::zugaben($v))) . ".\n\n" : '';
+
+        if (self::bar($v)) {                             // 1.15.0: bar bei Abholung, Rechnung vor Ort
+            $betreff = 'Abholtermin – Kikripp Artikelkatalog';
+            $text = "$anrede\n\n"
+                . $w('vielen Dank für Ihre Reservierung aus unserem Artikelkatalog.',
+                     'vielen Dank für deine Reservierung!', 'vielen Dank für eure Reservierung!')
+                . "\n\n" . $zugabe_text
+                . $w('Ihr', 'Dein', 'Euer') . " Abholtermin: $termin\n"
+                . 'Betrag: ' . Kikripp_Mail::eur(self::summe($v)) . " (umsatzsteuerfrei), zahlbar in bar bei Abholung.\n"
+                . $w('Bitte bringen Sie den Betrag möglichst passend mit. Die Rechnung und die Bestellung zum Unterschreiben erhalten Sie bei der Abholung.',
+                     'Bitte bring den Betrag möglichst passend mit. Die Rechnung und die Bestellung zum Unterschreiben bekommst du bei der Abholung.',
+                     'Bitte bringt den Betrag möglichst passend mit. Die Rechnung und die Bestellung zum Unterschreiben bekommt ihr bei der Abholung.')
+                . "\n\n"
+                . ($adresse !== '' ? "Abholadresse: $adresse\n" : '')
+                . ($zufahrt !== '' ? "$zufahrt\n" : '')
+                . $w('Bitte bringen Sie', 'Bitte bring', 'Bitte bringt') . " ausreichend Helfer, Werkzeug und ein passendes Fahrzeug mit.\n\n"
                 . $w('Bei Fragen erreichen Sie uns', 'Bei Fragen erreichst du uns', 'Bei Fragen erreicht ihr uns')
                 . " unter $tel oder $mail.\n\n$gruss";
             return [$betreff, $text];
@@ -663,16 +723,17 @@ class Kikripp_Ablauf {
 
     private static function karte($v, $druck = false) {
         $bezahlt = $v['status'] === 'bezahlt';
-        $h = '<div class="kik-karte" style="border:1px solid #ccd0d4;border-left:4px solid ' . ($bezahlt ? '#00a32a' : '#d63638')
+        $bar = self::bar($v) && !$bezahlt;                                    // 1.15.0
+        $h = '<div class="kik-karte" style="border:1px solid #ccd0d4;border-left:4px solid ' . ($bezahlt ? '#00a32a' : ($bar ? '#dba617' : '#d63638'))
            . ';background:#fff;padding:10px 14px;margin:0 0 12px;break-inside:avoid">';
         $h .= '<div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap">'
             . '<div><strong style="font-size:15px">' . esc_html(substr($v['abholung'], 11)) . ' Uhr · ' . esc_html(self::wer($v)) . '</strong>'
             . ' <span style="color:#555">#' . (int) $v['id'] . '</span><br>'
             . (trim((string) $v['telefon']) !== '' ? 'Tel. ' . esc_html($v['telefon']) . ' · ' : '')
-            . 'Rechnung ' . (trim((string) $v['rechnungsnr']) !== '' ? esc_html($v['rechnungsnr']) : '<em>fehlt</em>')
+            . 'Rechnung ' . (trim((string) $v['rechnungsnr']) !== '' ? esc_html($v['rechnungsnr']) : ($bar ? 'bei Abholung' : '<em>fehlt</em>'))
             . (!empty($v['demontage']) ? ' · <strong>nach Vereinbarung</strong>' : '') . '</div>'
-            . '<div style="font-weight:600;color:' . ($bezahlt ? '#00a32a' : '#d63638') . '">'
-            . ($bezahlt ? '✓ bezahlt' : '✗ NOCH NICHT BEZAHLT')
+            . '<div style="font-weight:600;color:' . ($bezahlt ? '#00a32a' : ($bar ? '#996800' : '#d63638')) . '">'
+            . ($bezahlt ? '✓ bezahlt' : ($bar ? '💶 BAR KASSIEREN: ' . esc_html(Kikripp_Mail::eur(self::summe($v))) : '✗ NOCH NICHT BEZAHLT'))
             . '<br><span id="kommi-badge-' . (int) $v['id'] . '" style="color:#50575e;font-weight:400">' . esc_html(self::kommi_text(self::kommi($v))) . '</span></div></div>';
         if (trim((string) ($v['notiz'] ?? '')) !== '') {
             $h .= '<div style="margin:6px 0;padding:4px 8px;background:#fcf9e8">Notiz: ' . esc_html($v['notiz']) . '</div>';
@@ -687,9 +748,13 @@ class Kikripp_Ablauf {
         }
         $h .= '</table>';
         if (!$druck) {
-            $h .= '<p style="margin:8px 0 0"><a class="button button-small" href="' . esc_url(Kikripp_Admin::aktion_url('abgeholt', $v['id']))
+            $h .= '<p style="margin:8px 0 0">' . ($bar
+                ? '<a class="button button-small button-primary" href="' . esc_url(Kikripp_Admin::aktion_url('barabholung', $v['id'])) . '" onclick="return confirm(\''
+                    . esc_js(Kikripp_Mail::eur(self::summe($v)) . ' bar erhalten und Ware übergeben?') . '\')">✓ abgeholt + bar bezahlt</a> '
+                : '<a class="button button-small" href="' . esc_url(Kikripp_Admin::aktion_url('abgeholt', $v['id']))
                 . '"' . ($bezahlt ? '' : ' onclick="return confirm(\'Noch nicht als bezahlt vermerkt. Trotzdem abgeholt (wird dabei als bezahlt vermerkt)?\')"')
-                . '>✓ abgeholt</a> <a class="button button-small" href="' . esc_url(self::ics_url($v['id'])) . '">📅 In Outlook eintragen</a> '
+                . '>✓ abgeholt</a> ')
+                . '<a class="button button-small" href="' . esc_url(self::ics_url($v['id'])) . '">📅 In Outlook eintragen</a> '
                 . '<a class="button button-small" href="' . esc_url(admin_url('admin.php?page=kikripp-reservierungen&reiter=alle#vorgang-' . (int) $v['id']))
                 . '">Vorgang öffnen</a></p>';
         }

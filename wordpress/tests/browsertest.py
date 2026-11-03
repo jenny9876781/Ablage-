@@ -279,11 +279,17 @@ with sync_playwright() as p:
     seite.fill("#k-tel", "07721 123456")
     seite.click("#k-senden")
     seite.wait_for_timeout(500)
+    pruefe("ohne Zahlungsart wird nicht abgeschickt (1.15.0)",
+           "bezahlen" in seite.inner_text("#k-meldung"), f"({seite.inner_text('#k-meldung')!r})")
+    pruefe("Zahlungsart: zwei Möglichkeiten", seite.locator('input[name="k-zahl"]').count() == 2)
+    seite.check('input[name="k-zahl"][value="bar"]')
+    seite.click("#k-senden")
+    seite.wait_for_timeout(500)
     pruefe("ohne Abholtermin wird nicht abgeschickt",
            "Abholung" in seite.inner_text("#k-meldung"), f"({seite.inner_text('#k-meldung')!r})")
     seite.select_option("#k-abhol", index=1)
     zeiten = [t.strip() for t in seite.locator("#k-abhol-zeit option").all_inner_texts()[1:]]
-    pruefe("Abholung: Uhrzeiten 08:00 bis 11:30 (1.12.0)", zeiten[:1] == ["08:00 Uhr"] and zeiten[-1:] == ["11:30 Uhr"], f"({zeiten})")
+    pruefe("Abholung: Uhrzeiten ab 08:00, bis 11:30 bzw. Do 14:30 (1.14.0)", zeiten[:1] == ["08:00 Uhr"] and zeiten[-1:] in (["11:30 Uhr"], ["14:30 Uhr"]), f"({zeiten})")
     seite.select_option("#k-abhol-zeit", "09:30")
     if seite.locator("#k-bes").count():
         seite.check("#k-bes")
@@ -301,6 +307,7 @@ with sync_playwright() as p:
            re.search(r"Reserviert bis\s+(Mo|Di|Mi|Do|Fr), \d{2}\.\d{2}\.\d{4}", beleg) is not None, f"({beleg!r})")
     pruefe("Beleg zeigt den Abholwunsch mit Uhrzeit", "Abholung gewünscht" in beleg and "09:30 Uhr" in beleg, f"({beleg!r})")
     pruefe("Beleg zeigt die Positionen", "3 Stück gesamt" in beleg, f"({beleg!r})")
+    pruefe("Beleg zeigt die Zahlungsart (1.15.0)", "bar bei Abholung" in beleg, f"({beleg!r})")
     pruefe("Beleg zeigt die Kontaktdaten zum Gegenlesen",
            "test@example.org" in beleg and "07721 123456" in beleg, f"({beleg!r})")
     pruefe("Hinweis auf Bildschirmfoto", "Bildschirmfoto" in erfolg)

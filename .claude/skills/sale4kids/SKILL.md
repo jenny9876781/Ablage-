@@ -1316,6 +1316,14 @@ ist die Merkliste; erledigte Punkte hier abhaken, nicht löschen.
       inzwischen entfallenen fehlen im Paket – Meldung „ohne Foto“ ist dann harmlos), (B) Umzug → Daten importieren
       (Stempel der alten Seite), (C) `ausgabe/katalog_import.json` (aktuell, 674 sichtbar) → Spielzeug/Geschenke/neue
       werden dabei „Im_Katalog nein → ja“ und bekommen frisches NEU.
+- [ ] **03.11. 16 Uhr: Domain zeigt auf den neuen Server** (Test `www.kikripp.de/test.txt` = „neuer Server“, https ok).
+      Schleife kam von siteurl ohne www → siteurl/home jetzt `https://www.kikripp.de`. Anmeldung im neuen WP 7.1.4 klappt
+      (Benutzer anna@kikripp.de, Mail an jennyp@). Übergangsdomain wäre kikripp.de.w0225640.kasserver.com (http).
+      **Nutzerin will Spielzeug/Geschenke/Neues erst Freitag 06.11.** → heute `ausgabe/katalog_import_HEUTE.json`
+      (= aktuelle Daten, 188 Artikel, die auf der alten Seite nicht sichtbar waren, auf im_katalog false; 486 sichtbar),
+      dann Umzug-Import (Datei von 03.11. früh, aus 1.13.0 – ohne `sichtbar`, deshalb vorher HEUTE-Import, damit die
+      188 nicht gestempelt werden). Freitag: `katalog_import.json` (674) → 188 bekommen NEU. SCHRITT1-Datei verworfen.
+      Erinnerung trig_01CKtpRTJa3TZqDuAnmCF8UX auf Fr 06.11. 08:15 umgeschrieben. test.txt im public-Ordner später löschen.
 - [ ] **Anfang November 2026 (Nutzerin meldet sich):**
       1. Spielzeug online: alle Artikel mit Kategorie „Spielzeug“ und Preis_geprüft ok auf Im_Katalog = ja (alte vom 12.10.
          BA04/BU01/BU02/BU04, Tonies NE01-27 bis -38, NU07-09 bis -18 inkl. -14A, NU05-Bücher/-Spiele), Fotopaket-Nachtrag.

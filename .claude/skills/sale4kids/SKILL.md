@@ -1299,8 +1299,9 @@ ist die Merkliste; erledigte Punkte hier abhaken, nicht löschen.
       Excel 03.11.: 57 Preise ok, entfällt BU04-03, NU01-15 (Rest; 1 verkauft), BU03-02, BE10-06, BU01-27, -28, -41, -45,
       NU04-26, -50, -55; BU01-22/-23/-24/-40 jetzt Stückware. Fotos BU01-42/-43/-44 = F-941/-942/-943. **Sichtbar ab
       Umzug: 611** (alles Spielzeug inkl. Tonies/NU07/NU04 + neue BU01). Noch offen/verborgen: BU01-43, BU01-44 (Preis offen);
-      Geschenke („zu verschenken“) weiter verborgen bis Freigabe. Ausgeliefert: Plugin 1.13.1, katalog_import.json,
-      Fotopaket komplett 5 Teile (608 Fotos, 128 MB).
+      **Geschenke freigegeben (03.11.): 63 sichtbar** (NE04-V01/-V02 ohne Foto bleiben verborgen) → **674 sichtbar**.
+      Ausgeliefert (endgültig für den Umzug): Plugin 1.13.1, katalog_import.json, Fotopaket 6 Teile (671 Fotos, 143 MB).
+      Nutzerin ist von den vielen Versionen verwirrt → **nur noch eine Plugin-Version für den Umzug (1.13.1), keine neue.
 - [ ] **Anfang November 2026 (Nutzerin meldet sich):**
       1. Spielzeug online: alle Artikel mit Kategorie „Spielzeug“ und Preis_geprüft ok auf Im_Katalog = ja (alte vom 12.10.
          BA04/BU01/BU02/BU04, Tonies NE01-27 bis -38, NU07-09 bis -18 inkl. -14A, NU05-Bücher/-Spiele), Fotopaket-Nachtrag.

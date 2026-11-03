@@ -1,16 +1,26 @@
-/* Kikripp – Zusätzliches CSS für das Design „Twenty Twenty-Five“ (Design → Editor → Stile → ⋮ → Zusätzliches CSS) */
+/* Kikripp – Zusätzliches CSS für „Twenty Twenty-Five“ */
 
-/* Kopfzeile: weiß mit roter Linie wie im Katalog */
+/* Kopfzeile: weiß, schmal, rote Linie wie im Katalog */
 header.wp-block-template-part { border-bottom: 3px solid #C8102E; }
-header.wp-block-template-part .wp-block-site-logo img { max-height: 64px; width: auto; }
+header.wp-block-template-part > .wp-block-group { padding-top: 10px !important; padding-bottom: 10px !important; }
+header.wp-block-template-part .wp-block-site-logo img { max-height: 56px; width: auto; }
 
-/* Startseite (Artikelkatalog): doppelte Überschrift weg, weniger Abstand oben */
+/* Bildschirm nutzen: breiter Inhalt, wenig Rand */
+:root { --wp--style--global--wide-size: 1400px; }
+header.wp-block-template-part .alignwide,
+.home .wp-block-post-content > * { max-width: min(1400px, calc(100vw - 32px)) !important; margin-left: auto !important; margin-right: auto !important; }
+.home main .has-global-padding { padding-left: 16px !important; padding-right: 16px !important; }
+
+/* Startseite: doppelte Überschrift und Weißraum oben weg */
 .home .wp-block-post-title { display: none; }
 .home main.wp-block-group { margin-top: 0 !important; }
-.home main .wp-block-group.has-global-padding { padding-top: 1.5rem !important; }
+.home main .wp-block-group, .home main .wp-block-post-content { padding-top: 0 !important; margin-top: 0 !important; }
+.home .wp-block-post-content { margin-block-start: 1rem !important; }
+.home .wp-block-post-content > * + * { margin-block-start: 0.8rem; }
 
-/* Begrüßungstext über dem Katalog */
-.home .kik-willkommen { max-width: 1200px; margin: 0 auto 1rem; font-size: 1.05rem; line-height: 1.55; color: #1A1A1A; }
+/* Begrüßungstext */
+.home .wp-block-post-content > h2:first-child { font-size: 1.6rem; margin: 0; color: #1A1A1A; }
+.home .wp-block-post-content > p { font-size: 1.05rem; line-height: 1.55; margin: 0.3rem auto 0; }
 
 /* Schrift wie im Katalog */
 body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif; }

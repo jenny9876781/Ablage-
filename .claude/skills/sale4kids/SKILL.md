@@ -1310,6 +1310,12 @@ ist die Merkliste; erledigte Punkte hier abhaken, nicht löschen.
       (spätestens 08.11.) → vorher auf alter Seite Plugin 1.13.1 + Umzug-Export → dann neues WP einrichten (Plugin, Seiten,
       Fotos 6 Pakete, Artikel-Import, Umzug-Import, Einstellungen, danach Artikel-Import NICHT nötig, Adresse stimmt).
       Erinnerung per send_later Fr 06.11. 08:15 (trig_01CKtpRTJa3TZqDuAnmCF8UX).
+- [ ] **03.11. abends: Hoster stellt um, alte Seite nicht mehr erreichbar.** Letzter Umzug-Export stammt noch aus 1.13.0
+      (ohne `sichtbar`). Damit das Spielzeug trotzdem NEU bekommt: auf der neuen Seite **zweistufig** importieren:
+      (A) `ausgabe/katalog_import_SCHRITT1.json` (= Import von 597522a, Stand alte Seite, 491 sichtbar; Fotos der
+      inzwischen entfallenen fehlen im Paket – Meldung „ohne Foto“ ist dann harmlos), (B) Umzug → Daten importieren
+      (Stempel der alten Seite), (C) `ausgabe/katalog_import.json` (aktuell, 674 sichtbar) → Spielzeug/Geschenke/neue
+      werden dabei „Im_Katalog nein → ja“ und bekommen frisches NEU.
 - [ ] **Anfang November 2026 (Nutzerin meldet sich):**
       1. Spielzeug online: alle Artikel mit Kategorie „Spielzeug“ und Preis_geprüft ok auf Im_Katalog = ja (alte vom 12.10.
          BA04/BU01/BU02/BU04, Tonies NE01-27 bis -38, NU07-09 bis -18 inkl. -14A, NU05-Bücher/-Spiele), Fotopaket-Nachtrag.

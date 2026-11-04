@@ -1,0 +1,340 @@
+{
+  "_hinweis": "Zentrale, lebende Konfiguration für den Zeit-/Kosten-Report. Wird von Claude aktualisiert, sobald die Nutzerin neue Angaben macht (Mitarbeiter, Sätze, Projekte, Sonderregeln).",
+  "_versions_hinweis": "Ab 2026-07-22: komplett überarbeitet (Mehrjahres-Auswertung). Ab 2026-11-04 (Skill-Version 6): Soll-Arbeitszeit/Auslastung entfernt (Datenschutz, Nutzerin), keine_hinweise_fuer ergänzt.",
+  "mitarbeiter_satzhistorie": {
+    "_hinweis": "Ein oder mehrere Sätze je Mitarbeiter mit 'gueltig_ab'. Bei einer Buchung wird der Satz verwendet, dessen gueltig_ab <= Termin-Datum ist und am nächsten daran liegt (letzter gültiger Satz vor/an diesem Datum). Aktuell gelten die Sätze laut Nutzerin einheitlich rückwirkend ab 2024-01-01.",
+    "Marius Neininger": {
+      "kuerzel": "MN",
+      "extern": false,
+      "saetze": [
+        {
+          "gueltig_ab": "2024-01-01",
+          "stundensatz_eur": 200
+        }
+      ]
+    },
+    "Felix Seltmann": {
+      "kuerzel": "FS",
+      "extern": false,
+      "saetze": [
+        {
+          "gueltig_ab": "2024-01-01",
+          "stundensatz_eur": 150
+        }
+      ]
+    },
+    "Jennifer Preisigke": {
+      "kuerzel": "JP",
+      "extern": true,
+      "saetze": [
+        {
+          "gueltig_ab": "2024-01-01",
+          "stundensatz_eur": 150
+        }
+      ]
+    }
+  },
+  "km_satz_historie": [
+    {
+      "gueltig_ab": "2024-01-01",
+      "satz_eur_pro_km": 1.2,
+      "inkl_arbeitszeit": true
+    }
+  ],
+  "km_satz_hinweis": "inkl_arbeitszeit=true bedeutet: die reine Fahrzeit wird NICHT zusätzlich über den Stundensatz abgerechnet, nur der Vor-Ort-Termin selbst. Gilt für alle Projekte (Standard- UND Sonderkalkulationsprojekte, sofern dort Fahrten überhaupt kostenwirksam sind).",
+  "mwst_satz_prozent": 19,
+  "preise_sind_netto": true,
+  "mwst_hinweis": "Alle Sätze (Stundensatz, km-Satz, Tagessatz-Pauschalen) sind Nettopreise. MwSt. wird in der Übersicht separat ausgewiesen (Netto / MwSt. / Brutto), sowohl intern als auch im TransCare-Bericht.",
+  "fahrzeug_fahrer_zuordnung": {
+    "_hinweis": "Kennzeichen -> tatsächlicher Fahrer/in. Der Autolog-Export kann den Fahrernamen falsch ausweisen (bekannter Fall: VS MN 1000 stand fälschlich auf Jennifer Preisigke statt Marius Neininger). Bei jedem neuen Jahrgang/Datensatz prüfen, ob diese Zuordnung noch stimmt oder neue Fehlzuordnungen dazukommen.",
+    "VS MN 1000": "Marius Neininger",
+    "AW FT 333": "IGNORIEREN - lt. Nutzerangabe nicht Teil der Projektzeit-Auswertung"
+  },
+  "projektname_erkennung": {
+    "standard": "Projektname steht im Kalender-Betreff in doppelten Anführungszeichen, z.B. \"Koko\" Dokumentenerstellung NBO. Tippfehler/Leerzeichen-Varianten automatisch normalisieren.",
+    "feste_namen_ohne_anfuehrungszeichen": [
+      "Spedition Niedermaier",
+      "Frutania"
+    ],
+    "aliase": {
+      "_hinweis": "Kurzformen/Codenamen, die in manchen Kalendern statt des offiziellen Projektnamens verwendet werden. Von der Nutzerin am 2026-07-23 bestätigt.",
+      "Nickles": "Koko",
+      "Sand": "Sandformation",
+      "COOL": "Cool"
+    },
+    "ignorieren": [
+      "Auf Herdenen",
+      "Kikripp gGmbH",
+      "Lange & Töchter GmbH",
+      "Dezentrale H2-Hubs als Kernelement der Wasserstoffinfrastrukturentwicklung in Baden-Württemberg - Analyse von Standortgütekriterien für Wasserstoff-Hubs",
+      "m&a themen",
+      "Am Doniswald",
+      "Am Doniswald, Königsfeld",
+      "Koalition der Willigen"
+    ],
+    "keine_hinweise_fuer": [
+      "Juli"
+    ],
+    "_keine_hinweise_hinweis": "Version 6: Termine OHNE Anführungszeichen, die einen bekannten Projektnamen als ganzes Wort enthalten, werden NICHT zugeordnet, aber gelb markiert und auf die Pruefliste gesetzt. Namen hier (z.B. Monatsnamen) lösen diesen Hinweis nicht aus."
+  },
+  "projekt_stammliste": {
+    "_hinweis": "Von der Nutzerin über Projektliste_Vorlage.xlsx gepflegt, Stand 2026-07-23.",
+    "Koko": {
+      "firma": "TransCare",
+      "status": "aktiv",
+      "startdatum": "2024-01-01",
+      "enddatum": "2026-10-31"
+    },
+    "Cool": {
+      "firma": "TransCare",
+      "status": "aktiv",
+      "startdatum": "2024-01-01",
+      "enddatum": "2026-12-31"
+    },
+    "Zeppelin": {
+      "firma": "TransCare",
+      "status": "aktiv",
+      "startdatum": "2025-01-01",
+      "enddatum": null
+    },
+    "Begamis": {
+      "firma": "TransCare",
+      "status": "aktiv",
+      "startdatum": "2026-01-01",
+      "enddatum": null
+    },
+    "Spedition Niedermaier": {
+      "firma": "Neininger GmbH",
+      "status": "aktiv",
+      "startdatum": "2026-01-01",
+      "enddatum": "2026-12-31"
+    },
+    "Barrierefrei": {
+      "firma": "Neininger GmbH",
+      "status": "aktiv",
+      "startdatum": "2026-07-15",
+      "enddatum": null
+    },
+    "Aufstieg": {
+      "firma": "TransCare",
+      "status": "aktiv",
+      "startdatum": null,
+      "enddatum": null
+    },
+    "Bambus": {
+      "firma": "TransCare",
+      "status": "beendet",
+      "startdatum": null,
+      "enddatum": "2026-06-30"
+    },
+    "Adler": {
+      "firma": "TransCare",
+      "status": "beendet",
+      "startdatum": null,
+      "enddatum": "2026-06-30"
+    },
+    "Hentzen": {
+      "firma": "Neininger GmbH",
+      "status": "aktiv",
+      "startdatum": "2026-07-01",
+      "enddatum": null
+    },
+    "Forst": {
+      "firma": "TransCare",
+      "status": "aktiv",
+      "startdatum": "2026-05-01",
+      "enddatum": null
+    },
+    "Mühle": {
+      "firma": "TransCare",
+      "status": "aktiv",
+      "startdatum": "2026-05-01",
+      "enddatum": null
+    },
+    "Roadster": {
+      "firma": "TransCare",
+      "status": "aktiv",
+      "startdatum": "2026-07-01",
+      "enddatum": null
+    },
+    "Sandformation": {
+      "firma": "TransCare",
+      "status": "aktiv",
+      "startdatum": "2026-01-01",
+      "enddatum": null
+    },
+    "Juli": {
+      "firma": "TransCare",
+      "status": "beendet",
+      "startdatum": null,
+      "enddatum": "2025-12-31"
+    },
+    "Holenstein": {
+      "firma": "Neininger GmbH",
+      "status": "aktiv",
+      "startdatum": "2026-01-01",
+      "enddatum": null
+    },
+    "Alsuna": {
+      "firma": "Neininger GmbH",
+      "status": "aktiv",
+      "startdatum": "2026-05-01",
+      "enddatum": null
+    },
+    "Frutania": {
+      "firma": "Neininger GmbH",
+      "status": "beendet",
+      "startdatum": "2025-01-01",
+      "enddatum": "2026-06-30"
+    },
+    "Paneuropa": {
+      "firma": "Neininger GmbH",
+      "status": "aktiv",
+      "startdatum": "2025-05-01",
+      "enddatum": null
+    },
+    "Schneegestöber": {
+      "firma": "TransCare",
+      "status": "beendet",
+      "startdatum": null,
+      "enddatum": null
+    },
+    "Eisscholle": {
+      "firma": "TransCare",
+      "status": "beendet",
+      "startdatum": null,
+      "enddatum": null
+    },
+    "Crossover": {
+      "firma": "TransCare",
+      "status": "beendet",
+      "startdatum": null,
+      "enddatum": null
+    },
+    "Phoenix": {
+      "firma": "Neininger GmbH",
+      "status": "beendet",
+      "startdatum": null,
+      "enddatum": null
+    }
+  },
+  "status_stichtag": "2026-06-30",
+  "status_stichtag_hinweis": "Status (aktiv/beendet) gilt zu diesem Stichtag, sofern kein individuelles Enddatum je Projekt hinterlegt ist. Ist ein Enddatum gesetzt und liegt es vor dem jeweiligen Berichtsjahr, gilt das Projekt in diesem Jahr als beendet, unabhängig vom globalen Status-Feld.",
+  "sonderkalkulationen": {
+    "_hinweis": "Projekte, die NICHT über den normalen Stundensatz + km-Satz abgerechnet werden, sondern über eigene Konditionen.",
+    "Spedition Niedermaier": {
+      "typ": "tagessatz_block",
+      "hauptaufgabe": "Projektbetreuung",
+      "mitarbeiter": "Marius Neininger",
+      "tagessatz_vor_ort_eur": 1750,
+      "tagessatz_enthaltene_stunden": 8.5,
+      "anfahrtspauschale_eur": 825,
+      "anfahrtspauschale_takt": "pro_woche",
+      "anfahrtspauschale_hinweis": "Seit 2026-07-22: Anfahrtspauschale wird PRO KALENDERWOCHE abgerechnet (nicht mehr pro Buchungszeitraum/Block). In den bisherigen Daten fällt i.d.R. genau 1 Block pro Woche an, das Ergebnis ist dadurch meist identisch zur alten Pro-Block-Zählung - bei abweichenden Mustern (z.B. 2 Blöcke in 1 Woche oder ein Block über 2 Wochen) mit der Nutzerin klären.",
+      "uebernachtung_pro_nacht_eur": 150,
+      "naechte_regel": "Naechte = volle Kalendertage des Buchungszeitraums (durchgehende Uebernachtung vor Ort). Mit Nutzerin am 2026-07-15 bestaetigt.",
+      "wochenendzuschlag_prozent": 0,
+      "wochenendzuschlag_hinweis": "Lt. Nutzerin NICHT berücksichtigen (Stand 2026-07-15)",
+      "zusaetzlicher_aufwand_pro_stunde_eur": 0,
+      "zusaetzlicher_aufwand_hinweis": "Lt. Nutzerin NICHT berücksichtigen (Stand 2026-07-15)",
+      "fahrten_kostentechnisch_ausschliessen": true,
+      "fahrten_km_zeit_informativ_zeigen": true
+    }
+  },
+  "hauptaufgaben_kategorien": {
+    "_hinweis": "Kategorisierung der Aufgabenbeschreibung. Von der Nutzerin am 2026-07-24 verfeinert: 'Projektbetreuung' ist eine eigene 5. Kategorie für Telefonate/laufende Betreuung (KEINE Verhandlungstermine). Fallback je Mitarbeiter, falls kein Keyword passt (siehe 'fallback_je_mitarbeiter'), statt generisch 'Nicht eindeutig'.",
+    "Verhandlungen / Kundentermine": [
+      "vor-ort",
+      "vor ort",
+      "erstgespräch",
+      "verhandlung",
+      "kundentermin",
+      "besuch",
+      "termin bei"
+    ],
+    "Projektbetreuung": [
+      "telefonat",
+      "abstimmungsgespräch",
+      "vorabstimmung",
+      "kundengespräch",
+      "gespräch mit",
+      "betreuung"
+    ],
+    "Vertrieb / Akquisition": [
+      "angebot",
+      "akquise",
+      "akquisition",
+      "interessent",
+      "neukunde",
+      "anfrage",
+      "abtelefonieren",
+      "statusliste",
+      "rückmeldung"
+    ],
+    "Projektorganisation / Terminvereinbarungen": [
+      "terminvereinbarung",
+      "montagssitzung",
+      "mosi",
+      "planung",
+      "koordination",
+      "serverwartung",
+      "organisatorisches"
+    ],
+    "Projektadministration / Dokumentation": [
+      "dokumentenerstellung",
+      "dokumentenauswertung",
+      "dokumentenbearbeitung",
+      "vertragsdurchsicht",
+      "kaufvertrag",
+      "nbo",
+      "im ",
+      "unterlagen",
+      "bericht",
+      "protokoll",
+      "wertermittlung",
+      "due diligence",
+      "dokument anfordern",
+      "sichten",
+      "ausarbeiten"
+    ],
+    "fallback_je_mitarbeiter": {
+      "_hinweis": "Wird verwendet, wenn kein Keyword oben passt - ersetzt 'Nicht eindeutig - bitte prüfen' durch die typische Hauptrolle der Person.",
+      "Felix Seltmann": "Vertrieb / Akquisition",
+      "Marius Neininger": "Projektbetreuung",
+      "Jennifer Preisigke": "Projektorganisation / Terminvereinbarungen"
+    }
+  },
+  "wochenpauschale": {
+    "_hinweis": "Automatische wöchentliche Pauschalzeit, unabhängig von echten Kalendereinträgen. Wird als eigener, NICHT projektbezogener Posten ('Allgemeine Vertriebszeit') geführt, Firma TransCare, Hauptaufgabe 'Projektbetreuung' (Stand 2026-07-24).",
+    "mitarbeiter": "Marius Neininger",
+    "stunden_pro_woche": 5,
+    "kategorie": "Projektbetreuung",
+    "firma": "TransCare",
+    "bezeichnung": "Allgemeine Vertriebszeit (automatische Wochenpauschale)",
+    "ausnahme_bei_urlaub": true,
+    "urlaub_erkennung_keyword": "urlaub",
+    "urlaub_regel": "Wenn im Kalender des Mitarbeiters (beliebiger Kalender) ein Termin mit dem Stichwort 'Urlaub' an mindestens einem Tag dieser Kalenderwoche liegt, entfällt die Pauschale für die GESAMTE Woche. Wochen mit nur teilweisem Urlaub werden trotzdem komplett ausgesetzt (konservative Annahme) und im Bericht als 'Teilweise Urlaub - Pauschale ausgesetzt' gekennzeichnet, zur Kontrolle durch die Nutzerin."
+  },
+  "zusatzkosten_hinweis": "Manuell erfasste Einzelkosten (z.B. Übernachtung im Ausnahmefall) werden im Sheet 'Zusatzkosten' der Ausgabedatei gepflegt (Datum, Projekt, Kostenart, Betrag netto, Anmerkung) und fließen automatisch in die Projekt-Gesamtkosten ein.",
+  "manuelle_zeitbuchungen_hinweis": "Manuell nacherfasste Arbeitsstunden (Termine, die (noch) nicht im Kalender stehen, z.B. weil sie erst nachträglich in den Kalender eingetragen werden) werden im Sheet 'Manuelle_Zeitbuchungen' der Ausgabedatei gepflegt (Datum, Mitarbeiter, Projekt, Hauptaufgabe, Stunden, Anmerkung) und fließen automatisch in die Projekt-Stunden/-Kosten ein. Der Stundensatz wird per Verweis auf die aktuelle Mitarbeiter-Tabelle im Parameter-Sheet ermittelt (keine Datums-Historie wie bei den Kalenderzeilen) - bei einer künftigen Satzänderung ggf. manuell prüfen.",
+  "plausibilitaets_check": {
+    "max_stunden_pro_person_pro_woche": 60,
+    "hinweis": "Nach dem '816-Stunden-Vorfall' im ersten Testlauf: die Ausgabe listet automatisch jede Kalenderwoche, in der eine Person (inkl. Wochenpauschale) mehr als dieser Schwellwert an Stunden hätte, BEVOR der Bericht an die Nutzerin geht. Kein automatisches Kürzen - nur Sichtbarmachen zur manuellen Prüfung."
+  },
+  "berichtszeitraum_default": null,
+  "berichtszeitraum_hinweis": "Kein Standardzeitraum - Zeitraum bzw. Jahr(e) werden jedes Mal explizit angegeben.",
+  "ganztagespauschale": {
+    "_hinweis": "Für Projekte, bei denen ganztägige/mehrtägige Kalenderblöcke als Pauschale mit X Stunden PRO TAG verrechnet werden sollen (statt der rohen Zeitspanne oder komplettem Ausschluss). Von der Nutzerin am 2026-07-24 für Frutania bestätigt: 8 Std./Tag.",
+    "Frutania": {
+      "stunden_pro_tag": 8
+    }
+  },
+  "partner_projekt_zuordnung": {
+    "_hinweis": "Autolog-Partner -> Projekt oder \"Unberücksichtigt\". Startbelegung; die live gepflegte Tabelle steht im Parameter-Reiter und wird bei jeder Fortführung aus der freigegebenen Vorlage übernommen (Vorlage hat Vorrang). Version 6: \"Unberücksichtigt\" gewinnt auch gegen einen Kalender-Match.",
+    "n. Immo": "Unberücksichtigt",
+    "Kikripp gGmbH": "Unberücksichtigt",
+    "Kikripp GmbH": "Unberücksichtigt",
+    "Vermietung": "Unberücksichtigt",
+    "Frutania GmbH": "Frutania"
+  }
+}

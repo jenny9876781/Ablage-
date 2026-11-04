@@ -658,7 +658,7 @@
   "raum": "Gruppenraum",
   "zustand": "gebraucht",
   "masse": "Ø 195 cm",
-  "menge": 2,
+  "menge": 1,
   "einheit": "Stück",
   "preis": 40.0,
   "basis": "Fix",
@@ -668,7 +668,7 @@
   "mengenhinweis": "",
   "foto": "F-150",
   "sortierung": 31,
-  "aktiv": false,
+  "aktiv": true,
   "im_katalog": true
  },
  {

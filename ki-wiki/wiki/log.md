@@ -19,3 +19,4 @@ stand: 2026-11-03
 - 2026-11-04 – B2 final: Auslastung je MA entfällt, Fahrten nur GF (Gelb), Kalender von MA selbst geliefert.
 - 2026-11-04 – B4: Aufwand E6+E7 = 8 h bestätigt.
 - 2026-11-04 – B4: Verwendung der gesparten Zeit belegt (M&A, Krippe, Buchhaltung, Liquiplanung).
+- 2026-11-04 – Abgabe: neutral (Beratungsfirma, Partnerfirma, Projekt A/B/C), Personen nur als Rollen, Name der Nutzerin nur auf dem Deckblatt.

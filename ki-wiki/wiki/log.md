@@ -11,3 +11,5 @@ stand: 2026-11-03
 - 2026-11-03 – Bausteine 1–3 als Entwurf, Bausteine 4–6 als Gerüst mit [offen].
 - 2026-11-03 – startcheck.md (Lint-Runde) + Mitbringliste TT23.
 - 2026-11-03 – stand-uebergabe.md angelegt: Stand der Sitzung + Liste, was für TT23 noch gebraucht wird.
+- 2026-11-04 – Gesprächsergebnis GF eingetragen (Rechenfehler/Unübersichtlichkeit, Ziel genauer, kein Betriebsrat).
+- 2026-11-04 – Zahlen für Baustein 4 erhalten: Baseline ca. 16 h (gerechnet 12 h), heute 1 h, Skill-Aufbau 15–20 h, Stundenwert 150 €, Betreuung 0,5 h/Monat. Frage „nicht abgerechnete Stunden“ entfällt.

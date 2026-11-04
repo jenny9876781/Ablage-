@@ -12,4 +12,14 @@ stand: 2026-11-03
 6. Wie viel Zeit kostet dich die Freigabe heute?
 
 # Ergebnis
-[offen – nach dem Gespräch hier eintragen und in log.md vermerken]
+Gespräch GF, 04.11.2026:
+1. **Was hakt:** Bericht ist zu unübersichtlich; GF ist nicht sicher, ob er stimmt – Rechenfehler zwischen Versionen bzw. von Monat zu Monat.
+2. **Was hilft am meisten:** **genauer** (nicht schneller).
+3. **Auswertung:** je Projekt **und** je Mitarbeiter gewünscht.
+4. **Betriebsrat:** keiner.
+5. **Account:** 2–3 Nutzer, keine gemeinsamen Projekte → Frage Team vs. Einzel-/Gratis-Accounts offen.
+6. **Vertretung** durch Kollegin mit dem Skill: ja.
+7. **Sprachnotiz** zum Nachmelden: ja.
+8. **Durchsicht + Freigabe:** 15 Minuten.
+
+Folgen fürs Projekt: neue Schwachstelle S5 „Vertrauen/Rechenfehler“ (Baustein 1), neue Einsatzstelle E6 „Abgleich Monat zu Monat“ (Baustein 3), Ziel von Baustein 5 = Genauigkeit vor Tempo.

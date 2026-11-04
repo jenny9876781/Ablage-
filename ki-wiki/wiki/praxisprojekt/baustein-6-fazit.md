@@ -1,16 +1,21 @@
 ---
 type: Praxisprojekt
-title: Baustein 6 – Fazit & Ausblick (Entwurf)
+title: Baustein 6 – Fazit & Ausblick
 stand: 2026-11-04
 ---
-# Baustein 6 – Fazit
-- **Kernbotschaft:** Die KI hat aus 12–16 Stunden Handarbeit rund zwei gemacht. Jetzt geht es nicht mehr um Tempo, sondern um Vertrauen in die Zahlen.
-- **Empfehlung:** Claude-Team-Account einrichten und den Skill im Dezember mit Claude Code prüfen und absichern.
-- **Nächster Schritt:** GF entscheidet bis [offen: Datum] über den Team-Account; danach Skill-Prüfung mit dem Novemberbericht als Testfall.
-- **Lernpunkt:** Ein KI-Ergebnis ersetzt nicht die Prüfung – erst die Kontrolle macht es belastbar.
-- **Ausblick:** Gleiches Muster für die Zeiterfassung (Skill vorhanden) – erst nach Datenschutzklärung (Gesundheitsdaten).
+# Baustein 6 (Variante B gewählt)
+**Kernaussage:** Der Bericht ist schnell, aber noch nicht verlässlich – und das ändern wir zuerst.
+
+**Empfehlung:** Dreimonatiger Pilot: Team-Account mit AVV, Skill mit Prüfblatt und Begründung je Zuordnung. Ab Jahr 2 ca. 3.200 €/Jahr. Unsicherste Annahme: geschätzter Aufwand früher – lohnt ab 6 h Ersparnis/Monat. Entscheidung GF bis 30.11.2026; in 12 Monaten Freigabe in 15 Minuten ohne Zweifel.
+
+| Wann | Was |
+|---|---|
+| bis 30.11.2026 | Entscheidung Team-Account |
+| Dez 2026 | Skill-Prüfung, Steckbrief, Verzeichnis; Pilot startet |
+| 15.03.2027 | Review |
+| Nov 2027 | Regelbetrieb, 0 Korrekturen, Vertretung |
+
+**Bonus (Claude als GF):** Ja, mit Auflagen – AVV/Steckbrief/Verzeichnis vor Echtdaten · Skill-Prüfung + Regressionstest · Auslastung entfernt. Fehlt: gemessene statt geschätzte Baseline.
 
 ## Reflexion
-- KI vermutete drei bereits gelöste Schwachstellen → Human in the Loop.
-- Verrechnungssatz 150 € machte die Rechnung zu schön → interner Satz 41 €.
-- Gespräch mit GF drehte das Ziel von „schneller“ zu „genauer“.
+KI vermutete gelöste Schwachstellen · Verrechnungssatz machte Rechnung zu schön · Gespräch drehte Ziel zu „genauer“ · bezahlter Schulungszugang ≠ Firmenzugang mit AVV.

@@ -1,32 +1,26 @@
 ---
 type: Praxisprojekt
-title: Baustein 5 – Strategie & Einführung (Entwurf)
+title: Baustein 5 – Strategie & Einführung
 stand: 2026-11-04
 ---
-# Baustein 5 – Einführung in Wellen (Ziel: genauer vor schneller)
+# Baustein 5 – Wellenplan (nach TT23-Muster)
+| Welle | Wer | Dauer | Kennzahl je Bericht | Stopp, wenn … |
+|---|---|---|---|---|
+| Pilot | Assistenz, abgesicherter Skill (E1, E2), Team-Account; GF gibt frei | 3 Berichte Nov–Jan (erstellt Dez 2026–Feb 2027) | Korrekturen → 0 · Aufwand ≤ 2 h | Vormonate weichen weiter ab |
+| Ausweitung | + Kollegin als Vertretung, Chef-Übersicht (E3) | 2 Berichte Feb–Mär | Vertretung ohne Hilfe · Freigabe ≤ 15 Min. | Hilfe nötig oder Korrekturen |
+| Regelbetrieb | monatlich, Sprachnotiz (E4) als Test | ab April 2027 | Versand bis 5. · 0 Korrekturen | Jahrescheck Nov. 2027 negativ |
 
-| Welle | Wann | Was | Wer |
-|---|---|---|---|
-| 1 | Nov–Dez 2026 | Team-Account einrichten (AVV prüfen) · **E1 + E2** Skill mit Claude Code prüfen/absichern (Versionsregel, Prüfblatt, Spalte „warum“, Auslastung je MA entfernen) | Assistenz, GF entscheidet Account |
-| 2 | Jan–Feb 2027 | Kollegin als Vertretung einweisen · E3 1-Seiten-Übersicht für die GF | Assistenz, Berater |
-| 3 | ab März 2027 | E4 Sprachnotiz-Nachmeldung testen (GF hat zugesagt) | GF, Berater |
+Review 15.03.2027 (weiter / anpassen / stoppen). Kennzahlen am Vorgang, nie an der Person.
 
-Erfolgskriterium Welle 1: drei Monatsberichte in Folge ohne Abweichung in den Vormonaten; GF-Freigabe bleibt bei ≤ 15 Min.
+## Widerstände (★ = wahrscheinlichste)
+- ★ Chef: „Stimmt das?“ → Prüfblatt Vormonate
+- ★ Ich: „Keine Zeit für Skill-Prüfung“ → fester 8-h-Block im Dezember
+- Chef: „Noch ein Abo“ → Gratis-Version für Beschäftigtendaten unzulässig; ca. 125 €/Monat gegen ca. 410 € gesparte Zeit
+- Team: „Noch mehr Pflicht“ → ein Satz per Sprachnotiz
 
-## Widerstände und Konter
-| Widerstand | Konter |
-|---|---|
-| GF: „Ich weiß nicht, ob die Zahlen stimmen.“ | Prüfblatt zeigt jeden Monat schwarz auf weiß: Vormonate unverändert / was sich geändert hat. |
-| „Noch ein Abo – wir haben doch die Gratis-Version.“ | Gratis = kein AVV, Daten der Beschäftigten dürfen dort nicht rein; ca. 125 €/Monat gegen 11 h gesparte Arbeit. |
-| Berater: „Noch mehr Pflicht.“ | Ein Satz per Sprachnotiz statt Nachtrag durch die Assistenz. |
-| „Wenn Jenny ausfällt, kann es keiner.“ | Skill + Kurzanleitung → Kollegin übernimmt (GF hat zugestimmt). |
+## Richtlinie (TT18)
+Keine KI-Nutzungsrichtlinie vorhanden → Use-Case-Steckbrief (Anhang D Bericht). Im Pilot: Mini-Richtlinie (Positivliste Claude Team, Datenklassen-Ampel nach Werkzeug, Merkblatt 7 Regeln), KI-Register, Verarbeitungsverzeichnis, AVV, Info an Mitarbeitende.
+Skill bisher im **Schulungszugang** entwickelt → Sofortmaßnahme: keine Echtdaten bis Team-Account.
 
-## Tool-Empfehlung
-Claude **Team** (Geschäftstarif, AVV, kein Training mit Firmendaten, Skill zentral für alle) – Weiterentwicklung des Skills mit **Claude Code**. [offen: Abgleich mit Tool-Check TT20]
-
-## Review und Ausstieg
-- Review mit GF am **15.03.2027**.
-- Ausstiegsregel: weiter Abweichungen nach drei abgesicherten Berichten → keine Welle 3, feste Excel-Vorlage bis Ursache behoben.
-
-## Risiken
-Falschzuordnung unbemerkt · Wissen an einer Person · Anbieterabhängigkeit · Preisänderung · Datenschutz – Gegenmaßnahmen siehe Abschlussbericht 5.4.
+## Tool
+Claude Team (Betrieb) + Claude Code (Weiterentwicklung).

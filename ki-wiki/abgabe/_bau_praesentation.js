@@ -7,7 +7,7 @@ const pres=new pptxgen(); pres.layout='LAYOUT_WIDE'; pres.theme={headFontFace:TH
 pres.title='Vom schnellen zum verlässlichen Monatsbericht'; pres.author='Jennifer Preisigke';
 const C=pres.SchemeColor;
 pres.defineSlideMaster({title:'DARK',background:{color:HX.navy},objects:[
- {placeholder:{options:{name:'title',type:'title',x:0.8,y:2.2,w:11.7,h:1.6,fontSize:44,bold:true,color:C.background1,valign:'bottom',align:'left'},text:''}},
+ {placeholder:{options:{name:'title',type:'title',x:0.8,y:1.6,w:11.7,h:2.2,fontSize:40,bold:true,color:C.background1,valign:'bottom',align:'left'},text:''}},
  {placeholder:{options:{name:'body',type:'body',x:0.8,y:4.0,w:11.7,h:2.0,fontSize:20,color:C.accent5,align:'left',valign:'top'},text:''}}]});
 pres.defineSlideMaster({title:'CONTENT',background:{color:'FFFFFF'},objects:[
  {placeholder:{options:{name:'title',type:'title',x:0.6,y:0.4,w:12.1,h:0.9,fontSize:34,bold:true,color:C.text2,valign:'top',align:'left'},text:''}},
@@ -55,7 +55,7 @@ const amp=[[HX.green,'Grün','Projektsummen ohne Personenbezug · Regeln, Katego
 amp.forEach((a,i)=>{const x=0.6+i*4.1;card(s,x,1.6,3.9,3.2,C.background2);s.addShape(pres.shapes.OVAL,{x:x+0.3,y:1.9,w:0.7,h:0.7,fill:{color:a[0]},line:{color:a[0]}});
  tb(s,a[1],{x:x+1.2,y:1.9,w:2.4,h:0.7,fontSize:22,bold:true,valign:'middle'});tb(s,a[2],{x:x+0.3,y:2.8,w:3.3,h:1.9,valign:'top'});});
 card(s,0.6,5.1,12.1,1.5,C.background2);
-tb(s,[{text:'Plattform: ',options:{bold:true}},{text:'Claude Team mit Auftragsverarbeitungsvertrag (AVV) statt Gratis-Version. ',options:{}},{text:'Kennzeichnungspflicht: ',options:{bold:true}},{text:'keine (keine KI im Kundenkontakt). ',options:{}},{text:'Betriebsrat: ',options:{bold:true}},{text:'keiner – Datenminimierung nach DSGVO trotzdem eingehalten.',options:{}}],{x:0.9,y:5.25,w:11.5,h:1.2,valign:'middle'});
+tb(s,[{text:'Plattform: ',options:{bold:true}},{text:'Claude Team mit AVV – bis dahin keine Echtdaten (Skill bisher im Schulungszugang). ',options:{}},{text:'KI-VO: ',options:{bold:true}},{text:'Betreiber, minimales Risiko (keine Leistungsbewertung). ',options:{}},{text:'Kennzeichnung: ',options:{bold:true}},{text:'keine Pflicht. ',options:{}},{text:'Richtlinie: ',options:{bold:true}},{text:'keine vorhanden → Use-Case-Steckbrief.',options:{}}],{x:0.9,y:5.25,w:11.5,h:1.2,valign:'middle'});
 
 // 5 Einsatzstellen
 pres.addSection({title:'Lösung'});
@@ -77,17 +77,21 @@ card(s,7.7,4.55,5.0,2.05,C.background2);
 tb(s,[{text:'Interner Kostensatz 41 €/h',options:{bullet:true,breakLine:true}},{text:'Gesparte 10 h/Monat fließen in M&A, Buchhaltung, Liquiplanung',options:{bullet:true,breakLine:true}},{text:'Lohnt ab 5,9 h Ersparnis/Monat',options:{bullet:true}}],{x:7.95,y:4.7,w:4.6,h:1.8,fontSize:14,paraSpaceAfter:4});
 
 // 7 Einführung
-s=add('CONTENT','Lösung'); s.addText('Drei Wellen: erst absichern, dann erweitern',{placeholder:'title'});
-s.addShape(pres.shapes.LINE,{x:1.0,y:2.35,w:11.3,h:0,line:{color:HX.teal,width:3}});
-const wv=[['1','Nov–Dez 2026','Team-Account + KI-Regel · Skill absichern (E1, E2) · Korrekturen zählen'],['2','Jan–Feb 2027','Vertretung einweisen · Chef-Übersicht (E3)'],['3','ab März 2027','Sprachnotiz testen (E4) · Review 15.03.2027']];
-wv.forEach((w,i)=>{const x=0.8+i*4.1;circ(s,x+1.6,2.0,0.7,HX.navy,w[0]);card(s,x,3.0,3.9,2.3,C.background2);
- tb(s,w[1],{x:x+0.25,y:3.15,w:3.4,h:0.45,fontSize:18,bold:true,color:C.text2});tb(s,w[2],{x:x+0.25,y:3.65,w:3.4,h:1.5,valign:'top'});});
-tb(s,[{text:'Erfolgskriterium Welle 1: ',options:{bold:true}},{text:'drei Berichte in Folge ohne Korrektur und ohne Abweichung in den Vormonaten. Sonst: keine Welle 3, Ursache zuerst beheben.'}],{x:0.8,y:5.7,w:11.7,h:0.6,color:C.text2});
+s=add('CONTENT','Lösung'); s.addText('Pilot, Ausweitung, Regelbetrieb – mit Stopp-Regel',{placeholder:'title'});
+const rows=[['Welle','Wer','Dauer','Kennzahl je Bericht','Stopp, wenn …'],
+ ['Pilot','Assistenz, abgesicherter Skill, Team-Account','3 Berichte (Dez–Feb)','0 Korrekturen · ≤ 2 h','Vormonate weichen ab'],
+ ['Ausweitung','+ Vertretung, Chef-Übersicht','2 Berichte (Mär–Apr)','Vertretung ohne Hilfe · Freigabe ≤ 15 Min.','Hilfe nötig oder Korrekturen'],
+ ['Regelbetrieb','monatlich, Sprachnotiz-Test','ab April 2027','Versand bis 5. · 0 Korrekturen','Jahrescheck Nov. 2027 negativ']];
+s.addTable(rows.map((r,i)=>r.map((c,j)=>({text:c,options:{bold:i===0||j===0,color:i===0?'FFFFFF':'1B2B36',fill:{color:i===0?HX.navy:(j===0?HX.light:'FFFFFF')},fontSize:14,fontFace:'Calibri'}}))),{x:0.6,y:1.5,w:12.1,colW:[1.8,3.2,2.2,2.6,2.3],border:{type:'solid',pt:0.75,color:'C9D6DE'},rowH:0.7});
+card(s,0.6,4.9,5.9,1.7,C.background2);
+tb(s,[{text:'Wahrscheinlichste Widerstände',options:{bold:true,breakLine:true,color:C.text2}},{text:'Chef: „Stimmt das?“ → Prüfblatt Vormonate',options:{bullet:true,breakLine:true}},{text:'Ich: „Keine Zeit“ → fester 8-h-Block im Dezember',options:{bullet:true}}],{x:0.85,y:5.05,w:5.5,h:1.45,fontSize:14,paraSpaceAfter:4});
+card(s,6.8,4.9,5.9,1.7,C.background2);
+tb(s,[{text:'Richtlinie & Steckbrief',options:{bold:true,breakLine:true,color:C.text2}},{text:'Keine Richtlinie vorhanden → Use-Case-Steckbrief',options:{bullet:true,breakLine:true}},{text:'Im Pilot: Positivliste, Merkblatt, KI-Register, Verzeichnis',options:{bullet:true}}],{x:7.05,y:5.05,w:5.5,h:1.45,fontSize:14,paraSpaceAfter:4});
 
 // 8 Empfehlung
 pres.addSection({title:'Empfehlung'});
 s=add('DARK','Empfehlung');
-s.addText('Jetzt geht es um Vertrauen in die Zahlen',{placeholder:'title'});
-s.addText([{text:'1  Claude-Team-Account einrichten (AVV)',options:{breakLine:true}},{text:'2  Skill im Dezember mit Claude Code absichern',options:{breakLine:true}},{text:'3  Nächster Schritt: Entscheidung der GF bis 30.11.2026',options:{bold:true,color:C.background1}}],{placeholder:'body'});
+s.addText('Schnell, aber noch nicht verlässlich – das ändern wir zuerst',{placeholder:'title'});
+s.addText([{text:'Empfehlung: Ja – Pilot über drei Berichte, Team-Account mit AVV',options:{breakLine:true}},{text:'Ab Jahr 2 ca. 3.200 € / Jahr · lohnt ab 6 h Ersparnis im Monat',options:{breakLine:true}},{text:'Nächster Schritt: Entscheidung der GF bis 30.11.2026',options:{bold:true,color:C.background1,breakLine:true}},{text:'In 12 Monaten: Regelbetrieb, 0 Korrekturen, Freigabe in 15 Minuten',options:{}}],{placeholder:'body'});
 
 (async()=>{const f=process.argv[2];await pres.writeFile({fileName:f});await applyTheme(f,THEME);})();

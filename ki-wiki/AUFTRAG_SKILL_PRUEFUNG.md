@@ -68,9 +68,12 @@ Lies den Skill komplett (SKILL.md, Config, References, `report_lib.py`). Schreib
 **Schritt 3 – Testen.**
 - Automatische Tests mit **erfundenen Testdaten** für alle Fälle oben, also falsche Vorlage, Alias, unsichere
   Zuordnung und Dubletten bei der Fortführung.
-- Danach ein Testlauf mit echten Daten (Oktober- und Novemberbericht). **Vorher fragen**, denn echte Kalender- und
-  Fahrtdaten sind personenbezogen. Das machen wir erst mit dem Firmen-Account (Claude Team mit AVV) oder
-  mit pseudonymisierten Daten. Das entscheide ich.
+- **Keine echten Firmendaten in diesem Zugang!** Dieser Claude-Zugang ist ein Schulungszugang (Komdis), kein
+  Firmenzugang mit AVV. Kalender-, Fahrt- und Kostendaten meiner Firma gehören hier nicht hinein.
+  Getestet wird nur mit **erfundenen oder vollständig pseudonymisierten Daten** (Kürzel statt Namen, keine
+  Adressen, keine echten Sätze). Den Testlauf mit echten Daten mache ich später selbst im Claude-Team-Account.
+- Bau mir dafür ein kleines **Pseudonymisierungs-Skript**, das aus meinen echten Exporten Testdaten macht,
+  bevor sie hochgeladen werden, oder erzeuge realistische Testdaten im Originalformat.
 - Excel-Formeln neu berechnen und auf Fehler prüfen (0 Fehler).
 
 ## 5. Was ich am Ende von dir erwarte
@@ -99,7 +102,6 @@ Lies den Skill komplett (SKILL.md, Config, References, `report_lib.py`). Schreib
 
 ## 8. Was ich mitbringe
 
-- die **zuletzt freigegebene Ausgabe-Excel** (Stand Oktober 2026)
-- falls vorhanden die **fehlerhafte Version**, in der Vormonate abwichen
-- die **Rohdaten** des neuen Monats: Kalenderexporte je Postfach und Autolog-CSV
-- meine Notizen, welche Zuordnungen falsch waren
+- eine **Beschreibung** der Fehler (welche Monate wichen ab, welche Zuordnungen waren falsch) – **ohne echte Daten**
+- falls nötig nur **pseudonymisierte** Ausschnitte der Exporte (Kürzel statt Namen, keine Adressen, keine echten Sätze)
+- echte Excel- und Rohdaten erst, wenn der Claude-Team-Account mit AVV steht

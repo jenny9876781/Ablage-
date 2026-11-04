@@ -19,3 +19,8 @@ stand: 2026-11-04
 - **Transparenz:** Mitarbeitende liefern ihre Kalender selbst; Fahrten nur der GF.
 - **Kennzeichnung Art. 50 AI Act?** Nein – keine KI im Kundenkontakt, Bericht intern erstellt und von der GF freigegeben.
 - **Plattform:** Claude **Team** (Geschäftstarif, AVV nach Art. 28 DSGVO, kein Training mit Firmendaten) – AVV und Preis bei Anthropic bestätigen. Die Gratis-Version, die im Betrieb genutzt wird, ist für diese Daten nicht zulässig.
+
+## Ergänzung 04.11. (TT18)
+- KI-VO: Betreiber, minimales Risiko – kein Hochrisiko nach Anhang III, weil keine Leistungsbewertung (Auslastung entfällt).
+- Datenklassen-Ampel nach Werkzeug: Beschäftigtendaten im Firmentool nur mit Verzeichnis-Eintrag + Vertrag; Kalkulation nur nach Freigabe im Steckbrief.
+- Ehrlicher Stand: Skill im Schulungszugang (Komdis) entwickelt – kein Firmenzugang mit AVV. Sofortmaßnahme: keine Echtdaten bis Team-Account. Mit GF besprechen (Merkblatt Regel 7).

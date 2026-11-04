@@ -21,3 +21,4 @@ stand: 2026-11-03
 - 2026-11-04 – B4: Verwendung der gesparten Zeit belegt (M&A, Krippe, Buchhaltung, Liquiplanung).
 - 2026-11-04 – Abgabe: neutral (Beratungsfirma, Partnerfirma, Projekt A/B/C), Personen nur als Rollen, Name der Nutzerin nur auf dem Deckblatt.
 - 2026-11-04 – Business Case TT20 nicht mehr vorhanden → B4 als neu aufgebauter Business Case gekennzeichnet.
+- 2026-11-04 – Abgabe gebaut: abgabe/Praxisprojekt_Abschlussbericht.docx (8 S.) + Praxisprojekt_Kurzpraesentation.pptx (8 Folien).

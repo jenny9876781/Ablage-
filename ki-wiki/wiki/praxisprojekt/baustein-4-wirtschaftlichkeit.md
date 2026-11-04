@@ -12,7 +12,7 @@ Nicht mehr verwendet: 150 €/h = Verrechnungssatz nach außen (enthält Gemeink
 | Posten | Jahr 1 | ab Jahr 2 | Herleitung |
 |---|---|---|---|
 | Einrichtung Skill | 718 € | – | 17,5 h (15–20 h) × 41 € |
-| E6 Skill prüfen/verbessern | 328 € | – | ca. 8 h × 41 € (Vorschlag, offen) |
+| E6+E7 Skill prüfen/absichern | 328 € | – | ca. 8 h × 41 € (bestätigt) |
 | Lizenz Claude Team | 1.500 € | 1.500 € | ca. 25 €/Platz/Monat × 5 Plätze × 12 (Worst Case, Preis/Mindestplätze prüfen) |
 | Auswahl + Schulung | 123 € | – | ca. 3 h |
 | Betreuung | 246 € | 246 € | 0,5 h/Monat |

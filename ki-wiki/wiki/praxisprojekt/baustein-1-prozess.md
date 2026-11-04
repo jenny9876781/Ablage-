@@ -39,3 +39,7 @@ Partnerfirma:                                                                   
 - Aufwand je Bericht **vorher (manuell)**: ca. 16 h (Schätzung Nutzerin; gerechnet vorsichtig mit **12 h**)
 - **heute (mit Skill)**: max. 1 h, davon ca. 15 Min. Rückfragen/Nachtragen · Freigabe GF: 15 Min.
 - Versand: meist bis zum 5. des Folgemonats.
+
+## Neu nummeriert (04.11.)
+S1 falsche Vorlage (vorher S5a) · S2 falsche Zuordnungen (S5b) · S3 unübersichtlich (S5c) · S4 fehlende Termine (S1).
+Heute: 1 h Bericht + ca. 1 h erneute Prüfung (Schätzung) = ca. 2 h. Skill läuft bisher in einem Einzelzugang (kein Firmen-Account mit AVV).

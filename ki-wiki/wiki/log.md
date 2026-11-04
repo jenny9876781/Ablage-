@@ -22,3 +22,5 @@ stand: 2026-11-03
 - 2026-11-04 – Abgabe: neutral (Beratungsfirma, Partnerfirma, Projekt A/B/C), Personen nur als Rollen, Name der Nutzerin nur auf dem Deckblatt.
 - 2026-11-04 – Business Case TT20 nicht mehr vorhanden → B4 als neu aufgebauter Business Case gekennzeichnet.
 - 2026-11-04 – Abgabe gebaut: abgabe/Praxisprojekt_Abschlussbericht.docx (8 S.) + Praxisprojekt_Kurzpraesentation.pptx (8 Folien).
+- 2026-11-04 – Dozenten-Check umgesetzt: Neu-Nummerierung S1–S4/E1–E4, Swimlane-Grafik, Vorher/Nachher-Grafik, Genauigkeits-Kennzahl, Alternativen (Excel), Jahr-1-Definition, Risiken, Review 15.03.2027 + Ausstiegsregel, Reflexion, Glossar; Nutzen neu (heute ca. 2 h) → +2.005 € / +3.174 €.
+- 2026-11-04 – AUFTRAG_SKILL_PRUEFUNG.md für neuen Claude-Code-Chat angelegt.

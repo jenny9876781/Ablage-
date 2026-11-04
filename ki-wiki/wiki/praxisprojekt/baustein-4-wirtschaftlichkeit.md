@@ -5,6 +5,8 @@ stand: 2026-11-04
 ---
 # Baustein 4 – Kosten und Nutzen (Skill + E6, Team-Account)
 
+Hinweis: Der Business Case aus TT20 liegt nicht mehr vor; er wurde hier mit echten Zahlen (Lohnabrechnung, Messung heute) neu aufgebaut.
+
 **Interner Stundensatz: 41 €/h** = Arbeitgeberkosten ca. 64.000 €/Jahr (Brutto + AG-Anteile SV laut Abrechnung + Umlagen geschätzt)
 ÷ ca. 1.562 tatsächlich gearbeitete Stunden (36 h/Woche, 28 Urlaubstage, 10 Feiertage BW, ca. 5 Krankheitstage).
 Nicht mehr verwendet: 150 €/h = Verrechnungssatz nach außen (enthält Gemeinkosten und Gewinn).

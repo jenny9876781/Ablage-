@@ -18,3 +18,4 @@ stand: 2026-11-03
 - 2026-11-04 – B1 Ist-Kette korrigiert: S2/S3/S4/Kurzformen gelöst; offen S1 (fehlende Termine) und S5a–c. B3 neu: E6, E7, E3, E5; E1/E2/E4 verworfen.
 - 2026-11-04 – B2 final: Auslastung je MA entfällt, Fahrten nur GF (Gelb), Kalender von MA selbst geliefert.
 - 2026-11-04 – B4: Aufwand E6+E7 = 8 h bestätigt.
+- 2026-11-04 – B4: Verwendung der gesparten Zeit belegt (M&A, Krippe, Buchhaltung, Liquiplanung).

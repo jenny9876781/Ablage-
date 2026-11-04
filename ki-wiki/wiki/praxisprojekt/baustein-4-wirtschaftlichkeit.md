@@ -21,7 +21,7 @@ Nicht mehr verwendet: 150 €/h = Verrechnungssatz nach außen (enthält Gemeink
 | **Ergebnis** | **+2.497 €** | **+3.666 €** | |
 
 ## Fallen
-- Zeit ist nicht Geld – entschärft: gesparte Zeit fließt in andere/neue Aufgaben [offen: Beispiel].
+- Zeit ist nicht Geld – entschärft: die gesparten 11 h/Monat fließen nachweislich in neu übernommene Aufgaben: Vorbereitung M&A-Angebote, Krippen-Auflösung, Buchhaltung und Liquiditätsplanung – ohne zusätzliche Kraft.
 - Doppelzählung – entschärft: verbleibende 1 h/Monat ist in der Ersparnis abgezogen.
 - Kosten ohne Rechnung – entschärft: alle fünf Zeilen inkl. eigener Arbeitszeit.
 - Falscher Satz – entschärft: interner Kostensatz statt Verrechnungssatz.

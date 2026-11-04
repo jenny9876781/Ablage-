@@ -13,3 +13,4 @@ stand: 2026-11-03
 - 2026-11-03 – stand-uebergabe.md angelegt: Stand der Sitzung + Liste, was für TT23 noch gebraucht wird.
 - 2026-11-04 – Gesprächsergebnis GF eingetragen (Rechenfehler/Unübersichtlichkeit, Ziel genauer, kein Betriebsrat).
 - 2026-11-04 – Zahlen für Baustein 4 erhalten: Baseline ca. 16 h (gerechnet 12 h), heute 1 h, Skill-Aufbau 15–20 h, Stundenwert 150 €, Betreuung 0,5 h/Monat. Frage „nicht abgerechnete Stunden“ entfällt.
+- 2026-11-04 – B1: S5 Rechenfehler ergänzt; B3: E6 Skill prüfen/verbessern; B4 gerechnet (Team-Account); B5/B6 als Entwurf; Startcheck aktualisiert.

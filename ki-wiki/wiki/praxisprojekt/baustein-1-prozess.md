@@ -25,6 +25,10 @@ Besonderheit: Ein Teil läuft schon mit einem Claude-Skill → ich kann **vorher
 | 8 | Freigabe | GF | Excel/Mail | ⚠ **S4** Freigabe-Stau, GF unterwegs |
 | 9 | Bericht an Partnerfirma / Abrechnung | Assistenz | Mail | – |
 
+⚠ **S5 Vertrauen / Rechenfehler** (Gespräch GF 04.11.): Bericht unübersichtlich; Vormonate weichen zwischen Versionen ab;
+bei der Fortführung wurde nicht die zuletzt bearbeitete Excel, sondern eine ältere gespeicherte Version als Grundlage genommen;
+Zuordnungen teils falsch, erst nach erneuter Prüfung korrigiert. → Der Skill hat noch Schwachstellen.
+
 Swimlane (Kurzform):
 ```
 GF/Berater : [1 Termin] [2 Fahrt] ......(Antwort S3)...... [8 Freigabe S4]
@@ -34,5 +38,6 @@ Partnerfirma:                                                                   
 
 ## Zahl zum Prozess
 - Takt: 12 Berichte/Jahr + Jahresbericht.
-- Aufwand je Bericht **vorher (manuell)**: [offen] h · **heute (mit Skill)**: [offen] h · davon Rückfragen: [offen] h
-- Anteil Fahrten ohne Projektzuordnung je Monat: [offen] % · Zahl Rückfragen je Monat: [offen]
+- Aufwand je Bericht **vorher (manuell)**: ca. 16 h (Schätzung Nutzerin; gerechnet vorsichtig mit **12 h**)
+- **heute (mit Skill)**: max. 1 h, davon ca. 15 Min. Rückfragen/Nachtragen · Freigabe GF: 15 Min.
+- Versand: meist bis zum 5. des Folgemonats.

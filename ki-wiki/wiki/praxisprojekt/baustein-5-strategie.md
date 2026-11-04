@@ -1,11 +1,25 @@
 ---
 type: Praxisprojekt
-title: Baustein 5 – Strategie & Einführung (Gerüst)
-stand: 2026-11-03
+title: Baustein 5 – Strategie & Einführung (Entwurf)
+stand: 2026-11-04
 ---
-# Baustein 5 – Vorschlag Wellenplan
-- Welle 1 (sofort): E1 Termin-Vorlage + E5 Monatsübersicht – kein neues Tool.
-- Welle 2: E4 Rückfrage-Entwürfe, E2 Fahrten-Vorschlag (erst nach AVV-Klärung).
-- Welle 3: E3 Sprach-Nacherfassung als Prototyp mit einem Berater testen.
-- Widerstand + Konter: [offen – aus TT20 übernehmen] z. B. „Noch eine App“ → „Ein Satz ins Handy statt Nachfrage am Monatsende.“
-- Tool-Empfehlung: [offen – aus Tool-Check TT20]
+# Baustein 5 – Einführung in Wellen (Ziel: genauer vor schneller)
+
+| Welle | Wann | Was | Wer |
+|---|---|---|---|
+| 1 | Nov–Dez 2026 | Team-Account einrichten (AVV prüfen) · **E6** Skill mit Claude Code prüfen/verbessern: Prüfblatt Monat-zu-Monat, feste Vorlagen-Regel, Übersicht für GF | Assistenz, GF entscheidet Account |
+| 2 | Jan–Feb 2027 | Kollegin als Vertretung einweisen · E1 Termin-Vorlage für Berater · E5 1-Seiten-Übersicht zur Freigabe | Assistenz, Berater |
+| 3 | ab März 2027 | E3 Sprachnotiz-Nachmeldung testen (GF hat zugesagt) · E2 Fahrten-Vorschlag | GF, Berater |
+
+Erfolgskriterium Welle 1: drei Monatsberichte in Folge ohne Abweichung in den Vormonaten; GF-Freigabe bleibt bei ≤ 15 Min.
+
+## Widerstände und Konter
+| Widerstand | Konter |
+|---|---|
+| GF: „Ich weiß nicht, ob die Zahlen stimmen.“ | Prüfblatt zeigt jeden Monat schwarz auf weiß: Vormonate unverändert / was sich geändert hat. |
+| „Noch ein Abo – wir haben doch die Gratis-Version.“ | Gratis = kein AVV, Daten der Beschäftigten dürfen dort nicht rein; ca. 125 €/Monat gegen 11 h gesparte Arbeit. |
+| Berater: „Noch mehr Pflicht beim Kalender.“ | Eine Vorlage, ein Satz per Sprachnotiz statt Nachfrage am Monatsende. |
+| „Wenn Jenny ausfällt, kann es keiner.“ | Skill + Kurzanleitung → Kollegin übernimmt (GF hat zugestimmt). |
+
+## Tool-Empfehlung
+Claude **Team** (Geschäftstarif, AVV, kein Training mit Firmendaten, Skill zentral für alle) – Weiterentwicklung des Skills mit **Claude Code**. [offen: Abgleich mit Tool-Check TT20]

@@ -15,3 +15,4 @@ stand: 2026-11-03
 - 2026-11-04 – Zahlen für Baustein 4 erhalten: Baseline ca. 16 h (gerechnet 12 h), heute 1 h, Skill-Aufbau 15–20 h, Stundenwert 150 €, Betreuung 0,5 h/Monat. Frage „nicht abgerechnete Stunden“ entfällt.
 - 2026-11-04 – B1: S5 Rechenfehler ergänzt; B3: E6 Skill prüfen/verbessern; B4 gerechnet (Team-Account); B5/B6 als Entwurf; Startcheck aktualisiert.
 - 2026-11-04 – B4 neu gerechnet mit internem Stundensatz 41 €/h (Arbeitgeberkosten statt Verrechnungssatz 150 €).
+- 2026-11-04 – B1 Ist-Kette korrigiert: S2/S3/S4/Kurzformen gelöst; offen S1 (fehlende Termine) und S5a–c. B3 neu: E6, E7, E3, E5; E1/E2/E4 verworfen.

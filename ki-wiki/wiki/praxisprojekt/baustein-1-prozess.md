@@ -12,28 +12,26 @@ das Ergebnis (Kosten je Projekt) nutzt die GF direkt für Abrechnung und Steueru
 Verworfen: Zeiterfassung (Datenlage zu rot, wenig KI-Hebel), M&A (zu selten), Krippe (einmalig).
 Besonderheit: Ein Teil läuft schon mit einem Claude-Skill → ich kann **vorher/nachher** messen.
 
-## Ist-Kette (Rollen statt Namen) – Schwachstellen = ⚠
-| # | Schritt | Rolle | Werkzeug | Wartezeit / Problem |
+## Ist-Kette (Rollen statt Namen) – Stand 04.11.2026
+| # | Schritt | Rolle | Werkzeug | Status |
 |---|---|---|---|---|
-| 1 | Termin mit „Projektname“ im Betreff eintragen | GF, Berater | Outlook | ⚠ **S1** Termine fehlen oder Projekt uneinheitlich benannt (Kurzformen) |
-| 2 | Fahrt wird aufgezeichnet | GF, Berater | Fahrtenbuch-App | ⚠ **S2** Fahrer falsch zugeordnet, Kennzeichen uneinheitlich |
-| 3 | Monatsende: Kalender je Postfach + Fahrtenbuch exportieren | Assistenz | Outlook, App | wartet ggf. auf Zugriff/Export |
-| 4 | Bericht erzeugen (Matching Fahrt↔Termin, Kosten je Zeile) | Assistenz | Claude-Skill → Excel | – |
-| 5 | Unklare Fälle prüfen (unbekannte Projekte, nicht zugeordnete Fahrten, Plausibilität) | Assistenz | Excel | ⚠ **S3** Rückfrage-Schleife: Antworten kommen spät |
-| 6 | Fehlende Zeiten / Zusatzkosten nachtragen | Assistenz nach Info von GF/Berater | Excel | ⚠ S3 (gleiche Schleife), Gefahr Doppelzählung |
-| 7 | Zuordnungstabellen pflegen (Partner → Projekt) | Assistenz | Excel | – |
-| 8 | Freigabe | GF | Excel/Mail | ⚠ **S4** Freigabe-Stau, GF unterwegs |
-| 9 | Bericht an Partnerfirma / Abrechnung | Assistenz | Mail | – |
+| 1 | Termin mit Projektname im Betreff eintragen | GF, Berater | Outlook | ⚠ **S1** Termine fehlen → Assistenz trägt händisch nach · ✔ Kurzformen gelöst (Alias-Liste im Skill) |
+| 2 | Fahrt wird aufgezeichnet | GF, Berater | Fahrtenbuch-App | ✔ **S2 gelöst**: feste Zuordnung Fahrzeug → Fahrer im Skill |
+| 3 | Monatsende: Kalender je Postfach + Fahrten exportieren | Assistenz | Outlook, App | – |
+| 4 | Bericht erzeugen (Matching Fahrt↔Termin, Kosten je Zeile) | Assistenz | Claude-Skill → Excel | ⚠ **S5a** falsche Vorlage: ältere gespeicherte Excel statt zuletzt bearbeiteter → Vormonate weichen ab |
+| 5 | Unklare Fälle prüfen | Assistenz | Excel | ⚠ **S5b** falsche Zuordnungen, erst bei erneuter Prüfung entdeckt · ✔ **S3 gelöst**: Rückfragen nur noch ca. 15 Min./Monat |
+| 6 | Fehlende Zeiten / Zusatzkosten nachtragen | Assistenz | Excel | (S1) |
+| 7 | Zuordnungstabellen pflegen | Assistenz | Excel | – |
+| 8 | Durchsicht + Freigabe | GF | Excel/Mail | ⚠ **S5c** unübersichtlich, GF unsicher ob es stimmt · ✔ **S4 gelöst**: 15 Min. |
+| 9 | Versand an Partnerfirma / Abrechnung | Assistenz | Mail | bis ca. 5. des Folgemonats |
 
-⚠ **S5 Vertrauen / Rechenfehler** (Gespräch GF 04.11.): Bericht unübersichtlich; Vormonate weichen zwischen Versionen ab;
-bei der Fortführung wurde nicht die zuletzt bearbeitete Excel, sondern eine ältere gespeicherte Version als Grundlage genommen;
-Zuordnungen teils falsch, erst nach erneuter Prüfung korrigiert. → Der Skill hat noch Schwachstellen.
+Fazit Ist-Kette: Der Skill hat das **Tempo** gelöst (S2, S3, S4, Kurzformen). Offen ist die **Genauigkeit** (S5a–c) und Restarbeit bei fehlenden Terminen (S1).
 
 Swimlane (Kurzform):
 ```
-GF/Berater : [1 Termin] [2 Fahrt] ......(Antwort S3)...... [8 Freigabe S4]
-Assistenz  : ............ [3 Export] [4 Bericht] [5 Prüfen S3] [6 Nachtragen] [7 Pflege] ........ [9 Versand]
-Partnerfirma:                                                                                    [empfängt]
+GF/Berater : [1 Termin S1] [2 Fahrt] .................................. [8 Freigabe S5c]
+Assistenz  : .............. [3 Export] [4 Bericht S5a] [5 Prüfen S5b] [6 Nachtragen S1] [7 Pflege] ... [9 Versand]
+Partnerfirma:                                                                                          [empfängt]
 ```
 
 ## Zahl zum Prozess

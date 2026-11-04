@@ -7,9 +7,9 @@ stand: 2026-11-04
 
 | Welle | Wann | Was | Wer |
 |---|---|---|---|
-| 1 | Nov–Dez 2026 | Team-Account einrichten (AVV prüfen) · **E6** Skill mit Claude Code prüfen/verbessern: Prüfblatt Monat-zu-Monat, feste Vorlagen-Regel, Übersicht für GF | Assistenz, GF entscheidet Account |
-| 2 | Jan–Feb 2027 | Kollegin als Vertretung einweisen · E1 Termin-Vorlage für Berater · E5 1-Seiten-Übersicht zur Freigabe | Assistenz, Berater |
-| 3 | ab März 2027 | E3 Sprachnotiz-Nachmeldung testen (GF hat zugesagt) · E2 Fahrten-Vorschlag | GF, Berater |
+| 1 | Nov–Dez 2026 | Team-Account einrichten (AVV prüfen) · **E6 + E7** Skill mit Claude Code prüfen/absichern (Versionsregel, Prüfblatt, Spalte „warum“) | Assistenz, GF entscheidet Account |
+| 2 | Jan–Feb 2027 | Kollegin als Vertretung einweisen · E5 1-Seiten-Übersicht für die GF | Assistenz, Berater |
+| 3 | ab März 2027 | E3 Sprachnotiz-Nachmeldung testen (GF hat zugesagt) | GF, Berater |
 
 Erfolgskriterium Welle 1: drei Monatsberichte in Folge ohne Abweichung in den Vormonaten; GF-Freigabe bleibt bei ≤ 15 Min.
 
@@ -18,7 +18,7 @@ Erfolgskriterium Welle 1: drei Monatsberichte in Folge ohne Abweichung in den Vo
 |---|---|
 | GF: „Ich weiß nicht, ob die Zahlen stimmen.“ | Prüfblatt zeigt jeden Monat schwarz auf weiß: Vormonate unverändert / was sich geändert hat. |
 | „Noch ein Abo – wir haben doch die Gratis-Version.“ | Gratis = kein AVV, Daten der Beschäftigten dürfen dort nicht rein; ca. 125 €/Monat gegen 11 h gesparte Arbeit. |
-| Berater: „Noch mehr Pflicht beim Kalender.“ | Eine Vorlage, ein Satz per Sprachnotiz statt Nachfrage am Monatsende. |
+| Berater: „Noch mehr Pflicht.“ | Ein Satz per Sprachnotiz statt Nachtrag durch die Assistenz. |
 | „Wenn Jenny ausfällt, kann es keiner.“ | Skill + Kurzanleitung → Kollegin übernimmt (GF hat zugestimmt). |
 
 ## Tool-Empfehlung

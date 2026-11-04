@@ -1,20 +1,21 @@
 ---
 type: Praxisprojekt
 title: Baustein 2 – Daten & Rechtsrahmen
-stand: 2026-11-03
+stand: 2026-11-04
 ---
-# Baustein 2 – Datenampel (Vorschlag, Farben setze ich)
+# Baustein 2 – Datenampel (von Nutzerin bestätigt 04.11.)
 | Schritt | Daten | Ampel | Begründung |
 |---|---|---|---|
-| 1 | Termin: Projekt-/Kundenname, Ort, Uhrzeit, Teilnehmer | Gelb | Firmennamen ok; bei Privatkunden/Personen im Betreff pseudonymisieren |
-| 2 | Fahrten: Fahrer, Start/Ziel-Adresse, Zeit, km | **Rot** | Bewegungsprofil von Beschäftigten |
-| 4 | Stundensätze, km-Satz, Kosten je Projekt | **Rot** | interne Kalkulation |
-| 4 | Stunden/Auslastung **je Mitarbeiter** | **Rot** | Leistungsdaten einzelner Personen |
-| 4 | Summen je Projekt/Firma ohne Personenbezug | Gelb→Grün | aggregiert |
-| – | Regeln (Kategorien, Zuordnungslogik, Prompts) | Grün | Verfahrenswissen |
+| 1 | Termine: Projekt-/Kundenname, Ort, Uhrzeit | Gelb | Firmennamen ok; Mitarbeitende stellen ihre Kalendereinträge selbst zur Verfügung, GF-Kalender mit Erlaubnis |
+| 2 | Fahrten: Adressen, Zeiten, km | Gelb | nur Fahrten der GF (andere arbeiten fast nur im Büro); GF wertet selbst aus; nur mit Team-Account + AVV |
+| 4 | Stundensätze, km-Satz, Kosten | Rot | interne Kalkulation – nicht ins Wiki, nur im Bericht |
+| 4 | Stunden je Mitarbeiter **und Projekt** | Gelb | nötig für die Kostenrechnung (Sätze je Person verschieden) |
+| 4 | Auslastung je Mitarbeiter ggü. Soll | Rot → **entfällt** | Leistungskontrolle; GF braucht sie nicht (Gespräch 04.11.) |
+| 4 | Summen je Projekt ohne Personenbezug | Grün | aggregiert |
+| – | Regeln, Kategorien, Prompts | Grün | Verfahrenswissen |
 
 ## Leitfragen
-- **Kennzahlen pro Person?** Ja – der Bericht enthält Auslastung je Mitarbeiter. → § 87 Abs. 1 Nr. 6 BetrVG, falls Betriebsrat [offen: gibt es einen?]. Unabhängig davon: Kennzahl an den **Vorgang/Projekt** binden; Personenauswertung nur, wenn GF sie ausdrücklich braucht und Beschäftigte informiert sind.
-- **Kennzeichnung Art. 50 AI Act?** Nein – keine Kundin spricht mit einer KI; der Bericht ist intern erstellt und von Menschen geprüft (Freigabe GF).
-- **Plattform?** Claude [offen: welcher Tarif?]. Rote Daten nur mit AVV (geschäftlicher Tarif, z. B. Team) oder pseudonymisiert (Kürzel statt Namen, keine Adressen). → mit GF klären.
-- Im Zweifel Datenschutzbeauftragte/n fragen.
+- **Kennzahlen pro Person?** Nur Stunden je Person und Projekt (für die Abrechnung). Die Auslastungsauswertung wird aus dem Bericht entfernt (Teil von E6). Kein Betriebsrat → § 87 BetrVG greift nicht; DSGVO-Grundsatz Datenminimierung eingehalten.
+- **Transparenz:** Mitarbeitende liefern ihre Kalender selbst; Fahrten nur der GF.
+- **Kennzeichnung Art. 50 AI Act?** Nein – keine KI im Kundenkontakt, Bericht intern erstellt und von der GF freigegeben.
+- **Plattform:** Claude **Team** (Geschäftstarif, AVV nach Art. 28 DSGVO, kein Training mit Firmendaten) – AVV und Preis bei Anthropic bestätigen. Die Gratis-Version, die im Betrieb genutzt wird, ist für diese Daten nicht zulässig.

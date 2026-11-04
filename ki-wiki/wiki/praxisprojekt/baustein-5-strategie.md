@@ -7,7 +7,7 @@ stand: 2026-11-04
 
 | Welle | Wann | Was | Wer |
 |---|---|---|---|
-| 1 | Nov–Dez 2026 | Team-Account einrichten (AVV prüfen) · **E6 + E7** Skill mit Claude Code prüfen/absichern (Versionsregel, Prüfblatt, Spalte „warum“) | Assistenz, GF entscheidet Account |
+| 1 | Nov–Dez 2026 | Team-Account einrichten (AVV prüfen) · **E6 + E7** Skill mit Claude Code prüfen/absichern (Versionsregel, Prüfblatt, Spalte „warum“, Auslastung je MA entfernen) | Assistenz, GF entscheidet Account |
 | 2 | Jan–Feb 2027 | Kollegin als Vertretung einweisen · E5 1-Seiten-Übersicht für die GF | Assistenz, Berater |
 | 3 | ab März 2027 | E3 Sprachnotiz-Nachmeldung testen (GF hat zugesagt) | GF, Berater |
 

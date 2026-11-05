@@ -103,3 +103,12 @@ Gesamtkosten (€) | Hinweis`
 ## Dateiname-Konvention
 - Monatsbericht: `Projektuebersicht_[Zeitraum].xlsx`, z.B. `Projektuebersicht_2026-07.xlsx`
 - Einzelprojekt-Bericht: `Projektbericht_[Projektname]_[Erstellungsdatum].xlsx`
+
+## Ab Version 6.4: TransCare-Reiter
+Reihenfolge: Cockpit, Uebersicht, Interne_Auswertung, Pruefen_Korrigieren, Abgleich_Vormonate, **TC_Bericht**,
+**TC_Stand**, **Zahlungen**, **Berichtshistorie**, Zusatzkosten, Manuelle_Zeitbuchungen, Stammdaten,
+Rohdaten_Kalender, Rohdaten_Fahrten, Sonderkalk, Listen.
+- TC_Stand: Eingabe gemeldeter Stand je Position + Schalter B6 (`korrigiert (Füxle)` / `wie gemeldet`).
+- Zahlungen: Rechnung, Zeitraum, Betrag brutto, Anmerkung; Summe wird in TC_Bericht abgezogen.
+- Berichtshistorie: Protokoll jeder Meldung an TransCare.
+- TC_Bericht: Formeln (SUMIFS), Auswahl per „x“, Druckbereich gesetzt; Teile Projekte / Allgemein / Abrechnung.

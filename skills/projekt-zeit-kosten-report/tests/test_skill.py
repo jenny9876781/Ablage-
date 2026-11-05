@@ -536,3 +536,76 @@ def test_kundenbericht_stoppt(szenario, tmp_path):
 def test_kw_bereiche():
     m = [pd.Timestamp(x) for x in ('2024-01-29', '2024-02-05', '2024-02-12', '2024-03-25', '2025-07-21')]
     assert rl._kw_bereiche(m) == 'KW 5–7/2024, 13/2024, 30/2025'
+
+
+# --------------------------------------------------------------- Version 6.4: TransCare-Abrechnung
+def _tc_datei(szenario, tmp_path, modus=None):
+    cfg = szenario['cfg']
+    cs, al = td.specs(tmp_path, td.MARIUS_BASIS)
+    r0 = rl.neuaufbau(cs, al, cfg, BASIS_START, BASIS_ENDE, '2026-10', str(tmp_path / 'ohne_tc'))
+    d0 = rl.lade_vorlage(r0['pfad'], cfg)
+    s0 = rl.summen_je_monat_projekt(d0, rl._merge_config(cfg, d0)[0])
+    koko_sep = round(float(s0[(s0['Projekt'] == 'Koko') & (s0['Monat'] == '2026-09')]['Kosten'].sum()), 2)
+    zeilen = pd.DataFrame([
+        {'Position': 'Koko', 'Bereich': 'Projekt', 'Std': 0, 'km': 0, 'Kosten_Zeit': koko_sep + 500,
+         'Kosten_Fahrt': 0, 'Sonstige': 0, 'Netto': koko_sep + 500, 'Hinweis': None},
+        {'Position': 'Vor-Ort Termine i. Auftrag TC', 'Bereich': 'Allgemein', 'Std': 5, 'km': 0,
+         'Kosten_Zeit': 1000, 'Kosten_Fahrt': 0, 'Sonstige': 0, 'Netto': 1000, 'Hinweis': None}])
+    tc = {'firma': 'TransCare', 'stichtag': pd.Timestamp('2026-09-30'), 'datum': '05.10.2026',
+          'modus': modus or rl.MODUS_KORR, 'zeilen': zeilen}
+    zahl = pd.DataFrame([{'Datum': None, 'Rechnung': 'RG 1', 'Zeitraum': '09/26', 'Betrag_brutto': 1190.0,
+                          'Anmerkung': None},
+                         {'Datum': None, 'Rechnung': 'RG 2', 'Zeitraum': '10/26', 'Betrag_brutto': None,
+                          'Anmerkung': None}])
+    r = rl.neuaufbau(cs, al, cfg, BASIS_START, BASIS_ENDE, '2026-10', str(tmp_path / 'o'), tc_stand=tc,
+                     zahlungen=zahl)
+    return r, koko_sep
+
+
+def _live_wert(pfad_recalc, label):
+    ws = openpyxl.load_workbook(pfad_recalc, data_only=True)['TC_Bericht']
+    for row in ws.iter_rows():
+        for c in row:
+            if c.value == label:
+                return ws.cell(row=c.row, column=c.column + 1).value
+    raise KeyError(label)
+
+
+def test_tc_abrechnung_live_gleich_bericht(szenario, tmp_path, recalced):
+    cfg = szenario['cfg']
+    r, koko_sep = _tc_datei(szenario, tmp_path)
+    js, kopie = recalced(r['pfad'])
+    assert js['total_errors'] == 0
+    b = rl.erstelle_kundenbericht(r['pfad'], cfg, ['Koko'], str(tmp_path / 'b'), pdf=False, nur_freigegeben=False,
+                                  interne=['Vor-Ort Termine i. Auftrag TC'])
+    z = b['rechnung']['Koko']
+    assert z['korrektur'] == pytest.approx(-500, abs=0.01)           # Füxle korrigiert die Aufstellung
+    assert z['basis']['Netto'] == pytest.approx(koko_sep, abs=0.01)
+    assert b['rechnung']['Vor-Ort Termine i. Auftrag TC']['basis']['Netto'] == pytest.approx(1000)  # immer gemeldet
+    assert b['zahlungen'] == pytest.approx(1190)
+    assert b['offen'] == pytest.approx(b['brutto'] - 1190, abs=0.01)
+    # Live-Blatt (Formeln, alle Positionen mit x) - nur Koko + Vor-Ort haben Werte bis Stichtag
+    assert _live_wert(kopie, 'abzüglich Zahlungen (brutto)') == pytest.approx(-1190, abs=0.01)
+    wb = openpyxl.load_workbook(b['xlsx'])
+    assert wb.sheetnames == ['Übersicht', 'Leistungsnachweis']
+    assert not any(isinstance(c.value, str) and c.value.startswith('=') for ws in wb for row in ws.iter_rows() for c in row)
+    # Prüfpunkt: Zahlung ohne Betrag
+    wbf = openpyxl.load_workbook(r['pfad'])
+    assert any(isinstance(c.value, str) and 'Zahlung ohne Betrag' in c.value
+               for ws in wbf for row in ws.iter_rows() for c in row)
+
+
+def test_tc_schalter_wie_gemeldet(szenario, tmp_path):
+    cfg = szenario['cfg']
+    r, koko_sep = _tc_datei(szenario, tmp_path)
+    wb = openpyxl.load_workbook(r['pfad'])
+    assert wb['TC_Stand']['B6'].value == rl.MODUS_KORR
+    wb['TC_Stand']['B6'] = rl.MODUS_GEMELDET                         # Nutzerin schaltet um
+    wb.save(r['pfad'])
+    b = rl.erstelle_kundenbericht(r['pfad'], cfg, ['Koko'], str(tmp_path / 'g'), pdf=False, nur_freigegeben=False)
+    z = b['rechnung']['Koko']
+    assert z['korrektur'] == 0 and z['basis']['Netto'] == pytest.approx(koko_sep + 500, abs=0.01)
+    # Leistungsnachweis: eine Zeile "Stand lt. Aufstellung", danach nur Leistungen ab Stichtag
+    ln = openpyxl.load_workbook(b['xlsx'])['Leistungsnachweis']
+    texte = [c.value for c in ln['D'] if isinstance(c.value, str)]
+    assert any(t.startswith('Stand lt. Aufstellung vom 05.10.2026') for t in texte)

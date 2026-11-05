@@ -3,7 +3,7 @@ name: projekt-zeit-kosten-report
 description: "Use this skill whenever the user (assistant to Neininger management) wants the recurring time/cost report that consolidates Outlook calendar entries (project name in quotes in the subject) with the Autolog vehicle logbook export into a multi-year Excel report: hours, driven km, and costs per project, per task category, per employee, per company (Neininger GmbH / TransCare), with a filterable dashboard, VAT breakdown, a weekly non-project sales-time allowance, manual extra costs, and a plausibility check. Trigger on 'Projektbericht', 'Zeit-/Kostenbericht', 'Autolog', 'Fahrtenbuch', 'Kalenderexport'+'Projekt', 'Jahresauswertung', or requests reconciling calendar time with driving logs into a cost report, any year from 2024 on. Also trigger when calendar/Autolog CSVs are uploaded with a request to consolidate hours/km/costs, including project-specific multi-year reports. Do NOT use for the separate ma-nbo-workflow skill."
 ---
 
-# Projekt-Zeit-/Kosten-Report (Neininger) — Version 6.3 (abgesichert + vereinfacht + Kundenbericht, 2026-11)
+# Projekt-Zeit-/Kosten-Report (Neininger) — Version 6.4 (abgesichert + vereinfacht + Kundenbericht + TransCare-Abrechnung, 2026-11)
 
 Dieser Skill bildet den wiederkehrenden Workflow ab, bei dem aus Outlook-Kalenderexporten
 mehrerer Mitarbeiter/Postfächer und einem Autolog-Fahrtenbuch-Export ein Excel-Bericht mit
@@ -71,6 +71,35 @@ nicht dauerhaft, nur über ein neues ZIP.**
 (Interne_Auswertung, Dashboard-Kreuztabelle) und je Mitarbeiter **und Projekt** (Übersicht) bleiben.
 
 **7. Tests:** `python -m pytest tests -q` (erfundene Testdaten). Vor jeder Änderung an `report_lib.py` laufen lassen.
+
+## Version 6.4 (2026-11-05): TransCare-Abrechnung (gemeldeter Stand, Schalter, Zahlungen)
+
+Ausgangslage: Am 05.08.2026 ging eine Aufstellung (Stand 31.07.2026) an TransCare – vor der Füxle, mit
+Doppelbuchungen. Die Füxle übernimmt diesen Stand und rechnet ab dem Stichtag weiter.
+
+- **TC_Stand** (Eingabe): Stichtag, Datum der Aufstellung und je Position (Bereich Projekt/Allgemein) die
+  gemeldeten Werte (Std, km, Kosten Zeit/Fahrt/Sonstige, Netto, Hinweis). Zelle **B6 = Schalter**:
+  `korrigiert (Füxle)` (Standard) oder `wie gemeldet`. Nur per `neuaufbau(..., tc_stand=)` anlegen; danach
+  pflegt die Nutzerin selbst.
+- Rechenregel (`tc_berechnung`): **Projekte** bis Stichtag = Füxle (korrigiert, Spalte „davon Korrektur ggü.
+  Aufstellung“) bzw. gemeldeter Wert (wie gemeldet). **Allgemeiner Aufwand** bis Stichtag = IMMER gemeldeter
+  Wert (steht nicht vollständig in der Füxle). Danach immer Füxle. Gesamt = Stand + ab Stichtag.
+- **Wochenpauschale** im TC-Bericht = nur die NICHT zugeordneten Restwochen (Position „Allgemeine Vertriebszeit“).
+  Fälschlich Neininger-Projekten zugeordnete Pauschalwochen 2025/2026 per Korrektur „automatisch“ zurückbuchen
+  (Abgleich-Ursache „Wochenpauschale umgebucht“).
+- **Zahlungen** (Rechnung, Zeitraum, Betrag brutto): werden vom Gesamt brutto abgezogen → „Offener Betrag“.
+  Zahlung ohne Betrag → Prüfpunkt. **Berichtshistorie**: jede Meldung an TC eintragen (Datum, Stand, Basis, Netto,
+  Brutto, Datei) – `erstelle_kundenbericht` liefert den Eintrag als `historie_eintrag`.
+- **TC_Bericht** (live, druckfertig, Auswahl mit „x“ in Spalte A): Teil 1 Projekte, Teil 2 allgemeiner
+  Aufwand, Teil 3 Abrechnung. Die Nutzerin kann selbst drucken (PDF) – Cockpit-KPI „TransCare offen (brutto)“.
+- **Externer Bericht** (`erstelle_kundenbericht`) nutzt automatisch TC_Stand, wenn vorhanden: Übersicht in
+  3 Teilen + Zahlungsliste (Seitenumbruch vor Abrechnung), Leistungsnachweis (bei „wie gemeldet“: eine Zeile
+  „Stand lt. Aufstellung vom …“, danach nur Leistungen ab Stichtag; bei „korrigiert“: alle Einzelpositionen +
+  Hinweis zur Korrektur). Kontrolle: Nachweissumme = Übersicht je Position, sonst Abbruch. Werte müssen mit dem
+  Live-Blatt TC_Bericht übereinstimmen.
+- Dropdowns: Entscheidung in Pruefen_Korrigieren enthält alle Stammdaten-Projekte inkl. interner TC-Positionen
+  und Wochenpauschale; Zusatzkosten-Kostenart aus Config `zusatzkosten_kostenarten` (freie Eingabe erlaubt).
+- Erledigt-Häkchen bei Hinweisen werden in Folgeversionen übernommen (gleiches Thema + Text).
 
 ## Version 6.3 (2026-11-05): Kundenbericht (z.B. für TransCare)
 

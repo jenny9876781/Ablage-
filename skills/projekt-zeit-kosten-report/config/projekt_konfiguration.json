@@ -221,6 +221,48 @@
       "status": "beendet",
       "startdatum": null,
       "enddatum": null
+    },
+    "Vor-Ort Termine i. Auftrag TC": {
+      "firma": "TransCare (intern, nicht projektbezogen)",
+      "status": "laufend",
+      "startdatum": null,
+      "enddatum": null
+    },
+    "Sonstige Termine inkl. MoSI": {
+      "firma": "TransCare (intern, nicht projektbezogen)",
+      "status": "laufend",
+      "startdatum": null,
+      "enddatum": null
+    },
+    "MoSI Assistenz": {
+      "firma": "TransCare (intern, nicht projektbezogen)",
+      "status": "laufend",
+      "startdatum": null,
+      "enddatum": null
+    },
+    "Veranstaltungen i. Auftrag TC": {
+      "firma": "TransCare (intern, nicht projektbezogen)",
+      "status": "laufend",
+      "startdatum": null,
+      "enddatum": null
+    },
+    "Messebesuche i. Auftrag TC": {
+      "firma": "TransCare (intern, nicht projektbezogen)",
+      "status": "laufend",
+      "startdatum": null,
+      "enddatum": null
+    },
+    "Office Wiesbaden": {
+      "firma": "TransCare (intern, nicht projektbezogen)",
+      "status": "laufend",
+      "startdatum": null,
+      "enddatum": null
+    },
+    "Reisekosten i. Auftrag TC": {
+      "firma": "TransCare (intern, nicht projektbezogen)",
+      "status": "laufend",
+      "startdatum": null,
+      "enddatum": null
     }
   },
   "status_stichtag": "2026-06-30",
@@ -356,5 +398,15 @@
   "matching": {
     "unsicher_wenn_abstand_unter_h": 2,
     "_hinweis": "Fahrt-Zuordnung: nächster Termin gewinnt. Gelb/Prüfliste nur, wenn ein anderes Projekt weniger als X Stunden weiter entfernt liegt (Nutzerin 2026-11-05)."
-  }
+  },
+  "zusatzkosten_kostenarten": [
+    "Übernachtung (Pauschale 150 €)",
+    "Übernachtung Hotel",
+    "Flug",
+    "Bahn",
+    "Parken",
+    "Fahrtkosten",
+    "km-Differenz (manuell erhöht)",
+    "Sonstiges"
+  ]
 }

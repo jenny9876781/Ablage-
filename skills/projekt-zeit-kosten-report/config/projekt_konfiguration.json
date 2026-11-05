@@ -57,10 +57,13 @@
       "Frutania"
     ],
     "aliase": {
-      "_hinweis": "Kurzformen/Codenamen, die in manchen Kalendern statt des offiziellen Projektnamens verwendet werden. Von der Nutzerin am 2026-07-23 bestätigt.",
+      "_hinweis": "Kurzformen/Codenamen, die in manchen Kalendern statt des offiziellen Projektnamens verwendet werden. Von der Nutzerin am 2026-07-23 bestätigt. 2026-11-05: Niedermaier, Holenstein CH, mühle ergänzt (Nutzerin).",
       "Nickles": "Koko",
       "Sand": "Sandformation",
-      "COOL": "Cool"
+      "COOL": "Cool",
+      "Niedermaier": "Spedition Niedermaier",
+      "Holenstein CH": "Holenstein",
+      "mühle": "Mühle"
     },
     "ignorieren": [
       "Auf Herdenen",
@@ -70,7 +73,9 @@
       "m&a themen",
       "Am Doniswald",
       "Am Doniswald, Königsfeld",
-      "Koalition der Willigen"
+      "Koalition der Willigen",
+      "Wirtschaftliche Wege zum CO₂-neutralen Fuhrpark?",
+      "Wo stehen Schwarzwald, Baar und Heuberg im Transformationsgeschehen"
     ],
     "keine_hinweise_fuer": [
       "Juli"
@@ -238,7 +243,8 @@
       "zusaetzlicher_aufwand_pro_stunde_eur": 0,
       "zusaetzlicher_aufwand_hinweis": "Lt. Nutzerin NICHT berücksichtigen (Stand 2026-07-15)",
       "fahrten_kostentechnisch_ausschliessen": true,
-      "fahrten_km_zeit_informativ_zeigen": true
+      "fahrten_km_zeit_informativ_zeigen": true,
+      "_mitarbeiter_hinweis": "Version 6: Tagessatz/Anfahrtspauschale gelten nur für diesen Mitarbeiter. Zeiten anderer Personen zu Niedermaier (z.B. Felix) normal mit Stundensatz (Nutzerin 2026-11-05)."
     }
   },
   "hauptaufgaben_kategorien": {
@@ -313,7 +319,15 @@
     "bezeichnung": "Allgemeine Vertriebszeit (automatische Wochenpauschale)",
     "ausnahme_bei_urlaub": true,
     "urlaub_erkennung_keyword": "urlaub",
-    "urlaub_regel": "Wenn im Kalender des Mitarbeiters (beliebiger Kalender) ein Termin mit dem Stichwort 'Urlaub' an mindestens einem Tag dieser Kalenderwoche liegt, entfällt die Pauschale für die GESAMTE Woche. Wochen mit nur teilweisem Urlaub werden trotzdem komplett ausgesetzt (konservative Annahme) und im Bericht als 'Teilweise Urlaub - Pauschale ausgesetzt' gekennzeichnet, zur Kontrolle durch die Nutzerin."
+    "urlaub_regel": "Wenn im Kalender des Mitarbeiters (beliebiger Kalender) ein Termin mit dem Stichwort 'Urlaub' an mindestens einem Tag dieser Kalenderwoche liegt, entfällt die Pauschale für die GESAMTE Woche. Wochen mit nur teilweisem Urlaub werden trotzdem komplett ausgesetzt (konservative Annahme) und im Bericht als 'Teilweise Urlaub - Pauschale ausgesetzt' gekennzeichnet, zur Kontrolle durch die Nutzerin.",
+    "bis": "2026-08-31",
+    "urlaub_fremde_namen": [
+      "Heidi",
+      "Isa",
+      "Marisa"
+    ],
+    "_bis_hinweis": "Lt. Nutzerin 2026-11-05: Wochenpauschale entfällt ab September 2026.",
+    "_urlaub_hinweis": "Version 6: nur eigener Urlaub zählt; Termine wie \"Felix Urlaub\" im Kalender von Marius setzen seine Pauschale NICHT aus (Nutzerin 2026-11-05)."
   },
   "zusatzkosten_hinweis": "Manuell erfasste Einzelkosten (z.B. Übernachtung im Ausnahmefall) werden im Sheet 'Zusatzkosten' der Ausgabedatei gepflegt (Datum, Projekt, Kostenart, Betrag netto, Anmerkung) und fließen automatisch in die Projekt-Gesamtkosten ein.",
   "manuelle_zeitbuchungen_hinweis": "Manuell nacherfasste Arbeitsstunden (Termine, die (noch) nicht im Kalender stehen, z.B. weil sie erst nachträglich in den Kalender eingetragen werden) werden im Sheet 'Manuelle_Zeitbuchungen' der Ausgabedatei gepflegt (Datum, Mitarbeiter, Projekt, Hauptaufgabe, Stunden, Anmerkung) und fließen automatisch in die Projekt-Stunden/-Kosten ein. Der Stundensatz wird per Verweis auf die aktuelle Mitarbeiter-Tabelle im Parameter-Sheet ermittelt (keine Datums-Historie wie bei den Kalenderzeilen) - bei einer künftigen Satzänderung ggf. manuell prüfen.",
@@ -336,5 +350,7 @@
     "Kikripp GmbH": "Unberücksichtigt",
     "Vermietung": "Unberücksichtigt",
     "Frutania GmbH": "Frutania"
-  }
+  },
+  "dateiname_praefix": "Füxle",
+  "_dateiname_hinweis": "Ausgabedatei: <dateiname_praefix>_<Zeitraum>_vNN.xlsx (Nutzerin 2026-11-05: \"Füxle\")."
 }

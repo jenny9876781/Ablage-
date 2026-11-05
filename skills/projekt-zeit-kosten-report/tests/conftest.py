@@ -52,7 +52,12 @@ def freigeben(pfad, wer='GF Test', zusatz=None):
 
 
 def config():
-    return rl.load_config(SKILL / 'config' / 'projekt_konfiguration.json')
+    """Echte Config. Die Testdaten liegen Sep.-Nov. 2026 - also NACH dem Ende der
+    Wochenpauschale (31.08.2026). Damit die Pauschale-Logik weiter mitgetestet wird,
+    wird 'bis' hier entfernt; test_wochenpauschale_endet prüft das Ende separat."""
+    c = rl.load_config(SKILL / 'config' / 'projekt_konfiguration.json')
+    c['wochenpauschale'].pop('bis', None)
+    return c
 
 
 def lade_v5():

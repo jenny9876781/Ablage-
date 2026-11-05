@@ -84,8 +84,8 @@ def test_niedermaier_nur_markiert_zahlen_unveraendert(szenario, recalced):
 
 # --------------------------------------------------------------- S1: Versionsregel
 def test_dateiname_und_versionsblock(szenario):
-    assert szenario['v01']['pfad'].endswith('Projektuebersicht_2026-10_v01.xlsx')
-    assert szenario['v02']['pfad'].endswith('Projektuebersicht_2026-11_v02.xlsx')
+    assert szenario['v01']['pfad'].endswith('Füxle_2026-10_v01.xlsx')
+    assert szenario['v02']['pfad'].endswith('Füxle_2026-11_v02.xlsx')
     m = rl.lese_berichtsversion(szenario['v02']['pfad'])
     assert m['version'] == 'v02' and m['vorgaenger'] == 'v01'
     assert m['datenstand_bis'].date() == NOV_ENDE.date()
@@ -115,7 +115,7 @@ def test_ohne_freigabe_gestoppt(tmp_path):
 
 
 def test_umbenannte_datei_gestoppt(szenario, tmp_path):
-    falsch = tmp_path / 'Projektuebersicht_2026-10_v05.xlsx'
+    falsch = tmp_path / 'Füxle_2026-10_v05.xlsx'
     shutil.copy(szenario['v01']['pfad'], falsch)
     with pytest.raises(rl.VorlageFehler, match='Dateinamen'):
         rl.pruefe_vorlage(falsch, 'v05')
@@ -324,3 +324,44 @@ def test_offene_fahrt_kommt_auf_pruefliste(tmp_path):
     r = rl.neuaufbau(cs, al, cfg, BASIS_START, BASIS_ENDE, '2026-10', str(tmp_path / 'o'))
     pl = openpyxl.load_workbook(r['pfad'])['Pruefliste']
     assert any(x[1] == 'Fahrt nicht klassifiziert' for x in pl.iter_rows(min_row=6, values_only=True))
+
+
+def test_sonderkalk_nur_fuer_marius():
+    cfg = config()
+    assert rl.sonderkalk_gilt('Spedition Niedermaier', td.MN, cfg)
+    assert not rl.sonderkalk_gilt('Spedition Niedermaier', td.FS, cfg)
+    r = {'Projekt': 'Spedition Niedermaier', 'Korrektur': None, 'Mitarbeiter': td.FS, 'Mehrtaegig': False,
+         'Ist_Pauschale': False, 'Dauer_h': 0.25, 'Stundensatz_EUR': 150}
+    assert rl._kosten_zeit_zeile(r, cfg) == pytest.approx(37.5)
+    assert rl.erkenne_projekt('Telefonat Kochtrans "Niedermaier"', cfg)['projekt'] == 'Spedition Niedermaier'
+
+
+def test_urlaub_nur_eigener():
+    cfg = config()
+    assert rl.ist_eigener_urlaub('Marius Urlaub', td.MN, cfg)
+    assert rl.ist_eigener_urlaub('Urlaub', td.MN, cfg)
+    assert not rl.ist_eigener_urlaub('Felix Urlaub', td.MN, cfg)
+    assert not rl.ist_eigener_urlaub('Heidi Urlaub', td.MN, cfg)
+
+
+def test_wochenpauschale_endet():
+    cfg = config()
+    cfg['wochenpauschale']['bis'] = rl.load_config(
+        str(rl.__file__).replace('scripts/report_lib.py', 'config/projekt_konfiguration.json'))['wochenpauschale']['bis']
+    cal = pd.DataFrame(columns=['Mitarbeiter', 'Ist_Urlaub', 'Start', 'Ende'])
+    p = rl.generate_wochenpauschale_rows(cal, cfg, datetime(2026, 8, 1), datetime(2026, 9, 30, 23, 59))
+    assert p['Start'].max() <= pd.Timestamp('2026-08-31') and len(p) == 5
+
+
+def test_korrektur_aus_chat(tmp_path):
+    cfg = config()
+    cs, al = td.specs(tmp_path, td.MARIUS_BASIS)
+    k = [{'bereich': 'kalender', 'mitarbeiter': td.MN, 'start': '2026-10-20 09:00', 'text': 'Montagssitzung',
+          'korrektur': 'Cool'},
+         {'bereich': 'kalender', 'mitarbeiter': td.MN, 'start': '2026-10-21 09:00', 'korrektur': 'Cool'}]
+    r = rl.neuaufbau(cs, al, cfg, BASIS_START, BASIS_ENDE, '2026-10', str(tmp_path / 'o'), korrekturen=k)
+    c = r['kalender']
+    assert c.loc[c['Aufgabe'] == 'Montagssitzung intern', 'Korrektur'].iloc[0] == 'Cool'
+    assert r['pfad'].endswith('Füxle_2026-10_v01.xlsx')
+    pl = openpyxl.load_workbook(r['pfad'])['Pruefliste']
+    assert any(x[1] == 'Korrektur aus Chat nicht anwendbar' for x in pl.iter_rows(min_row=6, values_only=True))

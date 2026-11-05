@@ -169,6 +169,22 @@ def extract_project(betreff, fixed_names, ignore_names=None, aliase=None):
     return r['projekt'], r['rest']
 
 
+def ist_eigener_urlaub(betreff, mitarbeiter, config):
+    """Urlaubstermin der Kalender-Inhaberin/des -Inhabers selbst? Version 6: Urlaub
+    ANDERER Personen im eigenen Kalender ("Felix Urlaub", "Heidi Urlaub" bei Marius)
+    zählt nicht (Nutzerin 2026-11-05). Andere Person = Vorname eines anderen
+    Mitarbeiters oder ein Name aus wochenpauschale.urlaub_fremde_namen."""
+    wp = config.get('wochenpauschale', {})
+    if not isinstance(betreff, str) or wp.get('urlaub_erkennung_keyword', 'urlaub') not in betreff.lower():
+        return False
+    eigene = str(mitarbeiter).split()[0].lower() if mitarbeiter else ''
+    fremde = {m.split()[0].lower() for m in config.get('mitarbeiter_satzhistorie', {}) if not m.startswith('_')}
+    fremde |= {n.lower() for n in wp.get('urlaub_fremde_namen', [])}
+    fremde.discard(eigene)
+    worte = set(re.findall(r'\w+', betreff.lower()))
+    return not (worte & fremde)
+
+
 def _enrich_calendar_df(df, mitarbeiter, kalendertyp, config):
     """Gemeinsame Anreicherung für alle Kalenderquellen: erwartet df mit Spalten
     Betreff, Start, Ende, Ort (Start/Ende als echte datetime). Fügt Mitarbeiter,
@@ -188,8 +204,7 @@ def _enrich_calendar_df(df, mitarbeiter, kalendertyp, config):
     df['Hauptaufgabe'] = df['Aufgabe'].apply(
         lambda a: classify_hauptaufgabe(a, config.get('hauptaufgaben_kategorien', {}), mitarbeiter))
     df['Jahr'] = df['Start'].dt.year
-    df['Ist_Urlaub'] = df['Betreff'].astype(str).str.lower().str.contains(
-        config.get('wochenpauschale', {}).get('urlaub_erkennung_keyword', 'urlaub'))
+    df['Ist_Urlaub'] = df['Betreff'].apply(lambda b: ist_eigener_urlaub(b, mitarbeiter, config))
     df['Ist_Pauschale'] = False
     return df[['Mitarbeiter', 'Kalendertyp', 'Betreff', 'Start', 'Ende', 'Ort',
                 'Projekt', 'Aufgabe', 'Hauptaufgabe', 'Dauer_h', 'Mehrtaegig',
@@ -354,6 +369,8 @@ def generate_wochenpauschale_rows(calendar_df_all, config, period_start, period_
     period_end_ts = pd.Timestamp(period_end)
     # Nur Montage AB period_start (keine Woche vor dem Zeitraum anhängen -
     # sonst "leckt" eine Pauschale in den Vormonat/-jahr, siehe Selbstpruefung 2026-07-22)
+    if cfg.get('bis'):   # Version 6: Pauschale endet (Nutzerin: ab September 2026 entfallen)
+        period_end_ts = min(period_end_ts, pd.Timestamp(cfg['bis']) + pd.Timedelta(hours=23, minutes=59))
     weeks = pd.date_range(period_start_ts, period_end_ts, freq='W-MON')
     for monday in weeks:
         if monday > period_end_ts:
@@ -548,6 +565,17 @@ def match_trips_to_calendar(trips_df, calendar_df, mitarbeiter,
 # ==========================================================================
 # Kosten je Kalenderzeile / Fahrt berechnen (rate-history-aware)
 # ==========================================================================
+def sonderkalk_gilt(projekt, mitarbeiter, config):
+    """True, wenn die Sonderkalkulation (z.B. Tagessatz Niedermaier) für diese Zeile
+    gilt. Version 6: nur für den in der Config genannten Mitarbeiter - andere
+    Personen (z.B. Felix' Telefonate zu Niedermaier) werden normal mit Stundensatz
+    abgerechnet (Nutzerin 2026-11-05)."""
+    sk = config.get('sonderkalkulationen', {}).get(projekt) if isinstance(projekt, str) else None
+    if not isinstance(sk, dict):
+        return False
+    return not sk.get('mitarbeiter') or sk.get('mitarbeiter') == mitarbeiter
+
+
 def _projekt_firma(projekt, config):
     stamm = config.get('projekt_stammliste', {})
     if projekt in stamm:
@@ -607,7 +635,7 @@ def compute_kalender_kosten(calendar_df, config):
     def row_kosten(r):
         if pd.isna(r['Projekt']) or r['Projekt'] is None:
             return 0.0
-        if r['Projekt'] in sonderkalk_projekte:
+        if sonderkalk_gilt(r['Projekt'], r['Mitarbeiter'], config):
             return 0.0
         if r['Mehrtaegig'] and not r['Ist_Pauschale'] and not r['Ist_Ganztagespauschale']:
             return 0.0
@@ -647,7 +675,7 @@ def markiere_pruefpunkte_kalender(df, config):
         if r.get('Ist_Pauschale', False) or pd.isna(r['Projekt']):
             continue
         zusatz = None
-        if r['Projekt'] in tb:
+        if r['Projekt'] in tb and sonderkalk_gilt(r['Projekt'], r['Mitarbeiter'], config):
             if not r['Mehrtaegig']:
                 zusatz = ('Kurztermin bei Tagessatz-Projekt: löst die Anfahrtspauschale der '
                           'Kalenderwoche aus - bitte prüfen')
@@ -703,7 +731,8 @@ def compute_fahrten_kosten(trips_df, config):
         if pd.isna(r['Projekt']) or r['Projekt'] is None:
             return 0.0
         cfg = sonderkalk.get(r['Projekt'])
-        if isinstance(cfg, dict) and cfg.get('fahrten_kostentechnisch_ausschliessen'):
+        if isinstance(cfg, dict) and cfg.get('fahrten_kostentechnisch_ausschliessen') \
+                and sonderkalk_gilt(r['Projekt'], r.get('Fahrer'), config):
             return 0.0
         km = r['Distanz (km)'] if pd.notna(r['Distanz (km)']) else 0.0
         return round(km * r['KmSatz_EUR'], 2)
@@ -724,7 +753,10 @@ def calc_tagessatz_block_kosten(calendar_df, projekt, sonderkalk_config):
     (DataFrame je betroffener Kalenderwoche).
     """
     cfg = sonderkalk_config[projekt]
-    blocks = calendar_df[calendar_df['Projekt'] == projekt].sort_values('Start').copy()
+    blocks = calendar_df[calendar_df['Projekt'] == projekt]
+    if cfg.get('mitarbeiter'):
+        blocks = blocks[blocks['Mitarbeiter'] == cfg['mitarbeiter']]
+    blocks = blocks.sort_values('Start').copy()
 
     block_rows = []
     wochen = set()
@@ -1340,6 +1372,13 @@ def build_excel_workbook(calendar_df, trips_df, config, period_label, output_pat
 
     sonderkalk_alle = [p_ for p_, c_ in config.get('sonderkalkulationen', {}).items()
                        if not p_.startswith('_') and isinstance(c_, dict)]
+
+    def _sk_bedingung(zp, zm):
+        teile = []
+        for p_ in sonderkalk_alle:
+            m_ = config['sonderkalkulationen'][p_].get('mitarbeiter')
+            teile.append(f'AND({zp}="{p_}",{zm}="{m_}")' if m_ else f'{zp}="{p_}"')
+        return 'OR(' + ','.join(teile) + ')' if teile else 'FALSE'
     fahrt_ohne_kosten = [p_ for p_ in sonderkalk_alle
                          if config['sonderkalkulationen'][p_].get('fahrten_kostentechnisch_ausschliessen')]
 
@@ -1388,7 +1427,7 @@ def build_excel_workbook(calendar_df, trips_df, config, period_label, output_pat
                 value=f'=IF(E{row}="","",IFERROR(VLOOKUP(E{row},{stamm_range},2,FALSE),"TBD"))')
         # Version 6: Kosten live je Zeile (Korrektur wirkt jetzt auch auf die Kosten)
         ws.cell(row=row, column=13,
-                value=(f'=IF(OR(E{row}="",O{row}<>"",{_or_gleich(f"E{row}", sonderkalk_alle)}),0,'
+                value=(f'=IF(OR(E{row}="",O{row}<>"",{_sk_bedingung(f"E{row}", f"C{row}")}),0,'
                        f'ROUND(K{row}*N(L{row}),2))'))
         ws.cell(row=row, column=17).fill = blue_fill
     for row in ws.iter_rows(min_row=2, max_row=ws.max_row):
@@ -1455,7 +1494,10 @@ def build_excel_workbook(calendar_df, trips_df, config, period_label, output_pat
                        f'IF(D{row}<>"","Partner-Zuordnung",IF(R{row}<>"","Kalender-Match (ignoriertes Projekt)",'
                        f'"Nicht zugeordnet")))))'))
         ws.cell(row=row, column=13,
-                value=f'=IF(D{row}="","",IF({_or_gleich(f"D{row}", fahrt_ohne_kosten)},0,J{row}*L{row}))')
+                value=(f'=IF(D{row}="","",IF(OR(' + ','.join(
+                    [f'AND(D{row}="{p_}",C{row}="{config["sonderkalkulationen"][p_].get("mitarbeiter")}")'
+                     if config["sonderkalkulationen"][p_].get("mitarbeiter") else f'D{row}="{p_}"'
+                     for p_ in fahrt_ohne_kosten] or ['FALSE']) + f'),0,J{row}*L{row}))'))
     for row in ws.iter_rows(min_row=2, max_row=ws.max_row):
         for cell in row:
             cell.font = normal
@@ -2278,7 +2320,7 @@ def _kosten_zeit_zeile(r, config):
     """Gleiche Logik wie die Excel-Formel in Rohdaten_Kalender!M (Version 6)."""
     sonderkalk = {p for p in config.get('sonderkalkulationen', {}) if not p.startswith('_')}
     proj = _wirksames_projekt_kalender(r)
-    if proj is None or _ist_blocker(r) or proj in sonderkalk:
+    if proj is None or _ist_blocker(r) or sonderkalk_gilt(proj, r['Mitarbeiter'], config):
         return 0.0
     satz = r['Stundensatz_EUR']
     satz = float(satz) if satz is not None and not pd.isna(satz) else 0.0
@@ -2323,7 +2365,8 @@ def summen_je_monat_projekt(daten, config, statische_kosten=False):
         t['P'] = t['Projekt']
         t['Monat'] = t['Start'].dt.strftime('%Y-%m')
         t['km'] = pd.to_numeric(t['Distanz (km)'], errors='coerce').fillna(0.0)
-        t['K'] = t.apply(lambda r: 0.0 if r['P'] in ohne else r['km'] * float(r['KmSatz_EUR'] or 0), axis=1)
+        t['K'] = t.apply(lambda r: 0.0 if (r['P'] in ohne and sonderkalk_gilt(r['P'], r['Fahrer'], config))
+                         else r['km'] * float(r['KmSatz_EUR'] or 0), axis=1)
         t['Std'] = 0.0
         teile.append(t[['Monat', 'P', 'Std', 'K', 'km']])
     zk = daten.get('zusatzkosten')
@@ -2380,16 +2423,37 @@ def uebertrage_korrekturen(neu_df, alt_df, art):
         return neu, rest
     keyf = _kal_key if art == 'kalender' else _trip_key
     grobf = _kal_key_grob if art == 'kalender' else _trip_key
-    exakt, grob = {}, {}
+    exakt, grob, tag_text, tag_text_ohne_ma = {}, {}, {}, {}
+
+    def _text(r):
+        if art != 'kalender':
+            return ''
+        b = r.get('Betreff')
+        if isinstance(b, str) and b:
+            return _norm(re.sub(r'[%s]' % ANFUEHRUNGSZEICHEN, '', b))
+        p_, a_ = r.get('Projekt'), r.get('Aufgabe')
+        return _norm(' '.join(x for x in (p_ if isinstance(p_, str) else '', a_ if isinstance(a_, str) else '') if x))
+    vergeben = set()
     for idx, r in neu.iterrows():
         exakt.setdefault(keyf(r), []).append(idx)
         grob.setdefault(grobf(r), []).append(idx)
+        if art == 'kalender':
+            tag_text.setdefault((r['Mitarbeiter'], r['Start'].date(), _text(r)), []).append(idx)
+            tag_text_ohne_ma.setdefault((r['Start'].date(), _text(r)), []).append(idx)
     for _, a in alt_df[alt_df['Korrektur'].notna() & (alt_df['Korrektur'] != '')].iterrows():
         ziel = exakt.get(keyf(a)) or []
         if len(ziel) != 1:
             ziel = grob.get(grobf(a)) or []
+        if len(ziel) != 1 and art == 'kalender':
+            # Stufe 3/4 (Version 6): gleicher Tag + gleicher Text (Uhrzeit im Export
+            # verschoben bzw. Termin lag in der Vorversion bei einer anderen Person)
+            ziel = tag_text.get((a['Mitarbeiter'], a['Start'].date(), _text(a))) or []
+            if len(ziel) != 1:
+                ziel = tag_text_ohne_ma.get((a['Start'].date(), _text(a))) or []
+        ziel = [z for z in ziel if z not in vergeben]
         if len(ziel) == 1:
             neu.at[ziel[0], 'Korrektur'] = a['Korrektur']
+            vergeben.add(ziel[0])
         else:
             wer = a['Mitarbeiter'] if art == 'kalender' else a['Fahrer']
             text = (a.get('Betreff') or a.get('Aufgabe') or '') if art == 'kalender' else (a.get('Partner') or '')
@@ -2812,7 +2876,8 @@ def _speichern_und_berichten(cal, trips, cfg, period_label, output_dir, version_
                             abgleich, extra):
     import os
     os.makedirs(output_dir, exist_ok=True)
-    pfad = os.path.join(output_dir, dateiname_fuer_version(period_label, version_info['version']))
+    pfad = os.path.join(output_dir, dateiname_fuer_version(period_label, version_info['version'],
+                                                           cfg.get('dateiname_praefix', 'Projektuebersicht')))
     if os.path.exists(pfad):
         raise FileExistsError(f'{pfad} existiert schon - Versionsnummer nicht doppelt vergeben')
     cal = cal.reset_index(drop=True)
@@ -2833,8 +2898,37 @@ def _speichern_und_berichten(cal, trips, cfg, period_label, output_dir, version_
             'n_extra': len(extra), 'abgleich': abgleich, 'kalender': cal, 'fahrten': trips, 'config': cfg}
 
 
+def wende_korrekturen_an(df, korrekturen, art):
+    """Von der Nutzerin im Chat entschiedene Einzelkorrekturen eintragen (landen sichtbar
+    in der Spalte 'Manuelle Projekt-Korrektur'). korrekturen: Liste von dicts
+    {bereich: 'kalender'|'fahrten', mitarbeiter, start ('YYYY-MM-DD HH:MM'),
+    text (optional, Teil des Betreffs/Partners), korrektur}. Passt ein Eintrag nicht auf
+    genau EINE Zeile -> Prüfliste statt raten."""
+    df = df.copy()
+    if 'Korrektur' not in df.columns:
+        df['Korrektur'] = None
+    rest = []
+    wer_col = 'Mitarbeiter' if art == 'kalender' else 'Fahrer'
+    txt_col = 'Betreff' if art == 'kalender' else 'Partner'
+    for k in korrekturen or []:
+        if k.get('bereich', 'kalender') != art:
+            continue
+        sel = df[(df[wer_col] == k['mitarbeiter']) & (df['Start'] == pd.Timestamp(k['start']))]
+        if k.get('text'):
+            sel = sel[sel[txt_col].astype(str).str.contains(k['text'], case=False, regex=False)]
+        if len(sel) == 1:
+            df.at[sel.index[0], 'Korrektur'] = k['korrektur']
+        else:
+            rest.append({'Bereich': 'Korrektur aus Chat nicht anwendbar', 'Datum': pd.Timestamp(k['start']),
+                         'Mitarbeiter': k['mitarbeiter'], 'Text': k.get('text', ''), 'Projekt': k['korrektur'],
+                         'Grund': f'passt auf {len(sel)} Zeilen - bitte von Hand eintragen'})
+    return df, rest
+
+
 def neuaufbau(calendar_specs, autolog_specs, config, period_start, period_end, period_label, output_dir,
-              vergleichsdatei=None, version=1, neue_manuelle_zeitbuchungen=None, neue_zusatzkosten=None):
+              vergleichsdatei=None, version=1, neue_manuelle_zeitbuchungen=None, neue_zusatzkosten=None,
+              korrekturen=None, zusatzkosten=None, partner_ueberschreiben=None, fahrten_als_geschaeftlich=None,
+              vergleich_bis=None):
     """Kompletter Neuaufbau aus allen Rohdaten (z.B. 'Basis v01').
     vergleichsdatei: die zuletzt freigegebene ALTE Ausgabe (auch Version 5 ohne
     Stempel erlaubt). Daraus werden Zusatzkosten, manuelle Zeitbuchungen,
@@ -2843,6 +2937,10 @@ def neuaufbau(calendar_specs, autolog_specs, config, period_start, period_end, p
     import os
     alt = lade_vorlage(vergleichsdatei, config) if vergleichsdatei else None
     cfg, hinweise = _merge_config(config, alt)
+    # Entscheidungen der Nutzerin, die die Vorlage übersteuern (z.B. Partner leer statt Unberücksichtigt)
+    for k_, v_ in (partner_ueberschreiben or {}).items():
+        cfg.setdefault('partner_projekt_zuordnung', {})[k_] = v_
+        hinweise.append(f'Partner-Zuordnung lt. Nutzerin: {k_} -> {v_ or "(leer)"}')
     extra = [{'Bereich': 'Hinweis Übernahme', 'Datum': None, 'Mitarbeiter': '', 'Text': h, 'Projekt': '',
               'Grund': 'aus der Vergleichsdatei übernommen - bitte kurz bestätigen'} for h in hinweise]
 
@@ -2853,10 +2951,25 @@ def neuaufbau(calendar_specs, autolog_specs, config, period_start, period_end, p
     cal = _markiere_dubletten(cal)
     cal['Quelle'] = 'neu'
     trips = _lade_fahrten(autolog_specs, cfg, period_start, period_end)
-    extra += offene_fahrten(autolog_specs, cfg, period_start, period_end)
+    offen = offene_fahrten(autolog_specs, cfg, period_start, period_end)
+    als_g = {pd.Timestamp(x) for x in (fahrten_als_geschaeftlich or [])}
+    if als_g:
+        # von der Nutzerin als geschäftlich bestätigte 'Offen'-Fahrten aufnehmen
+        roh = [load_autolog_csv(sp['path'], sp['kennzeichen'],
+                                {re.sub(r'\s+', '', k).upper(): v for k, v in cfg['fahrzeug_fahrer_zuordnung'].items()
+                                 if not k.startswith('_')}.get(re.sub(r'\s+', '', sp['kennzeichen']).upper()),
+                                period_start, period_end, nur_geschaeftlich=False) for sp in autolog_specs]
+        roh = pd.concat(roh, ignore_index=True)
+        dazu = roh[roh['Start'].isin(als_g) & (roh['Fahrtart'] != 'Geschäftlich')]
+        trips = pd.concat([trips, dazu], ignore_index=True)
+        offen = [o_ for o_ in offen if pd.Timestamp(o_['Datum']) not in als_g]
+    extra += offen
+    trips = trips.drop_duplicates(subset=['Fahrer', 'Start', 'Ende', 'Distanz (km)', 'Partner']).reset_index(drop=True)
     trips = _match_alle(trips, cal, cfg)
     trips['Quelle'] = 'neu'
     zk = alt['zusatzkosten'] if alt else pd.DataFrame(columns=['Datum', 'Projekt', 'Kostenart', 'Betrag_EUR', 'Anmerkung'])
+    if zusatzkosten is not None:
+        zk = zusatzkosten
     mz = alt['manuelle_zeitbuchungen'] if alt else pd.DataFrame(
         columns=['Datum', 'Mitarbeiter', 'Projekt', 'Hauptaufgabe', 'Stunden', 'Anmerkung'])
     if neue_zusatzkosten is not None and len(neue_zusatzkosten):
@@ -2867,6 +2980,9 @@ def neuaufbau(calendar_specs, autolog_specs, config, period_start, period_end, p
         cal, r1 = uebertrage_korrekturen(cal, alt['kalender'], 'kalender')
         trips, r2 = uebertrage_korrekturen(trips, alt['fahrten'], 'fahrten')
         extra += r1 + r2
+    cal, r3 = wende_korrekturen_an(cal, korrekturen, 'kalender')
+    trips, r4 = wende_korrekturen_an(trips, korrekturen, 'fahrten')
+    extra += r3 + r4
     trips = apply_partner_zuordnung(trips, cfg)
     trips = compute_fahrten_kosten(trips, cfg)
 
@@ -2877,7 +2993,8 @@ def neuaufbau(calendar_specs, autolog_specs, config, period_start, period_end, p
         meta = alt['meta']
         label = (f'{os.path.basename(vergleichsdatei)}'
                  + (f' ({versionstext(meta["version_nr"])})' if meta.get('version_nr') else ' (ohne Versionsstempel)'))
-        abgleich = vergleiche_versionen(alt, neu, cfg_alt, cfg, bis=meta.get('datenstand_bis'), alt_label=label)
+        bis_ = meta.get('datenstand_bis') or (pd.Timestamp(vergleich_bis) if vergleich_bis else None)
+        abgleich = vergleiche_versionen(alt, neu, cfg_alt, cfg, bis=bis_, alt_label=label)
     vi = {'version': version, 'vorgaenger': None,
           'vorgaenger_text': ('- (Neuaufbau, Vergleich: ' + os.path.basename(vergleichsdatei) + ')')
           if vergleichsdatei else '- (Neuaufbau)',

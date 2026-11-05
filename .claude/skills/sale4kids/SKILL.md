@@ -1349,7 +1349,7 @@ ist die Merkliste; erledigte Punkte hier abhaken, nicht löschen.
       § 18 Abs. 2 MStV, ODR-Absatz entfernt (Hinweis gegeben, kein Rechtsrat). Vorher: BU01-43/-44 je 40 € ok →
       `katalog_import-06.11.json` (676 sichtbar) + `kikripp-fotos-nachtrag-06.11.zip` (F-942/F-943) für Freitag.
       Browsertest-Fix: Merkliste über `.liste-knopf` öffnen (Leistenmitte trifft „Geschenke ansehen“).
-- [ ] **03./04.11.2026: Plugin 1.15.0 – Barzahlung + Artikel hinzufügen** (Nutzerin spielt es Do 05.11. ein, vor dem
+- [x] **03./04.11.2026: Plugin 1.15.0 – Barzahlung + Artikel hinzufügen** (am 05.11. eingespielt und geprüft: Formular, Ablauftext, Feld „Bezahlung“; vor dem
       Spielzeug-Freitag). SCHEMA 9: Vorgang `zahlart` ('', 'ueberweisung', 'bar') und `rg_korrektur`. Formular:
       Pflichtauswahl „Überweisung vorab / Bar bei Abholung“ (Verwaltung freiwillig), Beleg + Meldemail zeigen sie, CSV-Export
       Spalte „Zahlart“. **Bar** (`Kikripp_Ablauf::bar()`): keine „Rechnung schreiben“/„Zahlungserinnerung“/„noch nicht
@@ -1361,6 +1361,10 @@ ist die Merkliste; erledigte Punkte hier abhaken, nicht löschen.
       mit Rechnungsnr. → `rg_korrektur=1` + Aufgabe „Rechnung in DATEV korrigieren“ bis neue Nummer; bezahlt/abgeholt →
       wie bisher eigener Zusatz-Vorgang (übernimmt jetzt auch die Zahlart). Ablauftext `kikripp_ablauf_1150()`.
       Tests 559 Logik, 94 Browser, 16 mobil, 32 Geschenke, Liste ok.
+- [x] **04.11.: Reservierungs-Export (67 Vorgänge) eingelesen**, „bar“/„Sammel RG“ aus Rechnungsnr. in die Bemerkung
+      verschoben (24). Excel der Nutzerin war eine ältere Fassung (Geschenke verborgen, BU01-43/-44 offen) → verworfen, Stand
+      03.11. bleibt. **BU04-03 nicht entfallen, 1 Stück, an Fronius (#75)**. Ausgeliefert `01_Artikelstamm_kikripp_2026-11-04.xlsx`
+      (Datum im Namen – Wunsch der Nutzerin, künftig so benennen) und `katalog_import-06.11.json` (677 sichtbar).
 - [ ] **Anfang November 2026 (Nutzerin meldet sich):**
       1. Spielzeug online: alle Artikel mit Kategorie „Spielzeug“ und Preis_geprüft ok auf Im_Katalog = ja (alte vom 12.10.
          BA04/BU01/BU02/BU04, Tonies NE01-27 bis -38, NU07-09 bis -18 inkl. -14A, NU05-Bücher/-Spiele), Fotopaket-Nachtrag.

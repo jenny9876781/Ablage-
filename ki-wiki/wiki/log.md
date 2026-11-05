@@ -25,3 +25,4 @@ stand: 2026-11-03
 - 2026-11-04 – Dozenten-Check umgesetzt: Neu-Nummerierung S1–S4/E1–E4, Swimlane-Grafik, Vorher/Nachher-Grafik, Genauigkeits-Kennzahl, Alternativen (Excel), Jahr-1-Definition, Risiken, Review 15.03.2027 + Ausstiegsregel, Reflexion, Glossar; Nutzen neu (heute ca. 2 h) → +2.005 € / +3.174 €.
 - 2026-11-04 – AUFTRAG_SKILL_PRUEFUNG.md für neuen Claude-Code-Chat angelegt.
 - 2026-11-04 – TT23-Folien + TT18 (Richtlinie, Steckbrief, Ampel nach Werkzeug) eingearbeitet: Wellen Pilot/Ausweitung/Regelbetrieb, Fazit B, Anhang D Steckbrief, Bonus-Freigabe, Schulungszugang offen benannt; Auftrag Skill-Prüfung: nur Testdaten.
+- 2026-11-05 – Abschluss-Lint: S5-Rest korrigiert, Verrechnungssatz-Zahl entfernt; Abgabedatei Preisigke_Praxisprojekt_Monatsbericht.docx.

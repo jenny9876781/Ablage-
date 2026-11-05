@@ -2777,7 +2777,7 @@ def _markiere_dubletten(cal):
     zweite Zeile als 'mögliche Dublette' markieren (Entscheidung: Nutzerin).
     Identische Zeilen aus DEMSELBEN Kalender (doppelt exportiert) werden entfernt."""
     cal = cal.drop_duplicates(subset=['Mitarbeiter', 'Kalendertyp', 'Start', 'Ende', 'Betreff']).copy()
-    dup = cal.duplicated(subset=['Mitarbeiter', 'Start', 'Ende', 'Betreff'], keep='first')
+    dup = cal.duplicated(subset=['Mitarbeiter', 'Start', 'Ende', 'Betreff'], keep='first') & cal['Projekt'].notna()
     for idx in cal[dup].index:
         g = cal.at[idx, 'Zuordnung_Grund']
         cal.at[idx, 'Zuordnung_Grund'] = (g + '; ' if g else '') + \

@@ -3,7 +3,7 @@ name: projekt-zeit-kosten-report
 description: "Use this skill whenever the user (assistant to Neininger management) wants the recurring time/cost report that consolidates Outlook calendar entries (project name in quotes in the subject) with the Autolog vehicle logbook export into a multi-year Excel report: hours, driven km, and costs per project, per task category, per employee, per company (Neininger GmbH / TransCare), with a filterable dashboard, VAT breakdown, a weekly non-project sales-time allowance, manual extra costs, and a plausibility check. Trigger on 'Projektbericht', 'Zeit-/Kostenbericht', 'Autolog', 'Fahrtenbuch', 'Kalenderexport'+'Projekt', 'Jahresauswertung', or requests reconciling calendar time with driving logs into a cost report, any year from 2024 on. Also trigger when calendar/Autolog CSVs are uploaded with a request to consolidate hours/km/costs, including project-specific multi-year reports. Do NOT use for the separate ma-nbo-workflow skill."
 ---
 
-# Projekt-Zeit-/Kosten-Report (Neininger) — Version 6.1 (abgesichert, 2026-11)
+# Projekt-Zeit-/Kosten-Report (Neininger) — Version 6.2 (abgesichert + vereinfacht, 2026-11)
 
 Dieser Skill bildet den wiederkehrenden Workflow ab, bei dem aus Outlook-Kalenderexporten
 mehrerer Mitarbeiter/Postfächer und einem Autolog-Fahrtenbuch-Export ein Excel-Bericht mit
@@ -34,8 +34,8 @@ Ziel von Version 6: **genauer, nicht schneller.** Die Geschäftsführung muss de
   (Fahrer kommt aus `fahrzeug_fahrer_zuordnung`, nie aus dem Export).
 
 **2. Versionsregel (gegen S1 „falsche Vorlage“).**
-- Dateiname `Projektuebersicht_<Zeitraum>_v<NN>.xlsx`; Version, Vorgänger, Datenstand bis, Erstellt am,
-  Skill-Version und **Freigegeben am/von** stehen im Parameter-Reiter (Block „Berichtsversion“, Spalten M–N).
+- Dateiname `Füxle_<Zeitraum>_v<NN>.xlsx`; Version, Vorgänger, Datenstand bis, Erstellt am,
+  Skill-Version und **Freigegeben am/von** stehen im **Cockpit** (Block „Berichtsversion“).
 - **Vor jeder Fortführung die Nutzerin fragen: „Welche Version ist zuletzt freigegeben (z.B. v03)?“** Nie
   selbst aus Dateidatum, Chatverlauf oder Projektdateien ableiten.
 - `pruefe_vorlage()` (in `fortfuehrung()` eingebaut) stoppt mit `VorlageFehler`, wenn die Datei älter oder
@@ -46,13 +46,13 @@ Ziel von Version 6: **genauer, nicht schneller.** Die Geschäftsführung muss de
 - Vormonate werden **eingefroren** übernommen. Neue Rohdaten zählen nur NACH „Datenstand bis“. Nachträge in
   Vormonaten und in Outlook geänderte alte Termine kommen auf die Prüfliste, nicht in die Zahlen.
 
-**3. Prüfblatt „Abgleich_Vormonate“ (erster Reiter).** Summen je Monat × Projekt alt gegen neu. Oben steht
+**3. Prüfblatt „Abgleich_Vormonate“.** Summen je Monat × Projekt alt gegen neu. Oben steht
 „Vormonate unverändert ✔“ oder „X Abweichungen“; Abweichungen sind rot, mit automatischer Begründung und
 den betroffenen Einzelzeilen. **Bei einer Fortführung muss dort „unverändert ✔“ stehen – sonst nicht
 ausliefern, sondern der Nutzerin die Abweichungen zeigen.** Beim Neuaufbau mit Vergleichsdatei sind
 Abweichungen erwartbar (behobene Fehler) – jede einzeln mit der Nutzerin klären.
 
-**4. „Zuordnung_Grund“ + „Prüfen“ + Reiter „Pruefliste“ (gegen S2).** Jede Kalender- und Fahrtzeile hat einen
+**4. „Zuordnung_Grund“ + „Prüfen“ + Reiter „Pruefen_Korrigieren“ (gegen S2).** Jede Kalender- und Fahrtzeile hat einen
 Grund (z.B. „Projektname im Betreff“, „Alias Sand → Sandformation“, „Zeitfenster-Match mit Termin …“,
 „Partner-Zuordnung …“, „Partner … = Unberücksichtigt (hat Vorrang)“). Unsichere Fälle sind gelb und stehen auf
 der Pruefliste (Status live: erledigt, sobald eine Korrektur oder ein „x“ eingetragen ist). Unsicher sind:
@@ -71,6 +71,33 @@ nicht dauerhaft, nur über ein neues ZIP.**
 (Interne_Auswertung, Dashboard-Kreuztabelle) und je Mitarbeiter **und Projekt** (Übersicht) bleiben.
 
 **7. Tests:** `python -m pytest tests -q` (erfundene Testdaten). Vor jeder Änderung an `report_lib.py` laufen lassen.
+
+## Version 6.2 (2026-11-05): einfachere Bedienung – VERBINDLICHE Struktur
+
+**Reiter (Farbe):** 🟢 `Cockpit` · `Uebersicht` · `Interne_Auswertung` | 🟡 `Pruefen_Korrigieren` ·
+`Abgleich_Vormonate` | 🔵 `Zusatzkosten` · `Manuelle_Zeitbuchungen` · `Stammdaten` | ⚪ `Rohdaten_Kalender` ·
+`Rohdaten_Fahrten` · `<Sonderkalk>_Kalk` · `Listen` (versteckt). Entfallen: Filter_Dashboard, Uebersicht_<Jahr>,
+Gesamt_Alle_Jahre, Monatstrend, Hauptaufgaben_Verteilung, Plausibilitaets_Check, Pruefliste, Parameter.
+
+- **Cockpit:** Filter Jahr/Monat/Firma/Projekt/Status (KEIN Mitarbeiter-Filter – Datenschutz, Nutzerin). Ergebnis
+  mit ALLEN Bestandteilen (Kalender, manuelle Zeiten, Sonderkalk., Fahrten, Zusatzkosten), Projektliste der
+  Auswahl, Top 5, Monatsverlauf, Versionsblock mit **Freigabe**, Prüfstatus, Monatsabschluss-Checkliste.
+  Test: Cockpit „(Alle)“ = Übersicht GESAMT auf den Cent.
+- **Uebersicht:** ein Reiter mit Jahr-Auswahl (inkl. „(Alle)“). Projektliste enthält auch Projekte, die nur in
+  Zusatzkosten/manuellen Zeiten vorkommen.
+- **Interne_Auswertung (GF):** live, Filter inkl. Mitarbeiter; Stunden je Mitarbeiter × Hauptaufgabe (inkl.
+  informativer Niedermaier-Stunden) und Monat × Mitarbeiter.
+- **Pruefen_Korrigieren = die EINE Liste:** jede Zeile hat eine feste **ID** (Rohdaten Spalte X). Entscheidung in
+  Spalte J (Projekt / Unberücksichtigt / „✔ passt“), Kommentar K. Rohdaten holen die Entscheidung per ID
+  (`_entscheidung_formel`) – in den Rohdaten wird nichts mehr von Hand eingetragen. Oben offene Punkte (teuerste
+  zuerst), darunter alle Entscheidungen, 200 freie Zeilen (ID eintragen), unten eingeklappt die Hinweise.
+  Rechts **Regel-Vorschläge** (ab 3 gleichen Korrekturen); mit „x“ angenommene Regeln werden beim nächsten Lauf
+  als `projektname_erkennung.stichwort_regeln` übernommen (dann Config im ZIP nachziehen).
+- **Ausmisten:** Korrekturen ohne Wirkung („Unberücksichtigt“ bei Terminen ohne Projekt, Korrektur = automatisch)
+  werden beim Neuaufbau entfernt; bei unsicheren Zeilen bleiben sie als „✔ passt“ erhalten.
+- **Abgleich:** nur Abweichungen + Summenzeile; Einzelzeilen mit Spalte „Ursache“.
+- **Manuelle Zeitbuchungen:** neue Zeilen holen den Stundensatz automatisch (vorher leer → 0 €).
+- Firma/Status stehen als Formelspalten in allen Quellen (für die Filter).
 
 ## Version 6.1 (2026-11-05): Regeln aus dem ersten Echtdaten-Lauf (Basis v01 bis 30.09.2026)
 

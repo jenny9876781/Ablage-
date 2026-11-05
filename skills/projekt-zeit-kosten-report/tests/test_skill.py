@@ -9,8 +9,8 @@ import openpyxl
 import pandas as pd
 import pytest
 
-from conftest import (BASIS_ENDE, BASIS_START, NOV_ENDE, config, freigeben, lade_v5, rl, td,
-                      uebersicht_summen)
+from conftest import (BASIS_ENDE, BASIS_START, NOV_ENDE, config, entscheide, freigeben, lade_v5,
+                      pruefliste, rl, td, uebersicht_summen)
 
 
 # --------------------------------------------------------------- S2: Erkennung
@@ -56,10 +56,10 @@ def test_unsichere_faelle_gelb_und_auf_pruefliste(szenario):
     assert len(gelbe) == 3            # Niedermaier-Block, Kurztermin, "Fantasia"
     for r in gelbe:
         assert rk.cell(row=r, column=1).fill.fgColor.rgb.endswith('FFE699')
-    pl = wb['Pruefliste']
-    eintraege = [r for r in pl.iter_rows(min_row=6, values_only=True) if r[0]]
-    assert len(eintraege) == 4        # + Fahrt mit zwei Projekten im Zeitfenster
-    assert any('ähnlich nah' in (e[6] or '') for e in eintraege)
+    offen = [e for e in pruefliste(szenario['v01']['pfad']) if e['Thema'] == 'unsicher - bitte entscheiden']
+    assert len(offen) == 4            # + Fahrt mit zwei Projekten fast gleich nah
+    assert any('ähnlich nah' in (e['Grund'] or '') for e in offen)
+    assert offen[0]['Wirkung (€)'] >= offen[-1]['Wirkung (€)']     # teuerste zuerst
 
 
 def test_fahrt_mehrdeutig_wird_markiert_nicht_geaendert(szenario):
@@ -156,8 +156,7 @@ def test_keine_dubletten_bei_fortfuehrung(szenario):
 def test_nachtrag_im_vormonat_nicht_still_uebernommen(szenario):
     cal = szenario['v02']['kalender']
     assert not (cal['Start'] == pd.Timestamp('2026-10-30 09:00')).any()
-    pl = openpyxl.load_workbook(szenario['v02']['pfad'])['Pruefliste']
-    assert any(r[1] and 'Nachtrag Vormonat' in r[1] for r in pl.iter_rows(min_row=6, values_only=True))
+    assert any('Nachtrag Vormonat' in (e['Thema'] or '') for e in pruefliste(szenario['v02']['pfad']))
 
 
 def test_handeintraege_bleiben_erhalten(szenario):
@@ -211,7 +210,7 @@ def test_auslastung_entfernt(szenario):
 
 
 def test_stundensaetze_im_parameter_nicht_ueberschrieben(szenario):
-    ws = openpyxl.load_workbook(szenario['v01']['pfad'])['Parameter']
+    ws = openpyxl.load_workbook(szenario['v01']['pfad'])['Stammdaten']
     assert [ws.cell(row=r, column=4).value for r in (5, 6, 7)] == [200, 150, 150]
 
 
@@ -262,7 +261,7 @@ def test_regression_summen_je_projekt_wie_version5(szenario, recalced, tmp_path)
     cs, al = td.specs(tmp_path, td.MARIUS_BASIS, tag='v6')
     r6 = rl.neuaufbau(cs, al, cfg, BASIS_START, BASIS_ENDE, '2026-10', str(tmp_path / 'v6'))
     res6, rc6 = recalced(r6['pfad'])
-    s5, s6 = uebersicht_summen(rc5), uebersicht_summen(rc6)
+    s5, s6 = uebersicht_summen(rc5, 'Gesamt_Alle_Jahre'), uebersicht_summen(rc6)
     assert set(s5) == set(s6)
     for proj in s5:
         assert s6[proj]['kosten'] == pytest.approx(s5[proj]['kosten'], abs=0.005), proj
@@ -322,8 +321,7 @@ def test_offene_fahrt_kommt_auf_pruefliste(tmp_path):
     with open(al[0]['path'], 'a', encoding='utf-8') as f:
         f.write('VS MN 1000;30.09.26 11:52;30.09.26 15:19;333;Offen;;;;Landau;Überlingen\n')
     r = rl.neuaufbau(cs, al, cfg, BASIS_START, BASIS_ENDE, '2026-10', str(tmp_path / 'o'))
-    pl = openpyxl.load_workbook(r['pfad'])['Pruefliste']
-    assert any(x[1] == 'Fahrt nicht klassifiziert' for x in pl.iter_rows(min_row=6, values_only=True))
+    assert any(e['Thema'] == 'Fahrt nicht klassifiziert' for e in pruefliste(r['pfad']))
 
 
 def test_sonderkalk_nur_fuer_marius():
@@ -363,8 +361,7 @@ def test_korrektur_aus_chat(tmp_path):
     c = r['kalender']
     assert c.loc[c['Aufgabe'] == 'Montagssitzung intern', 'Korrektur'].iloc[0] == 'Cool'
     assert r['pfad'].endswith('Füxle_2026-10_v01.xlsx')
-    pl = openpyxl.load_workbook(r['pfad'])['Pruefliste']
-    assert any(x[1] == 'Korrektur aus Chat nicht anwendbar' for x in pl.iter_rows(min_row=6, values_only=True))
+    assert any(e['Thema'] == 'Korrektur aus Chat nicht anwendbar' for e in pruefliste(r['pfad']))
 
 
 def test_urlaub_in_fremdem_kalender_mit_namen():
@@ -373,3 +370,126 @@ def test_urlaub_in_fremdem_kalender_mit_namen():
                          'Start': pd.Timestamp('2024-03-29'), 'Ende': pd.Timestamp('2024-04-06')}])
     p = rl.generate_wochenpauschale_rows(cal, cfg, datetime(2024, 3, 25), datetime(2024, 4, 14, 23, 59))
     assert list(p['Dauer_h']) == [0.0, 0.0, 5.0]
+
+
+# --------------------------------------------------------------- Version 6.2
+def test_reiterstruktur(szenario):
+    wb = openpyxl.load_workbook(szenario['v02']['pfad'])
+    assert wb.sheetnames[:5] == ['Cockpit', 'Uebersicht', 'Interne_Auswertung', 'Pruefen_Korrigieren',
+                                 'Abgleich_Vormonate']
+    for weg in ('Filter_Dashboard', 'Monatstrend', 'Hauptaufgaben_Verteilung', 'Plausibilitaets_Check',
+                'Pruefliste', 'Gesamt_Alle_Jahre', 'Parameter'):
+        assert weg not in wb.sheetnames
+    assert wb['Listen'].sheet_state == 'hidden'
+
+
+@pytest.mark.parametrize('key', ['v01', 'v02'])
+def test_cockpit_alle_gleich_uebersicht(szenario, recalced, key):
+    res, pfad = recalced(szenario[key]['pfad'])
+    wb = openpyxl.load_workbook(pfad, data_only=True)
+    ue = sum(v['kosten'] for v in uebersicht_summen(pfad).values())
+    ck = wb['Cockpit']
+    netto = [r[1] for r in ck.iter_rows(min_row=10, max_row=22, max_col=2, values_only=True) if r[0] == 'Gesamtkosten NETTO'][0]
+    assert netto == pytest.approx(ue, abs=0.01)
+    assert any(r[1] == '0 Fehler ✔' for r in ck.iter_rows(min_col=5, max_col=6, values_only=True))
+    # Projektliste im Cockpit = Übersicht je Projekt
+    ue_p = uebersicht_summen(pfad)
+    for r in ck.iter_rows(min_row=25, max_col=5, values_only=True):
+        if r[0] in ue_p:
+            assert r[4] == pytest.approx(ue_p[r[0]]['kosten'], abs=0.01), r[0]
+
+
+def test_interne_auswertung_summe_gleich_stunden(szenario, recalced):
+    res, pfad = recalced(szenario['v01']['pfad'])
+    wb = openpyxl.load_workbook(pfad, data_only=True)
+    ia = wb['Interne_Auswertung']
+    gesamt = [r for r in ia.iter_rows(min_row=12, max_row=20, values_only=True) if r[0] == 'GESAMT'][0]
+    std_ue = sum(v['std'] for v in uebersicht_summen(pfad).values())
+    # Interne Auswertung = Übersichtsstunden + informative Niedermaier-Stunden (8,5 h/Tag)
+    info = sum(rl.calc_tagessatz_block_kosten(szenario['v01']['kalender'], 'Spedition Niedermaier',
+                                              szenario['cfg']['sonderkalkulationen'])['bloecke']['Tage']) * 8.5
+    n_ha = len(szenario['v01']['config']['hauptaufgaben_kategorien']) - 2
+    assert gesamt[1 + n_ha] == pytest.approx(std_ue + info, abs=0.01)
+
+
+def test_entscheidung_passt_und_kommentar_bleiben(szenario):
+    wb = openpyxl.load_workbook(szenario['v02']['pfad'])
+    eintraege = pruefliste(szenario['v02']['pfad'])
+    e = [x for x in eintraege if x['Thema'] == 'Entscheidung' and x['Entscheidung'] == 'Cool']
+    assert e and e[0]['Kommentar'] == 'Test: Montagssitzung gehört zu Cool'
+
+
+def test_passt_bestaetigt_ohne_korrektur(tmp_path):
+    cfg = config()
+    cs, al = td.specs(tmp_path, td.MARIUS_BASIS)
+    r = rl.neuaufbau(cs, al, cfg, BASIS_START, BASIS_ENDE, '2026-10', str(tmp_path / 'o'))
+    freigeben(r['pfad'], zusatz=lambda wb: [entscheide(wb, e['ID'], rl.PASST)
+                                            for e in pruefliste(r['pfad']) if e['Thema'].startswith('unsicher')])
+    alt = rl.lade_vorlage(r['pfad'], cfg)
+    k = alt['kalender']
+    fant = k[k['Projekt'] == 'Fantasia'].iloc[0]
+    assert fant['Entscheidung'] == rl.PASST and pd.isna(fant['Korrektur'])
+
+
+def test_ausmisten():
+    cfg = config()
+    cal = pd.DataFrame({'Projekt': [None, 'Koko', 'Koko', None], 'Korrektur': ['Unberücksichtigt', 'Koko', 'Cool', 'Cool']})
+    trips = pd.DataFrame(columns=['Projekt', 'Korrektur'])
+    c, t, n = rl.ausmisten(cal, trips, cfg)
+    assert n == 2 and [None if pd.isna(x) else x for x in c['Korrektur']] == [None, None, 'Cool', 'Cool']
+
+
+def test_regel_vorschlag_und_uebernahme(tmp_path):
+    cfg = config()
+    termine = td.MARIUS_BASIS + [(f'Termin Grafschaft {i}', f'2026-10-{10 + i} 09:00', f'2026-10-{10 + i} 10:00')
+                                 for i in range(3)]
+    cs, al = td.specs(tmp_path, termine)
+    k = [{'bereich': 'kalender', 'mitarbeiter': td.MN, 'start': f'2026-10-{10 + i} 09:00', 'korrektur': 'Frutania'}
+         for i in range(3)]
+    r = rl.neuaufbau(cs, al, cfg, BASIS_START, BASIS_ENDE, '2026-10', str(tmp_path / 'o'), korrekturen=k)
+    vor = rl.regel_vorschlaege(r['kalender'], r['config'])
+    assert any(v['Stichwort'] == 'grafschaft' and v['Projekt'] == 'Frutania' for v in vor)
+    wb = openpyxl.load_workbook(r['pfad'])
+    ws = wb[rl.PRUEF]
+    for row in range(7, ws.max_row + 1):
+        if ws.cell(row=row, column=15).value == 'grafschaft':
+            ws.cell(row=row, column=20, value='x')
+    wb.save(r['pfad'])
+    alt = rl.lade_vorlage(r['pfad'], cfg)
+    cfg2, hinweise = rl._merge_config(cfg, alt)
+    assert cfg2['projektname_erkennung']['stichwort_regeln']['grafschaft'] == 'Frutania'
+    e = rl.erkenne_projekt('M. Neininger Grafschaft', cfg2)
+    assert e['projekt'] == 'Frutania' and 'Regel' in e['grund']
+
+
+def test_neue_manuelle_zeile_holt_stundensatz(szenario, recalced, tmp_path):
+    import shutil
+    p = tmp_path / 'Füxle_2026-10_v01.xlsx'
+    shutil.copy(szenario['v01']['pfad'], p)
+    wb = openpyxl.load_workbook(p)
+    mz = wb['Manuelle_Zeitbuchungen']
+    for c, v in enumerate([datetime(2026, 10, 9), td.JP, 'Koko', 'Projektbetreuung', 2, 'neu'], start=1):
+        mz.cell(row=7, column=c, value=v)
+    wb.save(p)
+    res, pfad = recalced(str(p))
+    ws = openpyxl.load_workbook(pfad, data_only=True)['Manuelle_Zeitbuchungen']
+    assert ws.cell(row=7, column=8).value == 150 and ws.cell(row=7, column=9).value == 300
+
+
+def test_projekt_nur_in_eingaben_steht_in_uebersicht(tmp_path, recalced):
+    """Bug alte Berichte: Projekte nur aus manuellen Zeiten/Zusatzkosten fehlten in der Übersicht."""
+    cfg = config()
+    cs, al = td.specs(tmp_path, td.MARIUS_BASIS)
+    mz = pd.DataFrame([{'Datum': '2026-09-15', 'Mitarbeiter': td.MN, 'Projekt': 'Wackler',
+                        'Hauptaufgabe': 'Projektbetreuung', 'Stunden': 3, 'Anmerkung': 'nur manuell'}])
+    zk = pd.DataFrame([{'Datum': datetime(2026, 9, 16), 'Projekt': 'Süssmilch', 'Kostenart': 'Hotel',
+                        'Betrag_EUR': 264.0, 'Anmerkung': 'nur Zusatzkosten'}])
+    r = rl.neuaufbau(cs, al, cfg, BASIS_START, BASIS_ENDE, '2026-10', str(tmp_path / 'o'),
+                     neue_manuelle_zeitbuchungen=mz, neue_zusatzkosten=zk)
+    res, pfad = recalced(r['pfad'])
+    ue = uebersicht_summen(pfad)
+    assert ue['Wackler']['kosten'] == pytest.approx(600) and ue['Süssmilch']['kosten'] == pytest.approx(264)
+    ck = openpyxl.load_workbook(pfad, data_only=True)['Cockpit']
+    netto = [r_[1] for r_ in ck.iter_rows(min_row=10, max_row=22, max_col=2, values_only=True)
+             if r_[0] == 'Gesamtkosten NETTO'][0]
+    assert netto == pytest.approx(sum(v['kosten'] for v in ue.values()), abs=0.01)

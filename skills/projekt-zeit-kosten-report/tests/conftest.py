@@ -42,7 +42,7 @@ def recalc(pfad):
 def freigeben(pfad, wer='GF Test', zusatz=None):
     """Simuliert die Nutzerin in Excel: Freigabevermerk + händische Einträge."""
     wb = openpyxl.load_workbook(pfad)
-    ws = wb['Parameter']
+    ws = wb['Cockpit']
     pos = rl._finde_zelle(ws, 'Freigegeben am')
     ws.cell(row=pos[0], column=pos[1] + 1, value='05.11.2026')
     ws.cell(row=pos[0] + 1, column=pos[1] + 1, value=wer)
@@ -81,12 +81,34 @@ def handeintraege(wb):
     rk = wb['Rohdaten_Kalender']
     for row in range(2, rk.max_row + 1):
         if rk.cell(row=row, column=14).value == 'Montagssitzung intern':
-            rk.cell(row=row, column=17, value='Cool')
-    pa = wb['Parameter']
+            entscheide(wb, rk.cell(row=row, column=24).value, 'Cool', 'Test: Montagssitzung gehört zu Cool')
+    pa = wb['Stammdaten']
     pos = rl._finde_zelle(pa, 'Partner (Autolog)')
     for row in range(pos[0] + 1, pa.max_row + 1):
         if pa.cell(row=row, column=pos[1]).value == 'Koko Partner':
             pa.cell(row=row, column=pos[1] + 1, value='Koko')
+
+
+def entscheide(wb, id_, entscheidung, kommentar=None):
+    """Wie die Nutzerin: in Pruefen_Korrigieren die Zeile mit der ID suchen (oder eine freie
+    Zeile nehmen) und in Spalte J entscheiden."""
+    ws = wb[rl.PRUEF]
+    frei = None
+    for r in range(7, ws.max_row + 1):
+        if ws.cell(row=r, column=1).value == id_:
+            frei = r
+            break
+        if frei is None and ws.cell(row=r, column=3).value == 'frei (ID eintragen)':
+            frei = r
+    ws.cell(row=frei, column=1, value=id_)
+    ws.cell(row=frei, column=10, value=entscheidung)
+    ws.cell(row=frei, column=11, value=kommentar)
+
+
+def pruefliste(pfad):
+    ws = openpyxl.load_workbook(pfad)[rl.PRUEF]
+    kopf = [c.value for c in ws[6]]
+    return [dict(zip(kopf, r)) for r in ws.iter_rows(min_row=7, values_only=True) if r[1]]
 
 
 @pytest.fixture(scope='session')
@@ -115,11 +137,13 @@ def recalced():
     return _get
 
 
-def uebersicht_summen(pfad, blatt='Gesamt_Alle_Jahre'):
+def uebersicht_summen(pfad, blatt='Uebersicht'):
+    """Summen je Projekt (Uebersicht mit Jahr = (Alle); Version-5-Dateien: Gesamt_Alle_Jahre)."""
     ws = openpyxl.load_workbook(pfad, data_only=True)[blatt]
-    kopf = [c.value for c in ws[4]]
+    hr = 5 if blatt == 'Uebersicht' else 4
+    kopf = [c.value for c in ws[hr]]
     out = {}
-    for r in ws.iter_rows(min_row=5, values_only=True):
+    for r in ws.iter_rows(min_row=hr + 1, values_only=True):
         if r[0] in (None, 'GESAMT'):
             continue
         d = dict(zip(kopf, r))

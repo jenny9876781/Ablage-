@@ -1,6 +1,12 @@
 # Excel-Ausgabe-Struktur
 
-> **Aktueller Stand Version 6 (2026-11) – hat Vorrang vor den älteren Abschnitten unten.**
+> **Version 6.2 (2026-11-05): Reiterstruktur siehe SKILL.md „Version 6.2“ – hat Vorrang.** Ergänzend:
+> Rohdaten_Kalender Q / Rohdaten_Fahrten S = Formel „Entscheidung aus Pruefen_Korrigieren“ (per ID in Spalte X),
+> Spalte W = Status (Formel). Parameter-Reiter heißt jetzt „Stammdaten“ (Projekte F–H, Partner J–K), der
+> Versionsblock steht im Cockpit (Spalten E–F). Zusatzkosten H/I und Manuelle_Zeitbuchungen K/L = Firma/Status.
+> Sonderkalk-Reiter: Blöcke K–O bzw. Pauschalen E–J = Projekt/Firma/Status/Mitarbeiter/Hauptaufgabe.
+>
+> **Stand Version 6.0/6.1 (überholt in den genannten Punkten):**
 >
 > **Dateiname:** `Projektuebersicht_<Zeitraum>_v<NN>.xlsx` (z.B. `Projektuebersicht_2026-11_v02.xlsx`).
 > Die Version im Dateinamen muss zur Version im Parameter-Reiter passen, sonst stoppt die Fortführung.

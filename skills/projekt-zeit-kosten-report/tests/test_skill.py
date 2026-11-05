@@ -493,3 +493,46 @@ def test_projekt_nur_in_eingaben_steht_in_uebersicht(tmp_path, recalced):
     netto = [r_[1] for r_ in ck.iter_rows(min_row=10, max_row=22, max_col=2, values_only=True)
              if r_[0] == 'Gesamtkosten NETTO'][0]
     assert netto == pytest.approx(sum(v['kosten'] for v in ue.values()), abs=0.01)
+
+
+# --------------------------------------------------------------- Version 6.3: Kundenbericht
+def test_kundenbericht_summen_und_regeln(szenario, tmp_path):
+    cfg = szenario['cfg']
+    pfad = szenario['v01']['pfad']          # freigegeben (conftest)
+    proj = ['Koko', 'Cool', 'Zeppelin', 'Forst', 'Sandformation']
+    wp = 'Allgemeine Vertriebszeit (automatische Wochenpauschale)'
+    b = rl.erstelle_kundenbericht(pfad, cfg, proj, str(tmp_path), interne=[wp], pdf=False)
+    daten = rl.lade_vorlage(pfad, cfg)
+    soll = rl.summen_je_monat_projekt(daten, rl._merge_config(cfg, daten)[0], statische_kosten=True)
+    soll = soll[soll['Monat'] <= '2026-10'].groupby('Projekt')['Kosten'].sum()
+    x = b['positionen'].groupby('Projekt')['Netto'].sum()
+    for p_ in proj + [wp]:
+        assert x[p_] == pytest.approx(soll[p_], abs=0.01), p_
+    # Pauschale als EINE Zeile je Projekt (Standard b)
+    pp = b['positionen'][b['positionen']['Zeit'] == 'Pauschale']
+    assert len(pp) == 1 and '7 Wochen' in pp.iloc[0]['Leistung'] and 'KW' in pp.iloc[0]['Leistung']
+    b2 = rl.erstelle_kundenbericht(pfad, cfg, proj, str(tmp_path / 'einzeln'), interne=[wp], pdf=False,
+                                   pauschale_einzeln=True)
+    assert (b2['positionen']['Zeit'] == 'Pauschale').sum() == 7
+    # nur Werte, keine Formeln, keine internen Reiter
+    wb = openpyxl.load_workbook(b['xlsx'])
+    assert wb.sheetnames == ['Übersicht', 'Leistungsnachweis']
+    assert not any(isinstance(c.value, str) and c.value.startswith('=') for ws in wb for row in ws.iter_rows() for c in row)
+    assert '_ENTWURF' not in b['xlsx']
+
+
+def test_kundenbericht_stoppt(szenario, tmp_path):
+    cfg = szenario['cfg']
+    with pytest.raises(ValueError, match='gehört zu'):
+        rl.erstelle_kundenbericht(szenario['v01']['pfad'], cfg, ['Koko', 'Barrierefrei'], str(tmp_path), pdf=False)
+    cs, al = td.specs(tmp_path, td.MARIUS_BASIS)
+    r = rl.neuaufbau(cs, al, cfg, BASIS_START, BASIS_ENDE, '2026-10', str(tmp_path / 'o'))
+    with pytest.raises(rl.VorlageFehler, match='FREIGEGEBENEN'):
+        rl.erstelle_kundenbericht(r['pfad'], cfg, ['Koko'], str(tmp_path), pdf=False)
+    e = rl.erstelle_kundenbericht(r['pfad'], cfg, ['Koko'], str(tmp_path / 'e'), pdf=False, nur_freigegeben=False)
+    assert e['xlsx'].endswith('_ENTWURF.xlsx')
+
+
+def test_kw_bereiche():
+    m = [pd.Timestamp(x) for x in ('2024-01-29', '2024-02-05', '2024-02-12', '2024-03-25', '2025-07-21')]
+    assert rl._kw_bereiche(m) == 'KW 5–7/2024, 13/2024, 30/2025'

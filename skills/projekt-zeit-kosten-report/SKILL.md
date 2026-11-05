@@ -3,7 +3,7 @@ name: projekt-zeit-kosten-report
 description: "Use this skill whenever the user (assistant to Neininger management) wants the recurring time/cost report that consolidates Outlook calendar entries (project name in quotes in the subject) with the Autolog vehicle logbook export into a multi-year Excel report: hours, driven km, and costs per project, per task category, per employee, per company (Neininger GmbH / TransCare), with a filterable dashboard, VAT breakdown, a weekly non-project sales-time allowance, manual extra costs, and a plausibility check. Trigger on 'Projektbericht', 'Zeit-/Kostenbericht', 'Autolog', 'Fahrtenbuch', 'Kalenderexport'+'Projekt', 'Jahresauswertung', or requests reconciling calendar time with driving logs into a cost report, any year from 2024 on. Also trigger when calendar/Autolog CSVs are uploaded with a request to consolidate hours/km/costs, including project-specific multi-year reports. Do NOT use for the separate ma-nbo-workflow skill."
 ---
 
-# Projekt-Zeit-/Kosten-Report (Neininger) — Version 6.2 (abgesichert + vereinfacht, 2026-11)
+# Projekt-Zeit-/Kosten-Report (Neininger) — Version 6.3 (abgesichert + vereinfacht + Kundenbericht, 2026-11)
 
 Dieser Skill bildet den wiederkehrenden Workflow ab, bei dem aus Outlook-Kalenderexporten
 mehrerer Mitarbeiter/Postfächer und einem Autolog-Fahrtenbuch-Export ein Excel-Bericht mit
@@ -71,6 +71,26 @@ nicht dauerhaft, nur über ein neues ZIP.**
 (Interne_Auswertung, Dashboard-Kreuztabelle) und je Mitarbeiter **und Projekt** (Übersicht) bleiben.
 
 **7. Tests:** `python -m pytest tests -q` (erfundene Testdaten). Vor jeder Änderung an `report_lib.py` laufen lassen.
+
+## Version 6.3 (2026-11-05): Kundenbericht (z.B. für TransCare)
+
+Anforderung im Chat, z.B. „TransCare-Bericht aus Füxle v03 für Koko, Cool, Zeppelin (+ interne Position
+Vor-Ort Termine)“. Die Projektauswahl wird **je Bericht** genannt (keine feste Liste).
+
+- `erstelle_kundenbericht(fuexle_pfad, config, projekte, output_dir, firma='TransCare', interne=None,
+  nur_freigegeben=True, pdf=True, pauschale_einzeln=False)` → `Füxle_TransCare_<JJJJ-MM>.xlsx` + `.pdf`.
+- **Nur aus einer FREIGEGEBENEN Füxle** (sonst VorlageFehler). Vorschau ohne Freigabe nur mit
+  `nur_freigegeben=False` → Titel und Dateiname tragen „ENTWURF“.
+- **Kumuliert seit Projektbeginn** bis „Datenstand bis“, netto + MwSt. + brutto, Spalte „davon im Berichtsmonat“.
+- Interne TransCare-Positionen (Wochenpauschale, Vor-Ort Termine i. A. TC, Veranstaltungen, MoSI) **nur, wenn
+  angefordert** (`interne=`), als eigener Block. Projekte einer anderen Firma → Stopp mit Rückfrage.
+- **Leistungsnachweis** je Projekt: Datum, Uhrzeit, Kürzel, **Hauptaufgabe** (nie den Kalender-Betreff!), Menge,
+  Satz, netto; Fahrten nur mit Orten; Zusatzkosten mit Kostenart. Den Projekten zugeordnete Wochenpauschalen als
+  EINE Zeile je Projekt („Pauschale Projektbetreuung (wöchentlich): N Wochen × 5 Std., KW …“); jede Woche
+  einzeln nur, wenn der Kunde es verlangt (`pauschale_einzeln=True`).
+- Excel **nur mit Werten** (keine Formeln, keine Rohdaten, keine versteckten Reiter). Vor dem Speichern wird jede
+  Projektsumme gegen die Füxle-Logik geprüft – bei Abweichung Abbruch „nicht versenden“.
+- **Die Füxle-Datei selbst NIE extern versenden** (enthält Rohdaten, Kommentare, alle Projekte).
 
 ## Version 6.2 (2026-11-05): einfachere Bedienung – VERBINDLICHE Struktur
 

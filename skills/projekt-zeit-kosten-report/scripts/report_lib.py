@@ -14,7 +14,7 @@ Einstieg für den Monatsablauf: neuaufbau() bzw. fortfuehrung() (ganz unten).
 Diese Bibliothek wird von Jahr/Monat zu Jahr/Monat wiederverwendet. Nur
 config/projekt_konfiguration.json und die hochgeladenen Rohdateien ändern sich.
 """
-SKILL_VERSION = '6.2'
+SKILL_VERSION = '6.3'
 HINWEIS_STATISCH = ('ACHTUNG (bekannte Einschränkung, Version 6 nur markiert): statische Werte - enthalten auch mehrtägige Blöcke und ignorierte Termine, berücksichtigen keine manuellen Korrekturen. Für Freigabe/Abrechnung nur Uebersicht_<Jahr> bzw. Gesamt_Alle_Jahre verwenden.')
 
 import json
@@ -3281,14 +3281,33 @@ def _ort(adresse):
     return m.group(1).strip() if m else '-'
 
 
+def _kw_bereiche(montage):
+    """[Timestamp Montag, ...] -> 'KW 5–9/2024, 13/2024, 30–35/2025' (zusammenhängende Wochen verdichtet)."""
+    kws = sorted({(m.isocalendar()[0], m.isocalendar()[1]) for m in montage})
+    teile, start, prev = [], None, None
+    for j, w in kws:
+        if prev and j == prev[0] and w == prev[1] + 1:
+            prev = (j, w)
+            continue
+        if start:
+            teile.append(f'{start[1]}–{prev[1]}/{prev[0]}' if start != prev else f'{start[1]}/{start[0]}')
+        start = prev = (j, w)
+    if start:
+        teile.append(f'{start[1]}–{prev[1]}/{prev[0]}' if start != prev else f'{start[1]}/{start[0]}')
+    return 'KW ' + ', '.join(teile)
+
+
 def erstelle_kundenbericht(fuexle_pfad, config, projekte, output_dir, firma='TransCare', interne=None,
-                           nur_freigegeben=True, pdf=True):
+                           nur_freigegeben=True, pdf=True, pauschale_einzeln=False):
     """Externer Bericht für einen Kunden: NUR feste Werte, keine Formeln/Rohdaten/internen Infos.
     projekte: Liste der Projekte, die der Kunde sehen soll (je Bericht frei wählbar).
     interne: optional Liste interner Positionen (z.B. 'Vor-Ort Termine i. Auftrag TC'), eigener Block.
     Kumuliert seit Projektbeginn bis zum Datenstand der (freigegebenen) Füxle, plus 'davon im Berichtsmonat'.
     Leistungsnachweis je Projekt: Kalenderzeiten (Hauptaufgabe statt Betreff), manuelle Zeiten,
-    Fahrten (nur Orte), Zusatzkosten. Summen werden gegen summen_je_monat_projekt() geprüft."""
+    Fahrten (nur Orte), Zusatzkosten. Summen werden gegen summen_je_monat_projekt() geprüft.
+    Wochenpauschalen, die Projekten zugeordnet sind, stehen standardmäßig als EINE Zeile je Projekt
+    ("Pauschale Projektbetreuung (wöchentlich): N Wochen × 5 Std., KW ...") - pauschale_einzeln=True
+    zeigt jede Woche einzeln (nur wenn der Kunde das verlangt)."""
     import os
     from openpyxl import Workbook
     from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
@@ -3313,8 +3332,12 @@ def erstelle_kundenbericht(fuexle_pfad, config, projekte, output_dir, firma='Tra
     pos = []
     cal = daten['kalender'].copy()
     cal['P'] = cal.apply(_wirksames_projekt_kalender, axis=1)
+    pauschalen = {}
     for _, r in cal[cal['P'].isin(auswahl)].iterrows():
         if _ist_blocker(r) or float(r['Dauer_h']) <= 0 or (bis is not None and r['Start'] > bis):
+            continue
+        if bool(r['Ist_Pauschale']) and not pauschale_einzeln:
+            pauschalen.setdefault((r['P'], r['Mitarbeiter'], float(r['Stundensatz_EUR'] or 0)), []).append(r)
             continue
         pos.append({'Projekt': r['P'], 'Art': 'Zeit', 'Datum': r['Start'],
                     'Zeit': 'Pauschale' if bool(r['Ist_Pauschale']) else (
@@ -3323,6 +3346,15 @@ def erstelle_kundenbericht(fuexle_pfad, config, projekte, output_dir, firma='Tra
                     'Person': kuerzel.get(r['Mitarbeiter'], '?'), 'Leistung': r['Hauptaufgabe'],
                     'Menge': float(r['Dauer_h']), 'Einheit': 'Std.', 'Satz': float(r['Stundensatz_EUR'] or 0),
                     'Netto': _kosten_zeit_zeile(r, cfg)})
+    for (p_, ma_, satz_), rows_ in pauschalen.items():
+        std_ = sum(float(x['Dauer_h']) for x in rows_)
+        je_ = float(rows_[0]['Dauer_h'])
+        pos.append({'Projekt': p_, 'Art': 'Zeit', 'Datum': min(x['Start'] for x in rows_), 'Zeit': 'Pauschale',
+                    'Person': kuerzel.get(ma_, '?'),
+                    'Leistung': (f'Pauschale Projektbetreuung (wöchentlich): {len(rows_)} Wochen × '
+                                 f'{je_:g} Std., {_kw_bereiche([x["Start"] for x in rows_])}'),
+                    'Menge': std_, 'Einheit': 'Std.', 'Satz': satz_,
+                    'Netto': round(sum(_kosten_zeit_zeile(x, cfg) for x in rows_), 2)})
     mz = daten.get('manuelle_zeitbuchungen')
     if mz is not None and len(mz):
         m = prepare_manuelle_zeitbuchungen(mz, cfg)
@@ -3361,6 +3393,8 @@ def erstelle_kundenbericht(fuexle_pfad, config, projekte, output_dir, firma='Tra
         raise ValueError('Für die Auswahl gibt es keine Positionen bis zum Datenstand.')
     pdf_['Monat'] = pdf_['Datum'].dt.strftime('%Y-%m')
     pdf_ = pdf_.sort_values(['Projekt', 'Datum', 'Art'])
+    s_m = summen_je_monat_projekt(daten, cfg, statische_kosten=True)
+    monat_netto = s_m[s_m['Monat'] == bm].groupby('Projekt')['Kosten'].sum().to_dict() if bm else {}
 
     # ---- Kontrolle gegen die Füxle-Logik (muss exakt passen)
     s = summen_je_monat_projekt(daten, cfg, statische_kosten=True)
@@ -3413,7 +3447,7 @@ def erstelle_kundenbericht(fuexle_pfad, config, projekte, output_dir, firma='Tra
             vals = [p_, d['Datum'].min().strftime('%m/%Y') if len(d) else '-', round(zeit['Menge'].sum(), 2),
                     round(zeit['Netto'].sum(), 2), round(fahrt['Menge'].sum(), 1), round(fahrt['Netto'].sum(), 2),
                     round(zus['Netto'].sum(), 2), netto, round(netto * mwst, 2), round(netto * (1 + mwst), 2),
-                    round(d[d['Monat'] == bm]['Netto'].sum(), 2)]
+                    round(monat_netto.get(p_, 0.0), 2)]
             for c, v in enumerate(vals, start=1):
                 cell = ws.cell(row=row, column=c, value=v)
                 cell.font = nf; cell.border = brd
@@ -3460,6 +3494,8 @@ def erstelle_kundenbericht(fuexle_pfad, config, projekte, output_dir, firma='Tra
                 cell.font = nf; cell.border = brd
                 if c in (7, 8):
                     cell.number_format = eur
+                if c == 4:
+                    cell.alignment = Alignment(wrap_text=True, vertical='top')
             row += 1
         ln.cell(row=row, column=4, value=f'Summe {p_}').font = bf
         c_ = ln.cell(row=row, column=8, value=round(d['Netto'].sum(), 2))

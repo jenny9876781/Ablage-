@@ -616,8 +616,17 @@ def compute_kalender_kosten(calendar_df, config):
     # Ganztagespauschale: Dauer fuer betroffene mehrtaegige Bloecke anpassen
     df['Ist_Ganztagespauschale'] = False
 
+    def _eff(r):
+        k = r.get('Korrektur') if 'Korrektur' in r.index else None
+        if isinstance(k, str) and k:
+            return None if k == 'Unberücksichtigt' else k
+        return r['Projekt']
+
     def adjust_dauer(r):
-        if r['Mehrtaegig'] and r['Projekt'] in ganztag_cfg:
+        # Version 6: wirksames Projekt (inkl. manueller Korrektur), sonst zählen von Hand
+        # Frutania zugeordnete Blöcke ("M. Neininger Grafschaft") mit 0 h
+        if r['Mehrtaegig'] and _eff(r) in ganztag_cfg:
+            r = r.copy(); r['Projekt'] = _eff(r)
             if r['Start'].time().hour == 0 and r['Start'].time().minute == 0 and \
                r['Ende'].time().hour == 0 and r['Ende'].time().minute == 0:
                 # Klassische "ganztägig"-Konvention: Ende-Datum ist exklusiv
@@ -628,9 +637,11 @@ def compute_kalender_kosten(calendar_df, config):
             return tage * ganztag_cfg[r['Projekt']]['stunden_pro_tag']
         return r['Dauer_h']
 
+    if 'Dauer_h_roh' in df.columns:          # erneuter Aufruf (z.B. nach Korrektur-Übernahme)
+        df['Dauer_h'] = df['Dauer_h_roh'].where(df['Dauer_h_roh'].notna(), df['Dauer_h'])
     df['Dauer_h_roh'] = df['Dauer_h']
     df['Dauer_h'] = df.apply(adjust_dauer, axis=1)
-    df.loc[df['Mehrtaegig'] & df['Projekt'].isin(ganztag_cfg.keys()), 'Ist_Ganztagespauschale'] = True
+    df['Ist_Ganztagespauschale'] = df.apply(lambda r: bool(r['Mehrtaegig']) and _eff(r) in ganztag_cfg, axis=1)
 
     def row_kosten(r):
         if pd.isna(r['Projekt']) or r['Projekt'] is None:
@@ -687,6 +698,8 @@ def markiere_pruefpunkte_kalender(df, config):
                               f'überspannt {kal} Kalendertage')
         elif r['Mehrtaegig'] and r['Projekt'] not in ganztag:
             zusatz = 'Mehrtägiger Block (> 20 h) - zählt mit 0 Std., bitte klären'
+        if zusatz and zusatz in (r['Zuordnung_Grund'] or ''):
+            continue
         if zusatz:
             g = r['Zuordnung_Grund']
             df.at[idx, 'Zuordnung_Grund'] = f'{g}; {zusatz}' if g else zusatz
@@ -753,7 +766,13 @@ def calc_tagessatz_block_kosten(calendar_df, projekt, sonderkalk_config):
     (DataFrame je betroffener Kalenderwoche).
     """
     cfg = sonderkalk_config[projekt]
-    blocks = calendar_df[calendar_df['Projekt'] == projekt]
+    # Version 6: wirksames Projekt (inkl. manueller Korrektur), z.B. "Niedermaier Spedition ..."
+    if 'Korrektur' in calendar_df.columns:
+        wirksam = calendar_df['Korrektur'].where(
+            calendar_df['Korrektur'].notna() & (calendar_df['Korrektur'] != ''), calendar_df['Projekt'])
+    else:
+        wirksam = calendar_df['Projekt']
+    blocks = calendar_df[wirksam == projekt]
     if cfg.get('mitarbeiter'):
         blocks = blocks[blocks['Mitarbeiter'] == cfg['mitarbeiter']]
     blocks = blocks.sort_values('Start').copy()
@@ -1054,7 +1073,8 @@ def load_rohdaten_from_workbook(path, config):
             'Dauer_h': float(dauer) if dauer is not None else 0.0,
             'Dauer_h_roh': (ende - start).total_seconds() / 3600.0,
             'Mehrtaegig': mehrt, 'Jahr': start.year, 'Ist_Urlaub': False, 'Ist_Pauschale': ist_p,
-            'Ist_Ganztagespauschale': bool(mehrt and proj in ganztag),
+            'Ist_Ganztagespauschale': (bool(mehrt) and not ist_p and not rec.get('Mehrtaegig_Blocker'))
+            if 'Mehrtaegig_Blocker' in rec else bool(mehrt and proj in ganztag),
             'Stundensatz_EUR': rec.get('Stundensatz_EUR'),
             'Kosten_Zeit_EUR': kosten if isinstance(kosten, (int, float)) else None,
             'Firma': _projekt_firma(proj, config) if proj else '',
@@ -2422,7 +2442,8 @@ def uebertrage_korrekturen(neu_df, alt_df, art):
     if alt_df is None or len(alt_df) == 0 or 'Korrektur' not in alt_df.columns:
         return neu, rest
     keyf = _kal_key if art == 'kalender' else _trip_key
-    grobf = _kal_key_grob if art == 'kalender' else _trip_key
+    grobf = _kal_key_grob if art == 'kalender' else (
+        lambda r: (r['Fahrer'], pd.Timestamp(r['Start']).floor('min'), pd.Timestamp(r['Ende']).floor('min')))
     exakt, grob, tag_text, tag_text_ohne_ma = {}, {}, {}, {}
 
     def _text(r):
@@ -2440,27 +2461,40 @@ def uebertrage_korrekturen(neu_df, alt_df, art):
         if art == 'kalender':
             tag_text.setdefault((r['Mitarbeiter'], r['Start'].date(), _text(r)), []).append(idx)
             tag_text_ohne_ma.setdefault((r['Start'].date(), _text(r)), []).append(idx)
-    for _, a in alt_df[alt_df['Korrektur'].notna() & (alt_df['Korrektur'] != '')].iterrows():
-        ziel = exakt.get(keyf(a)) or []
-        if len(ziel) != 1:
-            ziel = grob.get(grobf(a)) or []
-        if len(ziel) != 1 and art == 'kalender':
-            # Stufe 3/4 (Version 6): gleicher Tag + gleicher Text (Uhrzeit im Export
-            # verschoben bzw. Termin lag in der Vorversion bei einer anderen Person)
-            ziel = tag_text.get((a['Mitarbeiter'], a['Start'].date(), _text(a))) or []
-            if len(ziel) != 1:
-                ziel = tag_text_ohne_ma.get((a['Start'].date(), _text(a))) or []
-        ziel = [z for z in ziel if z not in vergeben]
-        if len(ziel) == 1:
-            neu.at[ziel[0], 'Korrektur'] = a['Korrektur']
-            vergeben.add(ziel[0])
-        else:
-            wer = a['Mitarbeiter'] if art == 'kalender' else a['Fahrer']
-            text = (a.get('Betreff') or a.get('Aufgabe') or '') if art == 'kalender' else (a.get('Partner') or '')
-            rest.append({'Bereich': 'Korrektur nicht übertragbar', 'Datum': a['Start'], 'Mitarbeiter': wer,
-                         'Text': text, 'Projekt': a['Korrektur'],
-                         'Grund': (f'Korrektur "{a["Korrektur"]}" aus der Vorversion passt auf '
-                                   f'{len(ziel)} Zeilen der neuen Daten - bitte neu eintragen')})
+    alt_k = alt_df[alt_df['Korrektur'].notna() & (alt_df['Korrektur'] != '')]
+    # Version 6: gleiche Korrektur für alle Zeilen eines Schlüssels (z.B. Termin, der in
+    # der Vorversion bei zwei Personen stand und jetzt zweimal bei einer Person steht)
+    stufen = [(exakt, keyf), (grob, grobf)]
+    if art == 'kalender':
+        stufen += [(tag_text, lambda r: (r['Mitarbeiter'], r['Start'].date(), _text(r))),
+                   (tag_text_ohne_ma, lambda r: (r['Start'].date(), _text(r)))]
+    offen_idx = list(alt_k.index)
+    for index_map, kf in stufen:
+        gruppen = {}
+        for ai in offen_idx:
+            gruppen.setdefault(kf(alt_k.loc[ai]), []).append(ai)
+        noch = []
+        for key, ais in gruppen.items():
+            ziel = [z for z in (index_map.get(key) or []) if z not in vergeben]
+            werte = {alt_k.at[a_, 'Korrektur'] for a_ in ais}
+            if ziel and (len(ziel) == len(ais) or len(werte) == 1) and len(werte) == 1:
+                for z in ziel:
+                    neu.at[z, 'Korrektur'] = next(iter(werte))
+                    vergeben.add(z)
+            elif ziel and len(ziel) == len(ais) == 1:
+                neu.at[ziel[0], 'Korrektur'] = alt_k.at[ais[0], 'Korrektur']
+                vergeben.add(ziel[0])
+            else:
+                noch += ais
+        offen_idx = noch
+    for ai in offen_idx:
+        a = alt_k.loc[ai]
+        wer = a['Mitarbeiter'] if art == 'kalender' else a['Fahrer']
+        text = (a.get('Betreff') or a.get('Aufgabe') or '') if art == 'kalender' else (a.get('Partner') or '')
+        rest.append({'Bereich': 'Korrektur nicht übertragbar', 'Datum': a['Start'], 'Mitarbeiter': wer,
+                     'Text': text, 'Projekt': a['Korrektur'],
+                     'Grund': (f'Korrektur "{a["Korrektur"]}" aus der Vorversion findet keine eindeutige '
+                               'Zeile in den neuen Daten - bitte prüfen/neu eintragen')})
     return neu, rest
 
 
@@ -2983,6 +3017,7 @@ def neuaufbau(calendar_specs, autolog_specs, config, period_start, period_end, p
     cal, r3 = wende_korrekturen_an(cal, korrekturen, 'kalender')
     trips, r4 = wende_korrekturen_an(trips, korrekturen, 'fahrten')
     extra += r3 + r4
+    cal = compute_kalender_kosten(cal, cfg)   # Ganztagespauschale/Kosten mit übernommenen Korrekturen
     trips = apply_partner_zuordnung(trips, cfg)
     trips = compute_fahrten_kosten(trips, cfg)
 

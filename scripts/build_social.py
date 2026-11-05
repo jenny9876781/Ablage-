@@ -37,10 +37,10 @@ MOTIVE = [
      "Bilder · Leuchten · Schwarzwald-Charme"),
     ("6_Story_Spielzeug_November", "story", "Bald im Katalog", "Spielzeug ab November",
      [], "Jetzt schon reinschauen – Möbel, Kita, Garten und Deko gibt es ab sofort"),
-    # „held“: ein großes Foto oben über die ganze Breite, darunter 2 × 2 – größere Fotos, weniger Rand
-    ("8_Story_Spielzeug_online", "held", "Jetzt neu im Katalog", "Spielzeug ist da!",
-     [("F-901", "50% 62%"), ("F-878", "50% 40%"), ("F-884", "50% 20%"),
-      ("F-909", "50% 35%"), ("F-843", "50% 55%")],
+    # „hoch“: 3 × 2 Kacheln im Hochformat – Hochformat-Fotos (Tonies, Puppenwagen) werden nicht abgeschnitten
+    ("8_Story_Spielzeug_online", "hoch", "Jetzt neu im Katalog", "Spielzeug ist da!",
+     [("F-874", "50% 50%"), ("F-902", "50% 50%"), ("F-937", "50% 40%"),
+      ("F-911", "50% 50%"), ("F-929", "50% 50%"), ("F-884", "50% 30%")],
      "Spielzeug · Bücher · Spiele · Tonies"),
     ("7_Beitrag_Alles_muss_raus", "beitrag", "Inventarverkauf", "Alles muss raus!",
      [("F-019", "50% 60%"), ("F-176", "50% 60%"), ("F-102", "50% 40%"), ("F-017", "50% 72%")],
@@ -63,6 +63,7 @@ h1 { font-family: 'Archivo Black', sans-serif; font-weight: 400; line-height: .9
 .link { margin-top: 30px; background: #fff; color: #C8102E; border-radius: 999px; text-align: center;
         font-weight: 800; font-size: 46px; padding: 24px 20px; }
 .unter { margin-top: 14px; text-align: center; font-size: 30px; font-weight: 700; }
+.hoch { grid-template-columns: 1fr 1fr 1fr; grid-template-rows: 1fr 1fr; margin-top: 28px; gap: 14px; }
 .held { grid-template-rows: 1.25fr 1fr 1fr; margin-top: 28px; }
 .held div:first-child { grid-column: 1 / 3; }
 .leer { flex: 1; display: flex; align-items: center; justify-content: center; }
@@ -79,8 +80,9 @@ def schrift(name):
         return "data:font/woff2;base64," + base64.b64encode(f.read()).decode()
 
 def html(fmt, klein, titel, fotos, stich):
-    held = fmt == "held"
-    story = fmt in ("story", "held")
+    hoch = fmt == "hoch"
+    held = fmt in ("held", "hoch")
+    story = fmt in ("story", "held", "hoch")
     masse = dict(w=1080, h=1920 if story else 1350,
                  # Story: oben und unten verdecken WhatsApp/Instagram ihre Bedienleisten
                  oben=(170 if held else 230) if story else 64, unten=(210 if held else 300) if story else 56,
@@ -90,7 +92,7 @@ def html(fmt, klein, titel, fotos, stich):
     if held: masse["h1"] = 100
     kacheln = "".join(f'<div style="background-image:url({bild(nr)});background-position:{pos}"></div>'
                       for nr, pos in fotos)
-    mitte = f'<div class="raster{" held" if held else ""}">{kacheln}</div>' if fotos else '<div class="leer"><span>🧸</span></div>'
+    mitte = f'<div class="raster{" hoch" if hoch else (" held" if held else "")}">{kacheln}</div>' if fotos else '<div class="leer"><span>🧸</span></div>'
     unter = '<div class="unter">Jetzt online reservieren</div>' if story else ""
     return (f"<!doctype html><html><head><meta charset='utf-8'><style>{CSS % masse}</style></head><body>"
             f"<div class='klein'>{klein}</div><h1>{titel}</h1>{mitte}"
@@ -102,7 +104,7 @@ def main():
     with sync_playwright() as p:
         b = p.chromium.launch(executable_path=CHROME)
         for name, fmt, klein, titel, fotos, stich in MOTIVE:
-            h = 1920 if fmt in ("story", "held") else 1350
+            h = 1920 if fmt in ("story", "held", "hoch") else 1350
             s = b.new_page(viewport={"width": 1080, "height": h})
             s.set_content(html(fmt, klein, titel, fotos, stich), wait_until="networkidle")
             s.evaluate("document.fonts.ready.then(() => true)")

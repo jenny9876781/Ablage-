@@ -3390,8 +3390,9 @@ def erstelle_kundenbericht(fuexle_pfad, config, projekte, output_dir, firma='Tra
 
     ws = wb.active
     ws.title = 'Übersicht'
-    ws['A1'] = f'Neininger GmbH – Leistungsübersicht für {firma}'
-    ws['A1'].font = Font(name=F, bold=True, size=14, color='1F3864')
+    entwurf = not meta.get('freigegeben_am')
+    ws['A1'] = f'Neininger GmbH – Leistungsübersicht für {firma}' + (' – ENTWURF (Füxle noch nicht freigegeben)' if entwurf else '')
+    ws['A1'].font = Font(name=F, bold=True, size=14, color='C00000' if entwurf else '1F3864')
     ws['A2'] = (f"Kumuliert seit Projektbeginn bis {pd.Timestamp(bis):%d.%m.%Y}"
                 f" · Berichtsmonat {pd.Timestamp(bis):%m/%Y} · Stand {meta.get('version')} vom "
                 f"{meta.get('erstellt_am') or ''} · alle Beträge in EUR")
@@ -3440,7 +3441,7 @@ def erstelle_kundenbericht(fuexle_pfad, config, projekte, output_dir, firma='Tra
 
     # Leistungsnachweis: ein Reiter, je Projekt ein Abschnitt mit Zwischensumme
     ln = wb.create_sheet('Leistungsnachweis')
-    ln['A1'] = f'Leistungsnachweis {firma} – bis {pd.Timestamp(bis):%d.%m.%Y}'
+    ln['A1'] = f'Leistungsnachweis {firma} – bis {pd.Timestamp(bis):%d.%m.%Y}' + (' – ENTWURF' if entwurf else '')
     ln['A1'].font = Font(name=F, bold=True, size=13, color='1F3864')
     ln['A2'] = 'Personen: ' + ', '.join(f'{k} = {m}' for m, k in kuerzel.items())
     ln['A2'].font = Font(name=F, italic=True, size=9, color='808080')
@@ -3474,7 +3475,7 @@ def erstelle_kundenbericht(fuexle_pfad, config, projekte, output_dir, firma='Tra
     ln.oddFooter.right.text = 'Seite &P von &N'
 
     os.makedirs(output_dir, exist_ok=True)
-    name = f"{cfg.get('dateiname_praefix', 'Projektuebersicht')}_{firma}_{pd.Timestamp(bis):%Y-%m}"
+    name = f"{cfg.get('dateiname_praefix', 'Projektuebersicht')}_{firma}_{pd.Timestamp(bis):%Y-%m}" + ('_ENTWURF' if entwurf else '')
     xlsx = os.path.join(output_dir, name + '.xlsx')
     wb.save(xlsx)
     out = {'xlsx': xlsx, 'pdf': None, 'positionen': pdf_}

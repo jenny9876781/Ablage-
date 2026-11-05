@@ -204,7 +204,7 @@ Spalten und Konventionen:
 | `Raumcode` | Code aus `daten/raeume.csv`; bestimmt die Artikelnummer |
 | `Bezeichnung` | kurz und verkäuflich, ohne Marketingsprache |
 | `Beschreibung` | Material, Ausführung, Besonderheiten. Marke nur nennen, wenn im Bild belegt oder vom Nutzer bestätigt. |
-| `Kategorie` | Möbel · Designmöbel · Kita-Ausstattung · Büro · Küchentechnik · Leuchten · Deko · Kunst · Uhren · Textilien · Pflanzen · Garten · Verbrauchsmaterial · Technik · Sonstiges |
+| `Kategorie` | Seit 05.11.2026 (`scripts/kategorien_neu.py`): Spielzeug · Bücher, Spiele & Puzzles · Tonies · Kindermöbel · Kinderfahrzeuge (worauf ein Kind fährt; Spielzeugautos = Spielzeug) · Turnen & Bewegung (drinnen) · Spielplatz & Außenspiel · Baby & Unterwegs (Kinderwagen, Bollerwagen, Hochstühle, Wickeln) · Bastel- & Malmaterial · Möbel · Garten (nur Erwachsene) · Pflanzen · Deko (inkl. Uhren) · Textilien · Leuchten · Haushalt & Geräte · Büro · Kunst · zu verschenken (immer eigene Kategorie) |
 | `Marke` | **nur wenn belegt** — Typenschild, Aufdruck oder Aussage der Nutzerin. Steuert das rote Markenschild am Bild im Katalog und den Filter „nur Markenware". Leer lassen, wo die Marke nur vermutet ist: das Schild ist eine Zusicherung. Bisher belegt: Vitra, USM Haller, Kartell, Biohort, Weber, LG, Miele, Candy, Mr Maria, IKEA. |
 | `Raum` | **nicht frei wählen** — der Raumname aus `daten/raeume.csv` zum jeweiligen `Raumcode` |
 | `Menge` | erkennbare Stückzahl |
@@ -1393,6 +1393,7 @@ ist die Merkliste; erledigte Punkte hier abhaken, nicht löschen.
       (4) **„Hinweisband anzeigen bis“** (`kikripp_hinweis_bis`). (5) Ablauftext `kikripp_ablauf_1120()` ersetzt nur den
       unveränderten 1.2.3-Text (`kikripp_umstellen_1120`). Tests 515 Logik, 91 Browser, 16 mobil, Geschenke 31 (1 rot nur
       wegen NU05-V09/-V10), Liste ok.
+- [x] **05.11.: Neue Kategorien** (19 statt 16, Nutzerin einverstanden, Zuordnung macht Claude allein nach den Kriterien): `scripts/kategorien_neu.py` (370 Artikel, idempotent), nur Feld `kat` im Import geändert; steckt in `katalog_import-06.11.json` → kommt mit dem Freitags-Import. Excel `01_Artikelstamm_kikripp_2026-11-05.xlsx`. Plugin unverändert (Kategorien-Auswahl baut sich aus den Daten, Geschenke = Preis 0).
 - [ ] **Ende November 2026: Höchstzahl Geschenke je Reservierung mit der Nutzerin neu besprechen**
       (Vorschlag: ab ca. 01.12. auf 20 oder frei, damit bis 10.12. alles abgeholt wird).
 - [x] Plugin 1.2.1 (06.10.): Einstellung „Fußzeile ausblenden“ (Standard an) – Body-Klasse

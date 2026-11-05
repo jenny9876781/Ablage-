@@ -3,7 +3,7 @@ name: projekt-zeit-kosten-report
 description: "Use this skill whenever the user (assistant to Neininger management) wants the recurring time/cost report that consolidates Outlook calendar entries (project name in quotes in the subject) with the Autolog vehicle logbook export into a multi-year Excel report: hours, driven km, and costs per project, per task category, per employee, per company (Neininger GmbH / TransCare), with a filterable dashboard, VAT breakdown, a weekly non-project sales-time allowance, manual extra costs, and a plausibility check. Trigger on 'Projektbericht', 'Zeit-/Kostenbericht', 'Autolog', 'Fahrtenbuch', 'Kalenderexport'+'Projekt', 'Jahresauswertung', or requests reconciling calendar time with driving logs into a cost report, any year from 2024 on. Also trigger when calendar/Autolog CSVs are uploaded with a request to consolidate hours/km/costs, including project-specific multi-year reports. Do NOT use for the separate ma-nbo-workflow skill."
 ---
 
-# Projekt-Zeit-/Kosten-Report (Neininger) — Version 6 (abgesichert, 2026-11)
+# Projekt-Zeit-/Kosten-Report (Neininger) — Version 6.1 (abgesichert, 2026-11)
 
 Dieser Skill bildet den wiederkehrenden Workflow ab, bei dem aus Outlook-Kalenderexporten
 mehrerer Mitarbeiter/Postfächer und einem Autolog-Fahrtenbuch-Export ein Excel-Bericht mit
@@ -71,6 +71,27 @@ nicht dauerhaft, nur über ein neues ZIP.**
 (Interne_Auswertung, Dashboard-Kreuztabelle) und je Mitarbeiter **und Projekt** (Übersicht) bleiben.
 
 **7. Tests:** `python -m pytest tests -q` (erfundene Testdaten). Vor jeder Änderung an `report_lib.py` laufen lassen.
+
+## Version 6.1 (2026-11-05): Regeln aus dem ersten Echtdaten-Lauf (Basis v01 bis 30.09.2026)
+
+- **Dateiname:** `Füxle_<Zeitraum>_vNN.xlsx` (`config.dateiname_praefix`).
+- **Sonderkalkulation nur für den genannten Mitarbeiter** (`sonderkalkulationen.<P>.mitarbeiter`): Zeiten
+  anderer Personen zu Niedermaier zählen normal mit Stundensatz (`sonderkalk_gilt()`).
+- **Korrekturen wirken überall:** Ganztagespauschale (Frutania 8 h/Tag) und Tagessatz-Blöcke werden auch für
+  von Hand zugeordnete Termine gerechnet (z.B. „M. Neininger Grafschaft“, „Niedermaier Spedition …“).
+- **Wochenpauschale:** endet am `wochenpauschale.bis` (2026-08-31). Urlaub zählt nur, wenn er die Person selbst
+  betrifft: eigener Kalender ohne fremden Namen („Felix Urlaub“ bei Marius zählt NICHT) oder ein anderer
+  Kalender, der die Person ausdrücklich nennt („Urlaub MN …“ im Kalender der Assistenz zählt).
+- **Fahrten:** nächster Termin gewinnt; gelb nur, wenn ein anderes Projekt weniger als
+  `matching.unsicher_wenn_abstand_unter_h` (2 h) weiter weg liegt. Übergänge zwischen Terminen sind normal.
+- **Doppelte Termine:** identische Zeilen im selben Kalender werden einmal gezählt (die Augustdatei hatte 32
+  Doppelungen = 66 h). Gleicher Termin mit Projekt in zwei Kalendern derselben Person → gelb.
+- **`neuaufbau()` zusätzliche Parameter:** `korrekturen` (Einzelentscheidungen aus dem Chat → Spalte
+  „Manuelle Projekt-Korrektur“), `zusatzkosten` (bereinigte Liste), `partner_ueberschreiben`,
+  `fahrten_als_geschaeftlich` (bestätigte „Offen“-Fahrten), `vergleich_bis` (Vergleichsgrenze bei Dateien ohne
+  Stempel). Eine Korrektur, die nicht genau eine Zeile trifft, kommt auf die Prüfliste.
+- **Quellen je Zeitraum laden:** Kalenderexporte überschneiden sich (Spesen-Dateien enthalten auch 2026). Jede
+  Quelle nur für ihren Zeitraum laden – sonst Doppelzählung (so entstand der doppelte Januar 2026).
 
 ## Kernprinzipien
 

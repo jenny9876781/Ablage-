@@ -352,8 +352,18 @@ def generate_wochenpauschale_rows(calendar_df_all, config, period_start, period_
     stunden = cfg['stunden_pro_woche']
 
     urlaubswochen = set()
+    # eigener Urlaub im eigenen Kalender ODER ausdrücklich benannter Urlaub in einem
+    # anderen Kalender (z.B. "Urlaub MN 29.03.-06.04." im Kalender der Assistenz)
+    kw = cfg.get('urlaub_erkennung_keyword', 'urlaub')
+    kuerzel = config.get('mitarbeiter_satzhistorie', {}).get(mitarbeiter, {}).get('kuerzel', '')
+    namen = {mitarbeiter.split()[0].lower(), str(kuerzel).lower()} - {''}
+    betreffe = calendar_df_all['Betreff'] if 'Betreff' in calendar_df_all.columns else \
+        pd.Series([''] * len(calendar_df_all), index=calendar_df_all.index)
+    benannt = betreffe.apply(
+        lambda b: isinstance(b, str) and kw in b.lower() and bool(set(re.findall(r'\w+', b.lower())) & namen)
+    ).astype(bool)
     urlaub_rows = calendar_df_all[
-        (calendar_df_all['Mitarbeiter'] == mitarbeiter) & (calendar_df_all['Ist_Urlaub'])
+        ((calendar_df_all['Mitarbeiter'] == mitarbeiter) & (calendar_df_all['Ist_Urlaub'])) | benannt
     ]
     for _, r in urlaub_rows.iterrows():
         d = r['Start']
@@ -550,8 +560,15 @@ def match_trips_to_calendar(trips_df, calendar_df, mitarbeiter,
         unsicher = False
         andere = [p for p in dict.fromkeys(candidates['Projekt']) if p != best['Projekt']]
         if andere:
-            grund += '; weitere Projekte im Fenster: ' + ', '.join(map(str, andere)) + ' - bitte prüfen'
-            unsicher = True
+            # Version 6.1: nur unsicher, wenn ein ANDERES Projekt zeitlich fast gleich nah liegt
+            # (Übergänge wie "auf dem Weg zu Niedermaier noch NicLas" sind normal - Nutzerin 2026-11-05)
+            schwelle = timedelta(hours=(config or {}).get('matching', {}).get('unsicher_wenn_abstand_unter_h', 2))
+            naechstes_anderes = candidates[candidates['Projekt'] != best['Projekt']]['delta'].min()
+            if naechstes_anderes - best['delta'] < schwelle:
+                grund += ('; ähnlich nah: ' + ', '.join(map(str, andere)) + ' - bitte prüfen')
+                unsicher = True
+            else:
+                grund += '; weitere Projekte im Fenster (deutlich weiter weg): ' + ', '.join(map(str, andere))
         mehrt = bool(best.get('Mehrtaegig', False))
         if mehrt and best['Projekt'] not in sonderkalk:
             grund += '; Treffer ist ein mehrtägiger Block - bitte prüfen'
@@ -2477,8 +2494,13 @@ def uebertrage_korrekturen(neu_df, alt_df, art):
         for key, ais in gruppen.items():
             ziel = [z for z in (index_map.get(key) or []) if z not in vergeben]
             werte = {alt_k.at[a_, 'Korrektur'] for a_ in ais}
-            if ziel and (len(ziel) == len(ais) or len(werte) == 1) and len(werte) == 1:
-                for z in ziel:
+            if ziel and len(werte) == 1:
+                # höchstens so viele Zeilen wie in der Vorversion (sonst würde ein Termin,
+                # der neu in zwei Kalendern steht, doppelt gezählt); gleicher Kalendertyp zuerst
+                if art == 'kalender' and 'Kalendertyp' in neu.columns:
+                    typen = [alt_k.at[a_, 'Kalendertyp'] for a_ in ais]
+                    ziel = sorted(ziel, key=lambda z: 0 if neu.at[z, 'Kalendertyp'] in typen else 1)
+                for z in ziel[:len(ais)]:
                     neu.at[z, 'Korrektur'] = next(iter(werte))
                     vergeben.add(z)
             elif ziel and len(ziel) == len(ais) == 1:

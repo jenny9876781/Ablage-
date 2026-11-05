@@ -59,7 +59,7 @@ def test_unsichere_faelle_gelb_und_auf_pruefliste(szenario):
     pl = wb['Pruefliste']
     eintraege = [r for r in pl.iter_rows(min_row=6, values_only=True) if r[0]]
     assert len(eintraege) == 4        # + Fahrt mit zwei Projekten im Zeitfenster
-    assert any('weitere Projekte im Fenster' in (e[6] or '') for e in eintraege)
+    assert any('ähnlich nah' in (e[6] or '') for e in eintraege)
 
 
 def test_fahrt_mehrdeutig_wird_markiert_nicht_geaendert(szenario):
@@ -365,3 +365,11 @@ def test_korrektur_aus_chat(tmp_path):
     assert r['pfad'].endswith('Füxle_2026-10_v01.xlsx')
     pl = openpyxl.load_workbook(r['pfad'])['Pruefliste']
     assert any(x[1] == 'Korrektur aus Chat nicht anwendbar' for x in pl.iter_rows(min_row=6, values_only=True))
+
+
+def test_urlaub_in_fremdem_kalender_mit_namen():
+    cfg = config()
+    cal = pd.DataFrame([{'Mitarbeiter': td.JP, 'Betreff': 'Urlaub MN 29.03.-06.04.2024', 'Ist_Urlaub': True,
+                         'Start': pd.Timestamp('2024-03-29'), 'Ende': pd.Timestamp('2024-04-06')}])
+    p = rl.generate_wochenpauschale_rows(cal, cfg, datetime(2024, 3, 25), datetime(2024, 4, 14, 23, 59))
+    assert list(p['Dauer_h']) == [0.0, 0.0, 5.0]

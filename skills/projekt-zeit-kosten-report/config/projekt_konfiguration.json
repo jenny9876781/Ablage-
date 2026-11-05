@@ -352,5 +352,9 @@
     "Frutania GmbH": "Frutania"
   },
   "dateiname_praefix": "Füxle",
-  "_dateiname_hinweis": "Ausgabedatei: <dateiname_praefix>_<Zeitraum>_vNN.xlsx (Nutzerin 2026-11-05: \"Füxle\")."
+  "_dateiname_hinweis": "Ausgabedatei: <dateiname_praefix>_<Zeitraum>_vNN.xlsx (Nutzerin 2026-11-05: \"Füxle\").",
+  "matching": {
+    "unsicher_wenn_abstand_unter_h": 2,
+    "_hinweis": "Fahrt-Zuordnung: nächster Termin gewinnt. Gelb/Prüfliste nur, wenn ein anderes Projekt weniger als X Stunden weiter entfernt liegt (Nutzerin 2026-11-05)."
+  }
 }

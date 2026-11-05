@@ -3268,3 +3268,220 @@ def fortfuehrung(vorlage, erwartete_version, calendar_specs, autolog_specs, conf
     erg = _speichern_und_berichten(cal, trips, cfg, period_label, output_dir, vi, zk, mz, abgleich, extra)
     erg['config_hinweise'] = hinweise
     return erg
+
+
+# ==========================================================================
+# Version 6.3 (Entwurf): externer Kundenbericht (z.B. TransCare) - nur Werte
+# ==========================================================================
+def _ort(adresse):
+    """Nur der Ort aus einer Adresse ('Fuhrmannstraße 10, 94405 Landau an der Isar' -> 'Landau an der Isar')."""
+    if not isinstance(adresse, str):
+        return '-'
+    m = re.search(r'\b\d{4,5}\s+([^,]+)', adresse)
+    return m.group(1).strip() if m else '-'
+
+
+def erstelle_kundenbericht(fuexle_pfad, config, projekte, output_dir, firma='TransCare', interne=None,
+                           nur_freigegeben=True, pdf=True):
+    """Externer Bericht für einen Kunden: NUR feste Werte, keine Formeln/Rohdaten/internen Infos.
+    projekte: Liste der Projekte, die der Kunde sehen soll (je Bericht frei wählbar).
+    interne: optional Liste interner Positionen (z.B. 'Vor-Ort Termine i. Auftrag TC'), eigener Block.
+    Kumuliert seit Projektbeginn bis zum Datenstand der (freigegebenen) Füxle, plus 'davon im Berichtsmonat'.
+    Leistungsnachweis je Projekt: Kalenderzeiten (Hauptaufgabe statt Betreff), manuelle Zeiten,
+    Fahrten (nur Orte), Zusatzkosten. Summen werden gegen summen_je_monat_projekt() geprüft."""
+    import os
+    from openpyxl import Workbook
+    from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
+    from openpyxl.utils import get_column_letter
+    meta = lese_berichtsversion(fuexle_pfad)
+    if nur_freigegeben and (meta.get('legacy') or not meta.get('freigegeben_am')):
+        raise VorlageFehler('Kundenbericht nur aus einer FREIGEGEBENEN Füxle-Datei (Cockpit: Freigegeben am/von).')
+    daten = lade_vorlage(fuexle_pfad, config)
+    cfg, _ = _merge_config(config, daten)
+    bis = meta.get('datenstand_bis')
+    bm = pd.Timestamp(bis).strftime('%Y-%m') if bis is not None else None
+    interne = list(interne or [])
+    auswahl = list(projekte) + interne
+    for p_ in projekte:
+        f_ = _projekt_firma(p_, cfg)
+        if f_ != firma:
+            raise ValueError(f'Projekt "{p_}" gehört zu "{f_}", nicht zu {firma} - bitte Auswahl prüfen')
+    mwst = cfg.get('mwst_satz_prozent', 19) / 100.0
+    kuerzel = {m: v['kuerzel'] for m, v in cfg['mitarbeiter_satzhistorie'].items() if not m.startswith('_')}
+
+    # ---- Einzelpositionen
+    pos = []
+    cal = daten['kalender'].copy()
+    cal['P'] = cal.apply(_wirksames_projekt_kalender, axis=1)
+    for _, r in cal[cal['P'].isin(auswahl)].iterrows():
+        if _ist_blocker(r) or float(r['Dauer_h']) <= 0 or (bis is not None and r['Start'] > bis):
+            continue
+        pos.append({'Projekt': r['P'], 'Art': 'Zeit', 'Datum': r['Start'],
+                    'Zeit': 'Pauschale' if bool(r['Ist_Pauschale']) else (
+                        f"{r['Start']:%H:%M}–{r['Ende']:%H:%M}" if r['Ende'].date() == r['Start'].date() else
+                        f"bis {r['Ende']:%d.%m.}"),
+                    'Person': kuerzel.get(r['Mitarbeiter'], '?'), 'Leistung': r['Hauptaufgabe'],
+                    'Menge': float(r['Dauer_h']), 'Einheit': 'Std.', 'Satz': float(r['Stundensatz_EUR'] or 0),
+                    'Netto': _kosten_zeit_zeile(r, cfg)})
+    mz = daten.get('manuelle_zeitbuchungen')
+    if mz is not None and len(mz):
+        m = prepare_manuelle_zeitbuchungen(mz, cfg)
+        for _, r in m[m['Projekt'].isin(auswahl)].iterrows():
+            if bis is not None and r['Datum'] > bis:
+                continue
+            pos.append({'Projekt': r['Projekt'], 'Art': 'Zeit', 'Datum': r['Datum'], 'Zeit': 'nachgetragen',
+                        'Person': kuerzel.get(r['Mitarbeiter'], '?'), 'Leistung': r['Hauptaufgabe'],
+                        'Menge': float(r['Stunden']), 'Einheit': 'Std.', 'Satz': float(r['Stundensatz_EUR']),
+                        'Netto': float(r['Kosten_Zeit_EUR'])})
+    tr = apply_partner_zuordnung(daten['fahrten'], cfg) if len(daten['fahrten']) else daten['fahrten']
+    ohne = {p for p, sk in cfg.get('sonderkalkulationen', {}).items()
+            if not p.startswith('_') and isinstance(sk, dict) and sk.get('fahrten_kostentechnisch_ausschliessen')}
+    for _, r in (tr[tr['Projekt'].isin(auswahl)].iterrows() if len(tr) else []):
+        if bis is not None and r['Start'] > bis:
+            continue
+        km = pd.to_numeric(r['Distanz (km)'], errors='coerce')
+        km = float(km) if pd.notna(km) else 0.0
+        satz = float(r['KmSatz_EUR'] or 0)
+        netto = 0.0 if (r['Projekt'] in ohne and sonderkalk_gilt(r['Projekt'], r['Fahrer'], cfg)) else km * satz
+        pos.append({'Projekt': r['Projekt'], 'Art': 'Fahrt', 'Datum': r['Start'], 'Zeit': f"{r['Start']:%H:%M}",
+                    'Person': kuerzel.get(r['Fahrer'], '?'),
+                    'Leistung': f"Fahrt {_ort(r.get('Start-Adresse'))} → {_ort(r.get('End-Adresse'))}",
+                    'Menge': km, 'Einheit': 'km', 'Satz': satz, 'Netto': round(netto, 2)})
+    zk = daten.get('zusatzkosten')
+    if zk is not None and len(zk):
+        for _, r in zk[zk['Projekt'].isin(auswahl)].iterrows():
+            d = pd.to_datetime(r['Datum'], dayfirst=True, errors='coerce')
+            if bis is not None and d > bis:
+                continue
+            pos.append({'Projekt': r['Projekt'], 'Art': 'Zusatzkosten', 'Datum': d, 'Zeit': '', 'Person': '',
+                        'Leistung': str(r['Kostenart'] or 'Zusatzkosten'), 'Menge': 1, 'Einheit': 'pauschal',
+                        'Satz': float(r['Betrag_EUR'] or 0), 'Netto': float(r['Betrag_EUR'] or 0)})
+    pdf_ = pd.DataFrame(pos)
+    if len(pdf_) == 0:
+        raise ValueError('Für die Auswahl gibt es keine Positionen bis zum Datenstand.')
+    pdf_['Monat'] = pdf_['Datum'].dt.strftime('%Y-%m')
+    pdf_ = pdf_.sort_values(['Projekt', 'Datum', 'Art'])
+
+    # ---- Kontrolle gegen die Füxle-Logik (muss exakt passen)
+    s = summen_je_monat_projekt(daten, cfg, statische_kosten=True)
+    if bm:
+        s = s[s['Monat'] <= bm]
+    for p_ in auswahl:
+        soll = float(s[s['Projekt'] == p_]['Kosten'].sum())
+        ist = float(pdf_[pdf_['Projekt'] == p_]['Netto'].sum())
+        if abs(soll - ist) > 0.01:
+            raise ValueError(f'Kontrolle fehlgeschlagen für {p_}: Bericht {ist:.2f} € ≠ Füxle {soll:.2f} € - nicht versenden')
+
+    # ---- Excel (nur Werte)
+    wb = Workbook()
+    F = 'Arial'
+    hf, hfont = PatternFill('solid', fgColor='1F3864'), Font(name=F, bold=True, color='FFFFFF', size=10)
+    nf, bf = Font(name=F, size=10), Font(name=F, size=10, bold=True)
+    thin = Side(style='thin', color='BFBFBF')
+    brd = Border(left=thin, right=thin, top=thin, bottom=thin)
+    sumfill = PatternFill('solid', fgColor='EBF0FA')
+    eur = '#,##0.00 €'
+
+    def kopf(ws, row, werte):
+        for c, v in enumerate(werte, start=1):
+            cell = ws.cell(row=row, column=c, value=v)
+            cell.fill = hf; cell.font = hfont; cell.border = brd
+            cell.alignment = Alignment(horizontal='center', vertical='center', wrap_text=True)
+
+    ws = wb.active
+    ws.title = 'Übersicht'
+    ws['A1'] = f'Neininger GmbH – Leistungsübersicht für {firma}'
+    ws['A1'].font = Font(name=F, bold=True, size=14, color='1F3864')
+    ws['A2'] = (f"Kumuliert seit Projektbeginn bis {pd.Timestamp(bis):%d.%m.%Y}"
+                f" · Berichtsmonat {pd.Timestamp(bis):%m/%Y} · Stand {meta.get('version')} vom "
+                f"{meta.get('erstellt_am') or ''} · alle Beträge in EUR")
+    ws['A2'].font = Font(name=F, italic=True, size=9, color='808080')
+    spalten = ['Projekt', 'Beginn', 'Stunden', 'Kosten Zeit (netto)', 'km', 'Kosten Fahrt (netto)',
+               'Zusatzkosten (netto)', 'Gesamt netto', f'MwSt. {int(mwst * 100)} %', 'Gesamt brutto',
+               'davon im Berichtsmonat (netto)']
+
+    def block(titel, liste, start):
+        ws.cell(row=start, column=1, value=titel).font = bf
+        kopf(ws, start + 1, spalten)
+        r0 = start + 2
+        for i, p_ in enumerate(liste):
+            d = pdf_[pdf_['Projekt'] == p_]
+            row = r0 + i
+            zeit, fahrt, zus = (d[d['Art'] == a] for a in ('Zeit', 'Fahrt', 'Zusatzkosten'))
+            netto = round(d['Netto'].sum(), 2)
+            vals = [p_, d['Datum'].min().strftime('%m/%Y') if len(d) else '-', round(zeit['Menge'].sum(), 2),
+                    round(zeit['Netto'].sum(), 2), round(fahrt['Menge'].sum(), 1), round(fahrt['Netto'].sum(), 2),
+                    round(zus['Netto'].sum(), 2), netto, round(netto * mwst, 2), round(netto * (1 + mwst), 2),
+                    round(d[d['Monat'] == bm]['Netto'].sum(), 2)]
+            for c, v in enumerate(vals, start=1):
+                cell = ws.cell(row=row, column=c, value=v)
+                cell.font = nf; cell.border = brd
+                cell.number_format = eur if c in (4, 6, 7, 8, 9, 10, 11) else ('#,##0.00' if c == 3 else '#,##0')
+                if c == 1:
+                    cell.alignment = Alignment(wrap_text=True, vertical='top')
+        sr = r0 + len(liste)
+        ws.cell(row=sr, column=1, value='Summe').font = bf
+        for c in range(3, len(spalten) + 1):
+            vals = [ws.cell(row=r_, column=c).value or 0 for r_ in range(r0, sr)]
+            cell = ws.cell(row=sr, column=c, value=round(sum(vals), 2))
+            cell.font = bf; cell.fill = sumfill; cell.border = brd
+            cell.number_format = eur if c in (4, 6, 7, 8, 9, 10, 11) else '#,##0.00'
+        return sr
+    ende = block('Projekte', [p_ for p_ in projekte if (pdf_['Projekt'] == p_).any()], 4)
+    if interne:
+        ende = block('Interne TransCare-Positionen', [p_ for p_ in interne if (pdf_['Projekt'] == p_).any()], ende + 2)
+    for i, w in enumerate([30, 9, 10, 16, 9, 16, 14, 15, 13, 15, 16], start=1):
+        ws.column_dimensions[get_column_letter(i)].width = w
+    ws.page_setup.orientation = 'landscape'
+    ws.page_setup.fitToWidth = 1
+    ws.page_setup.fitToHeight = 0
+    ws.sheet_properties.pageSetUpPr.fitToPage = True
+    ws.oddFooter.right.text = 'Seite &P von &N'
+
+    # Leistungsnachweis: ein Reiter, je Projekt ein Abschnitt mit Zwischensumme
+    ln = wb.create_sheet('Leistungsnachweis')
+    ln['A1'] = f'Leistungsnachweis {firma} – bis {pd.Timestamp(bis):%d.%m.%Y}'
+    ln['A1'].font = Font(name=F, bold=True, size=13, color='1F3864')
+    ln['A2'] = 'Personen: ' + ', '.join(f'{k} = {m}' for m, k in kuerzel.items())
+    ln['A2'].font = Font(name=F, italic=True, size=9, color='808080')
+    row = 4
+    for p_ in [x for x in auswahl if (pdf_['Projekt'] == x).any()]:
+        d = pdf_[pdf_['Projekt'] == p_]
+        ln.cell(row=row, column=1, value=p_).font = Font(name=F, bold=True, size=11, color='1F3864')
+        row += 1
+        kopf(ln, row, ['Datum', 'Zeit', 'Person', 'Leistung', 'Menge', 'Einheit', 'Satz', 'Netto'])
+        row += 1
+        for _, r in d.iterrows():
+            vals = [r['Datum'].strftime('%d.%m.%Y'), r['Zeit'], r['Person'], r['Leistung'],
+                    round(r['Menge'], 2), r['Einheit'], r['Satz'], round(r['Netto'], 2)]
+            for c, v in enumerate(vals, start=1):
+                cell = ln.cell(row=row, column=c, value=v)
+                cell.font = nf; cell.border = brd
+                if c in (7, 8):
+                    cell.number_format = eur
+            row += 1
+        ln.cell(row=row, column=4, value=f'Summe {p_}').font = bf
+        c_ = ln.cell(row=row, column=8, value=round(d['Netto'].sum(), 2))
+        c_.font = bf; c_.number_format = eur; c_.fill = sumfill
+        row += 2
+    for i, w in enumerate([11, 12, 7, 52, 9, 8, 11, 13], start=1):
+        ln.column_dimensions[get_column_letter(i)].width = w
+    ln.page_setup.orientation = 'portrait'
+    ln.page_setup.fitToWidth = 1
+    ln.page_setup.fitToHeight = 0
+    ln.sheet_properties.pageSetUpPr.fitToPage = True
+    ln.print_title_rows = '1:2'
+    ln.oddFooter.right.text = 'Seite &P von &N'
+
+    os.makedirs(output_dir, exist_ok=True)
+    name = f"{cfg.get('dateiname_praefix', 'Projektuebersicht')}_{firma}_{pd.Timestamp(bis):%Y-%m}"
+    xlsx = os.path.join(output_dir, name + '.xlsx')
+    wb.save(xlsx)
+    out = {'xlsx': xlsx, 'pdf': None, 'positionen': pdf_}
+    if pdf:
+        import subprocess
+        subprocess.run(['soffice', '--headless', '--convert-to', 'pdf', '--outdir', output_dir, xlsx],
+                       capture_output=True, timeout=180)
+        p = os.path.join(output_dir, name + '.pdf')
+        out['pdf'] = p if os.path.exists(p) else None
+    return out

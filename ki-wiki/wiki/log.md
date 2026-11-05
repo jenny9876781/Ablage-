@@ -28,3 +28,4 @@ stand: 2026-11-03
 - 2026-11-05 – Abschluss-Lint: S5-Rest korrigiert, Verrechnungssatz-Zahl entfernt; Abgabedatei Preisigke_Praxisprojekt_Monatsbericht.docx.
 - 2026-11-05 – Stundensatz auf 'ca. 40 €' gerundet (Datenschutz eigener Lohn); alle Zahlen neu: Jahr 1 +1.920 €, ab Jahr 2 +3.060 €, Break-even 6 h.
 - 2026-11-05 – TT24_Einschaetzung_zum_Kurs.docx erstellt (1 Seite, 3 Felder zum Ausfüllen).
+- 2026-11-05 – Abgabe erledigt; Übergabeseite aktualisiert.

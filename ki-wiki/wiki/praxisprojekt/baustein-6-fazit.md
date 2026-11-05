@@ -6,7 +6,7 @@ stand: 2026-11-04
 # Baustein 6 (Variante B gewählt)
 **Kernaussage:** Der Bericht ist schnell, aber noch nicht verlässlich – und das ändern wir zuerst.
 
-**Empfehlung:** Dreimonatiger Pilot: Team-Account mit AVV, Skill mit Prüfblatt und Begründung je Zuordnung. Ab Jahr 2 ca. 3.200 €/Jahr. Unsicherste Annahme: geschätzter Aufwand früher – lohnt ab 6 h Ersparnis/Monat. Entscheidung GF bis 30.11.2026; in 12 Monaten Freigabe in 15 Minuten ohne Zweifel.
+**Empfehlung:** Dreimonatiger Pilot: Team-Account mit AVV, Skill mit Prüfblatt und Begründung je Zuordnung. Ab Jahr 2 ca. 3.100 €/Jahr. Unsicherste Annahme: geschätzter Aufwand früher – lohnt ab 6 h Ersparnis/Monat. Entscheidung GF bis 30.11.2026; in 12 Monaten Freigabe in 15 Minuten ohne Zweifel.
 
 | Wann | Was |
 |---|---|

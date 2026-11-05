@@ -5,7 +5,7 @@ stand: 2026-11-04
 ---
 # Stand
 - Abgabe fertig: `abgabe/Praxisprojekt_Abschlussbericht.docx` (11 S.) + `abgabe/Praxisprojekt_Kurzpraesentation.pptx` (8 Folien). Quellen der Dateien: `abgabe/_bau_*.js`.
-- Zahlen: Stundensatz 41 €/h · heute ca. 2 h · Jahr 1 +2.005 € · ab Jahr 2 +3.174 € · Break-even 5,9 h/Monat.
+- Zahlen: Stundensatz ca. 40 €/h · heute ca. 2 h · Jahr 1 +1.920 € · ab Jahr 2 +3.060 € · Break-even 6 h/Monat.
 - Nummern: S1–S4, E1–E4. Review 15.03.2027. Entscheidung GF Team-Account bis 30.11.2026.
 
 # Erledigt 04.11.

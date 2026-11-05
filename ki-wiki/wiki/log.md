@@ -26,3 +26,4 @@ stand: 2026-11-03
 - 2026-11-04 – AUFTRAG_SKILL_PRUEFUNG.md für neuen Claude-Code-Chat angelegt.
 - 2026-11-04 – TT23-Folien + TT18 (Richtlinie, Steckbrief, Ampel nach Werkzeug) eingearbeitet: Wellen Pilot/Ausweitung/Regelbetrieb, Fazit B, Anhang D Steckbrief, Bonus-Freigabe, Schulungszugang offen benannt; Auftrag Skill-Prüfung: nur Testdaten.
 - 2026-11-05 – Abschluss-Lint: S5-Rest korrigiert, Verrechnungssatz-Zahl entfernt; Abgabedatei Preisigke_Praxisprojekt_Monatsbericht.docx.
+- 2026-11-05 – Stundensatz auf 'ca. 40 €' gerundet (Datenschutz eigener Lohn); alle Zahlen neu: Jahr 1 +1.920 €, ab Jahr 2 +3.060 €, Break-even 6 h.

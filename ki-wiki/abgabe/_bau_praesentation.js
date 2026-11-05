@@ -66,15 +66,15 @@ es.forEach((e,i)=>{const x=0.6+(i%2)*6.15,y=1.6+Math.floor(i/2)*2.6;card(s,x,y,5
 
 // 6 Wirtschaftlichkeit
 s=add('CONTENT','Lösung'); s.addText('Vorsichtig gerechnet – und trotzdem positiv',{placeholder:'title'});
-s.addChart(pres.charts.BAR,[{name:'Kosten',labels:['Jahr 1','ab Jahr 2'],values:[2915,1746]},{name:'Nutzen',labels:['Jahr 1','ab Jahr 2'],values:[4920,4920]}],
+s.addChart(pres.charts.BAR,[{name:'Kosten',labels:['Jahr 1','ab Jahr 2'],values:[2880,1740]},{name:'Nutzen',labels:['Jahr 1','ab Jahr 2'],values:[4800,4800]}],
  {x:0.6,y:1.5,w:6.6,h:5.1,barDir:'col',barGrouping:'clustered',chartColors:[HX.coral,HX.green],showValue:true,dataLabelPosition:'outEnd',dataLabelFormatCode:'#,##0 "€"',dataLabelFontSize:12,dataLabelFontFace:'+mn-lt',
   showLegend:true,legendPos:'b',legendFontFace:'+mn-lt',legendFontSize:12,catAxisLabelFontFace:'+mn-lt',catAxisLabelFontSize:14,catAxisLabelColor:HX.grey,valAxisHidden:true,valGridLine:{style:'none'},catGridLine:{style:'none'},showTitle:false});
 tb(s,'Ergebnis Jahr 1',{x:7.7,y:1.6,w:5,h:0.4,fontSize:14,color:C.accent6});
-tb(s,'+2.005 €',{x:7.7,y:2.0,w:5,h:0.9,fontSize:48,bold:true,color:C.accent3,fontFace:'Cambria'});
+tb(s,'+1.920 €',{x:7.7,y:2.0,w:5,h:0.9,fontSize:48,bold:true,color:C.accent3,fontFace:'Cambria'});
 tb(s,'ab Jahr 2',{x:7.7,y:3.0,w:5,h:0.4,fontSize:14,color:C.accent6});
-tb(s,'+3.174 € / Jahr',{x:7.7,y:3.4,w:5,h:0.9,fontSize:40,bold:true,color:C.accent3,fontFace:'Cambria'});
+tb(s,'+3.060 € / Jahr',{x:7.7,y:3.4,w:5,h:0.9,fontSize:40,bold:true,color:C.accent3,fontFace:'Cambria'});
 card(s,7.7,4.55,5.0,2.05,C.background2);
-tb(s,[{text:'Interner Kostensatz 41 €/h',options:{bullet:true,breakLine:true}},{text:'Gesparte 10 h/Monat fließen in M&A, Buchhaltung, Liquiplanung',options:{bullet:true,breakLine:true}},{text:'Lohnt ab 5,9 h Ersparnis/Monat',options:{bullet:true}}],{x:7.95,y:4.7,w:4.6,h:1.8,fontSize:14,paraSpaceAfter:4});
+tb(s,[{text:'Interner Kostensatz ca. 40 €/h',options:{bullet:true,breakLine:true}},{text:'Gesparte 10 h/Monat fließen in M&A, Buchhaltung, Liquiplanung',options:{bullet:true,breakLine:true}},{text:'Lohnt ab 6 h Ersparnis/Monat',options:{bullet:true}}],{x:7.95,y:4.7,w:4.6,h:1.8,fontSize:14,paraSpaceAfter:4});
 
 // 7 Einführung
 s=add('CONTENT','Lösung'); s.addText('Pilot, Ausweitung, Regelbetrieb – mit Stopp-Regel',{placeholder:'title'});
@@ -92,6 +92,6 @@ tb(s,[{text:'Richtlinie & Steckbrief',options:{bold:true,breakLine:true,color:C.
 pres.addSection({title:'Empfehlung'});
 s=add('DARK','Empfehlung');
 s.addText('Schnell, aber noch nicht verlässlich – das ändern wir zuerst',{placeholder:'title'});
-s.addText([{text:'Empfehlung: Ja – Pilot über drei Berichte, Team-Account mit AVV',options:{breakLine:true}},{text:'Ab Jahr 2 ca. 3.200 € / Jahr · lohnt ab 6 h Ersparnis im Monat',options:{breakLine:true}},{text:'Nächster Schritt: Entscheidung der GF bis 30.11.2026',options:{bold:true,color:C.background1,breakLine:true}},{text:'In 12 Monaten: Regelbetrieb, 0 Korrekturen, Freigabe in 15 Minuten',options:{}}],{placeholder:'body'});
+s.addText([{text:'Empfehlung: Ja – Pilot über drei Berichte, Team-Account mit AVV',options:{breakLine:true}},{text:'Ab Jahr 2 ca. 3.100 € / Jahr · lohnt ab 6 h Ersparnis im Monat',options:{breakLine:true}},{text:'Nächster Schritt: Entscheidung der GF bis 30.11.2026',options:{bold:true,color:C.background1,breakLine:true}},{text:'In 12 Monaten: Regelbetrieb, 0 Korrekturen, Freigabe in 15 Minuten',options:{}}],{placeholder:'body'});
 
 (async()=>{const f=process.argv[2];await pres.writeFile({fileName:f});await applyTheme(f,THEME);})();

@@ -1499,7 +1499,7 @@ def build_excel_workbook(calendar_df, trips_df, config, period_label, output_pat
         r += 1
     for rr in range(zk_start_row, zk_last_row + 1):
         ws.cell(row=rr, column=6, value=f'=IF(A{rr}="","",YEAR(A{rr}))')
-        ws.cell(row=rr, column=7, value=f'=IF(A{rr}="","",TEXT(A{rr},"YYYY-MM"))')
+        ws.cell(row=rr, column=7, value=f'=IF(A{rr}="","",YEAR(A{rr})&"-"&TEXT(MONTH(A{rr}),"00"))')
         for c in range(1, 8):
             ws.cell(row=rr, column=c).font = normal
             ws.cell(row=rr, column=c).border = border
@@ -1542,7 +1542,7 @@ def build_excel_workbook(calendar_df, trips_df, config, period_label, output_pat
     for rr in range(mz_start_row, mz_last_row + 1):
         ws.cell(row=rr, column=7, value=f'=IF(A{rr}="","",YEAR(A{rr}))')
         ws.cell(row=rr, column=9, value=f'=IF(A{rr}="","",E{rr}*H{rr})')
-        ws.cell(row=rr, column=10, value=f'=IF(A{rr}="","",TEXT(A{rr},"YYYY-MM"))')
+        ws.cell(row=rr, column=10, value=f'=IF(A{rr}="","",YEAR(A{rr})&"-"&TEXT(MONTH(A{rr}),"00"))')
         for c in range(1, 11):
             ws.cell(row=rr, column=c).font = normal
             ws.cell(row=rr, column=c).border = border
@@ -2757,6 +2757,28 @@ def _lade_fahrten(autolog_specs, config, period_start, period_end):
     return pd.concat(frames, ignore_index=True)
 
 
+def offene_fahrten(autolog_specs, config, period_start, period_end):
+    """Fahrten, die weder 'Geschäftlich' noch 'Privat' sind (z.B. 'Offen' = in Autolog
+    noch nicht klassifiziert). Sie fließen NICHT ein, kommen aber auf die Prüfliste
+    (früher fielen sie still heraus)."""
+    zuord = {re.sub(r'\s+', '', k).upper(): v for k, v in config.get('fahrzeug_fahrer_zuordnung', {}).items()
+             if not k.startswith('_')}
+    out = []
+    for spec in autolog_specs:
+        fahrer = zuord.get(re.sub(r'\s+', '', spec['kennzeichen']).upper())
+        if fahrer is None or str(fahrer).upper().startswith('IGNORIEREN'):
+            continue
+        df = load_autolog_csv(spec['path'], spec['kennzeichen'], fahrer, period_start, period_end,
+                              nur_geschaeftlich=False)
+        for _, r in df[~df['Fahrtart'].isin(['Geschäftlich', 'Privat'])].iterrows():
+            out.append({'Bereich': 'Fahrt nicht klassifiziert', 'Datum': r['Start'], 'Mitarbeiter': fahrer,
+                        'Text': f"{r.get('Start-Adresse')} \u2192 {r.get('End-Adresse')} ({r['Distanz (km)']} km)",
+                        'Projekt': '',
+                        'Grund': (f'Fahrtart "{r["Fahrtart"]}" - fließt NICHT ein. In Autolog als geschäftlich/privat '
+                                  'einstufen und neu exportieren, oder als Zusatzkosten erfassen.')})
+    return out
+
+
 def _match_alle(trips, cal, config):
     teile = []
     for fahrer in trips['Fahrer'].dropna().unique():
@@ -2831,6 +2853,7 @@ def neuaufbau(calendar_specs, autolog_specs, config, period_start, period_end, p
     cal = _markiere_dubletten(cal)
     cal['Quelle'] = 'neu'
     trips = _lade_fahrten(autolog_specs, cfg, period_start, period_end)
+    extra += offene_fahrten(autolog_specs, cfg, period_start, period_end)
     trips = _match_alle(trips, cal, cfg)
     trips['Quelle'] = 'neu'
     zk = alt['zusatzkosten'] if alt else pd.DataFrame(columns=['Datum', 'Projekt', 'Kostenart', 'Betrag_EUR', 'Anmerkung'])
@@ -2931,7 +2954,8 @@ def fortfuehrung(vorlage, erwartete_version, calendar_specs, autolog_specs, conf
             extra.append({'Bereich': 'Fahrt-Nachtrag Vormonat (nicht übernommen)', 'Datum': r['Start'],
                           'Mitarbeiter': r['Fahrer'], 'Text': r.get('Partner'), 'Projekt': '',
                           'Grund': 'Fahrt fehlt in der freigegebenen Vorversion - Vormonate bleiben unverändert.'})
-    t_inc = _match_alle(t_inc, cal, cfg) if len(t_inc) else _match_alle(t_inc, cal, cfg)
+    extra += offene_fahrten(autolog_specs, cfg, bis + pd.Timedelta(seconds=1), period_end)
+    t_inc = _match_alle(t_inc, cal, cfg)
     t_inc['Quelle'] = 'neu'
     trips = pd.concat([alt_trips, t_inc], ignore_index=True)
     trips = apply_partner_zuordnung(trips, cfg)

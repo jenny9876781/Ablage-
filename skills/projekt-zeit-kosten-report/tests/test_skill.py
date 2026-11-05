@@ -305,3 +305,22 @@ def test_dublette_zwischen_zwei_kalendern_markiert(tmp_path):
     d = c[c['Aufgabe'] == 'Projektplanung']
     assert len(d) == 2 and d['Unsicher'].sum() == 1
     assert 'Mögliche Dublette' in d[d['Unsicher']].iloc[0]['Zuordnung_Grund']
+
+
+def test_monat_formel_ohne_yyyy(szenario):
+    """Bug Füxle-Datei: TEXT(..;"YYYY-MM") liefert in deutschem Excel "YYYY-05"."""
+    wb = openpyxl.load_workbook(szenario['v01']['pfad'])
+    for blatt in ('Zusatzkosten', 'Manuelle_Zeitbuchungen'):
+        for row in wb[blatt].iter_rows():
+            for c in row:
+                assert not (isinstance(c.value, str) and 'YYYY' in c.value), (blatt, c.coordinate)
+
+
+def test_offene_fahrt_kommt_auf_pruefliste(tmp_path):
+    cfg = config()
+    cs, al = td.specs(tmp_path, td.MARIUS_BASIS)
+    with open(al[0]['path'], 'a', encoding='utf-8') as f:
+        f.write('VS MN 1000;30.09.26 11:52;30.09.26 15:19;333;Offen;;;;Landau;Überlingen\n')
+    r = rl.neuaufbau(cs, al, cfg, BASIS_START, BASIS_ENDE, '2026-10', str(tmp_path / 'o'))
+    pl = openpyxl.load_workbook(r['pfad'])['Pruefliste']
+    assert any(x[1] == 'Fahrt nicht klassifiziert' for x in pl.iter_rows(min_row=6, values_only=True))

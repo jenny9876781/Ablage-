@@ -112,3 +112,11 @@ Rohdaten_Kalender, Rohdaten_Fahrten, Sonderkalk, Listen.
 - Zahlungen: Rechnung, Zeitraum, Betrag brutto, Anmerkung; Summe wird in TC_Bericht abgezogen.
 - Berichtshistorie: Protokoll jeder Meldung an TransCare.
 - TC_Bericht: Formeln (SUMIFS), Auswahl per „x“, Druckbereich gesetzt; Teile Projekte / Allgemein / Abrechnung.
+
+## Ab Version 6.5 (ersetzt den Abschnitt 6.4 oben)
+Reihenfolge: Cockpit, Interne_Auswertung, Pruefen_Korrigieren, TC_Bericht, TC_Stand, Zusatzkosten,
+Manuelle_Zeitbuchungen, Stammdaten, Rohdaten_Kalender, Rohdaten_Fahrten, Sonderkalk, Listen (ausgeblendet).
+- Uebersicht, Abgleich_Vormonate, Zahlungen, Berichtshistorie gibt es nicht mehr (siehe SKILL.md, Version 6.5).
+- Pruefen_Korrigieren: Kopfblock Zeilen 1–13 (Prüfstatus A–C, Berichtsversion/Freigabe E–F), Liste ab Zeile 14,
+  Abgleich als letzter Abschnitt (Titel „Abgleich mit der Vorversion“).
+- TC_Bericht: Schalter J2, Druckbereich B–H, interne Spalten J–K.

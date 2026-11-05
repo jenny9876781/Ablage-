@@ -10,7 +10,7 @@ import pandas as pd
 import pytest
 
 from conftest import (BASIS_ENDE, BASIS_START, NOV_ENDE, config, entscheide, freigeben, lade_v5,
-                      pruefliste, rl, td, uebersicht_summen)
+                      pruefliste, rl, td, uebersicht_summen, abgleich_status)
 
 
 # --------------------------------------------------------------- S2: Erkennung
@@ -138,8 +138,7 @@ def test_mehrere_kandidaten_nur_die_richtige(szenario):
 def test_abgleich_vormonate_unveraendert(szenario):
     ab = szenario['v02']['abgleich']
     assert ab['n_abweichungen'] == 0
-    ws = openpyxl.load_workbook(szenario['v02']['pfad'])['Abgleich_Vormonate']
-    assert ws['A4'].value == 'Vormonate unverändert ✔'
+    assert abgleich_status(szenario['v02']['pfad']) == 'Vormonate unverändert ✔'
 
 
 def test_keine_dubletten_bei_fortfuehrung(szenario):
@@ -194,8 +193,7 @@ def test_abweichung_wird_gezeigt_mit_zeile(szenario, tmp_path):
     assert set(zip(abw['Monat'], abw['Projekt'])) == {('2026-09', 'Koko')}
     z = ab['zeilen']
     assert len(z) == 1 and z.iloc[0]['Art'] == 'Nur in neuer Version' and 'Zusatztermin' in z.iloc[0]['Text']
-    ws = openpyxl.load_workbook(r['pfad'])['Abgleich_Vormonate']
-    assert ws['A4'].value.startswith('1 Abweichungen')
+    assert abgleich_status(r['pfad']).startswith('1 Abweichungen')
 
 
 # --------------------------------------------------------------- Auslastung entfernt
@@ -375,10 +373,10 @@ def test_urlaub_in_fremdem_kalender_mit_namen():
 # --------------------------------------------------------------- Version 6.2
 def test_reiterstruktur(szenario):
     wb = openpyxl.load_workbook(szenario['v02']['pfad'])
-    assert wb.sheetnames[:5] == ['Cockpit', 'Uebersicht', 'Interne_Auswertung', 'Pruefen_Korrigieren',
-                                 'Abgleich_Vormonate']
+    assert wb.sheetnames[:3] == ['Cockpit', 'Interne_Auswertung', 'Pruefen_Korrigieren']
     for weg in ('Filter_Dashboard', 'Monatstrend', 'Hauptaufgaben_Verteilung', 'Plausibilitaets_Check',
-                'Pruefliste', 'Gesamt_Alle_Jahre', 'Parameter'):
+                'Pruefliste', 'Gesamt_Alle_Jahre', 'Parameter', 'Uebersicht', 'Abgleich_Vormonate',
+                'Zahlungen', 'Berichtshistorie'):
         assert weg not in wb.sheetnames
     assert wb['Listen'].sheet_state == 'hidden'
 
@@ -391,12 +389,14 @@ def test_cockpit_alle_gleich_uebersicht(szenario, recalced, key):
     ck = wb['Cockpit']
     netto = [r[1] for r in ck.iter_rows(min_row=10, max_row=22, max_col=2, values_only=True) if r[0] == 'Gesamtkosten NETTO'][0]
     assert netto == pytest.approx(ue, abs=0.01)
-    assert any(r[1] == '0 Fehler ✔' for r in ck.iter_rows(min_col=5, max_col=6, values_only=True))
+    pk = wb[rl.PRUEF]
+    assert any(r[2] == '0 Fehler ✔' for r in pk.iter_rows(min_row=4, max_row=12, max_col=3, values_only=True))
+    # Cockpit ohne Versionsblock/Prüfstatus/Monatsabschluss
+    texte = {c.value for row in ck.iter_rows() for c in row if isinstance(c.value, str)}
+    assert not texte & {'Berichtsversion', 'Prüfstatus', 'Monatsabschluss (abhaken mit x)'}
     # Projektliste im Cockpit = Übersicht je Projekt
     ue_p = uebersicht_summen(pfad)
-    for r in ck.iter_rows(min_row=25, max_col=5, values_only=True):
-        if r[0] in ue_p:
-            assert r[4] == pytest.approx(ue_p[r[0]]['kosten'], abs=0.01), r[0]
+    assert sum(v['kosten'] for v in ue_p.values()) == pytest.approx(netto, abs=0.01)
 
 
 def test_interne_auswertung_summe_gleich_stunden(szenario, recalced):
@@ -599,8 +599,8 @@ def test_tc_schalter_wie_gemeldet(szenario, tmp_path):
     cfg = szenario['cfg']
     r, koko_sep = _tc_datei(szenario, tmp_path)
     wb = openpyxl.load_workbook(r['pfad'])
-    assert wb['TC_Stand']['B6'].value == rl.MODUS_KORR
-    wb['TC_Stand']['B6'] = rl.MODUS_GEMELDET                         # Nutzerin schaltet um
+    assert wb['TC_Bericht']['J2'].value == rl.MODUS_KORR
+    wb['TC_Bericht']['J2'] = rl.MODUS_GEMELDET                       # Nutzerin schaltet um (im TC_Bericht)
     wb.save(r['pfad'])
     b = rl.erstelle_kundenbericht(r['pfad'], cfg, ['Koko'], str(tmp_path / 'g'), pdf=False, nur_freigegeben=False)
     z = b['rechnung']['Koko']
@@ -609,3 +609,30 @@ def test_tc_schalter_wie_gemeldet(szenario, tmp_path):
     ln = openpyxl.load_workbook(b['xlsx'])['Leistungsnachweis']
     texte = [c.value for c in ln['D'] if isinstance(c.value, str)]
     assert any(t.startswith('Stand lt. Aufstellung vom 05.10.2026') for t in texte)
+
+
+# --------------------------------------------------------------- Version 6.5
+def test_tc_65_nichts_neues_und_keine_hinweise(szenario, tmp_path, recalced):
+    cfg = szenario['cfg']
+    r, _ = _tc_datei(szenario, tmp_path)
+    wp = cfg['wochenpauschale']['bezeichnung']
+    b = rl.erstelle_kundenbericht(r['pfad'], cfg, ['Koko'], str(tmp_path / 'b'), pdf=False, nur_freigegeben=False,
+                                  interne=[wp])
+    z = b['rechnung'][wp]
+    # nicht gemeldeter allgemeiner Aufwand: bis Stichtag 0, erst danach (Pauschale Okt.)
+    assert z['basis']['Netto'] == 0 and z['fx_bis']['Netto'] > 0 and z['aktuell']['Netto'] == z['fx_ab']['Netto']
+    nachweis = openpyxl.load_workbook(b['xlsx'])['Leistungsnachweis']
+    texte = [c.value for row in nachweis.iter_rows() for c in row if isinstance(c.value, str)]
+    ue = openpyxl.load_workbook(b['xlsx'])['Übersicht']
+    alle = [c.value for row in ue.iter_rows() for c in row if isinstance(c.value, str)]
+    assert 'Hinweis' not in alle and not any('Korrektur' in t or 'Aufstellung' in t and '€' in t for t in alle)
+    # Live-Blatt: Schalter im TC_Bericht, interne Spalten außerhalb des Druckbereichs
+    wb = openpyxl.load_workbook(r['pfad'])
+    tb = wb['TC_Bericht']
+    assert tb['J1'].value.startswith('Basis bis Stichtag') and '$B$1:$H$' in str(tb.print_area)
+    # Zahlungen/Historie in TC_Stand und wieder einlesbar
+    d = rl.lade_vorlage(r['pfad'], cfg)
+    assert list(d['zahlungen']['Rechnung']) == ['RG 1', 'RG 2'] and d['tc_stand']['modus'] == rl.MODUS_KORR
+    js, kopie = recalced(r['pfad'])
+    assert js['total_errors'] == 0
+    assert _live_wert(kopie, 'Offener Betrag (brutto)') is not None

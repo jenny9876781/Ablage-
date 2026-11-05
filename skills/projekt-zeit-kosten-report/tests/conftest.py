@@ -42,7 +42,7 @@ def recalc(pfad):
 def freigeben(pfad, wer='GF Test', zusatz=None):
     """Simuliert die Nutzerin in Excel: Freigabevermerk + händische Einträge."""
     wb = openpyxl.load_workbook(pfad)
-    ws = wb['Cockpit']
+    ws = wb[rl.PRUEF]                    # ab 6.5: Freigabe oben in Pruefen_Korrigieren
     pos = rl._finde_zelle(ws, 'Freigegeben am')
     ws.cell(row=pos[0], column=pos[1] + 1, value='05.11.2026')
     ws.cell(row=pos[0] + 1, column=pos[1] + 1, value=wer)
@@ -94,7 +94,9 @@ def entscheide(wb, id_, entscheidung, kommentar=None):
     Zeile nehmen) und in Spalte J entscheiden."""
     ws = wb[rl.PRUEF]
     frei = None
-    for r in range(7, ws.max_row + 1):
+    for r in range(rl.PRUEF_KOPFZEILE + 1, ws.max_row + 1):
+        if ws.cell(row=r, column=1).value == rl.ABGL_TITEL:
+            break
         if ws.cell(row=r, column=1).value == id_:
             frei = r
             break
@@ -107,8 +109,23 @@ def entscheide(wb, id_, entscheidung, kommentar=None):
 
 def pruefliste(pfad):
     ws = openpyxl.load_workbook(pfad)[rl.PRUEF]
-    kopf = [c.value for c in ws[6]]
-    return [dict(zip(kopf, r)) for r in ws.iter_rows(min_row=7, values_only=True) if r[1]]
+    hr = rl.PRUEF_KOPFZEILE
+    kopf = [c.value for c in ws[hr]]
+    out = []
+    for r in ws.iter_rows(min_row=hr + 1, values_only=True):
+        if r[0] == rl.ABGL_TITEL:
+            break
+        if r[1]:
+            out.append(dict(zip(kopf, r)))
+    return out
+
+
+def abgleich_status(pfad):
+    ws = openpyxl.load_workbook(pfad)[rl.PRUEF]
+    for row in ws.iter_rows(max_col=1):
+        if row[0].value == rl.ABGL_TITEL:
+            return ws.cell(row=row[0].row + 3, column=1).value
+    raise KeyError('Abgleich-Abschnitt fehlt')
 
 
 @pytest.fixture(scope='session')
@@ -137,9 +154,18 @@ def recalced():
     return _get
 
 
-def uebersicht_summen(pfad, blatt='Uebersicht'):
-    """Summen je Projekt (Uebersicht mit Jahr = (Alle); Version-5-Dateien: Gesamt_Alle_Jahre)."""
+def uebersicht_summen(pfad, blatt='Cockpit'):
+    """Summen je Projekt: ab 6.5 Projektliste im Cockpit (Filter (Alle)); Version-5-Dateien: Gesamt_Alle_Jahre."""
     ws = openpyxl.load_workbook(pfad, data_only=True)[blatt]
+    if blatt == 'Cockpit':
+        out, an = {}, False
+        for r in ws.iter_rows(max_col=7, values_only=True):
+            if r[0] == 'Projekt' and r[3] == 'Stunden':
+                an = True
+                continue
+            if an and r[0]:
+                out[r[0]] = {'std': r[3], 'kosten': r[5], 'km': r[4]}
+        return out
     hr = 5 if blatt == 'Uebersicht' else 4
     kopf = [c.value for c in ws[hr]]
     out = {}

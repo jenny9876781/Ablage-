@@ -3,7 +3,7 @@ name: projekt-zeit-kosten-report
 description: "Use this skill whenever the user (assistant to Neininger management) wants the recurring time/cost report that consolidates Outlook calendar entries (project name in quotes in the subject) with the Autolog vehicle logbook export into a multi-year Excel report: hours, driven km, and costs per project, per task category, per employee, per company (Neininger GmbH / TransCare), with a filterable dashboard, VAT breakdown, a weekly non-project sales-time allowance, manual extra costs, and a plausibility check. Trigger on 'Projektbericht', 'Zeit-/Kostenbericht', 'Autolog', 'Fahrtenbuch', 'Kalenderexport'+'Projekt', 'Jahresauswertung', or requests reconciling calendar time with driving logs into a cost report, any year from 2024 on. Also trigger when calendar/Autolog CSVs are uploaded with a request to consolidate hours/km/costs, including project-specific multi-year reports. Do NOT use for the separate ma-nbo-workflow skill."
 ---
 
-# Projekt-Zeit-/Kosten-Report (Neininger) — Version 6.4 (abgesichert + vereinfacht + Kundenbericht + TransCare-Abrechnung, 2026-11)
+# Projekt-Zeit-/Kosten-Report (Neininger) — Version 6.5 (abgesichert + vereinfacht + Kundenbericht + TransCare-Abrechnung, 2026-11)
 
 Dieser Skill bildet den wiederkehrenden Workflow ab, bei dem aus Outlook-Kalenderexporten
 mehrerer Mitarbeiter/Postfächer und einem Autolog-Fahrtenbuch-Export ein Excel-Bericht mit
@@ -71,6 +71,34 @@ nicht dauerhaft, nur über ein neues ZIP.**
 (Interne_Auswertung, Dashboard-Kreuztabelle) und je Mitarbeiter **und Projekt** (Übersicht) bleiben.
 
 **7. Tests:** `python -m pytest tests -q` (erfundene Testdaten). Vor jeder Änderung an `report_lib.py` laufen lassen.
+
+## Version 6.5 (2026-11-05): noch einfacher – VERBINDLICH (ersetzt abweichende Angaben in 6.2/6.4)
+
+**Reiter (12 statt 16, inkl. ausgeblendeter Listen):** Cockpit, Interne_Auswertung (grün) · Pruefen_Korrigieren (gelb) · TC_Bericht (grün),
+TC_Stand (blau) · Zusatzkosten, Manuelle_Zeitbuchungen (blau) · Stammdaten, Rohdaten_Kalender, Rohdaten_Fahrten,
+Sonderkalk (grau) · Listen (ausgeblendet). **Weggefallen:** Uebersicht (= Cockpit mit Filter „(Alle)“; Projektliste
+im Cockpit hat jetzt auch km), Abgleich_Vormonate, Zahlungen, Berichtshistorie.
+
+- **Cockpit nur Filter + Zahlen** (Wunsch GF): kein Versionsblock, kein Prüfstatus, keine Monatsabschluss-Liste,
+  kein „TransCare offen“.
+- **Pruefen_Korrigieren oben (Zeilen 1–13):** links Prüfstatus (offene Entscheidungen, Hinweise offen, Abgleich
+  Vorversion mit Link, Formel-Check, Anzahl Regel-Vorschläge, TransCare offen brutto), rechts **Berichtsversion mit
+  Freigegeben am/von** (hier liest der Skill Version und Freigabe – ältere Dateien: Cockpit). Kopfzeile der Liste
+  = Zeile 14 (`PRUEF_KOPFZEILE`). Reihenfolge: offene Punkte → bisherige Entscheidungen (zugeklappt) → 50 freie
+  Zeilen → Hinweise (zugeklappt) → **Abschnitt „Abgleich mit der Vorversion“** ganz unten. Regel-Vorschläge in
+  Spalten O–T, zugeklappt.
+- **TC_Stand** = alle TC-Eingaben: 1. gemeldeter Stand, 2. Zahlungen, 3. Berichtshistorie (Abschnitte per Titel
+  „2. Zahlungen…“, „3. Berichtshistorie…“ – beim Einlesen danach suchen; ältere Dateien: eigene Reiter).
+- **Schalter jetzt im TC_Bericht, Zelle J2** (`TC_SCHALTER`). TC_Stand zeigt ihn nur an. In TC_Stand ändern sich
+  beim Umschalten keine Zahlen (das ist die Eingabe) – wirksam ist er im TC_Bericht und im externen Bericht.
+- **Nichts erstmals rückwirkend zeigen:** allgemeiner Aufwand, der in der Aufstellung NICHT stand, erscheint bis
+  zum Stichtag mit 0 und erst ab dem Stichtag (z. B. Allgemeine Vertriebszeit: nur 2.000 € ab 01.08.2026). Laufende
+  Projekte erscheinen normal.
+- **Keine Hinweise und keine Korrekturspalte im Bericht** (live und extern). Im TC_Bericht stehen „intern: Korrektur“
+  und „intern: Hinweis“ in J/K – außerhalb des Druckbereichs B–H. Bei „korrigiert“ sieht TC die bereinigten Zahlen
+  ohne Erklärung (von der Nutzerin so gewollt).
+- Bericht-Layout: Seite 1 Projekte, Seite 2 allgemeiner Aufwand + Abrechnung + Zahlungen (Summe in der Titelzeile).
+  Pauschalwochen werden im Leistungsnachweis getrennt vor/nach dem Stichtag zusammengefasst.
 
 ## Version 6.4 (2026-11-05): TransCare-Abrechnung (gemeldeter Stand, Schalter, Zahlungen)
 

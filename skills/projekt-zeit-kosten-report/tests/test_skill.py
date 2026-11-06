@@ -636,3 +636,57 @@ def test_tc_65_nichts_neues_und_keine_hinweise(szenario, tmp_path, recalced):
     js, kopie = recalced(r['pfad'])
     assert js['total_errors'] == 0
     assert _live_wert(kopie, 'Offener Betrag (brutto)') is not None
+
+
+# --------------------------------------------------------------- Version 6.6 (Oktober-Lauf)
+def _mini_cal(rows):
+    return pd.DataFrame([{'Mitarbeiter': td.MN, 'Projekt': p, 'Start': pd.Timestamp(s), 'Ende': pd.Timestamp(e),
+                          'Ist_Pauschale': False, 'Mehrtaegig': m, 'Ort': o} for p, s, e, m, o in rows])
+
+
+def _mini_trip(start, partner=None, zweck=None):
+    return pd.DataFrame([{'Fahrer': td.MN, 'Start': pd.Timestamp(start), 'Ende': pd.Timestamp(start) + pd.Timedelta(minutes=20),
+                          'Partner': partner, 'Zweck': zweck, 'Distanz (km)': 10.0}])
+
+
+def test_matching_zweck_teams_partnervorrang():
+    cfg = config()
+    cfg['partner_projekt_zuordnung']['Ki-Immo'] = 'Barrierefrei'
+    cfg['partner_mit_vorrang'] = ['Ki-Immo']
+    cal = _mini_cal([('Spedition Niedermaier', '2026-10-06 02:00', '2026-10-08 02:00', True, ''),
+                     ('Cool', '2026-10-07 18:30', '2026-10-07 20:00', False, 'Microsoft Teams-Besprechung'),
+                     ('Zeppelin', '2026-10-23 08:30', '2026-10-23 09:00', False, 'Kunde vor Ort')])
+    # Zweck nennt Projekt -> gewinnt
+    t = rl.match_trips_to_calendar(_mini_trip('2026-10-07 07:14', 'Neininger GmbH', 'Beratungseinsatz Spedition Niedermaier'),
+                                   cal, td.MN, config=cfg)
+    assert t.iloc[0]['Projekt'] == 'Spedition Niedermaier' and 'Zweck' in t.iloc[0]['Zuordnung_Grund']
+    # Teams-Termin zieht keine Fahrt an (ohne Zweck -> Block)
+    t = rl.match_trips_to_calendar(_mini_trip('2026-10-07 17:00'), cal, td.MN, config=cfg)
+    assert t.iloc[0]['Projekt'] == 'Spedition Niedermaier'
+    # Partner mit Vorrang schlägt den Kalender-Match
+    t = rl.match_trips_to_calendar(_mini_trip('2026-10-23 07:00', 'Ki-Immo', 'Banktermin'), cal, td.MN, config=cfg)
+    assert t.iloc[0]['Projekt'] == 'Barrierefrei'
+    # ohne Vorrang/Zweck bleibt es beim Kalender-Match
+    t = rl.match_trips_to_calendar(_mini_trip('2026-10-23 07:00', 'Neininger GmbH', 'Banktermin'), cal, td.MN, config=cfg)
+    assert t.iloc[0]['Projekt'] == 'Zeppelin'
+
+
+def test_anfahrtspauschale_einmal_je_kw_trotz_uhrzeit():
+    cfg = config()
+    cal = _mini_cal([('Spedition Niedermaier', '2026-10-06 02:00', '2026-10-08 02:00', True, ''),
+                     ('Spedition Niedermaier', '2026-10-08 08:00', '2026-10-08 12:00', False, '')])
+    sk = rl.calc_tagessatz_block_kosten(cal, 'Spedition Niedermaier', cfg['sonderkalkulationen'])
+    assert len(sk['pauschalen']) == 1
+
+
+def test_fortfuehrung_mit_entscheidungen_aus_dem_chat(szenario, tmp_path):
+    cfg = szenario['cfg']
+    korr = [{'bereich': 'kalender', 'mitarbeiter': td.MN, 'start': '2026-11-03 09:00', 'text': 'Koko',
+             'korrektur': 'Unberücksichtigt'}]
+    zl = pd.DataFrame([{'Datum': None, 'Rechnung': 'RG X', 'Zeitraum': '11/26', 'Betrag_brutto': 100.0, 'Anmerkung': None}])
+    r = rl.fortfuehrung(szenario['v01']['pfad'], 'v01', szenario['cs_n'], szenario['al_n'], cfg, NOV_ENDE, '2026-11',
+                        str(tmp_path / 'o'), korrekturen=korr, zahlungen=zl)
+    k = r['kalender']
+    z = k[(k['Start'] == pd.Timestamp('2026-11-03 09:00')) & (k['Mitarbeiter'] == td.MN)]
+    assert list(z['Korrektur']) == ['Unberücksichtigt']
+    assert r['abgleich']['n_abweichungen'] == 0                   # Vormonate unberührt

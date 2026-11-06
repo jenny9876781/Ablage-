@@ -391,7 +391,8 @@
     "Kikripp gGmbH": "Unberücksichtigt",
     "Kikripp GmbH": "Unberücksichtigt",
     "Vermietung": "Unberücksichtigt",
-    "Frutania GmbH": "Frutania"
+    "Frutania GmbH": "Frutania",
+    "Ki-Immo": "Barrierefrei"
   },
   "dateiname_praefix": "Füxle",
   "_dateiname_hinweis": "Ausgabedatei: <dateiname_praefix>_<Zeitraum>_vNN.xlsx (Nutzerin 2026-11-05: \"Füxle\").",
@@ -408,5 +409,9 @@
     "Fahrtkosten",
     "km-Differenz (manuell erhöht)",
     "Sonstiges"
-  ]
+  ],
+  "partner_mit_vorrang": [
+    "Ki-Immo"
+  ],
+  "_partner_mit_vorrang_hinweis": "Partner, deren Zuordnung VOR dem Kalender-Match gilt (Nutzerin 2026-11-06: Ki-Immo grundsätzlich Barrierefrei)."
 }

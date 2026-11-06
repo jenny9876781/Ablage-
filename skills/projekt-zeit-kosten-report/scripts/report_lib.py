@@ -14,7 +14,7 @@ Einstieg für den Monatsablauf: neuaufbau() bzw. fortfuehrung() (ganz unten).
 Diese Bibliothek wird von Jahr/Monat zu Jahr/Monat wiederverwendet. Nur
 config/projekt_konfiguration.json und die hochgeladenen Rohdateien ändern sich.
 """
-SKILL_VERSION = '6.5'
+SKILL_VERSION = '6.6'
 HINWEIS_STATISCH = ('ACHTUNG (bekannte Einschränkung, Version 6 nur markiert): statische Werte - enthalten auch mehrtägige Blöcke und ignorierte Termine, berücksichtigen keine manuellen Korrekturen. Für Freigabe/Abrechnung nur Uebersicht_<Jahr> bzw. Gesamt_Alle_Jahre verwenden.')
 
 import json
@@ -556,7 +556,25 @@ def match_trips_to_calendar(trips_df, calendar_df, mitarbeiter,
     trips['Projekt'] = None
     trips['Zuordnung_Grund'] = 'Nicht zugeordnet (kein Termin im Zeitfenster)'
     trips['Unsicher'] = False
+    # Version 6.6: Online-Termine (Teams/Zoom) ziehen keine Fahrten an
+    if 'Ort' in cal.columns:
+        cal = cal[~cal['Ort'].astype(str).str.contains('Teams|Zoom|Google Meet', case=False, regex=True)]
+    vorrang = set((config or {}).get('partner_mit_vorrang', []))
+    mapping_ = _partner_mapping(config) if config else {}
+    ignore_ = set((config or {}).get('projektname_erkennung', {}).get('ignorieren', []))
     for ti, trip in trips.iterrows():
+        partner = trip.get('Partner')
+        if isinstance(partner, str) and partner in vorrang and mapping_.get(partner):
+            trips.at[ti, 'Projekt'] = mapping_[partner]
+            trips.at[ti, 'Zuordnung_Grund'] = f'Partner "{partner}" -> {mapping_[partner]} (Partner-Regel mit Vorrang)'
+            continue
+        zweck = trip.get('Zweck')
+        if config and isinstance(zweck, str) and zweck.strip():
+            e = erkenne_projekt(zweck, config)
+            if e['projekt'] and not e['unsicher'] and e['projekt'] not in ignore_:
+                trips.at[ti, 'Projekt'] = e['projekt']
+                trips.at[ti, 'Zuordnung_Grund'] = f'Autolog-Zweck nennt Projekt ("{zweck.strip()}")'
+                continue
         candidates = cal[
             (trip['Start'] >= cal['Start'] - window_before) &
             (trip['Start'] <= cal['Ende'] + window_after)
@@ -821,7 +839,7 @@ def calc_tagessatz_block_kosten(calendar_df, projekt, sonderkalk_config):
         cur = r['Start']
         while cur <= r['Ende']:
             iso = cur.isocalendar()
-            wochen.add((iso[0], iso[1], cur - timedelta(days=cur.weekday())))
+            wochen.add((iso[0], iso[1], (cur - timedelta(days=cur.weekday())).normalize()))   # 6.6: ohne Uhrzeit
             cur += timedelta(days=1)
 
     pauschale_rows = []
@@ -3290,7 +3308,9 @@ def neuaufbau(calendar_specs, autolog_specs, config, period_start, period_end, p
 
 
 def fortfuehrung(vorlage, erwartete_version, calendar_specs, autolog_specs, config, period_end,
-                 period_label, output_dir, neue_manuelle_zeitbuchungen=None, neue_zusatzkosten=None):
+                 period_label, output_dir, neue_manuelle_zeitbuchungen=None, neue_zusatzkosten=None,
+                 korrekturen=None, fahrten_als_geschaeftlich=None, partner_ueberschreiben=None,
+                 hinweise_erledigt=None, zahlungen=None):
     """Monatliche Fortführung (gegen S1). Ablauf:
     1. pruefe_vorlage(): nur die zuletzt FREIGEGEBENE Version, sonst Stopp (VorlageFehler).
     2. Alle Zeilen der Vorlage bis 'Datenstand bis' werden EINGEFROREN übernommen
@@ -3308,6 +3328,8 @@ def fortfuehrung(vorlage, erwartete_version, calendar_specs, autolog_specs, conf
                             f'({bis:%d.%m.%Y}) - nichts fortzuführen.')
     alt = lade_vorlage(vorlage, config)
     cfg, hinweise = _merge_config(config, alt)
+    for k_, v_ in (partner_ueberschreiben or {}).items():      # 6.6: Entscheidungen der Nutzerin im Chat
+        cfg.setdefault('partner_projekt_zuordnung', {})[k_] = v_
     vtext = versionstext(meta['version_nr'])
     extra = []
 
@@ -3358,9 +3380,28 @@ def fortfuehrung(vorlage, erwartete_version, calendar_specs, autolog_specs, conf
             extra.append({'Bereich': 'Fahrt-Nachtrag Vormonat (nicht übernommen)', 'Datum': r['Start'],
                           'Mitarbeiter': r['Fahrer'], 'Text': r.get('Partner'), 'Projekt': '',
                           'Grund': 'Fahrt fehlt in der freigegebenen Vorversion - Vormonate bleiben unverändert.'})
-    extra += offene_fahrten(autolog_specs, cfg, bis + pd.Timedelta(seconds=1), period_end)
+    offen = offene_fahrten(autolog_specs, cfg, bis + pd.Timedelta(seconds=1), period_end)
+    als_g = {pd.Timestamp(x) for x in (fahrten_als_geschaeftlich or [])}
+    if als_g:
+        # 6.6: von der Nutzerin als geschäftlich bestätigte 'Offen'-Fahrten aufnehmen
+        zu = {re.sub(r'\s+', '', k).upper(): v for k, v in cfg['fahrzeug_fahrer_zuordnung'].items() if not k.startswith('_')}
+        roh = pd.concat([load_autolog_csv(sp['path'], sp['kennzeichen'], zu.get(re.sub(r'\s+', '', sp['kennzeichen']).upper()),
+                                          bis + pd.Timedelta(seconds=1), period_end, nur_geschaeftlich=False)
+                         for sp in autolog_specs], ignore_index=True)
+        dazu = roh[roh['Start'].isin(als_g) & (roh['Fahrtart'] != 'Geschäftlich')]
+        t_inc = pd.concat([t_inc, dazu], ignore_index=True)
+        offen = [o_ for o_ in offen if pd.Timestamp(o_['Datum']) not in als_g]
+    extra += offen
     t_inc = _match_alle(t_inc, cal, cfg)
     t_inc['Quelle'] = 'neu'
+    if korrekturen:
+        # 6.6: Korrekturen aus dem Chat nur auf NEUE Zeilen (Vormonate bleiben eingefroren)
+        neu_c = cal['Quelle'] == 'neu'
+        c2, r1 = wende_korrekturen_an(cal[neu_c], korrekturen, 'kalender')
+        cal = pd.concat([cal[~neu_c], c2]).sort_index()
+        t2, r2 = wende_korrekturen_an(t_inc, korrekturen, 'fahrten')
+        t_inc = t2
+        extra += r1 + r2
     trips = pd.concat([alt_trips, t_inc], ignore_index=True)
     trips = apply_partner_zuordnung(trips, cfg)
     trips = compute_fahrten_kosten(trips, cfg)
@@ -3379,7 +3420,9 @@ def fortfuehrung(vorlage, erwartete_version, calendar_specs, autolog_specs, conf
                                     alt_label=f'{os.path.basename(str(vorlage))} ({vtext})')
     vi = {'version': meta['version_nr'] + 1, 'vorgaenger': meta['version_nr'],
           'datenstand_bis': period_end, 'zeitraum': period_label}
-    ctx_extra = _tc_ctx(cfg, alt, None, None, None, extra)
+    ctx_extra = _tc_ctx(cfg, alt, None, zahlungen, None, extra)
+    if hinweise_erledigt:
+        ctx_extra['hinweise_erledigt'] = {**ctx_extra.get('hinweise_erledigt', {}), **hinweise_erledigt}
     erg = _speichern_und_berichten(cal, trips, cfg, period_label, output_dir, vi, zk, mz, abgleich, extra,
                                    ctx_extra=ctx_extra)
     erg['config_hinweise'] = hinweise

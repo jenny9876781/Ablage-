@@ -3,7 +3,7 @@ name: projekt-zeit-kosten-report
 description: "Use this skill whenever the user (assistant to Neininger management) wants the recurring time/cost report that consolidates Outlook calendar entries (project name in quotes in the subject) with the Autolog vehicle logbook export into a multi-year Excel report: hours, driven km, and costs per project, per task category, per employee, per company (Neininger GmbH / TransCare), with a filterable dashboard, VAT breakdown, a weekly non-project sales-time allowance, manual extra costs, and a plausibility check. Trigger on 'Projektbericht', 'Zeit-/Kostenbericht', 'Autolog', 'Fahrtenbuch', 'Kalenderexport'+'Projekt', 'Jahresauswertung', or requests reconciling calendar time with driving logs into a cost report, any year from 2024 on. Also trigger when calendar/Autolog CSVs are uploaded with a request to consolidate hours/km/costs, including project-specific multi-year reports. Do NOT use for the separate ma-nbo-workflow skill."
 ---
 
-# Projekt-Zeit-/Kosten-Report (Neininger) — Version 6.5 (abgesichert + vereinfacht + Kundenbericht + TransCare-Abrechnung, 2026-11)
+# Projekt-Zeit-/Kosten-Report (Neininger) — Version 6.6 (abgesichert + vereinfacht + Kundenbericht + TransCare-Abrechnung, 2026-11)
 
 Dieser Skill bildet den wiederkehrenden Workflow ab, bei dem aus Outlook-Kalenderexporten
 mehrerer Mitarbeiter/Postfächer und einem Autolog-Fahrtenbuch-Export ein Excel-Bericht mit
@@ -71,6 +71,22 @@ nicht dauerhaft, nur über ein neues ZIP.**
 (Interne_Auswertung, Dashboard-Kreuztabelle) und je Mitarbeiter **und Projekt** (Übersicht) bleiben.
 
 **7. Tests:** `python -m pytest tests -q` (erfundene Testdaten). Vor jeder Änderung an `report_lib.py` laufen lassen.
+
+## Version 6.6 (2026-11-06): Regeln aus dem ersten echten Monatslauf (Oktober 2026)
+
+- **Fahrten-Zuordnung (Reihenfolge):** 1. manuelle Korrektur, 2. Partner = Unberücksichtigt, 3. **Partner mit
+  Vorrang** (Config `partner_mit_vorrang`, z. B. Ki-Immo → Barrierefrei), 4. **Autolog-„Zweck“ nennt ein Projekt**
+  (z. B. „Beratungseinsatz Spedition Niedermaier“), 5. Zeitfenster-Match, 6. Partner-Fallback.
+  **Online-Termine (Ort enthält Teams/Zoom/Google Meet) ziehen keine Fahrten an.**
+- **Anfahrtspauschale (Sonderkalk):** je Kalenderwoche genau einmal – Fehler behoben, der bei Terminen mit
+  unterschiedlicher Uhrzeit in derselben Woche (02:00-Block + 08:00-Termin) doppelt rechnete.
+- **Autolog als Excel (.xlsx)** wird eingelesen (getrennte Datums-/Uhrzeitspalten).
+- **`fortfuehrung()` nimmt Chat-Entscheidungen direkt an:** `korrekturen` (nur neue Zeilen), `fahrten_als_geschaeftlich`
+  (bestätigte „Offen“-Fahrten), `partner_ueberschreiben`, `hinweise_erledigt` ({(Thema, Text): '✔ passt'}),
+  `zahlungen` (geänderte Zahlungsliste). Vormonate bleiben eingefroren (Abgleich muss „unverändert ✔“ zeigen).
+- **Vor dem Bau immer:** Probelauf in einen Testordner, Unstimmigkeiten gebündelt fragen (Offen-Fahrten, Zuordnungen
+  über Teams-Termine, neue Partner, mehrtägige Blöcke mit 01:00/02:00-Uhrzeit, Pauschalen), erst nach Okay bauen.
+- Sonderfälle ohne Schalter (z. B. zusätzlicher Vor-Ort-Tag Niedermaier) als **Zusatzkosten mit Begründung** erfassen.
 
 ## Version 6.5 (2026-11-05): noch einfacher – VERBINDLICH (ersetzt abweichende Angaben in 6.2/6.4)
 

@@ -436,7 +436,11 @@ def load_autolog_csv(path, kennzeichen, fahrer_name, period_start=None, period_e
     WICHTIG: 'Fahrer'-Wert im (alten) Export ist nicht vertrauenswürdig — fahrer_name wird
     explizit übergeben und überschreibt/ersetzt die Spalte.
     """
-    df = pd.read_csv(path, sep=';', encoding='utf-8-sig')
+    if str(path).lower().endswith(('.xlsx', '.xls')):        # ab 10/2026: Autolog-Export als Excel
+        df = pd.read_excel(path, dtype=str, keep_default_na=False)
+        df = df.replace({'': None})
+    else:
+        df = pd.read_csv(path, sep=';', encoding='utf-8-sig')
     kennzeichen_norm = re.sub(r'\s+', '', kennzeichen).upper()
     df = df[df['Kennzeichen'].astype(str).str.replace(r'\s+', '', regex=True).str.upper()
             == kennzeichen_norm].copy()
@@ -3103,7 +3107,7 @@ def _tc_ctx(cfg, alt, tc_stand, zahlungen, historie, extra):
             if z['Rechnung'] and (z['Betrag_brutto'] in (None, '') or pd.isna(z['Betrag_brutto'])):
                 extra.append({'Bereich': 'Zahlung ohne Betrag', 'Datum': None, 'Mitarbeiter': '',
                               'Text': f"{z['Rechnung']} ({z['Zeitraum'] or ''})", 'Projekt': '',
-                              'Grund': 'Rechnung ohne Zahlbetrag - offen oder Betrag fehlt? Im Reiter Zahlungen eintragen.'})
+                              'Grund': 'Rechnung ohne Zahlbetrag - offen oder Betrag fehlt? In TC_Stand unter 2. Zahlungen eintragen.'})
     wp = cfg.get('wochenpauschale', {}).get('bezeichnung')
     interne = [p for p, v in cfg.get('projekt_stammliste', {}).items()
                if isinstance(v, dict) and 'intern' in str(v.get('firma', ''))] + ([wp] if wp else [])

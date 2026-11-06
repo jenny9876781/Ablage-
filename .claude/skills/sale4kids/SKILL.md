@@ -1394,6 +1394,7 @@ ist die Merkliste; erledigte Punkte hier abhaken, nicht löschen.
       unveränderten 1.2.3-Text (`kikripp_umstellen_1120`). Tests 515 Logik, 91 Browser, 16 mobil, Geschenke 31 (1 rot nur
       wegen NU05-V09/-V10), Liste ok.
 - [x] **05.11.: Neue Kategorien** (19 statt 16, Nutzerin einverstanden, Zuordnung macht Claude allein nach den Kriterien): `scripts/kategorien_neu.py` (370 Artikel, idempotent), nur Feld `kat` im Import geändert; steckt in `katalog_import-06.11.json` → kommt mit dem Freitags-Import. Excel `01_Artikelstamm_kikripp_2026-11-05.xlsx`. Plugin unverändert (Kategorien-Auswahl baut sich aus den Daten, Geschenke = Preis 0).
+- [x] **06.11.: Spielzeug online.** Foto-Nachtrag F-942/F-943 + F-150 (fehlte in allen Paketen), Import „0 neu, 801 aktualisiert, 191 NEU“, Hinweisband „Neu im Katalog: Spielzeug, Bücher, Spiele und Tonies – Abholung ab 11.11.“ bis 20.11.2026, Kontrolle privat ok. NU01-15-Warnung harmlos (einzige Reservierung abgeholt). BU04-04 (Kallax) behält Foto F-080 mit Teppich im Vordergrund – Nutzerin will es so. Beim Prüfen nie einen bestellten/bezahlten Artikel suchen lassen (der fällt aus dem Katalog).
 - [ ] **Ende November 2026: Höchstzahl Geschenke je Reservierung mit der Nutzerin neu besprechen**
       (Vorschlag: ab ca. 01.12. auf 20 oder frei, damit bis 10.12. alles abgeholt wird).
 - [x] Plugin 1.2.1 (06.10.): Einstellung „Fußzeile ausblenden“ (Standard an) – Body-Klasse

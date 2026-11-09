@@ -3,7 +3,7 @@ name: projekt-zeit-kosten-report
 description: "Use this skill whenever the user (assistant to Neininger management) wants the recurring time/cost report that consolidates Outlook calendar entries (project name in quotes in the subject) with the Autolog vehicle logbook export into a multi-year Excel report: hours, driven km, and costs per project, per task category, per employee, per company (Neininger GmbH / TransCare), with a filterable dashboard, VAT breakdown, a weekly non-project sales-time allowance, manual extra costs, and a plausibility check. Trigger on 'Projektbericht', 'Zeit-/Kostenbericht', 'Autolog', 'Fahrtenbuch', 'Kalenderexport'+'Projekt', 'Jahresauswertung', or requests reconciling calendar time with driving logs into a cost report, any year from 2024 on. Also trigger when calendar/Autolog CSVs are uploaded with a request to consolidate hours/km/costs, including project-specific multi-year reports. Do NOT use for the separate ma-nbo-workflow skill."
 ---
 
-# Projekt-Zeit-/Kosten-Report (Neininger) — Version 6.7 (abgesichert + vereinfacht + Kundenbericht + TransCare-Abrechnung, 2026-11)
+# Projekt-Zeit-/Kosten-Report (Neininger) — Version 6.8 (abgesichert + vereinfacht + Kundenbericht + TransCare-Abrechnung, 2026-11)
 
 Dieser Skill bildet den wiederkehrenden Workflow ab, bei dem aus Outlook-Kalenderexporten
 mehrerer Mitarbeiter/Postfächer und einem Autolog-Fahrtenbuch-Export ein Excel-Bericht mit
@@ -71,6 +71,22 @@ nicht dauerhaft, nur über ein neues ZIP.**
 (Interne_Auswertung, Dashboard-Kreuztabelle) und je Mitarbeiter **und Projekt** (Übersicht) bleiben.
 
 **7. Tests:** `python -m pytest tests -q` (erfundene Testdaten). Vor jeder Änderung an `report_lib.py` laufen lassen.
+
+## Version 6.8 (2026-11-09): immer „wie gemeldet“, Cockpit = TC-Bericht, Nachträge
+
+- **Kein Schalter mehr.** Bis zum Stichtag gilt überall der gemeldete Stand (Aufstellung 05.08.2026). Projekte,
+  die nicht in der Aufstellung standen, kommen aus der Füxle; nicht gemeldeter allgemeiner Aufwand = 0.
+- **Cockpit = TC-Bericht** (Nutzerin): TC_Stand Spalte K „Übertrag in die Füxle“ = gemeldet − Füxle bis Stichtag
+  (ohne Nachträge, Spalte J statisch). Der Übertrag ist eine eigene SUMIFS-Quelle (`_quellen`: 'tc', Hilfsspalten
+  N–Q ausgeblendet) und erscheint im Cockpit unter „Zusatzkosten / Übertrag Meldung“. Nur €, Stunden/km bleiben
+  echte Werte. TC_Bericht „ab Stichtag“ rechnet OHNE Übertrag (`_formeln(..., uebertrag=False)`).
+  Nicht gemeldeter allgemeiner Aufwand mit Füxle-Kosten bis Stichtag bekommt automatisch eine 0-Zeile in TC_Stand.
+- **TC_Stand Abschnitt 4 „Nachträge zur Aufstellung“:** Bezeichnung, Position, Datum von/bis → Betrag live =
+  Zusatzkosten + manuelle Zeiten der Position im Zeitraum (Kalender/Fahrten haben Text-Datumsspalten und zählen
+  nicht als Nachtrag). Im TC_Bericht und externen Bericht eigene Zeile „Nachtrag <Bezeichnung> (Datum)“ unter der
+  Position; Leistungsnachweis zeigt die Einzelposten. Beispiel: Italien (Vor-Ort Termine, 17.10.2024) 5.072,40 €.
+- **Zahlungen/Gutschriften NUR in TC_Stand eintragen.** Die Liste im TC_Bericht ist Anzeige (graue Schrift);
+  dort Eingetragenes wird nicht gerechnet und beim nächsten Lauf überschrieben.
 
 ## Version 6.7 (2026-11-09): Gutschriften, laufende Gegenüberstellung, Neuausgabe
 

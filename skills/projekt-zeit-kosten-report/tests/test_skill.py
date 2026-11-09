@@ -579,8 +579,8 @@ def test_tc_abrechnung_live_gleich_bericht(szenario, tmp_path, recalced):
     b = rl.erstelle_kundenbericht(r['pfad'], cfg, ['Koko'], str(tmp_path / 'b'), pdf=False, nur_freigegeben=False,
                                   interne=['Vor-Ort Termine i. Auftrag TC'])
     z = b['rechnung']['Koko']
-    assert z['korrektur'] == pytest.approx(-500, abs=0.01)           # Füxle korrigiert die Aufstellung
-    assert z['basis']['Netto'] == pytest.approx(koko_sep, abs=0.01)
+    assert z['korrektur'] == 0                                       # 6.8: immer wie gemeldet
+    assert z['basis']['Netto'] == pytest.approx(koko_sep + 500, abs=0.01)
     assert b['rechnung']['Vor-Ort Termine i. Auftrag TC']['basis']['Netto'] == pytest.approx(1000)  # immer gemeldet
     assert b['zahlungen'] == pytest.approx(1190)
     assert b['offen'] == pytest.approx(b['brutto'] - 1190, abs=0.01)
@@ -595,20 +595,25 @@ def test_tc_abrechnung_live_gleich_bericht(szenario, tmp_path, recalced):
                for ws in wbf for row in ws.iter_rows() for c in row)
 
 
-def test_tc_schalter_wie_gemeldet(szenario, tmp_path):
+def test_tc_immer_wie_gemeldet_und_cockpit_gleich(szenario, tmp_path, recalced):
+    """6.8: kein Schalter; Leistungsnachweis mit 'Stand lt. Aufstellung'; Cockpit (Firma TransCare) = TC-Bericht."""
     cfg = szenario['cfg']
     r, koko_sep = _tc_datei(szenario, tmp_path)
     wb = openpyxl.load_workbook(r['pfad'])
-    assert wb['TC_Bericht']['J2'].value == rl.MODUS_KORR
-    wb['TC_Bericht']['J2'] = rl.MODUS_GEMELDET                       # Nutzerin schaltet um (im TC_Bericht)
-    wb.save(r['pfad'])
+    assert wb['TC_Bericht']['J1'].value is None                      # Schalter entfernt
     b = rl.erstelle_kundenbericht(r['pfad'], cfg, ['Koko'], str(tmp_path / 'g'), pdf=False, nur_freigegeben=False)
-    z = b['rechnung']['Koko']
-    assert z['korrektur'] == 0 and z['basis']['Netto'] == pytest.approx(koko_sep + 500, abs=0.01)
-    # Leistungsnachweis: eine Zeile "Stand lt. Aufstellung", danach nur Leistungen ab Stichtag
     ln = openpyxl.load_workbook(b['xlsx'])['Leistungsnachweis']
     texte = [c.value for c in ln['D'] if isinstance(c.value, str)]
     assert any(t.startswith('Stand lt. Aufstellung vom 05.10.2026') for t in texte)
+    js, kopie = recalced(r['pfad'])
+    assert js['total_errors'] == 0
+    w = openpyxl.load_workbook(kopie, data_only=True)
+    tb = w['TC_Bericht']
+    koko = [row for row in tb.iter_rows(values_only=True) if row[1] == 'Koko'][0]
+    vor = [row for row in tb.iter_rows(values_only=True) if row[1] == 'Vor-Ort Termine i. Auftrag TC'][0]
+    ck = {row[0]: row[5] for row in w['Cockpit'].iter_rows(min_row=25, values_only=True) if row[0]}
+    assert ck['Koko'] == pytest.approx(koko[4], abs=0.01)             # Cockpit = gemeldet + danach
+    assert ck['Vor-Ort Termine i. Auftrag TC'] == pytest.approx(vor[4], abs=0.01)
 
 
 # --------------------------------------------------------------- Version 6.5
@@ -629,10 +634,10 @@ def test_tc_65_nichts_neues_und_keine_hinweise(szenario, tmp_path, recalced):
     # Live-Blatt: Schalter im TC_Bericht, interne Spalten außerhalb des Druckbereichs
     wb = openpyxl.load_workbook(r['pfad'])
     tb = wb['TC_Bericht']
-    assert tb['J1'].value.startswith('Basis bis Stichtag') and '$B$1:$H$' in str(tb.print_area)
+    assert '$B$1:$H$' in str(tb.print_area)
     # Zahlungen/Historie in TC_Stand und wieder einlesbar
     d = rl.lade_vorlage(r['pfad'], cfg)
-    assert list(d['zahlungen']['Rechnung']) == ['RG 1', 'RG 2'] and d['tc_stand']['modus'] == rl.MODUS_KORR
+    assert list(d['zahlungen']['Rechnung']) == ['RG 1', 'RG 2'] and d['tc_stand']['modus'] == rl.MODUS_GEMELDET
     js, kopie = recalced(r['pfad'])
     assert js['total_errors'] == 0
     assert _live_wert(kopie, rl.TC_DIFF_LABEL) is not None
@@ -717,3 +722,38 @@ def test_tc_gutschriften_und_neu_ausgeben(szenario, tmp_path, recalced):
     js, kopie = recalced(n['pfad'])
     assert js['total_errors'] == 0
     assert _live_wert(kopie, 'abzüglich Gutschriften (bezahlt)') == pytest.approx(-500)
+
+
+# --------------------------------------------------------------- Version 6.8: Nachträge
+def test_tc_nachtrag_italien(szenario, tmp_path, recalced):
+    cfg = szenario['cfg']
+    r, _ = _tc_datei(szenario, tmp_path)
+    wb = openpyxl.load_workbook(r['pfad'])
+    zk = wb['Zusatzkosten']
+    for c, v in enumerate([datetime(2026, 9, 17), 'Vor-Ort Termine i. Auftrag TC', 'Übernachtung Hotel', 400.0, 'Chiasso'], 1):
+        zk.cell(row=5, column=c, value=v)
+    mz = wb['Manuelle_Zeitbuchungen']
+    for c, v in enumerate([datetime(2026, 9, 17), td.MN, 'Vor-Ort Termine i. Auftrag TC', 'Projektbetreuung', 2,
+                           'Italien'], 1):
+        mz.cell(row=5, column=c, value=v)
+    mz.cell(row=5, column=8, value=200)
+    wb.save(r['pfad'])
+    freigeben(r['pfad'])
+    nach = [{'Bezeichnung': 'Italien', 'Position': 'Vor-Ort Termine i. Auftrag TC',
+             'von': pd.Timestamp('2026-09-17'), 'bis': pd.Timestamp('2026-09-17')}]
+    n = rl.neu_ausgeben(r['pfad'], 'v01', cfg, str(tmp_path / 'n'), tc_nachtraege=nach)
+    freigeben(n['pfad'])
+    b = rl.erstelle_kundenbericht(n['pfad'], cfg, [], str(tmp_path / 'b'), pdf=False,
+                                  interne=['Vor-Ort Termine i. Auftrag TC'])
+    z = b['rechnung']['Vor-Ort Termine i. Auftrag TC']
+    assert [x['Netto'] for x in z['nachtraege']] == [pytest.approx(800)]   # 400 + 2 h x 200
+    assert z['aktuell']['Netto'] == pytest.approx(1000 + 800, abs=0.01)
+    js, kopie = recalced(n['pfad'])
+    assert js['total_errors'] == 0
+    w = openpyxl.load_workbook(kopie, data_only=True)
+    zeilen = {row[1]: row for row in w['TC_Bericht'].iter_rows(values_only=True) if row[1]}
+    assert zeilen['   Nachtrag Italien (17.09.2026)'][2] == pytest.approx(800)
+    assert zeilen['Vor-Ort Termine i. Auftrag TC'][2] == pytest.approx(1000)
+    ck = {row[0]: row[5] for row in w['Cockpit'].iter_rows(min_row=25, values_only=True) if row[0]}
+    assert ck['Vor-Ort Termine i. Auftrag TC'] == pytest.approx(1800, abs=0.01)
+    assert rl.lade_vorlage(n['pfad'], cfg)['tc_stand']['nachtraege'][0]['Bezeichnung'] == 'Italien'

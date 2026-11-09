@@ -757,3 +757,34 @@ def test_tc_nachtrag_italien(szenario, tmp_path, recalced):
     ck = {row[0]: row[5] for row in w['Cockpit'].iter_rows(min_row=25, values_only=True) if row[0]}
     assert ck['Vor-Ort Termine i. Auftrag TC'] == pytest.approx(1800, abs=0.01)
     assert rl.lade_vorlage(n['pfad'], cfg)['tc_stand']['nachtraege'][0]['Bezeichnung'] == 'Italien'
+
+
+# --------------------------------------------------------------- Version 6.9: Stichtag-Aufteilung live
+def test_tc_nachtraeglicher_excel_eintrag_live(szenario, tmp_path, recalced):
+    cfg = szenario['cfg']
+    r, _ = _tc_datei(szenario, tmp_path)
+    js0, k0 = recalced(r['pfad'])
+    vorher = {row[1]: row for row in openpyxl.load_workbook(k0, data_only=True)['TC_Bericht'].iter_rows(values_only=True)
+              if row[1]}
+    # Nutzerin trägt in Excel nachträglich (vor Stichtag 30.09.2026) Zusatzkosten ein
+    wb = openpyxl.load_workbook(r['pfad'])
+    zk = wb['Zusatzkosten']
+    for i, (proj, betrag) in enumerate([('Cool', 300.0), ('Koko', 111.0)]):
+        for c, v in enumerate([datetime(2026, 9, 20), proj, 'Hotel', betrag, 'nachträglich'], 1):
+            zk.cell(row=5 + i, column=c, value=v)
+    pfad2 = str(tmp_path / 'nachtraeglich.xlsx')
+    wb.save(pfad2)
+    js, k1 = recalced(pfad2)
+    assert js['total_errors'] == 0
+    w = openpyxl.load_workbook(k1, data_only=True)
+    nach = {row[1]: row for row in w['TC_Bericht'].iter_rows(values_only=True) if row[1]}
+    # nicht gemeldetes Projekt: landet live in "Stand bis Stichtag", nicht in "ab"
+    assert nach['Cool'][2] == pytest.approx(vorher['Cool'][2] + 300, abs=0.01)
+    assert nach['Cool'][3] == pytest.approx(vorher['Cool'][3], abs=0.01)
+    # gemeldetes Projekt ohne Nachtrag: TC-Bericht bleibt beim gemeldeten Stand
+    assert nach['Koko'][2] == pytest.approx(vorher['Koko'][2], abs=0.01)
+    assert nach['Koko'][3] == pytest.approx(vorher['Koko'][3], abs=0.01)
+    # Cockpit bleibt = TC-Bericht (Übertrag gleicht aus)
+    ck = {row[0]: row[5] for row in w['Cockpit'].iter_rows(min_row=25, values_only=True) if row[0]}
+    for p in ('Cool', 'Koko'):
+        assert ck[p] == pytest.approx(nach[p][4], abs=0.01), p

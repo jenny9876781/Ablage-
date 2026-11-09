@@ -14,7 +14,7 @@ Einstieg für den Monatsablauf: neuaufbau() bzw. fortfuehrung() (ganz unten).
 Diese Bibliothek wird von Jahr/Monat zu Jahr/Monat wiederverwendet. Nur
 config/projekt_konfiguration.json und die hochgeladenen Rohdateien ändern sich.
 """
-SKILL_VERSION = '6.8'
+SKILL_VERSION = '6.9'
 HINWEIS_STATISCH = ('ACHTUNG (bekannte Einschränkung, Version 6 nur markiert): statische Werte - enthalten auch mehrtägige Blöcke und ignorierte Termine, berücksichtigen keine manuellen Korrekturen. Für Freigabe/Abrechnung nur Uebersicht_<Jahr> bzw. Gesamt_Alle_Jahre verwenden.')
 
 import json
@@ -1515,7 +1515,7 @@ def build_excel_workbook(calendar_df, trips_df, config, period_label, output_pat
             'Datum', 'Start', 'Ende', 'Dauer_h', 'Stundensatz_EUR', 'Kosten_Zeit_EUR', 'Aufgabe',
             'Mehrtaegig_Blocker', 'Ist_Pauschale', 'Entscheidung (aus Prüfen & Korrigieren)',
             'Projekt (automatisch erkannt, intern)', 'Zuordnung_Grund', 'Prüfen', 'Betreff', 'Quelle',
-            'Status', 'ID']
+            'Status', 'ID', 'MonatNr']
     ws.append(cols)
     style_header_row(ws, 1, len(cols))
     cal_all_rows = calendar_df.copy()
@@ -1541,7 +1541,8 @@ def build_excel_workbook(calendar_df, trips_df, config, period_label, output_pat
                                               and not r_.get('Ist_Ganztagespauschale', False)) else '',
                     'JA' if r_['Ist_Pauschale'] else '', None, auto_projekt,
                     r_['Zuordnung_Grund'] or '', 'JA - bitte prüfen' if unsicher else '',
-                    r_['Betreff'] if isinstance(r_['Betreff'], str) else None, r_['Quelle'], None, r_['ID']])
+                    r_['Betreff'] if isinstance(r_['Betreff'], str) else None, r_['Quelle'], None, r_['ID'],
+                    int(r_['Start'].year * 100 + r_['Start'].month)])
         # Version 6.2: Entscheidung kommt aus der EINEN Liste "Pruefen_Korrigieren" (Schlüssel = ID)
         ws.cell(row=row, column=17, value=_entscheidung_formel(f'X{row}'))
         ws.cell(row=row, column=23,
@@ -1575,7 +1576,8 @@ def build_excel_workbook(calendar_df, trips_df, config, period_label, output_pat
     cols = ['Jahr', 'Monat', 'Mitarbeiter', 'Projekt', 'Firma', 'Herkunft', 'Datum', 'Start', 'Ende',
             'Distanz_km', 'Dauer_h', 'KmSatz_EUR', 'Kosten_Fahrt_EUR', 'Start-Adresse', 'End-Adresse',
             'Partner (Autolog)', 'Zweck', 'Projekt (Kalender-Match, intern)',
-            'Entscheidung (aus Prüfen & Korrigieren)', 'Zuordnung_Grund', 'Prüfen', 'Quelle', 'Status', 'ID']
+            'Entscheidung (aus Prüfen & Korrigieren)', 'Zuordnung_Grund', 'Prüfen', 'Quelle', 'Status', 'ID',
+            'MonatNr']
     ws.append(cols)
     style_header_row(ws, 1, len(cols))
     tdf = trips_df.copy()
@@ -1600,7 +1602,7 @@ def build_excel_workbook(calendar_df, trips_df, config, period_label, output_pat
                     r_['Start'].strftime('%d.%m.%Y'), r_['Start'].strftime('%d.%m.%Y %H:%M'),
                     r_['Ende'].strftime('%d.%m.%Y %H:%M'), r_['Distanz (km)'], dauer_h, r_['KmSatz_EUR'],
                     None, r_['Start-Adresse'], r_['End-Adresse'], r_['Partner'], r_['Zweck'], kal_match, None,
-                    grund, 'JA - bitte prüfen' if unsicher else '', r_['Quelle'], None, r_['ID']])
+                    grund, 'JA - bitte prüfen' if unsicher else '', r_['Quelle'], None, r_['ID'], int(r_['Start'].year * 100 + r_['Start'].month)])
         ws.cell(row=row, column=19, value=_entscheidung_formel(f'X{row}'))
         ws.cell(row=row, column=23,
                 value=f'=IF(D{row}="","",IFERROR(VLOOKUP(D{row},{stamm_range},3,FALSE),"TBD"))')
@@ -1669,6 +1671,7 @@ def build_excel_workbook(calendar_df, trips_df, config, period_label, output_pat
         ws.cell(row=rr, column=7, value=f'=IF(A{rr}="","",YEAR(A{rr})&"-"&TEXT(MONTH(A{rr}),"00"))')
         ws.cell(row=rr, column=8, value=f'=IF(B{rr}="","",IFERROR(VLOOKUP(B{rr},{stamm_range},2,FALSE),"TBD"))')
         ws.cell(row=rr, column=9, value=f'=IF(B{rr}="","",IFERROR(VLOOKUP(B{rr},{stamm_range},3,FALSE),"TBD"))')
+        ws.cell(row=rr, column=10, value=f'=IF(A{rr}="","",YEAR(A{rr})*100+MONTH(A{rr}))')   # 6.9: MonatNr
         for c in range(1, 10):
             ws.cell(row=rr, column=c).font = normal
             ws.cell(row=rr, column=c).border = border
@@ -1722,6 +1725,7 @@ def build_excel_workbook(calendar_df, trips_df, config, period_label, output_pat
     for rr in range(mz_start_row, mz_last_row + 1):
         ws.cell(row=rr, column=11, value=f'=IF(C{rr}="","",IFERROR(VLOOKUP(C{rr},{stamm_range},2,FALSE),"TBD"))')
         ws.cell(row=rr, column=12, value=f'=IF(C{rr}="","",IFERROR(VLOOKUP(C{rr},{stamm_range},3,FALSE),"TBD"))')
+        ws.cell(row=rr, column=13, value=f'=IF(A{rr}="","",YEAR(A{rr})*100+MONTH(A{rr}))')   # 6.9: MonatNr
         ws.cell(row=rr, column=7, value=f'=IF(A{rr}="","",YEAR(A{rr}))')
         ws.cell(row=rr, column=9, value=f'=IF(A{rr}="","",E{rr}*N(H{rr}))')
         ws.cell(row=rr, column=10, value=f'=IF(A{rr}="","",YEAR(A{rr})&"-"&TEXT(MONTH(A{rr}),"00"))')
@@ -1786,6 +1790,7 @@ def build_excel_workbook(calendar_df, trips_df, config, period_label, output_pat
             ws.cell(row=row, column=13, value=f'=IFERROR(VLOOKUP(K{row},{stamm_range},3,FALSE),"TBD")')
             ws.cell(row=row, column=14, value=cfg.get('mitarbeiter'))
             ws.cell(row=row, column=15, value=cfg.get('hauptaufgabe'))
+            ws.cell(row=row, column=16, value=int(r_['Start'].year * 100 + r_['Start'].month))
         b_last = b_start + max(len(block_df) - 1, 0)
         b_sum_row = b_last + 1
         if len(block_df) > 0:
@@ -1822,6 +1827,7 @@ def build_excel_workbook(calendar_df, trips_df, config, period_label, output_pat
             ws.cell(row=row, column=8, value=f'=IFERROR(VLOOKUP(F{row},{stamm_range},3,FALSE),"TBD")')
             ws.cell(row=row, column=9, value=cfg.get('mitarbeiter'))
             ws.cell(row=row, column=10, value=cfg.get('hauptaufgabe'))
+            ws.cell(row=row, column=11, value=int(r_['Woche_ab'].year * 100 + r_['Woche_ab'].month))
         p_last = p_start + max(len(pausch_df) - 1, 0)
         p_sum_row = p_last + 1
         if len(pausch_df) > 0:
@@ -1921,31 +1927,34 @@ def _quellen(ctx):
     n_cal, n_trip = ctx['n_cal_rows'], ctx['n_trip_rows']
     q = {
         'kal': dict(sheet='Rohdaten_Kalender', r1=2, r2=n_cal,
-                    k=dict(jahr='A', monat='B', mitarbeiter='C', projekt='E', firma='F', hauptaufgabe='G', status='W'),
+                    k=dict(jahr='A', monat='B', mitarbeiter='C', projekt='E', firma='F', hauptaufgabe='G', status='W',
+                           monatnr='Y'),
                     fix=[('E', '"?*"'), ('F', '"<>Ignoriert / kein Projekt"')]),
         'fahrt': dict(sheet='Rohdaten_Fahrten', r1=2, r2=n_trip,
-                      k=dict(jahr='A', monat='B', mitarbeiter='C', projekt='D', firma='E', status='W'),
+                      k=dict(jahr='A', monat='B', mitarbeiter='C', projekt='D', firma='E', status='W', monatnr='Y'),
                       fix=[('D', '"?*"'), ('E', '"<>Ignoriert / kein Projekt"')]),
         'zk': dict(sheet='Zusatzkosten', r1=ctx['zk_start_row'], r2=ctx['zk_last_row'],
-                   k=dict(jahr='F', monat='G', projekt='B', firma='H', status='I'), fix=[('B', '"?*"')]),
+                   k=dict(jahr='F', monat='G', projekt='B', firma='H', status='I', monatnr='J'), fix=[('B', '"?*"')]),
         'mz': dict(sheet='Manuelle_Zeitbuchungen', r1=ctx['mz_start_row'], r2=ctx['mz_last_row'],
-                   k=dict(jahr='G', monat='J', mitarbeiter='B', projekt='C', hauptaufgabe='D', firma='K', status='L'),
+                   k=dict(jahr='G', monat='J', mitarbeiter='B', projekt='C', hauptaufgabe='D', firma='K', status='L',
+                          monatnr='M'),
                    fix=[('C', '"?*"')]),
     }
     if ctx.get('tc_uebertrag'):                      # 6.8: Übertrag Meldung (TC_Stand) als Quelle
         a_, b_ = ctx['tc_uebertrag']
-        q['tc'] = dict(sheet='TC_Stand', r1=a_, r2=b_, k=dict(jahr='N', monat='O', projekt='A', firma='P', status='Q'),
+        q['tc'] = dict(sheet='TC_Stand', r1=a_, r2=b_, k=dict(jahr='N', monat='O', projekt='A', firma='P', status='Q',
+                                                              monatnr='R'),
                        fix=[('A', '"?*"')])
     sk = []
     for ref in ctx['sonderkalk_refs'].values():
         if ref['has_blocks']:
             sk.append(('skb', dict(sheet=ref['sheet'], r1=ref['block_start'], r2=ref['block_last'],
                                    k=dict(jahr='A', monat='B', projekt='K', firma='L', status='M',
-                                          mitarbeiter='N', hauptaufgabe='O'), fix=[])))
+                                          mitarbeiter='N', hauptaufgabe='O', monatnr='P'), fix=[])))
         if ref['has_pauschalen']:
             sk.append(('skp', dict(sheet=ref['sheet'], r1=ref['pausch_start'], r2=ref['pausch_last'],
                                    k=dict(jahr='A', monat='E', projekt='F', firma='G', status='H',
-                                          mitarbeiter='I', hauptaufgabe='J'), fix=[])))
+                                          mitarbeiter='I', hauptaufgabe='J', monatnr='K'), fix=[])))
     return q, sk
 
 
@@ -3691,6 +3700,7 @@ def _build_tc_sheets(wb, ctx, config):
 
     rech = {z['Position']: z for z in ctx['tc_rechnung']}
     zeilen = tc['zeilen'].copy()
+    stnr = int(st.year * 100 + st.month)
     # nicht gemeldeter allgemeiner Aufwand bis Stichtag -> Zeile mit 0 (damit Cockpit = TC-Bericht)
     for z in ctx['tc_rechnung']:
         if z['Bereich'] == 'Allgemein' and not z['gemeldet'] and abs(z['fx_bis']['Netto']) > 0.005:
@@ -3709,6 +3719,17 @@ def _build_tc_sheets(wb, ctx, config):
     ws.cell(row=6, column=1, value=('Bis zum Stichtag gilt im TC-Bericht UND im Cockpit der gemeldete Stand. '
                                     'Die Füxle gleicht die Differenz automatisch aus (Spalte K, grau).')).font = ctx['sub_font']
     hr = 8
+    # Zeilenplan: Abschnitt 1 (zeilen + ggf. 0-Zeilen), 2 (Zahlungen), 3 (Historie), 4 (Nachträge)
+    _n1 = len(zeilen) + sum(1 for z in ctx['tc_rechnung'] if z['Bereich'] == 'Allgemein' and not z['gemeldet']
+                             and abs(z['fx_bis']['Netto']) > 0.005 and z['Position'] not in set(zeilen['Position']))
+    _zl = ctx.get('zahlungen')
+    _nz = (len(_zl) if _zl is not None else 0) + 10
+    _hi = ctx.get('historie')
+    _nh = (len(_hi) if _hi is not None else 0) + 10
+    _nn = len(tc.get('nachtraege') or []) + 8
+    _n0 = (hr + 1 + _n1) + 3 + 1 + _nz + 4 + 2 + _nh + 2      # = Titelzeile Abschnitt 4
+    nach_pos = f'$B${_n0 + 2}:$B${_n0 + 1 + _nn}'
+    nach_betr = f'$E${_n0 + 2}:$E${_n0 + 1 + _nn}'
     ws.cell(row=hr - 1, column=1, value='1. Gemeldeter Stand (festgeschrieben)').font = bf
     kopf(ws, hr, ['Position', 'Bereich', 'Std', 'km', 'Kosten Zeit', 'Kosten Fahrt', 'Sonstige (Übern., Flüge …)',
                   'Netto gemeldet', 'Hinweis (intern)', f'Füxle bis {st:%d.%m.%Y} ohne Nachträge (netto)',
@@ -3723,8 +3744,9 @@ def _build_tc_sheets(wb, ctx, config):
             cell.font = nf; cell.border = brd
             if c <= 9 and c != 8:
                 cell.fill = blue
-        fx = rech.get(z['Position'], {}).get('fx_bis_ohne_nachtrag', 0.0)
-        ws.cell(row=r, column=10, value=round(fx, 2)).border = brd
+        # 6.9: Füxle bis Stichtag LIVE (ohne Übertrag), abzüglich der Nachträge dieser Position
+        fx_live = _netto(_formeln(ctx, {'projekt': f'$A{r}', 'monatnr': f'"<={stnr}"'}, uebertrag=False))
+        ws.cell(row=r, column=10, value=f'=({fx_live})-SUMIF({nach_pos},$A{r},{nach_betr})').border = brd
         ws.cell(row=r, column=11, value=f'=H{r}-J{r}').border = brd
         for c in (10, 11):
             ws.cell(row=r, column=c).fill = grau
@@ -3735,10 +3757,11 @@ def _build_tc_sheets(wb, ctx, config):
         ws.cell(row=r, column=15, value=st.strftime('%Y-%m'))
         ws.cell(row=r, column=16, value=f'=IFERROR(VLOOKUP(A{r},{stamm},2,FALSE),"TBD")')
         ws.cell(row=r, column=17, value=f'=IFERROR(VLOOKUP(A{r},{stamm},3,FALSE),"TBD")')
+        ws.cell(row=r, column=18, value=stnr)
         pos_zeile[z['Position']] = r
         r += 1
     ctx['tc_uebertrag'] = (hr + 1, r - 1)
-    for col_ in ('N', 'O', 'P', 'Q'):
+    for col_ in ('N', 'O', 'P', 'Q', 'R'):
         ws.column_dimensions[col_].hidden = True
     ws.cell(row=r, column=1, value='SUMME').font = bf
     for c in (3, 4, 5, 6, 7, 8, 10, 11):
@@ -3787,6 +3810,7 @@ def _build_tc_sheets(wb, ctx, config):
             ws.cell(row=rr, column=c).number_format = eur
     # 4. Nachträge zur Aufstellung (live aus Zusatzkosten + manuellen Zeiten)
     n0 = h0 + 2 + n_h + 2
+    assert n0 == _n0, (n0, _n0)
     ws.cell(row=n0, column=1, value=TC_NACH_TITEL).font = bf
     kopf(ws, n0 + 1, ['Bezeichnung (z. B. Italien)', 'Position (wie in TC_Stand)', 'Datum von', 'Datum bis',
                       'Betrag netto (automatisch)'])
@@ -3794,7 +3818,7 @@ def _build_tc_sheets(wb, ctx, config):
     zk_r = (ctx['zk_start_row'], ctx['zk_last_row'])
     mz_r = (ctx['mz_start_row'], ctx['mz_last_row'])
     nach_zellen = {}
-    for i in range(len(nach) + 8):
+    for i in range(_nn):
         rr = n0 + 2 + i
         n_ = nach[i] if i < len(nach) else None
         for c, v in enumerate([n_ and n_['Bezeichnung'], n_ and n_['Position'], n_ and n_['von'], n_ and n_['bis']],
@@ -3867,19 +3891,19 @@ def _build_tc_sheets(wb, ctx, config):
         r0 = row
         for z in zs:
             p = z['Position']
-            fx_ges = _netto(_formeln(ctx, {'projekt': f'"{p}"'}, uebertrag=False))
             fm = _formeln(ctx, {'projekt': f'"{p}"', 'monat': f'"{bm_txt}"'}, uebertrag=False) if bm_txt else None
             h_bm = ('=' + _netto(fm)) if fm else 0
             nach_refs = [nach_zellen.get((p, n_['Bezeichnung'])) for n_ in z.get('nachtraege', [])]
             nach_refs = [x_ for x_ in nach_refs if x_]
             h = z.get('hinweis') if isinstance(z.get('hinweis'), str) else ''
+            f_bis = _netto(_formeln(ctx, {'projekt': f'"{p}"', 'monatnr': f'"<={stnr}"'}, uebertrag=False))
+            f_ab = _netto(_formeln(ctx, {'projekt': f'"{p}"', 'monatnr': f'">{stnr}"'}, uebertrag=False))
+            ab = f'={f_ab}'                                    # 6.9: live ab Stichtag
             if p in pos_zeile:
                 basis = f"=TC_Stand!$H${pos_zeile[p]}"
-                ab = f"=({fx_ges})-TC_Stand!$J${pos_zeile[p]}" + ''.join(f'-{x_}' for x_ in nach_refs)
                 h = (h + ' · ' if h else '') + f"Stand lt. Aufstellung {tc['datum']}"
             else:
-                basis = f"={round(z['fx_bis']['Netto'], 2)}"
-                ab = f"=({fx_ges})-{round(z['fx_bis']['Netto'], 2)}"
+                basis = f'={f_bis}'                            # 6.9: live bis Stichtag
                 if abs(z['fx_bis']['Netto']) > 0.005:
                     h = (h + ' · ' if h else '') + f"nicht in Aufstellung {tc['datum']} – Stand aus der Füxle"
             x = None if p in ohne_ else 'x'

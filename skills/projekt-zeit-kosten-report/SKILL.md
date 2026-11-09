@@ -3,7 +3,7 @@ name: projekt-zeit-kosten-report
 description: "Use this skill whenever the user (assistant to Neininger management) wants the recurring time/cost report that consolidates Outlook calendar entries (project name in quotes in the subject) with the Autolog vehicle logbook export into a multi-year Excel report: hours, driven km, and costs per project, per task category, per employee, per company (Neininger GmbH / TransCare), with a filterable dashboard, VAT breakdown, a weekly non-project sales-time allowance, manual extra costs, and a plausibility check. Trigger on 'Projektbericht', 'Zeit-/Kostenbericht', 'Autolog', 'Fahrtenbuch', 'Kalenderexport'+'Projekt', 'Jahresauswertung', or requests reconciling calendar time with driving logs into a cost report, any year from 2024 on. Also trigger when calendar/Autolog CSVs are uploaded with a request to consolidate hours/km/costs, including project-specific multi-year reports. Do NOT use for the separate ma-nbo-workflow skill."
 ---
 
-# Projekt-Zeit-/Kosten-Report (Neininger) — Version 6.8 (abgesichert + vereinfacht + Kundenbericht + TransCare-Abrechnung, 2026-11)
+# Projekt-Zeit-/Kosten-Report (Neininger) — Version 6.9 (abgesichert + vereinfacht + Kundenbericht + TransCare-Abrechnung, 2026-11)
 
 Dieser Skill bildet den wiederkehrenden Workflow ab, bei dem aus Outlook-Kalenderexporten
 mehrerer Mitarbeiter/Postfächer und einem Autolog-Fahrtenbuch-Export ein Excel-Bericht mit
@@ -71,6 +71,19 @@ nicht dauerhaft, nur über ein neues ZIP.**
 (Interne_Auswertung, Dashboard-Kreuztabelle) und je Mitarbeiter **und Projekt** (Übersicht) bleiben.
 
 **7. Tests:** `python -m pytest tests -q` (erfundene Testdaten). Vor jeder Änderung an `report_lib.py` laufen lassen.
+
+## Version 6.9 (2026-11-09): Stichtag-Aufteilung live
+
+- Jede Datenquelle hat eine Zahlenspalte **MonatNr** (JJJJMM): Rohdaten_Kalender/-Fahrten Spalte Y, Zusatzkosten J,
+  Manuelle_Zeitbuchungen M, Sonderkalk Blöcke P / Pauschalen K, TC_Stand R. `_formeln` kennt den Filter
+  `monatnr` (z. B. `'"<=202607"'`).
+- **TC_Bericht:** „Stand bis Stichtag“ (Projekte ohne Meldung) und „Leistungen ab Stichtag“ (alle) rechnen LIVE.
+  Nachträgliche Excel-Einträge vor dem Stichtag erscheinen sofort in der richtigen Spalte.
+- **TC_Stand Spalte J** (Füxle bis Stichtag ohne Nachträge) ist live → Übertrag (K) live → **Cockpit bleibt = TC-Bericht**.
+  Regel: Bei gemeldeten Positionen zählt vor dem Stichtag nur der gemeldete Stand + Nachträge (Abschnitt 4);
+  andere spätere Einträge vor dem Stichtag gleicht der Übertrag aus.
+- **Umzug in einen neuen Account:** ZIP entpacken bzw. als Skill hochladen (Ordner `projekt-zeit-kosten-report`
+  mit SKILL.md). Echte Kalender-/Fahrtdaten sind NICHT im Skill – die Füxle-Datei ist die Datenbasis.
 
 ## Version 6.8 (2026-11-09): immer „wie gemeldet“, Cockpit = TC-Bericht, Nachträge
 

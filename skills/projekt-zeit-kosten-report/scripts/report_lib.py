@@ -14,7 +14,7 @@ Einstieg für den Monatsablauf: neuaufbau() bzw. fortfuehrung() (ganz unten).
 Diese Bibliothek wird von Jahr/Monat zu Jahr/Monat wiederverwendet. Nur
 config/projekt_konfiguration.json und die hochgeladenen Rohdateien ändern sich.
 """
-SKILL_VERSION = '6.6'
+SKILL_VERSION = '6.7'
 HINWEIS_STATISCH = ('ACHTUNG (bekannte Einschränkung, Version 6 nur markiert): statische Werte - enthalten auch mehrtägige Blöcke und ignorierte Termine, berücksichtigen keine manuellen Korrekturen. Für Freigabe/Abrechnung nur Uebersicht_<Jahr> bzw. Gesamt_Alle_Jahre verwenden.')
 
 import json
@@ -3429,6 +3429,54 @@ def fortfuehrung(vorlage, erwartete_version, calendar_specs, autolog_specs, conf
     return erg
 
 
+def lade_offene_hinweise(wb):
+    """Version 6.7: noch NICHT abgehakte Hinweise der Vorversion (für neu_ausgeben)."""
+    if PRUEF not in wb.sheetnames:
+        return []
+    ws = wb[PRUEF]
+    pos = _finde_zelle(ws, 'ID', max_col=1)
+    out = []
+    for r in ws.iter_rows(min_row=(pos[0] if pos else 6) + 1, max_col=12, values_only=True):
+        if r[0] == ABGL_TITEL:
+            break
+        if r[1] == 'Hinweis' and not r[9]:
+            d = pd.to_datetime(r[3], dayfirst=True, errors='coerce') if r[3] else None
+            out.append({'Bereich': r[2], 'Datum': None if d is None or pd.isna(d) else d, 'Mitarbeiter': r[4] or '',
+                        'Text': r[5], 'Projekt': r[6] or '', 'Grund': r[7]})
+    return out
+
+
+def neu_ausgeben(vorlage, erwartete_version, config, output_dir, zahlungen=None):
+    """Version 6.7: dieselben Daten (gleicher Datenstand) als NEUE Version ausgeben, z. B. nach einem
+    Skill-Update (neue Reiter/Formeln). Nur aus der zuletzt FREIGEGEBENEN Version. Alle Zeilen,
+    Entscheidungen, Eingaben, TC-Stand/Zahlungen/Gutschriften und offenen Hinweise werden übernommen;
+    der Abgleich mit der Vorlage muss 0 Abweichungen zeigen."""
+    import os
+    meta = pruefe_vorlage(vorlage, erwartete_version)
+    alt = lade_vorlage(vorlage, config)
+    cfg, hinweise = _merge_config(config, alt)
+    vtext = versionstext(meta['version_nr'])
+    cal = alt['kalender'].copy()
+    cal['Quelle'] = f'Vorversion {vtext}'
+    trips = alt['fahrten'].copy()
+    trips['Quelle'] = f'Vorversion {vtext}'
+    trips = apply_partner_zuordnung(trips, cfg)
+    trips = compute_fahrten_kosten(trips, cfg)
+    zk, mz = alt['zusatzkosten'], alt['manuelle_zeitbuchungen']
+    extra = lade_offene_hinweise(_wb(vorlage))
+    extra = [e for e in extra if e['Bereich'] != 'Zahlung ohne Betrag']     # wird neu geprüft
+    neu = {'kalender': cal, 'fahrten': trips, 'zusatzkosten': zk, 'manuelle_zeitbuchungen': mz}
+    abgleich = vergleiche_versionen(alt, neu, cfg, cfg, bis=meta['datenstand_bis'],
+                                    alt_label=f'{os.path.basename(str(vorlage))} ({vtext})')
+    vi = {'version': meta['version_nr'] + 1, 'vorgaenger': meta['version_nr'],
+          'datenstand_bis': meta['datenstand_bis'], 'zeitraum': meta.get('zeitraum')}
+    ctx_extra = _tc_ctx(cfg, alt, None, zahlungen, None, extra)
+    erg = _speichern_und_berichten(cal, trips, cfg, meta.get('zeitraum'), output_dir, vi, zk, mz, abgleich, extra,
+                                   ctx_extra=ctx_extra)
+    erg['config_hinweise'] = hinweise
+    return erg
+
+
 # ==========================================================================
 # Version 6.4: Kunden-Abrechnung TransCare (Stand lt. Aufstellung, Schalter, Zahlungen, Historie)
 # ==========================================================================
@@ -3438,7 +3486,8 @@ TC_SPALTEN = ['Position', 'Bereich', 'Std', 'km', 'Kosten_Zeit', 'Kosten_Fahrt',
 
 
 TC_SCHALTER = 'TC_Bericht!$J$2'
-TC_ZAHL_TITEL = '2. Zahlungen (brutto) – werden vom Gesamt brutto abgezogen'
+TC_DIFF_LABEL = 'Differenz final (offen, brutto)'
+TC_ZAHL_TITEL = '2. Zahlungen und Gutschriften (bezahlt, brutto) – werden vom Gesamt brutto abgezogen'
 TC_HIST_TITEL = '3. Berichtshistorie – was wurde wann an TransCare gemeldet?'
 
 
@@ -3487,17 +3536,26 @@ def lade_tc_stand(wb):
             'zeilen': pd.DataFrame(rows, columns=TC_SPALTEN)}
 
 
+ZAHL_SPALTEN = ['Datum', 'Rechnung', 'Zeitraum', 'Betrag_brutto', 'Anmerkung', 'Gutschrift', 'Gutschrift_Betrag']
+
+
 def lade_zahlungen(wb):
+    """Zahlungen (Rechnungen bezahlt, brutto) und ab 6.7 Gutschriften (bezahlt) aus TC_Stand, Abschnitt 2."""
     if 'Zahlungen' in wb.sheetnames:                     # bis 6.4: eigener Reiter
-        rows = [r[:5] for r in wb['Zahlungen'].iter_rows(min_row=5, max_col=5, values_only=True) if r[1] or r[3]]
+        rows = [tuple(r[:5]) + (None, None) for r in wb['Zahlungen'].iter_rows(min_row=5, max_col=5, values_only=True)
+                if r[1] or r[3]]
     elif 'TC_Stand' in wb.sheetnames:
-        rows = _tc_abschnitt(wb['TC_Stand'], '2. Zahlungen', 5)
+        rows = _tc_abschnitt(wb['TC_Stand'], '2. Zahlungen', 7)
         if rows is None:
             return None
-        rows = [r[:5] for r in rows if r[1] or r[3]]
+        rows = [tuple(r[:7]) + (None,) * (7 - len(r[:7])) for r in rows if r[1] or r[3] or r[5] or (len(r) > 6 and r[6])]
     else:
         return None
-    return pd.DataFrame(rows, columns=['Datum', 'Rechnung', 'Zeitraum', 'Betrag_brutto', 'Anmerkung'])
+    df = pd.DataFrame(rows, columns=ZAHL_SPALTEN)
+    # Excel macht aus "07/26" gern ein Datum -> wieder als MM/JJ anzeigen; Rechnungsnummern als Text
+    df['Zeitraum'] = df['Zeitraum'].map(lambda v: v.strftime('%m/%y') if hasattr(v, 'strftime') else v)
+    df['Rechnung'] = df['Rechnung'].map(lambda v: str(int(v)) if isinstance(v, (int, float)) and not pd.isna(v) else v)
+    return df
 
 
 def lade_historie(wb):
@@ -3633,22 +3691,28 @@ def _build_tc_sheets(wb, ctx, config):
     # 2. Zahlungen
     z0 = r + 3
     ws.cell(row=z0, column=1, value=TC_ZAHL_TITEL).font = bf
-    kopf(ws, z0 + 1, ['Datum', 'Rechnung', 'Zeitraum', 'Betrag brutto (€)', 'Anmerkung'])
+    kopf(ws, z0 + 1, ['Datum', 'Rechnung', 'Zeitraum', 'Betrag brutto (€)', 'Anmerkung', 'Gutschrift (bezahlt)',
+                      'Betrag Gutschrift (€)'])
     zl = ctx.get('zahlungen')
+    if zl is not None:
+        zl = zl.reindex(columns=ZAHL_SPALTEN)
     rows = list(zl.itertuples(index=False)) if zl is not None else []
     n_z = len(rows) + 10
     for i in range(n_z):
         rr = z0 + 2 + i
-        for c in range(1, 6):
+        for c in range(1, 8):
             v = rows[i][c - 1] if i < len(rows) else None
             cell = ws.cell(row=rr, column=c, value=None if (isinstance(v, float) and pd.isna(v)) else v)
             cell.fill = blue; cell.border = brd; cell.font = nf
         ws.cell(row=rr, column=4).number_format = eur
+        ws.cell(row=rr, column=7).number_format = eur
     zend = z0 + 1 + n_z
     ws.cell(row=zend + 1, column=1, value='SUMME').font = bf
-    c = ws.cell(row=zend + 1, column=4, value=f'=SUM(D{z0 + 2}:D{zend})')
-    c.font = bf; c.number_format = eur
+    for col_, L_ in ((4, 'D'), (7, 'G')):
+        c = ws.cell(row=zend + 1, column=col_, value=f'=SUM({L_}{z0 + 2}:{L_}{zend})')
+        c.font = bf; c.number_format = eur
     ctx['tc_zahlungen_summe'] = f'TC_Stand!$D${zend + 1}'
+    ctx['tc_gutschriften_summe'] = f'TC_Stand!$G${zend + 1}'
     ctx['tc_zahlungen_bereich'] = (z0 + 2, zend)
     # 3. Berichtshistorie
     h0 = zend + 4
@@ -3720,7 +3784,11 @@ def _build_tc_sheets(wb, ctx, config):
                 korr = f'IF({TC_SCHALTER}="{MODUS_GEMELDET}",0,{round(fx_bis - gem, 2)})'
             else:
                 basis, korr = f'{fx_bis}', '0'
-            wbr.cell(row=row, column=1, value='x')
+            ohne_ = (config.get('tc_bericht_standard_ohne') or {})
+            wbr.cell(row=row, column=1, value=None if p in ohne_ else 'x')
+            if p in ohne_:
+                z = {**z, 'hinweis': ((z.get('hinweis') + ' · ') if isinstance(z.get('hinweis'), str) else '')
+                     + f'standardmäßig NICHT im Bericht: {ohne_[p]}'}
             wbr.cell(row=row, column=2, value=p)
             wbr.cell(row=row, column=3, value=f'={basis}')
             wbr.cell(row=row, column=4, value=f'=({fx_ges})-{fx_bis}')
@@ -3759,30 +3827,34 @@ def _build_tc_sheets(wb, ctx, config):
     netto_s = '+'.join(f'E{s_}' for s_ in bereiche.values()) or '0'
     zeilen = [('Gesamt netto', f'={netto_s}'), ('Gesamt brutto', f'={summen}'),
               ('abzüglich Zahlungen (brutto)', f'=-{ctx["tc_zahlungen_summe"]}'),
-              ('Offener Betrag (brutto)', f'=C{rr + 2}+C{rr + 3}')]
+              ('abzüglich Gutschriften (bezahlt)', f'=-{ctx["tc_gutschriften_summe"]}'),
+              (TC_DIFF_LABEL, f'=C{rr + 2}+C{rr + 3}+C{rr + 4}')]
     for i, (lab, form) in enumerate(zeilen):
-        wbr.cell(row=rr + 1 + i, column=2, value=lab).font = bf if i == 3 else nf
+        fett = i == len(zeilen) - 1
+        wbr.cell(row=rr + 1 + i, column=2, value=lab).font = bf if fett else nf
         c = wbr.cell(row=rr + 1 + i, column=3, value=form)
-        c.number_format = eur; c.font = bf if i == 3 else nf
-        if i == 3:
+        c.number_format = eur; c.font = bf if fett else nf
+        if fett:
             c.fill = ctx['kpi_fill']
-    ctx['tc_offen_zelle'] = f'TC_Bericht!$C${rr + 4}'
-    zr = rr                     # Zahlungen rechts neben der Abrechnung (Spalten E-G)
-    wbr.cell(row=zr, column=5, value='Zahlungen').font = bf
-    kopf(wbr, zr + 1, ['Rechnung', 'Zeitraum', 'Betrag brutto'], start=5)
+    ctx['tc_offen_zelle'] = f'TC_Bericht!$C${rr + len(zeilen)}'
+    zr = rr                     # Zahlungen + Gutschriften rechts neben der Abrechnung (Spalten D-H)
+    wbr.cell(row=zr, column=4, value='Zahlungen und Gutschriften').font = bf
+    kopf(wbr, zr + 1, ['Rechnung', 'Zeitraum', 'Zahlung brutto', 'Gutschrift', 'Betrag'], start=4)
     a_, b_ = ctx['tc_zahlungen_bereich']
     for i, src in enumerate(range(a_, b_ + 1)):
         row = zr + 2 + i
-        wbr.cell(row=row, column=5, value=f'=IF(TC_Stand!B{src}="","",TC_Stand!B{src})').font = nf
-        wbr.cell(row=row, column=6, value=f'=IF(TC_Stand!C{src}="","",TC_Stand!C{src})').font = nf
-        c = wbr.cell(row=row, column=7,
+        for col_, L_ in ((4, 'B'), (5, 'C'), (7, 'F')):
+            wbr.cell(row=row, column=col_, value=f'=IF(TC_Stand!{L_}{src}="","",TC_Stand!{L_}{src})').font = nf
+        c = wbr.cell(row=row, column=6,
                      value=(f'=IF(TC_Stand!B{src}="","",IF(TC_Stand!D{src}="","noch offen",TC_Stand!D{src}))'))
         c.font = nf; c.number_format = eur; c.alignment = Alignment(horizontal='right')
+        c = wbr.cell(row=row, column=8, value=f'=IF(TC_Stand!G{src}="","",TC_Stand!G{src})')
+        c.font = nf; c.number_format = eur
     endz = zr + 1 + (b_ - a_ + 1)
-    wbr.cell(row=zr, column=6, value='Summe').font = bf
-    c = wbr.cell(row=zr, column=7, value=f'={ctx["tc_zahlungen_summe"]}')
-    c.font = bf; c.number_format = eur; c.fill = ctx['kpi_fill']
-    for i, w in enumerate([4, 40, 16, 16, 16, 13, 16, 16, 3, 16, 50], start=1):
+    for col_, ref in ((6, ctx['tc_zahlungen_summe']), (8, ctx['tc_gutschriften_summe'])):
+        c = wbr.cell(row=zr, column=col_, value=f'={ref}')
+        c.font = bf; c.number_format = eur; c.fill = ctx['kpi_fill']
+    for i, w in enumerate([4, 48, 16, 16, 16, 14, 20, 16, 3, 16, 50], start=1):
         wbr.column_dimensions[get_column_letter(i)].width = w
     wbr.print_area = f'B1:H{endz}'
     wbr.page_setup.orientation = 'landscape'
@@ -3880,33 +3952,44 @@ def _kundenbericht_mit_stand(daten, cfg, meta, pos_df, projekte, interne, output
     netto = round(sum(ws.cell(row=r_, column=c_net).value for r_ in summen_zeilen), 2)
     brutto = round(sum(ws.cell(row=r_, column=c_bru).value for r_ in summen_zeilen), 2)
     zl = daten.get('zahlungen')
-    zsum = round(float(pd.to_numeric(zl['Betrag_brutto'], errors='coerce').fillna(0).sum()), 2) if zl is not None else 0.0
+    if zl is not None:
+        zl = zl.reindex(columns=ZAHL_SPALTEN)
+    num = lambda col: round(float(pd.to_numeric(zl[col], errors='coerce').fillna(0).sum()), 2) if zl is not None else 0.0
+    zsum, gsum = num('Betrag_brutto'), num('Gutschrift_Betrag')
+    offen = round(brutto - zsum - gsum, 2)
     ws.cell(row=row, column=1, value='Abrechnung').font = Font(name=F, bold=True, size=12, color='1F3864')
-    for i, (lab, v) in enumerate([('Gesamt netto', netto), ('Gesamt brutto', brutto),
-                                  ('abzüglich Zahlungen (brutto)', -zsum),
-                                  ('Offener Betrag (brutto)', round(brutto - zsum, 2))]):
-        ws.cell(row=row + 1 + i, column=1, value=lab).font = bf if i == 3 else nf
+    abr = [('Gesamt netto', netto), ('Gesamt brutto', brutto), ('abzüglich Zahlungen (brutto)', -zsum),
+           ('abzüglich Gutschriften (bezahlt)', -gsum), (TC_DIFF_LABEL, offen)]
+    for i, (lab, v) in enumerate(abr):
+        fett = i == len(abr) - 1
+        ws.cell(row=row + 1 + i, column=1, value=lab).font = bf if fett else nf
         c = ws.cell(row=row + 1 + i, column=2, value=v)
-        c.number_format = eur; c.font = bf if i == 3 else nf
-        if i == 3:
+        c.number_format = eur; c.font = bf if fett else nf
+        if fett:
             c.fill = sumfill
-    r_z = row + 7
-    ws.cell(row=r_z, column=1, value='Zahlungen').font = bf
-    kopf(ws, r_z + 1, ['Rechnung', 'Zeitraum', 'Betrag brutto'])
+    r_z = row + 8
+    ws.cell(row=r_z, column=1, value='Zahlungen und Gutschriften').font = bf
+    kopf(ws, r_z + 1, ['Rechnung', 'Zeitraum', 'Zahlung brutto', 'Gutschrift', 'Betrag'])
     r_z += 2
     if zl is not None:
         for _, z_ in zl.iterrows():
             b_ = pd.to_numeric(z_['Betrag_brutto'], errors='coerce')
-            for c, v in enumerate([z_['Rechnung'], z_['Zeitraum'],
-                                   'noch offen' if pd.isna(b_) else float(b_)], start=1):
+            g_ = pd.to_numeric(z_['Gutschrift_Betrag'], errors='coerce')
+            leer = lambda v: None if (v is None or (isinstance(v, float) and pd.isna(v))) else v
+            vals = [leer(z_['Rechnung']), leer(z_['Zeitraum']),
+                    ('noch offen' if pd.isna(b_) else float(b_)) if leer(z_['Rechnung']) else None,
+                    leer(z_['Gutschrift']), None if pd.isna(g_) else float(g_)]
+            for c, v in enumerate(vals, start=1):
                 cell = ws.cell(row=r_z, column=c, value=v)
                 cell.font = nf; cell.border = brd
-            ws.cell(row=r_z, column=3).number_format = eur
-            ws.cell(row=r_z, column=3).alignment = Alignment(horizontal='right')
+            for c in (3, 5):
+                ws.cell(row=r_z, column=c).number_format = eur
+                ws.cell(row=r_z, column=c).alignment = Alignment(horizontal='right')
             r_z += 1
-    ws.cell(row=r_z, column=2, value='Summe').font = bf
-    c = ws.cell(row=r_z, column=3, value=zsum)
-    c.font = bf; c.number_format = eur; c.fill = sumfill
+    ws.cell(row=r_z, column=2, value='Summen').font = bf
+    for c, v in ((3, zsum), (5, gsum)):
+        cc = ws.cell(row=r_z, column=c, value=v)
+        cc.font = bf; cc.number_format = eur; cc.fill = sumfill
     for i, w in enumerate([40, 16, 16, 16, 14, 16, 16], start=1):
         ws.column_dimensions[get_column_letter(i)].width = w
     ws.page_setup.orientation = 'landscape'
@@ -3973,7 +4056,7 @@ def _kundenbericht_mit_stand(daten, cfg, meta, pos_df, projekte, interne, output
     xlsx = os.path.join(output_dir, name + '.xlsx')
     wb.save(xlsx)
     out = {'xlsx': xlsx, 'pdf': None, 'positionen': pos_df, 'netto': netto, 'brutto': brutto,
-           'zahlungen': zsum, 'offen': round(brutto - zsum, 2), 'rechnung': rech,
+           'zahlungen': zsum, 'gutschriften': gsum, 'offen': offen, 'rechnung': rech,
            'historie_eintrag': {'Datum': pd.Timestamp.now().strftime('%d.%m.%Y'), 'Empfänger': firma,
                                 'Stand_bis': pd.Timestamp(meta['datenstand_bis']).strftime('%d.%m.%Y'),
                                 'Basis': tc['modus'], 'Positionen': ', '.join(auswahl), 'Netto': netto,

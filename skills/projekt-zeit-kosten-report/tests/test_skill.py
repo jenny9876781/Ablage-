@@ -635,7 +635,7 @@ def test_tc_65_nichts_neues_und_keine_hinweise(szenario, tmp_path, recalced):
     assert list(d['zahlungen']['Rechnung']) == ['RG 1', 'RG 2'] and d['tc_stand']['modus'] == rl.MODUS_KORR
     js, kopie = recalced(r['pfad'])
     assert js['total_errors'] == 0
-    assert _live_wert(kopie, 'Offener Betrag (brutto)') is not None
+    assert _live_wert(kopie, rl.TC_DIFF_LABEL) is not None
 
 
 # --------------------------------------------------------------- Version 6.6 (Oktober-Lauf)
@@ -690,3 +690,30 @@ def test_fortfuehrung_mit_entscheidungen_aus_dem_chat(szenario, tmp_path):
     z = k[(k['Start'] == pd.Timestamp('2026-11-03 09:00')) & (k['Mitarbeiter'] == td.MN)]
     assert list(z['Korrektur']) == ['Unberücksichtigt']
     assert r['abgleich']['n_abweichungen'] == 0                   # Vormonate unberührt
+
+
+# --------------------------------------------------------------- Version 6.7: Gutschriften + Neuausgabe
+def test_tc_gutschriften_und_neu_ausgeben(szenario, tmp_path, recalced):
+    cfg = szenario['cfg']
+    r, _ = _tc_datei(szenario, tmp_path)
+    # Nutzerin trägt eine bezahlte Gutschrift in TC_Stand ein (Abschnitt 2, Spalten F/G)
+    wb = openpyxl.load_workbook(r['pfad'])
+    ws = wb['TC_Stand']
+    z = [c.row for c in ws['A'] if isinstance(c.value, str) and c.value.startswith('2. Zahlungen')][0]
+    ws.cell(row=z + 2, column=6, value='Deisser')
+    ws.cell(row=z + 2, column=7, value=500.0)
+    wb.save(r['pfad'])
+    freigeben(r['pfad'])
+    d = rl.lade_vorlage(r['pfad'], cfg)
+    assert d['zahlungen']['Gutschrift_Betrag'].sum() == pytest.approx(500)
+    b = rl.erstelle_kundenbericht(r['pfad'], cfg, ['Koko'], str(tmp_path / 'b'), pdf=False,
+                                  interne=['Vor-Ort Termine i. Auftrag TC'])
+    assert b['gutschriften'] == pytest.approx(500)
+    assert b['offen'] == pytest.approx(b['brutto'] - 1190 - 500, abs=0.01)
+    # Neuausgabe gleicher Datenstand: alles übernommen, Abgleich 0, Live-Blatt zieht Gutschrift ab
+    n = rl.neu_ausgeben(r['pfad'], 'v01', cfg, str(tmp_path / 'neu'))
+    assert n['pfad'].endswith('_v02.xlsx') and n['abgleich']['n_abweichungen'] == 0
+    assert rl.lade_vorlage(n['pfad'], cfg)['zahlungen']['Gutschrift_Betrag'].sum() == pytest.approx(500)
+    js, kopie = recalced(n['pfad'])
+    assert js['total_errors'] == 0
+    assert _live_wert(kopie, 'abzüglich Gutschriften (bezahlt)') == pytest.approx(-500)

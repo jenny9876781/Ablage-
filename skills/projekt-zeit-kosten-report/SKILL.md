@@ -3,7 +3,7 @@ name: projekt-zeit-kosten-report
 description: "Use this skill whenever the user (assistant to Neininger management) wants the recurring time/cost report that consolidates Outlook calendar entries (project name in quotes in the subject) with the Autolog vehicle logbook export into a multi-year Excel report: hours, driven km, and costs per project, per task category, per employee, per company (Neininger GmbH / TransCare), with a filterable dashboard, VAT breakdown, a weekly non-project sales-time allowance, manual extra costs, and a plausibility check. Trigger on 'Projektbericht', 'Zeit-/Kostenbericht', 'Autolog', 'Fahrtenbuch', 'Kalenderexport'+'Projekt', 'Jahresauswertung', or requests reconciling calendar time with driving logs into a cost report, any year from 2024 on. Also trigger when calendar/Autolog CSVs are uploaded with a request to consolidate hours/km/costs, including project-specific multi-year reports. Do NOT use for the separate ma-nbo-workflow skill."
 ---
 
-# Projekt-Zeit-/Kosten-Report (Neininger) — Version 6.6 (abgesichert + vereinfacht + Kundenbericht + TransCare-Abrechnung, 2026-11)
+# Projekt-Zeit-/Kosten-Report (Neininger) — Version 6.7 (abgesichert + vereinfacht + Kundenbericht + TransCare-Abrechnung, 2026-11)
 
 Dieser Skill bildet den wiederkehrenden Workflow ab, bei dem aus Outlook-Kalenderexporten
 mehrerer Mitarbeiter/Postfächer und einem Autolog-Fahrtenbuch-Export ein Excel-Bericht mit
@@ -71,6 +71,23 @@ nicht dauerhaft, nur über ein neues ZIP.**
 (Interne_Auswertung, Dashboard-Kreuztabelle) und je Mitarbeiter **und Projekt** (Übersicht) bleiben.
 
 **7. Tests:** `python -m pytest tests -q` (erfundene Testdaten). Vor jeder Änderung an `report_lib.py` laufen lassen.
+
+## Version 6.7 (2026-11-09): Gutschriften, laufende Gegenüberstellung, Neuausgabe
+
+- **An TransCare ging nur die Aufstellung vom 05.08.2026 (Stand 31.07., 9 beendete Projekte + allgemeiner Aufwand,
+  ohne Gutschriften).** Die Datei „beendete_Projekte_TransCare“ mit Stand 31.08. (alle 18 Projekte) ist eine INTERNE
+  Gegenüberstellung der Nutzerin – nicht als TC_Stand verwenden. (Sie zählt Wackler doppelt: Projekt + allg. Teil.)
+- **TC_Stand, Abschnitt 2 „Zahlungen und Gutschriften“:** Spalten Datum, Rechnung, Zeitraum, Betrag brutto, Anmerkung,
+  **Gutschrift (bezahlt), Betrag Gutschrift**. Beide Summen werden abgezogen. Excel-Daten in „Zeitraum“ (07/26 → Datum)
+  werden als MM/JJ eingelesen.
+- **TC_Bericht, Abrechnung (laufend):** Gesamt netto → Gesamt brutto → abzgl. Zahlungen → abzgl. Gutschriften →
+  **„Differenz final (offen, brutto)“** (`TC_DIFF_LABEL`), daneben die Liste Zahlungen + Gutschriften (Summen in der
+  Titelzeile). Der externe Bericht zeigt dasselbe. KEINE eigene Differenz-Formel in TC_Stand (Fehlerquelle: netto
+  gegen brutto, nur Teilmenge der Positionen).
+- **Roadster standardmäßig ohne x** (Config `tc_bericht_standard_ohne`: „wird kostengerecht verrechnet“).
+- **`neu_ausgeben(vorlage, erwartete_version, config, output_dir)`:** gleiche Daten, gleicher Datenstand, neue
+  Version (z. B. nach Skill-Update). Nur aus freigegebener Vorlage; übernimmt alles inkl. offener Hinweise;
+  Abgleich muss 0 zeigen.
 
 ## Version 6.6 (2026-11-06): Regeln aus dem ersten echten Monatslauf (Oktober 2026)
 

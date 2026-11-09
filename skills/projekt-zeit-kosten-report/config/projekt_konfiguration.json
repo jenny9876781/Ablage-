@@ -413,5 +413,8 @@
   "partner_mit_vorrang": [
     "Ki-Immo"
   ],
-  "_partner_mit_vorrang_hinweis": "Partner, deren Zuordnung VOR dem Kalender-Match gilt (Nutzerin 2026-11-06: Ki-Immo grundsätzlich Barrierefrei)."
+  "_partner_mit_vorrang_hinweis": "Partner, deren Zuordnung VOR dem Kalender-Match gilt (Nutzerin 2026-11-06: Ki-Immo grundsätzlich Barrierefrei).",
+  "tc_bericht_standard_ohne": {
+    "Roadster": "wird kostengerecht verrechnet (lt. Aufstellung 08/2026)"
+  }
 }

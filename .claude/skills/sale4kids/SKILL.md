@@ -1395,6 +1395,16 @@ ist die Merkliste; erledigte Punkte hier abhaken, nicht löschen.
       wegen NU05-V09/-V10), Liste ok.
 - [x] **05.11.: Neue Kategorien** (19 statt 16, Nutzerin einverstanden, Zuordnung macht Claude allein nach den Kriterien): `scripts/kategorien_neu.py` (370 Artikel, idempotent), nur Feld `kat` im Import geändert; steckt in `katalog_import-06.11.json` → kommt mit dem Freitags-Import. Excel `01_Artikelstamm_kikripp_2026-11-05.xlsx`. Plugin unverändert (Kategorien-Auswahl baut sich aus den Daten, Geschenke = Preis 0).
 - [x] **06.11.: Spielzeug online.** Foto-Nachtrag F-942/F-943 + F-150 (fehlte in allen Paketen), Import „0 neu, 801 aktualisiert, 191 NEU“, Hinweisband „Neu im Katalog: Spielzeug, Bücher, Spiele und Tonies – Abholung ab 11.11.“ bis 20.11.2026, Kontrolle privat ok. NU01-15-Warnung harmlos (einzige Reservierung abgeholt). BU04-04 (Kallax) behält Foto F-080 mit Teppich im Vordergrund – Nutzerin will es so. Beim Prüfen nie einen bestellten/bezahlten Artikel suchen lassen (der fällt aus dem Katalog).
+- [x] **10.11.2026: Word „Spielzeug_neu“ + 31 Fotos (F-944 bis F-974) + Reservierungen + Kasse.** 31 neue Zeilen (832), alle
+      Preis ok und sofort sichtbar (708 sichtbar): Tonies NE01-40 bis -46 (8 €; NE01-40 = zweite rote Katze, NE01-30 ist verkauft),
+      NU03-11 bis -20 (Feuerwehrhaus, Murmelbahn = Korb mit Holzteilen + Murmeln, Bosch Tool-Box mit Helm/Heckenschere,
+      Stapelwürfel hohl 10 €, Puppen mit 2 Baby Born 45 € nach Recherche, Sitzkissen grau 42×1 €, Bär/Panda/Löwe/Tiger je 2 €),
+      NU05-53 bis -66 (Gravitrax -55 vollständig, Scheren -60, Holzspiele -65, Acryl -66, Bücher-Sets -53/-54/-56 bis -59,
+      -61 bis -64). **Bücher gibt es mehrfach** – dieselben Titel stehen bewusst in mehreren Sets. Excel der Nutzerin = Stand 04.11.
+      ohne Artikeländerungen, aber **Kasse +5** (22; zwei Buchungen absichtlich auf 11.11. datiert). Reservierungsexport 10.11.
+      eingelesen (254 Artikel, keine Überbuchung), „bar“/„Sammel RG“ aus Rechnungsnr. in die Bemerkung. Import-Basis war
+      `katalog_import-06.11.json`. Erwartete Meldung: „31 neu, 801 aktualisiert … 31 NEU“, Nachtrag 31 Fotos (7 MB).
+      Nächster Nachtrag gegen `ausgabe/katalog_import-10.11.json`.
 - [ ] **Ende November 2026: Höchstzahl Geschenke je Reservierung mit der Nutzerin neu besprechen**
       (Vorschlag: ab ca. 01.12. auf 20 oder frei, damit bis 10.12. alles abgeholt wird).
 - [x] Plugin 1.2.1 (06.10.): Einstellung „Fußzeile ausblenden“ (Standard an) – Body-Klasse

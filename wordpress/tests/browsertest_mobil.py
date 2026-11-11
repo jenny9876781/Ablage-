@@ -57,7 +57,7 @@ with sync_playwright() as p:
     pruefe("Knopf liegt vollstaendig im Sichtfeld", kb["x"] >= 0 and kb["x"] + kb["width"] <= breite[1] + 1)
 
     print("\n3) Filterzeile")
-    for name, wahl in (("Suchfeld", "#k-q"), ("Kategorie-Knöpfe", "#k-kats"), ("Raum", "#k-raum"), ("Merkleiste", "#k-merk")):
+    for name, wahl in (("Suchfeld", "#k-q"), ("Kategorie-Knöpfe", "#k-kats"), ("Merkleiste", "#k-merk")):
         el = seite.locator(wahl)
         eb = el.bounding_box()
         pruefe(f"{name} sichtbar und nicht abgeschnitten",

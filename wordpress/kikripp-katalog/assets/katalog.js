@@ -171,15 +171,8 @@
   // ------------------------------------------------------------------ Gerüst
 
   function geruest() {
-    var kats = [], raeume = [];
-    ARTIKEL.forEach(function (a) {
-      if (a.kat && kats.indexOf(a.kat) < 0) { kats.push(a.kat); }
-      if (a.raum && raeume.indexOf(a.raum) < 0) { raeume.push(a.raum); }
-    });
-    kats.sort();
-    function optionen(liste) {
-      return liste.map(function (v) { return '<option>' + sicher(v) + '</option>'; }).join('');
-    }
+    // 1.15.2: kein Raumfilter mehr – Käufer suchen nach Dingen, nicht nach Räumen
+    var kats = katListe();
     wurzel.innerHTML =
       (HINWEIS ? '<div class="band">' + sicher(HINWEIS) + '</div>' : '') +
       '<div class="kopf">' +
@@ -198,7 +191,6 @@
       '<div class="filter">' +
         '<div class="zeile">' +
           '<input type="search" id="k-q" placeholder="Suchen: Bezeichnung, Nummer, Beschreibung …">' +
-          '<select id="k-raum"><option value="">Alle Räume</option>' + optionen(raeume) + '</select>' +
           '<select id="k-sort" aria-label="Sortierung"><option value="">Sortierung: Standard</option>' +
             '<option value="auf">Preis aufsteigend</option><option value="ab">Preis absteigend</option></select>' +
           '<label class="chk"><input type="checkbox" id="k-design"> nur Markenware</label>' +
@@ -207,6 +199,8 @@
         '</div>' +
         // 1.15.1: Kategorien als Knöpfe statt Auswahlfeld – am Telefon eine Zeile zum Wischen
         '<div class="kats" id="k-kats" role="group" aria-label="Kategorien">' + katKnoepfe(kats) + '</div>' +
+        // 1.15.2: Sammlungen (Spalte Bündel) als zweite, schmale Knopfzeile
+        '<div class="kats samml" id="k-samml" role="group" aria-label="Sammlungen">' + sammlKnoepfe() + '</div>' +
         '<div class="zaehler" id="k-zaehler"></div>' +
       '</div>' +
       '<div class="raster" id="k-raster"></div>' +
@@ -224,13 +218,19 @@
           ? '<p>Abholung nach Terminvereinbarung: ' + sicher(ABHOLUNG) + '</p>' : '') +
         '</div>' : '');
 
-    ['k-q', 'k-raum', 'k-sort', 'k-design', 'k-neu', 'k-frei'].forEach(function (id) {
+    ['k-q', 'k-sort', 'k-design', 'k-neu', 'k-frei'].forEach(function (id) {
       el(id).addEventListener('input', render);
     });
     el('k-kats').addEventListener('click', function (e) {
       var k = e.target.closest ? e.target.closest('button[data-kat]') : null;
       if (!k) { return; }
       waehleKat(k.getAttribute('data-kat'));
+    });
+    el('k-samml').addEventListener('click', function (e) {
+      var k = e.target.closest ? e.target.closest('button[data-samml]') : null;
+      if (!k) { return; }
+      var w = k.getAttribute('data-samml');
+      waehleSammlung(w === sammlung ? '' : w);              // zweiter Tipp hebt die Auswahl auf
     });
     el('k-leeren').addEventListener('click', function () {
       merk = {}; listeOffen = false; leiste(); knoepfe();
@@ -282,6 +282,7 @@
   }
   function waehleKat(wert) {
     katWahl = wert || '';
+    if (sammlung) { sammlung = ''; el('k-samml').innerHTML = sammlKnoepfe(); }
     el('k-kats').innerHTML = katKnoepfe(katListe());
     render();
   }
@@ -290,6 +291,27 @@
     if (katWahl === SALE) { return istSale(a); }
     if (katWahl === GUENSTIG) { return istGuenstig(a); }
     return a.kat === katWahl;
+  }
+
+  /** 1.15.2: Sammlungen als Knöpfe – nur wenn es welche gibt; Zahl = verfügbare Artikel. */
+  var sammlung = '';
+  function sammlKnoepfe() {
+    var namen = [];
+    ARTIKEL.forEach(function (a) { if (a.buendel && namen.indexOf(a.buendel) < 0) { namen.push(a.buendel); } });
+    if (!namen.length) { return ''; }
+    namen.sort();
+    var frei = ARTIKEL.filter(function (a) { return a.frei > 0; });
+    return '<span class="titel">Sammlungen:</span>' + namen.map(function (n) {
+      var an = sammlung === n;
+      return '<button type="button" data-samml="' + sicher(n) + '" class="kat' + (an ? ' an' : '') + '" aria-pressed="' + an + '">' +
+        sicher(n) + ' <span>' + (an ? '×' : frei.filter(function (a) { return a.buendel === n; }).length) + '</span></button>';
+    }).join('');
+  }
+  function waehleSammlung(n) {
+    sammlung = n || '';
+    if (sammlung) { katWahl = ''; el('k-kats').innerHTML = katKnoepfe(katListe()); }   // Sammlung über alle Kategorien
+    el('k-samml').innerHTML = sammlKnoepfe();
+    render();
   }
 
   var listeOffen = false;
@@ -347,11 +369,10 @@
 
   function render() {
     var q = el('k-q').value.toLowerCase().trim();
-    var raum = el('k-raum').value;
     var nurFrei = el('k-frei').checked, nurDesign = el('k-design').checked, nurNeu = el('k-neu').checked;
     var liste = ARTIKEL.filter(function (a) {
       return (!q || (a.nr + ' ' + a.titel + ' ' + a.beschr + ' ' + (a.buendel || '')).toLowerCase().indexOf(q) >= 0)
-        && passtKat(a) && (!raum || a.raum === raum)
+        && passtKat(a) && (!sammlung || a.buendel === sammlung)
         && (!nurFrei || a.frei > 0) && (!nurDesign || !!a.marke) && (!nurNeu || !!a.neu);
     });
     var sort = el('k-sort') ? el('k-sort').value : '';
@@ -409,9 +430,9 @@
         '<span>Zustand: ' + sicher(a.zustand) + '</span>' +
         '<span' + knapp + '>' + mengeText + '</span>' +
         (a.masse ? '<span>' + sicher(a.masse) + '</span>' : '') +
-        '<span>' + sicher(a.raum) + '</span>' +
         (BES_AB > 0 && a.preis >= BES_AB ? '<span class="bes">Besichtigung möglich</span>' : '') +
-        (a.buendel ? '<span class="bnd">Sammlung ' + sicher(a.buendel) + '</span>' : '') +
+        (a.buendel ? '<button type="button" class="bnd" data-samml="' + sicher(a.buendel) + '" title="Ganze Sammlung anzeigen">Sammlung ' +
+          sicher(a.buendel) + ' ›</button>' : '') +
       '</div>' +
       (geschenk(a)
         ? '<div class="preis geschenk"><b>Kostenlos zu Ihrem Einkauf</b><small>' +
@@ -448,6 +469,15 @@
       k.className = merk[nr] ? 'drin' : '';
     });
   }
+
+  // 1.15.2: „Sammlung …“ an der Karte zeigt die ganze Sammlung
+  document.addEventListener('click', function (e) {
+    var k = e.target && e.target.closest ? e.target.closest('.karte button.bnd[data-samml]') : null;
+    if (!k) { return; }
+    el('k-q').value = '';
+    waehleSammlung(k.getAttribute('data-samml'));
+    el('k-samml').scrollIntoView({ behavior: 'smooth', block: 'center' });
+  });
 
   // Foto groß anzeigen
   document.addEventListener('click', function (e) {

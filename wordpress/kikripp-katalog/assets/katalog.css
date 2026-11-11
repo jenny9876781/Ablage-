@@ -84,7 +84,9 @@
 .kikripp .badge { position: absolute; top: 8px; right: 8px; font-size: 10.5px; font-weight: 700; padding: 3px 9px; border-radius: 2px; letter-spacing: .03em; text-transform: uppercase; }
 .kikripp .badge.frei { background: rgba(255,255,255,.92); color: var(--schwarz); border: 1px solid var(--linie); }
 .kikripp .badge.res { background: var(--rot); color: #fff; }
-.kikripp .meta span.bnd { background: var(--rot); color: #fff; font-weight: 700; }
+.kikripp .meta span.bnd, .kikripp .meta button.bnd { background: var(--rot); color: #fff; font-weight: 700; }
+.kikripp .meta button.bnd { border: 0; font: inherit; padding: 3px 8px; border-radius: 2px; cursor: pointer; }
+.kikripp .meta button.bnd:hover { background: var(--schwarz); }
 .kikripp .meta span.bes { background: #fff; border: 1px solid var(--schwarz); color: var(--schwarz); font-weight: 600; }
 /* So laeuft es ab */
 .kikripp .ablauf { border: 1px solid var(--linie); border-left: 3px solid var(--rot); background: var(--papier); padding: 10px 14px; margin: 14px 0 4px; font-size: 13.5px; }
@@ -322,3 +324,9 @@ body.kikripp-ohne-menue .ast-header-social-wrap { display: none !important; }
 .kikripp .preis.im-sale small { display: block; }
 /* 1.15.1: Teilen per WhatsApp in der Großansicht */
 .kikripp .kik-gross .teilen { color: #fff; background: #1f8f4e; padding: 8px 16px; border-radius: 3px; font-size: 14px; font-weight: 600; text-decoration: none; cursor: pointer; }
+
+/* 1.15.2: Sammlungen – schmalere zweite Knopfzeile */
+.kikripp .kats.samml { padding-top: 6px; align-items: center; }
+.kikripp .kats.samml:empty { display: none; }
+.kikripp .kats.samml .titel { font-size: 12.5px; color: var(--grau); margin-right: 2px; white-space: nowrap; }
+.kikripp .kats.samml .kat { font-size: 12px; padding: 4px 10px; }

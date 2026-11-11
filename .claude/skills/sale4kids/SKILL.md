@@ -1426,6 +1426,11 @@ ist die Merkliste; erledigte Punkte hier abhaken, nicht löschen.
       `NO_PROXY=127.0.0.1` (sonst 401 vom Proxy), Chromium jetzt `/opt/pw-browsers/chromium`; der erste Seitenaufruf des
       Testservers füllt die Datenbank und kann > 30 s dauern. NU05-V07 Kladdig 7 → 6 (Import 11.11.: „0 neu, 832 aktualisiert“).
       **Die nächste Excel an die Nutzerin hat die neue Spalte „Sale“** – ihre alte Mappe ohne Spalte liest rueckeinlesen trotzdem.
+- [x] **11.11.2026: Plugin 1.15.2 – Räume raus, Sammlungen rein.** Raumfilter `#k-raum` und die Raumangabe auf der Karte
+      entfernt (Käufer suchen nach Dingen; Raum bleibt in ArtNr, Excel, Abholplan). Sammlungen (Spalte `Bündel`): zweite
+      schmale Knopfzeile „Sammlungen:“ (`#k-samml`, Zahl = verfügbare, zweiter Tipp = alle) und das rote Kästchen
+      „Sammlung … ›“ an der Karte ist ein Knopf, der die Sammlung zeigt. Sammlung wählen setzt die Kategorie auf „Alle“,
+      Kategorie wählen hebt die Sammlung auf. Kein neuer Import nötig. browsertest_sale.py jetzt 29 Prüfungen, mobil 15.
 - [ ] **Ende November 2026: Höchstzahl Geschenke je Reservierung mit der Nutzerin neu besprechen**
       (Vorschlag: ab ca. 01.12. auf 20 oder frei, damit bis 10.12. alles abgeholt wird).
 - [x] Plugin 1.2.1 (06.10.): Einstellung „Fußzeile ausblenden“ (Standard an) – Body-Klasse

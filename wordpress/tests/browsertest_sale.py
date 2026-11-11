@@ -42,7 +42,13 @@ def pruefe(name, bedingung, zusatz=""):
 
 # Aufwärmen: beim ersten Aufruf füllt der Testserver die Datenbank, das dauert
 import urllib.request
-urllib.request.build_opener(urllib.request.ProxyHandler({})).open(BASIS + "wp-json/kikripp/v1/artikel", timeout=180).read()
+import time
+for _ in range(5):                       # der allererste Aufruf kann ins Leere gehen, solange der Server füllt
+    try:
+        urllib.request.build_opener(urllib.request.ProxyHandler({})).open(BASIS + "wp-json/kikripp/v1/artikel", timeout=180).read()
+        break
+    except Exception:
+        time.sleep(3)
 
 with sync_playwright() as p:
     b = p.chromium.launch(executable_path=CHROME)
@@ -83,6 +89,29 @@ with sync_playwright() as p:
     pruefe("„bis 15 €“: keine Geschenke", s.locator(".karte .preis.geschenk").count() == 0)
     s.click('#k-kats button[data-kat=""]'); s.wait_for_timeout(300)
 
+    print("\n3b) Räume weg, Sammlungen (1.15.2)")
+    pruefe("kein Raumfilter mehr", s.locator("#k-raum").count() == 0)
+    raeume = {a["raum"] for a in liste if a.get("raum")}
+    spans = set(s.evaluate("() => Array.from(document.querySelectorAll('.karte .meta span')).map(x => x.textContent.trim())"))
+    pruefe("Karten nennen keinen Raum", not (spans & raeume), f"({sorted(spans & raeume)[:3]})")
+    samml = sorted({a["buendel"] for a in liste if sichtbar(a) and a.get("buendel")})
+    pruefe("Knopfzeile Sammlungen vollständig", s.locator("#k-samml button[data-samml]").count() == len(samml),
+           f"({s.locator('#k-samml button').count()} statt {len(samml)})")
+    ziel = samml[0]
+    s.click(f'#k-samml button[data-samml="{ziel}"]'); s.wait_for_timeout(300)
+    soll = {a["nr"] for a in liste if sichtbar(a) and a.get("buendel") == ziel}
+    ist = set(nrs(s.locator(".karte").count()))
+    pruefe("Sammlungs-Knopf zeigt nur diese Sammlung", ist and ist <= soll, f"({sorted(ist - soll)[:5]})")
+    s.click(f'#k-samml button[data-samml="{ziel}"]'); s.wait_for_timeout(300)
+    pruefe("zweiter Tipp zeigt wieder alles", s.locator(".karte").count() > len(ist))
+    bnd = s.locator(".karte button.bnd").first
+    name = bnd.get_attribute("data-samml"); bnd.click(); s.wait_for_timeout(400)
+    ist = {a["nr"] for a in liste if a.get("buendel") == name}
+    pruefe("Kästchen „Sammlung …“ an der Karte filtert", set(nrs(s.locator(".karte").count())) <= ist)
+    pruefe("… und markiert den Knopf", "an" in (s.locator(f'#k-samml button[data-samml="{name}"]').get_attribute("class") or ""))
+    s.click('#k-kats button[data-kat=""]'); s.wait_for_timeout(300)
+    pruefe("Kategorie-Knopf hebt die Sammlung auf", s.locator("#k-samml button.an").count() == 0)
+
     print("\n4) Teilen per WhatsApp in der Großansicht")
     s.locator(".karte img[data-gross]").first.click(); s.wait_for_timeout(200)
     link = s.locator("#k-gross .teilen")
@@ -106,8 +135,9 @@ with sync_playwright() as p:
     m.goto(BASIS, wait_until="networkidle"); m.wait_for_selector(".karte", timeout=30000)
     breite = m.evaluate("() => [document.documentElement.scrollWidth, window.innerWidth]")
     pruefe("Seite nicht breiter als das Telefon", breite[0] <= breite[1] + 1, str(breite))
-    hoehen = m.evaluate("() => Array.from(document.querySelectorAll('#k-kats button')).map(b => b.getBoundingClientRect().top)")
-    pruefe("alle Knöpfe in einer Zeile", len(set(round(h) for h in hoehen)) == 1, f"({sorted(set(round(h) for h in hoehen))})")
+    for zeile in ("#k-kats", "#k-samml"):
+        hoehen = m.evaluate(f"() => Array.from(document.querySelectorAll('{zeile} button')).map(b => b.getBoundingClientRect().top)")
+        pruefe(f"{zeile}: alle Knöpfe in einer Zeile", len(set(round(h) for h in hoehen)) == 1, f"({sorted(set(round(h) for h in hoehen))})")
     m.screenshot(path="/tmp/kikweb/s02-mobil.png")
 
     pruefe("keine Skriptfehler", not konsole, f"({konsole!r})")

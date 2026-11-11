@@ -9,7 +9,7 @@ Der Testserver muss mit KIK_TEST_NOVEMBER=1 laufen, damit die vorbereiteten Posi
 import sys, json, re, urllib.request
 from playwright.sync_api import sync_playwright
 
-CHROME = "/opt/pw-browsers/chromium-1194/chrome-linux/chrome"
+CHROME = "/opt/pw-browsers/chromium"
 BASIS = "http://127.0.0.1:8801/"
 
 fehler, proben = [], 0
@@ -58,9 +58,9 @@ with sync_playwright() as p:
     seite.wait_for_selector(".karte", timeout=20000)
 
     print("\n1) Anzeige")
-    pruefe("Kategorie „zu verschenken“ im Filter", seite.locator('#k-kat option', has_text="zu verschenken").count() == 1)
-    pruefe("Kategorie „Spielzeug“ im Filter", seite.locator('#k-kat option', has_text="Spielzeug").count() == 1)
-    seite.select_option("#k-kat", "zu verschenken"); seite.wait_for_timeout(400)
+    pruefe("Kategorie „zu verschenken“ im Filter", seite.locator('#k-kats button[data-kat="zu verschenken"]').count() == 1)
+    pruefe("Kategorie „Spielzeug“ im Filter", seite.locator('#k-kats button[data-kat="Spielzeug"]').count() == 1)
+    seite.click('#k-kats button[data-kat="zu verschenken"]'); seite.wait_for_timeout(400)
     karten = seite.locator(".karte")
     pruefe("Filter zeigt nur Geschenke", karten.count() == len(geschenke), f"({karten.count()} statt {len(geschenke)})")
     text = karten.first.inner_text()
@@ -68,7 +68,7 @@ with sync_playwright() as p:
     seite.screenshot(path="/tmp/kikweb/g01-geschenke.png")
 
     print("\n1b) NEU-Schild und Sortierung")
-    seite.select_option("#k-kat", ""); seite.wait_for_timeout(400)
+    seite.click('#k-kats button[data-kat=""]'); seite.wait_for_timeout(400)
     erste = [seite.locator(".karte .nr").nth(i).inner_text() for i in range(2)]
     pruefe("Neuheiten stehen ganz oben", sorted(erste) == ["NE03-12", "NE04-17"], f"({erste!r})")
     pruefe("Schild NEU an genau 2 Karten", seite.locator(".karte .neuschild").count() == 2,
@@ -80,7 +80,7 @@ with sync_playwright() as p:
     seite.select_option("#k-sort", "auf"); seite.wait_for_timeout(300)
     erste = seite.locator(".karte .nr").first.inner_text()
     pruefe("Sortierung nach Preis zieht NEU nicht vor", erste not in ("NE03-12", "NE04-17"), f"({erste!r})")
-    seite.select_option("#k-sort", ""); seite.select_option("#k-kat", "zu verschenken"); seite.wait_for_timeout(300)
+    seite.select_option("#k-sort", ""); seite.click('#k-kats button[data-kat="zu verschenken"]'); seite.wait_for_timeout(300)
 
     print("\n2) Nur Geschenke: vormerken ja, abschicken nein (1.12.0), höchstens 5")
     for nr in geschenke[:5]:
@@ -95,7 +95,7 @@ with sync_playwright() as p:
 
     print("\n3) Geschenk + billiger Kaufartikel: Mindestwert gilt für den Kaufanteil")
     seite.locator("#k-leeren").click(); seite.wait_for_timeout(200)
-    seite.select_option("#k-kat", ""); seite.wait_for_timeout(400)
+    seite.click('#k-kats button[data-kat=""]'); seite.wait_for_timeout(400)
     seite.locator(f'button[data-res="{geschenke[0]}"]').click()
     seite.locator(f'button[data-res="{billig[0]}"]').click(); seite.wait_for_timeout(300)
     pruefe("unter 50 € Kaufwert gesperrt", seite.locator("#k-anfragen").is_disabled())
@@ -104,7 +104,7 @@ with sync_playwright() as p:
     print("\n4) Geschenke + Kauf ab 50 €: abschicken")
     for nr in geschenke[:2]:
         seite.locator(f'button[data-res="{nr}"]').click(); seite.wait_for_timeout(150)
-    seite.select_option("#k-kat", ""); seite.fill("#k-q", teuer[0]); seite.wait_for_timeout(300)
+    seite.click('#k-kats button[data-kat=""]'); seite.fill("#k-q", teuer[0]); seite.wait_for_timeout(300)
     seite.locator(f'button[data-res="{teuer[0]}"]').click(); seite.wait_for_timeout(300)
     pruefe("mit Kauf ab 50 € freigegeben", not seite.locator("#k-anfragen").is_disabled())
     seite.click("#k-anfragen"); seite.wait_for_selector("#k-dlg", timeout=5000)

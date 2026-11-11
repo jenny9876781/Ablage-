@@ -979,10 +979,20 @@ class Kikripp_Admin {
                 : (is_array($alt_daten) ? (string) ($alt_daten['neu_seit'] ?? '') : '');
             if ($im_katalog && !$war_sichtbar) { $neu_markiert++; }
 
+            // 1.15.1: Sale. Steht in der Importdatei ein Sale-Preis unter dem normalen Preis, gilt er
+            // als Preis – für Katalog, Reservierung, Mindestbestellwert und Auswertung gleichermaßen.
+            // Der normale Preis wandert nach 'vorher' und erscheint durchgestrichen.
+            $preis = (float) ($a['preis'] ?? 0);
+            $sale  = isset($a['sale']) && $a['sale'] !== '' && $a['sale'] !== null ? (float) $a['sale'] : 0.0;
+            if ($sale > 0 && $preis > 0 && $sale < $preis) {
+                $daten['vorher'] = $preis;
+                $preis = $sale;
+            }
+
             $zeile = [
                 'sortierung'   => (int) ($a['sortierung'] ?? $i),
                 'menge'        => max(0, (int) ($a['menge'] ?? 0)),
-                'preis_netto'  => (float) ($a['preis'] ?? 0),
+                'preis_netto'  => $preis,
                 'aktiv'        => !empty($a['aktiv']) ? 1 : 0,
                 'im_katalog'   => !empty($a['im_katalog']) ? 1 : 0,
                 'daten'        => wp_json_encode($daten),

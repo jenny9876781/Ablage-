@@ -1405,6 +1405,27 @@ ist die Merkliste; erledigte Punkte hier abhaken, nicht löschen.
       eingelesen (254 Artikel, keine Überbuchung), „bar“/„Sammel RG“ aus Rechnungsnr. in die Bemerkung. Import-Basis war
       `katalog_import-06.11.json`. Erwartete Meldung: „31 neu, 801 aktualisiert … 31 NEU“, Nachtrag 31 Fotos (7 MB).
       Nächster Nachtrag gegen `ausgabe/katalog_import-10.11.json`.
+- [x] **11.11.2026: Plugin 1.15.1 – Katalog für Käufer.** (1) **Neuheiten nach Datum**: `katalog_artikel()` liefert
+      `neu_tag` (Y-m-d des Imports); Standardsortierung = Neuheiten (jüngster Tag zuerst) → Sale → Importreihenfolge.
+      Anlass: 191 Spielzeuge vom 06.11. waren noch NEU, die 31 vom 10.11. gingen darin unter. (2) **Kategorie-Knöpfe**
+      statt Auswahlfeld `#k-kat` (gibt es nicht mehr; Tests klicken `#k-kats button[data-kat=…]`), mit Zahl der
+      verfügbaren Artikel, am Telefon eine Zeile zum Wischen. Zusatzknöpfe „Sale“ (nur wenn Sale-Artikel da) und
+      **„bis 15 €“** (Brutto 0 < Preis ≤ 15, ohne Geschenke; Nutzerin wollte 25 €, 15 € empfohlen und angenommen: bis 25 €
+      wäre die Hälfte des Katalogs). (3) **Sale – nur vorbereitet, noch nicht live**: Spalte `Sale` in CSV/Excel (nach
+      Preis_netto). Leer = normaler Preis. Gilt nur, wenn 0 < Sale < Preis (`lib.sale_gilt`, pruefen.py meldet sonst FEHLER).
+      Importdatei-Feld `sale`; `einspielen()` setzt dann `preis_netto = Sale` und `daten.vorher = Preis` → Reservierung,
+      Mindestwert, Auswertung rechnen automatisch mit dem Sale-Preis; Sale-Ende (Spalte leer + Import) → normaler Preis,
+      bestehende Reservierungen behalten ihren eingefrorenen Preis. Karte: Schild „Sale“, alter Preis durchgestrichen.
+      Excel-Positionswert rechnet mit Sale. **Regel-Sale:** `python3 scripts/sale.py --kategorie Spielzeug --prozent 30`
+      (Probelauf, `--schreiben` übernimmt, `--alle`, `--beenden`); Einzelvorgaben der Nutzerin bleiben stehen, gerundet nach
+      unten (< 10 € auf 0,50, sonst ganze Euro). Hinweis gegeben: Streichpreis = Preis der letzten 30 Tage (PAngV § 11),
+      vor dem Sale keine Preise anheben. (4) **Teilen per WhatsApp** nur in der Großansicht (Foto antippen), nicht auf der Karte.
+      (5) **Merkliste bleibt** über Neuladen (localStorage `kikripp_merkliste`, verkaufte fallen still heraus).
+      Tests: 559 Logik, Kette 0 Fehler (+12 Sale/NEU), 94 Browser, 16 mobil, 32 Geschenke, Liste ok, neu
+      `browsertest_sale.py` (20, Server mit `KIK_TEST_IMPORT`/`KIK_TEST_NEU_ALT`, Aufruf steht im Kopf). Browsertests brauchen
+      `NO_PROXY=127.0.0.1` (sonst 401 vom Proxy), Chromium jetzt `/opt/pw-browsers/chromium`; der erste Seitenaufruf des
+      Testservers füllt die Datenbank und kann > 30 s dauern. NU05-V07 Kladdig 7 → 6 (Import 11.11.: „0 neu, 832 aktualisiert“).
+      **Die nächste Excel an die Nutzerin hat die neue Spalte „Sale“** – ihre alte Mappe ohne Spalte liest rueckeinlesen trotzdem.
 - [ ] **Ende November 2026: Höchstzahl Geschenke je Reservierung mit der Nutzerin neu besprechen**
       (Vorschlag: ab ca. 01.12. auf 20 oder frei, damit bis 10.12. alles abgeholt wird).
 - [x] Plugin 1.2.1 (06.10.): Einstellung „Fußzeile ausblenden“ (Standard an) – Body-Klasse

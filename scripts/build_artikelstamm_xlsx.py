@@ -44,6 +44,7 @@ SPALTEN = [
     ("Anlagennr",              12, "Buchhaltung",  "text"),
     ("Anschaffungswert_netto", 17, "Buchhaltung",  "eur"),
     ("Preis_netto",            13, "Preis",        "eur"),
+    ("Sale",                   11, "Preis",        "eur"),
     ("Preisbasis",             11, "Preis",        "text"),
     ("Preis_geprüft",          12, "Preis",        "text"),
     ("Positionswert_netto",    17, "Preis",        "formel"),
@@ -80,7 +81,7 @@ IDX = {s[0]: i + 1 for i, s in enumerate(SPALTEN)}
 def L(n): return get_column_letter(IDX[n])
 
 PFLEGE = {"Menge", "Verkauft_Menge", "Maße", "Aktiv", "Im_Katalog",
-          "Anlagennr", "Anschaffungswert_netto", "Preis_netto",
+          "Anlagennr", "Anschaffungswert_netto", "Preis_netto", "Sale",
           "Preisbasis", "Preis_geprüft", "Marke", "Bündel", "Status", "Kanal", "Reserviert_für", "Verkaufspreis_netto",
           "Verkaufsdatum", "Käufer", "Rechnungsnr", "Zahlung", "Zahlart", "Abholtermin", "Bemerkung"}
 
@@ -169,6 +170,8 @@ TEXTE = [
     ("Hinweise zu den Preisen", "Alle Preise in dieser Datei sind Schätzwerte auf Basis der Fotos. Sie sind zur Überarbeitung gedacht."),
     ("  Preis_geprüft", "„offen“ = Preis ist noch geschätzt und muss kontrolliert werden (dunkelgrau hinterlegt). Nach der Kontrolle „ok“ eintragen. "
      "Filter auf „offen“ zeigt die Prüfliste. Artikel mit „offen“ gehen nicht in den Webkatalog."),
+    ("  Sale", "Leer = normaler Preis. Steht hier ein Preis unter Preis_netto, ist der Artikel im Sale: der Katalog zeigt das Schild „Sale“ "
+     "und den normalen Preis durchgestrichen, Reservierungen bekommen den Sale-Preis. Spalte leeren = Sale vorbei."),
     ("Markenware", "Vitra, Stokke, USM Haller und Kartell sind dort vermerkt, wo die Marke am Stück belegt ist. Für diese Stücke gibt es einen eigenen Gebrauchtmarkt mit Fachhändlern – dort sind höhere Preise erzielbar als im Sammelangebot."),
     ("Kunst", "Die Acrylbilder sind Eigenarbeiten einer Privatperson, die Schwarzwald-Trachtenmotive sind Kaufware. Beides ist in der Beschreibung vermerkt."),
     ("", ""),
@@ -223,7 +226,9 @@ for j, art in enumerate(daten):
         if name == "Restmenge":
             wert = f'={L("Menge")}{r}-IF({L("Verkauft_Menge")}{r}="",0,{L("Verkauft_Menge")}{r})'
         elif name == "Positionswert_netto":
-            wert = f'={L("Restmenge")}{r}*{L("Preis_netto")}{r}'
+            # 1.15.1: gilt ein Sale-Preis (über 0 und unter dem Preis), rechnet der Wert mit ihm
+            wert = (f'={L("Restmenge")}{r}*IF(AND(N({L("Sale")}{r})>0,N({L("Sale")}{r})<{L("Preis_netto")}{r}),'
+                    f'{L("Sale")}{r},{L("Preis_netto")}{r})')
         elif name == "Umsatz_netto":
             wert = (f'=IF({L("Verkauft_Menge")}{r}="","",'
                     f'{L("Verkauft_Menge")}{r}*{L("Verkaufspreis_netto")}{r})')

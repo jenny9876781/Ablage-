@@ -77,11 +77,16 @@ $GLOBALS['ist_admin'] = !empty($_COOKIE['kik_test_admin']);
 
 global $wpdb;
 if ((int) $wpdb->get_var('SELECT COUNT(*) FROM ' . Kikripp_DB::t_artikel()) === 0) {
-    $daten = json_decode(file_get_contents(__DIR__ . '/../../ausgabe/katalog_import.json'), true);
+    // KIK_TEST_IMPORT=<datei> nimmt eine andere Importdatei (1.15.1: Sale-Probe)
+    $daten = json_decode(file_get_contents(getenv('KIK_TEST_IMPORT') ?: __DIR__ . '/../../ausgabe/katalog_import.json'), true);
+    $neu_alt = explode(',', (string) getenv('KIK_TEST_NEU_ALT'));   // NEU seit 5 Tagen (älterer Import)
     foreach ($daten as $i => $a) {
+        // Sale wie in Kikripp_Admin::einspielen(): Sale-Preis gilt, der normale Preis wird 'vorher'
+        $sale = (float) ($a['sale'] ?? 0);
+        $vorher = ($sale > 0 && $a['preis'] > 0 && $sale < $a['preis']) ? (float) $a['preis'] : 0;
         $wpdb->insert(Kikripp_DB::t_artikel(), [
             'artnr' => $a['nr'], 'sortierung' => $i, 'menge' => $a['menge'],
-            'preis_netto' => $a['preis'], 'aktiv' => $a['aktiv'] ? 1 : 0,
+            'preis_netto' => $vorher ? $sale : $a['preis'], 'aktiv' => $a['aktiv'] ? 1 : 0,
             // KIK_TEST_NOVEMBER=1 zeigt auch die vorbereiteten Positionen (Spielzeug, zu verschenken)
             'im_katalog' => ($a['im_katalog'] || (getenv('KIK_TEST_NOVEMBER') && $a['aktiv'])) ? 1 : 0,
             'daten' => wp_json_encode([
@@ -92,8 +97,9 @@ if ((int) $wpdb->get_var('SELECT COUNT(*) FROM ' . Kikripp_DB::t_artikel()) === 
                 'mengenhinweis' => $a['mengenhinweis'] ?? '', 'foto' => $a['foto'],
                 'bild' => '/fotos/' . $a['foto'] . '.jpg',
                 // KIK_TEST_NEU=NR1,NR2 stempelt diese Artikel als frisch importiert (Schild NEU)
-                'neu_seit' => in_array($a['nr'], explode(',', (string) getenv('KIK_TEST_NEU')), true) ? current_time('mysql') : '',
-            ]),
+                'neu_seit' => in_array($a['nr'], explode(',', (string) getenv('KIK_TEST_NEU')), true) ? current_time('mysql')
+                    : (in_array($a['nr'], $neu_alt, true) ? date('Y-m-d H:i:s', strtotime(current_time('mysql')) - 5 * 86400) : ''),
+            ] + ($vorher ? ['vorher' => $vorher] : [])),
             'aktualisiert' => current_time('mysql'),
         ]);
     }

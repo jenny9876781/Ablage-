@@ -1,7 +1,7 @@
 """Erzeugt ausgabe/katalog_import.json – die Datei für den Import ins WordPress-Plugin."""
 import sys, os, json
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from lib import lade_artikel, AUSGABE
+from lib import lade_artikel, sale_gilt, AUSGABE
 
 def main():
     raeume, liste, zurueck = [], [], []
@@ -19,6 +19,8 @@ def main():
             "menge":      a["Menge"],
             "einheit":    a["Einheit"],
             "preis":      a["Preis_netto"] or 0,
+            # 1.15.1: Sale-Preis (nur wenn er unter dem Preis liegt); leer = kein Sale
+            "sale":       a["Sale"] if sale_gilt(a) else None,
             "basis":      a["Preisbasis"],
             "versand":    a["Versand"],
             "marke":      a.get("Marke", ""),

@@ -49,6 +49,11 @@ except Exception as _e:
 _preis_offen = [a["ArtNr"] for a in aktiv if (a.get("Preis_geprüft") or "") == "offen"]
 _offen_sichtbar = [a["ArtNr"] for a in aktiv if (a.get("Preis_geprüft") or "") == "offen" and a.get("Im_Katalog") == "ja"]
 if _offen_sichtbar: F(f"{len(_offen_sichtbar)} Positionen mit ungeprüftem Preis stehen im Katalog: {_offen_sichtbar[:10]} – erst prüfen (Preis_geprüft = ok) oder Im_Katalog = nein")
+# 1.15.1: Sale-Preis muss unter dem normalen Preis liegen, sonst gilt er nicht (und keiner merkt es)
+_sale_falsch = [a["ArtNr"] for a in aktiv if a.get("Sale") and not (a["Preis_netto"] and 0 < a["Sale"] < a["Preis_netto"])]
+if _sale_falsch: F(f"{len(_sale_falsch)} Sale-Preise liegen nicht unter dem normalen Preis (oder Preis fehlt): {_sale_falsch[:10]}")
+_im_sale = [a["ArtNr"] for a in aktiv if a.get("Sale") and a["Preis_netto"] and 0 < a["Sale"] < a["Preis_netto"]]
+if _im_sale: W(f"{len(_im_sale)} Artikel im Sale")
 if _preis_offen: W(f"{len(_preis_offen)} Preise noch zu prüfen (Preis_geprüft = offen)")
 else:            OK("alle Preise geprüft")
 ohne_mass = [a["ArtNr"] for a in aktiv if not a.get("Maße")]
@@ -168,7 +173,7 @@ else:
     else:
         OK(f"alle {len(ERW)} Kennzahlen greifen auf die richtigen Spalten")
 
-    ZAHLEN = ["Preis_netto", "Anschaffungswert_netto", "Verkaufspreis_netto",
+    ZAHLEN = ["Preis_netto", "Sale", "Anschaffungswert_netto", "Verkaufspreis_netto",
               "Menge", "Verkauft_Menge"]
     sp = {v: k for k, v in kopf.items()}
     text_in_zahl = []

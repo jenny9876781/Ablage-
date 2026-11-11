@@ -225,6 +225,37 @@ $d = json_decode($wpdb->get_var("SELECT daten FROM " . Kikripp_DB::t_artikel() .
 $d['neu_seit'] = gmdate('Y-m-d H:i:s', time() - 15 * 86400);
 $wpdb->update(Kikripp_DB::t_artikel(), ['daten' => wp_json_encode($d)], ['artnr' => 'TEST-NEU1']);
 pruefe('nach 15 Tagen kein NEU mehr', im_katalog('TEST-NEU1')['neu'] ?? null, false);
+
+echo "\nNEU nach Datum und Sale (1.15.1)\n";
+$zusatz2 = $alle;
+$zusatz2[] = array_merge($alle[0], ['nr' => 'TEST-NEU2']);
+Kikripp_Admin::einspielen($zusatz2);
+pruefe('NEU trägt den Tag des Imports', im_katalog('TEST-NEU2')['neu_tag'] ?? null, substr(current_time('mysql'), 0, 10));
+pruefe('ohne NEU kein Tag', array_key_exists('neu_tag', im_katalog($alle[0]['nr']) ?? []), false);
+// Sale: ein verfügbarer Artikel mit Preis
+$s_i = null;
+foreach ($alle as $i => $a) {
+    if (!empty($a['aktiv']) && !empty($a['im_katalog']) && (float) $a['preis'] >= 10 && (im_katalog($a['nr'])['frei'] ?? 0) > 0) { $s_i = $i; break; }
+}
+$s_nr = $alle[$s_i]['nr']; $s_preis = (float) $alle[$s_i]['preis'];
+$mit_sale = $alle;
+$mit_sale[$s_i]['sale'] = round($s_preis * 0.7, 2);
+$mit_sale[0]['sale'] = (float) $alle[0]['preis'] + 5;           // Sale über dem Preis gilt nicht
+Kikripp_Admin::einspielen($mit_sale);
+pruefe('Sale-Preis gilt im Katalog', im_katalog($s_nr)['preis'] ?? null, round($s_preis * 0.7, 2));
+pruefe('normaler Preis steht als „vorher“', (float) (im_katalog($s_nr)['vorher'] ?? 0), $s_preis);
+pruefe('Sale über dem Preis wird ignoriert', array_key_exists('vorher', im_katalog($alle[0]['nr']) ?? []), false);
+$vs = Kikripp_DB::reservieren(['name' => 'Sale', 'email' => 's@example.org', 'telefon' => '0123456',
+    'nachricht' => '', 'datenschutz' => 1], [$s_nr => 1]);
+pruefe('Reservierung im Sale', is_wp_error($vs), false);
+$ps = $wpdb->get_row($wpdb->prepare('SELECT preis_netto FROM ' . Kikripp_DB::t_position() . ' WHERE vorgang_id = %d', $vs), ARRAY_A);
+pruefe('Reservierung bekommt den Sale-Preis', (float) $ps['preis_netto'], round($s_preis * 0.7, 2));
+Kikripp_Admin::einspielen($alle);                                   // Sale beendet (Spalte leer)
+pruefe('Sale vorbei: wieder normaler Preis', im_katalog($s_nr)['preis'] ?? null, $s_preis);
+pruefe('Sale vorbei: kein „vorher“ mehr', array_key_exists('vorher', im_katalog($s_nr) ?? []), false);
+$ps = $wpdb->get_row($wpdb->prepare('SELECT preis_netto FROM ' . Kikripp_DB::t_position() . ' WHERE vorgang_id = %d', $vs), ARRAY_A);
+pruefe('… die Reservierung behält den Sale-Preis', (float) $ps['preis_netto'], round($s_preis * 0.7, 2));
+Kikripp_DB::vorgang_status($vs, 'storniert');
 Kikripp_Admin::einspielen($alle);
 
 printf("\n== Kettentest: %d Fehler ==\n", $fehler);

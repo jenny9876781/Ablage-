@@ -301,3 +301,24 @@ body.kikripp-ohne-menue .ast-header-social-wrap { display: none !important; }
   margin-left: auto !important;
   margin-right: auto !important;
 }
+
+/* 1.15.1: Kategorie-Knöpfe. Am Telefon eine Zeile zum Wischen, am Rechner umbrechend. */
+.kikripp .kats { display: flex; flex-wrap: wrap; gap: 6px; padding-top: 10px; }
+.kikripp .kats .kat { font: inherit; font-size: 13px; padding: 6px 11px; border: 1px solid var(--linie); border-radius: 16px; background: var(--grund); color: var(--schwarz); cursor: pointer; white-space: nowrap; }
+.kikripp .kats .kat span { color: var(--grau); font-size: 12px; margin-left: 2px; }
+.kikripp .kats .kat:hover { border-color: var(--schwarz); }
+.kikripp .kats .kat.an { background: var(--schwarz); border-color: var(--schwarz); color: #fff; }
+.kikripp .kats .kat.an span { color: rgba(255,255,255,.75); }
+.kikripp .kats .kat.sale { border-color: var(--rot); color: var(--rot); font-weight: 700; }
+.kikripp .kats .kat.sale.an { background: var(--rot); color: #fff; }
+@media (max-width: 560px) {
+  .kikripp .kats { flex-wrap: nowrap; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; padding-bottom: 2px; }
+  .kikripp .kats::-webkit-scrollbar { display: none; }
+}
+/* 1.15.1: Sale – alter Preis durchgestrichen, Schild in Rot */
+.kikripp .preis.im-sale s { color: var(--grau); font-size: 14px; margin-right: 6px; }
+.kikripp .preis.im-sale b { color: var(--rot); display: inline; }
+.kikripp .saleschild { display: inline-block; background: var(--rot); color: #fff; font-size: 11px; font-weight: 800; padding: 2px 7px; margin-right: 8px; letter-spacing: .06em; text-transform: uppercase; vertical-align: 3px; }
+.kikripp .preis.im-sale small { display: block; }
+/* 1.15.1: Teilen per WhatsApp in der Großansicht */
+.kikripp .kik-gross .teilen { color: #fff; background: #1f8f4e; padding: 8px 16px; border-radius: 3px; font-size: 14px; font-weight: 600; text-decoration: none; cursor: pointer; }

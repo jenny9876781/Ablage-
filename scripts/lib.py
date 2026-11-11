@@ -13,6 +13,17 @@ def zahl(s):
     return float(s.replace(".", "").replace(",", ".")) if s else None
 
 
+def sale_gilt(d):
+    """1.15.1: Ein Sale-Preis gilt nur, wenn er über 0 und unter dem normalen Preis liegt."""
+    s, p = d.get("Sale"), d.get("Preis_netto")
+    return bool(s) and bool(p) and 0 < s < p
+
+
+def wirkpreis(d):
+    """Der Preis, der gerade gilt: Sale-Preis, sonst der normale Preis."""
+    return d["Sale"] if sale_gilt(d) else (d.get("Preis_netto") or 0)
+
+
 def lade_artikel(nur_aktive=True):
     with open(CSV_PFAD, encoding="utf-8") as f:
         rows = list(csv.DictReader(f, delimiter=";"))
@@ -24,11 +35,11 @@ def lade_artikel(nur_aktive=True):
         if nur_aktive and (d.get("Aktiv") or "ja").lower() in ("entfällt", "nein"):
             continue
         # Geld- und Mengenfelder müssen Zahlen sein, sonst rechnen die Excel-Formeln nicht
-        for feld in ("Preis_netto", "Anschaffungswert_netto", "Verkaufspreis_netto"):
+        for feld in ("Preis_netto", "Sale", "Anschaffungswert_netto", "Verkaufspreis_netto"):
             d[feld] = zahl(d.get(feld))
         d["Menge"] = int(d["Menge"]) if d.get("Menge", "").isdigit() else 0
         d["Verkauft_Menge"] = int(d["Verkauft_Menge"]) if d.get("Verkauft_Menge", "").isdigit() else None
-        d["Positionswert"] = (d["Preis_netto"] or 0) * d["Menge"]
+        d["Positionswert"] = wirkpreis(d) * d["Menge"]
         out.append(d)
     return out
 

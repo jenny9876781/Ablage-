@@ -7,7 +7,7 @@ Leiste, die den Inhalt verdeckt, und zu kleine Tippflächen.
 import sys
 from playwright.sync_api import sync_playwright
 
-CHROME = "/opt/pw-browsers/chromium-1194/chrome-linux/chrome"
+CHROME = "/opt/pw-browsers/chromium"
 BASIS = "http://127.0.0.1:8801/"
 PW = "2026sales4kids"
 
@@ -57,7 +57,7 @@ with sync_playwright() as p:
     pruefe("Knopf liegt vollstaendig im Sichtfeld", kb["x"] >= 0 and kb["x"] + kb["width"] <= breite[1] + 1)
 
     print("\n3) Filterzeile")
-    for name, wahl in (("Suchfeld", "#k-q"), ("Kategorie", "#k-kat"), ("Raum", "#k-raum"), ("Merkleiste", "#k-merk")):
+    for name, wahl in (("Suchfeld", "#k-q"), ("Kategorie-Knöpfe", "#k-kats"), ("Raum", "#k-raum"), ("Merkleiste", "#k-merk")):
         el = seite.locator(wahl)
         eb = el.bounding_box()
         pruefe(f"{name} sichtbar und nicht abgeschnitten",

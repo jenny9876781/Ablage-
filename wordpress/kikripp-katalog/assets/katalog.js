@@ -21,6 +21,27 @@
   var TERMIN_TAGE = [1, 2, 3, 4];                                                               // Mo–Do
   var formularSeit = 0;
   var merk = {};                       // ArtNr -> gewünschte Stückzahl
+  var katWahl = '';                    // 1.15.1: gewählter Kategorie-Knopf ('' = alle, SALE, GUENSTIG oder Kategoriename)
+  var SALE = '\u0001sale', GUENSTIG = '\u0001bis15', GUENSTIG_BIS = 15;
+
+  /* 1.15.1: Merkliste bleibt beim Neuladen erhalten. Speicher kann fehlen oder gesperrt sein
+     (privates Fenster) – dann läuft alles wie vorher, nur ohne Erinnern. */
+  var MERK_SCHLUESSEL = 'kikripp_merkliste';
+  function merkSichern() {
+    try { window.localStorage.setItem(MERK_SCHLUESSEL, JSON.stringify(merk)); } catch (e) { /* egal */ }
+  }
+  function merkLaden() {
+    var alt = {};
+    try { alt = JSON.parse(window.localStorage.getItem(MERK_SCHLUESSEL) || '{}') || {}; } catch (e) { alt = {}; }
+    merk = {};
+    Object.keys(alt).forEach(function (nr) {
+      var a = ARTIKEL.filter(function (x) { return x.nr === nr; })[0];
+      var n = parseInt(alt[nr], 10);
+      if (a && a.frei > 0 && n > 0) { merk[nr] = Math.min(n, a.frei); }   // Verkauftes fällt still heraus
+    });
+  }
+  function istSale(a) { return a.vorher > 0 && a.preis > 0 && a.preis < a.vorher; }
+  function istGuenstig(a) { return a.preis > 0 && brutto(a.preis) <= GUENSTIG_BIS + 0.004; }
 
   function eur(v) {
     return (v || 0).toLocaleString('de-DE', { style: 'currency', currency: 'EUR' });
@@ -138,6 +159,7 @@
       RECHT = a.daten.recht || '';
       ABHOLUNG = a.daten.abholung || '';
       ANBIETER = a.daten.anbieter || {};
+      merkLaden();
       geruest();
       render();
     }).catch(function () {
@@ -176,7 +198,6 @@
       '<div class="filter">' +
         '<div class="zeile">' +
           '<input type="search" id="k-q" placeholder="Suchen: Bezeichnung, Nummer, Beschreibung …">' +
-          '<select id="k-kat"><option value="">Alle Kategorien</option>' + optionen(kats) + '</select>' +
           '<select id="k-raum"><option value="">Alle Räume</option>' + optionen(raeume) + '</select>' +
           '<select id="k-sort" aria-label="Sortierung"><option value="">Sortierung: Standard</option>' +
             '<option value="auf">Preis aufsteigend</option><option value="ab">Preis absteigend</option></select>' +
@@ -184,6 +205,8 @@
           '<label class="chk"><input type="checkbox" id="k-neu"> nur Neuheiten</label>' +
           '<label class="chk"><input type="checkbox" id="k-frei" checked> nur verfügbare</label>' +
         '</div>' +
+        // 1.15.1: Kategorien als Knöpfe statt Auswahlfeld – am Telefon eine Zeile zum Wischen
+        '<div class="kats" id="k-kats" role="group" aria-label="Kategorien">' + katKnoepfe(kats) + '</div>' +
         '<div class="zaehler" id="k-zaehler"></div>' +
       '</div>' +
       '<div class="raster" id="k-raster"></div>' +
@@ -191,7 +214,8 @@
       // Formular unter allen Artikeln, und die Seite sprang beim Öffnen ganz nach unten.
       '<div class="kik-fenster" id="k-fenster" hidden><div class="kik-fenster-box" role="dialog" aria-modal="true">' +
         '<button class="kik-zu" id="k-zu" aria-label="Schließen">×</button><div id="k-formular"></div></div></div>' +
-      '<div class="kik-gross" id="k-gross" hidden><img alt=""><span></span></div>' +
+      '<div class="kik-gross" id="k-gross" hidden><img alt=""><span></span>' +
+        '<a class="teilen" href="#" target="_blank" rel="noopener">Per WhatsApp teilen</a></div>' +
       '<button class="nach-oben" id="k-oben" aria-label="Nach oben" hidden>↑</button>' +
       ((RECHT || ANBIETER.firma) ? '<div class="recht">' + anbieterBlock() +
         (RECHT ? '<h4>Kaufbedingungen</h4>' + RECHT.split(/\n\s*\n/).map(function (t) {
@@ -200,8 +224,13 @@
           ? '<p>Abholung nach Terminvereinbarung: ' + sicher(ABHOLUNG) + '</p>' : '') +
         '</div>' : '');
 
-    ['k-q', 'k-kat', 'k-raum', 'k-sort', 'k-design', 'k-neu', 'k-frei'].forEach(function (id) {
+    ['k-q', 'k-raum', 'k-sort', 'k-design', 'k-neu', 'k-frei'].forEach(function (id) {
       el(id).addEventListener('input', render);
+    });
+    el('k-kats').addEventListener('click', function (e) {
+      var k = e.target.closest ? e.target.closest('button[data-kat]') : null;
+      if (!k) { return; }
+      waehleKat(k.getAttribute('data-kat'));
     });
     el('k-leeren').addEventListener('click', function () {
       merk = {}; listeOffen = false; leiste(); knoepfe();
@@ -213,7 +242,10 @@
     });
     el('k-zu').addEventListener('click', schliessen);
     el('k-fenster').addEventListener('click', function (e) { if (e.target === this) { schliessen(); } });
-    el('k-gross').addEventListener('click', function () { this.hidden = true; });
+    el('k-gross').addEventListener('click', function (e) {
+      if (e.target.classList && e.target.classList.contains('teilen')) { return; }   // Link öffnen, Bild bleibt
+      this.hidden = true;
+    });
     el('k-oben').addEventListener('click', function () {
       wurzel.scrollIntoView({ behavior: 'smooth', block: 'start' });
     });
@@ -221,6 +253,43 @@
       var k = el('k-oben'); if (k) { k.hidden = window.scrollY < 900; }
     }, { passive: true });
     leiste();
+  }
+
+  /** 1.15.1: Kategorie-Knöpfe mit Zahl der verfügbaren Artikel. „Sale“ erscheint nur, wenn es
+      Sale-Artikel gibt; Sale- und Preis-Knopf sind Zusatzsichten – der Artikel bleibt auch in seiner Kategorie. */
+  function katKnoepfe(kats) {
+    var frei = ARTIKEL.filter(function (a) { return a.frei > 0; });
+    function zahl(f) { return frei.filter(f).length; }
+    function knopf(wert, text, n, extra) {
+      return '<button type="button" data-kat="' + sicher(wert) + '" class="kat' + (extra || '') +
+        (katWahl === wert ? ' an' : '') + '" aria-pressed="' + (katWahl === wert) + '">' +
+        sicher(text) + ' <span>' + n + '</span></button>';
+    }
+    var aus = knopf('', 'Alle', frei.length);
+    var nSale = zahl(istSale);
+    if (nSale) { aus += knopf(SALE, 'Sale', nSale, ' sale'); }
+    var nG = zahl(istGuenstig);
+    if (nG) { aus += knopf(GUENSTIG, 'bis ' + GUENSTIG_BIS + ' €', nG, ' preiswert'); }
+    kats.forEach(function (k) {
+      aus += knopf(k, k, zahl(function (a) { return a.kat === k; }));
+    });
+    return aus;
+  }
+  function katListe() {
+    var kats = [];
+    ARTIKEL.forEach(function (a) { if (a.kat && kats.indexOf(a.kat) < 0) { kats.push(a.kat); } });
+    return kats.sort();
+  }
+  function waehleKat(wert) {
+    katWahl = wert || '';
+    el('k-kats').innerHTML = katKnoepfe(katListe());
+    render();
+  }
+  function passtKat(a) {
+    if (!katWahl) { return true; }
+    if (katWahl === SALE) { return istSale(a); }
+    if (katWahl === GUENSTIG) { return istGuenstig(a); }
+    return a.kat === katWahl;
   }
 
   var listeOffen = false;
@@ -278,20 +347,26 @@
 
   function render() {
     var q = el('k-q').value.toLowerCase().trim();
-    var kat = el('k-kat').value, raum = el('k-raum').value;
+    var raum = el('k-raum').value;
     var nurFrei = el('k-frei').checked, nurDesign = el('k-design').checked, nurNeu = el('k-neu').checked;
     var liste = ARTIKEL.filter(function (a) {
       return (!q || (a.nr + ' ' + a.titel + ' ' + a.beschr + ' ' + (a.buendel || '')).toLowerCase().indexOf(q) >= 0)
-        && (!kat || a.kat === kat) && (!raum || a.raum === raum)
+        && passtKat(a) && (!raum || a.raum === raum)
         && (!nurFrei || a.frei > 0) && (!nurDesign || !!a.marke) && (!nurNeu || !!a.neu);
     });
     var sort = el('k-sort') ? el('k-sort').value : '';
     if (sort) {
       liste = liste.slice().sort(function (x, y) { return sort === 'auf' ? x.preis - y.preis : y.preis - x.preis; });
     } else {
-      // Standard: Neuheiten zuerst, sonst die Reihenfolge der Importdatei (stabil über den Index)
+      // Standard (1.15.1): Neuheiten zuerst, die jüngsten oben (Tag des Imports), dann Sale,
+      // dann die Reihenfolge der Importdatei (stabil über den Index)
+      var rang = function (a) { return a.neu ? 0 : (istSale(a) ? 1 : 2); };
       liste = liste.map(function (a, i) { return [a, i]; })
-        .sort(function (x, y) { return (y[0].neu ? 1 : 0) - (x[0].neu ? 1 : 0) || x[1] - y[1]; })
+        .sort(function (x, y) {
+          return rang(x[0]) - rang(y[0]) ||
+            (x[0].neu ? String(y[0].neu_tag || '').localeCompare(String(x[0].neu_tag || '')) : 0) ||
+            x[1] - y[1];
+        })
         .map(function (p) { return p[0]; });
     }
     el('k-zaehler').innerHTML = '<b>' + liste.length + '</b> von ' + ARTIKEL.length + ' Positionen';
@@ -342,7 +417,9 @@
         ? '<div class="preis geschenk"><b>Kostenlos zu Ihrem Einkauf</b><small>' +
             (MINDEST > 0 ? 'ab einem Einkauf von ' + eur(MINDEST) + ' · ' : 'nur zusammen mit einem Kauf · ') +
             'nur Abholung · höchstens ' + GESCHENKE_MAX + ' Geschenke je Reservierung</small><small class="kita">' + KITA + '</small></div>'
-        : '<div class="preis"><b>' + eur(brutto(a.preis)) + vhb + '</b>' +
+        : '<div class="preis' + (istSale(a) ? ' im-sale' : '') + '">' +
+          (istSale(a) ? '<span class="saleschild">Sale</span><s>' + eur(brutto(a.vorher)) + '</s>' : '') +
+          '<b>' + eur(brutto(a.preis)) + vhb + '</b>' +
           '<small>' + (UST > 0 ? 'inkl. USt · netto ' + eur(a.preis) : sicher(STEUER || 'Endpreis')) +
           ' · je ' + sicher(a.einheit) + '</small></div>') +
       auswahl + '</div></div>';
@@ -381,8 +458,16 @@
     var g = el('k-gross');
     g.querySelector('img').src = a.bild;
     g.querySelector('span').textContent = a.nr + ' · ' + a.titel + ' – zum Schließen klicken';
+    // 1.15.1: Teilen per WhatsApp – nur hier in der Großansicht, damit die Karten schlicht bleiben
+    var t = g.querySelector('.teilen');
+    if (t) { t.href = 'https://wa.me/?text=' + encodeURIComponent(teilText(a)); }
     g.hidden = false;
   });
+  function teilText(a) {
+    var adresse = location.origin + location.pathname;
+    return 'Schau mal, im Kikripp-Artikelkatalog: ' + a.titel + ' (' + a.nr + ') – ' +
+      (geschenk(a) ? 'kostenlos zum Einkauf' : eur(brutto(a.preis))) + '\n' + adresse;
+  }
 
   // Eingabefeld: hart auf die verfügbare Menge begrenzen
   document.addEventListener('input', function (e) {
@@ -434,6 +519,7 @@
   }
 
   function leiste() {
+    merkSichern();                       // jede Änderung der Merkliste läuft hier vorbei
     var w = auswahl();
     var stueck = 0, netto = 0;
     w.forEach(function (p) { stueck += p.menge; netto += p.menge * p.a.preis; });
@@ -475,11 +561,11 @@
   document.addEventListener('click', function (e) {
     if (!e.target || !e.target.classList || !e.target.classList.contains('geschenke-link')) { return; }
     e.preventDefault(); e.stopPropagation();
-    var kat = el('k-kat'), g = ARTIKEL.filter(geschenk)[0];
-    if (!kat || !g) { return; }
-    kat.value = g.kat; el('k-q').value = '';
+    var g = ARTIKEL.filter(geschenk)[0];
+    if (!g) { return; }
+    el('k-q').value = '';
     el('k-frei').checked = true;
-    render();
+    waehleKat(g.kat);
     el('k-raster').scrollIntoView({ behavior: 'smooth', block: 'start' });
   });
 

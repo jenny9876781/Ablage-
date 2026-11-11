@@ -19,11 +19,11 @@ UEBERNEHMEN = ["Bezeichnung", "Beschreibung", "Kategorie", "Marke", "Bündel", "
                "Raum", "Menge", "Einheit",
                "Zustand", "Maße", "Wertklasse", "Aktiv", "Im_Katalog",
                "Anlagennr", "Anschaffungswert_netto",
-               "Preis_netto", "Preisbasis", "Preis_geprüft", "Versand", "Foto", "Status", "Kanal",
+               "Preis_netto", "Sale", "Preisbasis", "Preis_geprüft", "Versand", "Foto", "Status", "Kanal",
                "Reserviert_für", "Verkauft_Menge", "Verkaufspreis_netto", "Verkaufsdatum",
                "Käufer", "Rechnungsnr", "Zahlung", "Zahlart", "Abholtermin",
                "Mengenhinweis", "Bemerkung"]
-GELDFELDER = {"Preis_netto", "Anschaffungswert_netto", "Verkaufspreis_netto"}
+GELDFELDER = {"Preis_netto", "Sale", "Anschaffungswert_netto", "Verkaufspreis_netto"}
 
 
 def zahl_aus(v):

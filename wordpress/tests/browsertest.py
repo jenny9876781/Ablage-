@@ -11,7 +11,7 @@ das Passwort, die SQLite-Datei ueber die Artikel.
 import re, sys, os
 from playwright.sync_api import sync_playwright
 
-CHROME = "/opt/pw-browsers/chromium-1194/chrome-linux/chrome"
+CHROME = "/opt/pw-browsers/chromium"
 BASIS = "http://127.0.0.1:8801/"
 PW = "2026sales4kids"
 
@@ -193,6 +193,8 @@ with sync_playwright() as p:
     pruefe("Merkliste wieder zu", not seite.locator("#k-liste").is_visible())
 
     # Wunsch 01.10.2026: Leiste oben statt unter der Liste, Fotos ganz statt beschnitten
+    # Erst nach oben – die Leiste klebt beim Scrollen am oberen Rand (1.15.1: Kategorie-Knöpfe machen den Kopf höher)
+    seite.evaluate("window.scrollTo(0, 0)"); seite.wait_for_timeout(200)
     lb = seite.locator(".leiste").bounding_box()
     rb = seite.locator("#k-raster").bounding_box()
     pruefe("Leiste steht oberhalb der Artikel", lb is not None and rb is not None and lb["y"] < rb["y"],

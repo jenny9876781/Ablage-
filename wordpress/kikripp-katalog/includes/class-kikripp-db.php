@@ -163,6 +163,8 @@ class Kikripp_DB {
             $daten['status']     = $frei > 0 ? 'verfügbar' : 'reserviert';
             $seit = (string) ($daten['neu_seit'] ?? '');
             $daten['neu']        = $seit !== '' && strtotime($seit) >= strtotime(current_time('mysql')) - self::NEU_TAGE * DAY_IN_SECONDS;
+            // 1.15.1: Tag des Imports (nur das Datum), damit die jüngsten Neuheiten oben stehen
+            if ($daten['neu']) { $daten['neu_tag'] = substr($seit, 0, 10); }
             unset($daten['neu_seit']);
             $out[] = $daten;
         }

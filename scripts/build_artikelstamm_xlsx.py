@@ -92,7 +92,7 @@ AUSWAHL = {
     "Einheit":    '"Stück,Karton,Set,Palette,Konvolut"',
     "Zustand":    '"neuwertig,gut,gebraucht,stark gebraucht,defekt"',
     "Preisbasis": '"Fix,VHB"',
-    "Preis_geprüft": '"offen,ok"',
+    "Preis_geprüft": '"offen,prüfen,ok"',
     "Versand":    '"nur Abholung,Versand möglich,Spedition"',
     "Status":     '"verfügbar,reserviert,teilverkauft,verkauft,gespendet,entsorgt"',
     "Kanal":      '"Webkatalog,Kleinanzeigen,eBay,Direkt,Händler,Verkaufstag"',
@@ -169,7 +169,8 @@ TEXTE = [
     ("", ""),
     ("Hinweise zu den Preisen", "Alle Preise in dieser Datei sind Schätzwerte auf Basis der Fotos. Sie sind zur Überarbeitung gedacht."),
     ("  Preis_geprüft", "„offen“ = Preis ist noch geschätzt und muss kontrolliert werden (dunkelgrau hinterlegt). Nach der Kontrolle „ok“ eintragen. "
-     "Filter auf „offen“ zeigt die Prüfliste. Artikel mit „offen“ gehen nicht in den Webkatalog."),
+     "Filter auf „offen“ zeigt die Prüfliste. Artikel mit „offen“ gehen nicht in den Webkatalog. "
+     "„prüfen“ = Preis bitte nochmals ansehen, der Artikel bleibt aber online (hellgrau hinterlegt)."),
     ("  Sale", "Leer = normaler Preis. Steht hier ein Preis unter Preis_netto, ist der Artikel im Sale: der Katalog zeigt das Schild „Sale“ "
      "und den normalen Preis durchgestrichen, Reservierungen bekommen den Sale-Preis. Spalte leeren = Sale vorbei."),
     ("Markenware", "Vitra, Stokke, USM Haller und Kartell sind dort vermerkt, wo die Marke am Stück belegt ist. Für diese Stücke gibt es einen eigenen Gebrauchtmarkt mit Fachhändlern – dort sind höhere Preise erzielbar als im Sammelangebot."),
@@ -252,6 +253,10 @@ for j, art in enumerate(daten):
         # Preis noch nicht geprüft: Preis und Prüfspalte dunkler grau und fett (kein Gelb, kein flächiges Rot)
         if name in ("Preis_netto", "Preis_geprüft") and (art.get("Preis_geprüft") or "") == "offen":
             c.fill = PatternFill("solid", fgColor="BFBFBF")
+            c.font = Font(name=FONT, size=10, bold=True)
+        # 13.11.2026: „prüfen“ = Preis nochmals ansehen, Artikel bleibt aber online – nur fett, hellgrau
+        if name in ("Preis_netto", "Preis_geprüft") and (art.get("Preis_geprüft") or "") == "prüfen":
+            c.fill = PatternFill("solid", fgColor="E3E3E3")
             c.font = Font(name=FONT, size=10, bold=True)
     mini = miniatur(art.get("Foto"))
     if mini:

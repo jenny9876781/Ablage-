@@ -54,6 +54,10 @@ _sale_falsch = [a["ArtNr"] for a in aktiv if a.get("Sale") and not (a["Preis_net
 if _sale_falsch: F(f"{len(_sale_falsch)} Sale-Preise liegen nicht unter dem normalen Preis (oder Preis fehlt): {_sale_falsch[:10]}")
 _im_sale = [a["ArtNr"] for a in aktiv if a.get("Sale") and a["Preis_netto"] and 0 < a["Sale"] < a["Preis_netto"]]
 if _im_sale: W(f"{len(_im_sale)} Artikel im Sale")
+_pruefen = [a["ArtNr"] for a in aktiv if (a.get("Preis_geprüft") or "") == "prüfen"]
+if _pruefen: W(f"{len(_pruefen)} Preise zum Nachprüfen (Preis_geprüft = prüfen, bleiben online)")
+_unbekannt = sorted({a.get("Preis_geprüft") for a in aktiv} - {"", "offen", "ok", "prüfen", None})
+if _unbekannt: F(f"Unbekannter Wert in Preis_geprüft: {_unbekannt}")
 if _preis_offen: W(f"{len(_preis_offen)} Preise noch zu prüfen (Preis_geprüft = offen)")
 else:            OK("alle Preise geprüft")
 ohne_mass = [a["ArtNr"] for a in aktiv if not a.get("Maße")]

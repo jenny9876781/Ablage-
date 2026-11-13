@@ -68,7 +68,7 @@ def pruefe_fotos():
         F("Datei fehlt"); return {}
     with zipfile.ZipFile(FOTOS) as z:
         namen = [n for n in z.namelist() if not n.endswith("/")]
-        falsch = [n for n in namen if not re.fullmatch(r"fotos/F-\d{3}\.jpg", n)]
+        falsch = [n for n in namen if not re.fullmatch(r"fotos/F-\d{3,4}\.jpg", n)]
         if falsch: F(f"unerwartete Einträge: {falsch[:5]}")
         else:      OK(f"alle {len(namen)} Einträge heißen fotos/F-xxx.jpg")
         basis = [os.path.basename(n) for n in namen]

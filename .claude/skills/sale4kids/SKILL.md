@@ -1431,6 +1431,17 @@ ist die Merkliste; erledigte Punkte hier abhaken, nicht löschen.
       schmale Knopfzeile „Sammlungen:“ (`#k-samml`, Zahl = verfügbare, zweiter Tipp = alle) und das rote Kästchen
       „Sammlung … ›“ an der Karte ist ein Knopf, der die Sammlung zeigt. Sammlung wählen setzt die Kategorie auf „Alle“,
       Kategorie wählen hebt die Sammlung auf. Kein neuer Import nötig. browsertest_sale.py jetzt 29 Prüfungen, mobil 15.
+- [ ] **13.11.2026: Word „neue_artikel“ + 45 Fotos + 2 Chat-Fotos (F-975 bis F-1021, ab hier vierstellig) + Reservierungen + Kasse.**
+      47 neue Zeilen (879): Weihnachtsdeko NU01-57 bis -82 (Bündel Weihnachten, Preise geschätzt; NU01-62 = Glücksmomentkerzen,
+      Post-it), Bücher NU05-67 bis -87 (Preise aus dem Word, -86 geschätzt), tiptoi-Stifte NU05-71 einzeln (5 × 10 €). **Alle
+      Preis_geprüft = offen, Im_Katalog = nein** – Nutzerin prüft in der Excel; bei „ok“ Im_Katalog = ja setzen und Foto-Nachtrag
+      (F-975 bis F-1021) bauen. Chat-Fotos über `/root/.claude/uploads/manuell/` eingespielt (F-975 = NU01-79, F-976 = NU05-70,
+      um 180° gedreht). Masken: F-988 (Teelichtgläser) und F-1000 (Person in roten Kugeln). **Neuer Wert Preis_geprüft = „prüfen“**:
+      Preis nochmals ansehen, Artikel bleibt ONLINE (hellgrau in der Excel; „offen“ = offline). Gesetzt für die noch verfügbaren
+      Artikel vom 10.11. außer Tonies und Sitzkissen (NU03-11, -12, -14, -17, NU05-53 bis -66 ohne die verkauften). NU05-V05 bis -V07
+      heißen jetzt Malschutzkittel (nicht Lätzchen). Kasse 31 Buchungen (Nullzeilen „Einzahlung …“ bleiben so). Hinweis gegeben:
+      RG 4000122 jetzt Kindernest Kopp, war früher an stornierter Reservierung #22. pruefe_uebergabe erlaubt F-Nummern mit 4 Ziffern.
+      Import 13.11.: „47 neu, 832 aktualisiert“, keine neuen Fotos nötig (alle neuen sind verborgen).
 - [ ] **Ende November 2026: Höchstzahl Geschenke je Reservierung mit der Nutzerin neu besprechen**
       (Vorschlag: ab ca. 01.12. auf 20 oder frei, damit bis 10.12. alles abgeholt wird).
 - [x] Plugin 1.2.1 (06.10.): Einstellung „Fußzeile ausblenden“ (Standard an) – Body-Klasse

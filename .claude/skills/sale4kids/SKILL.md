@@ -1442,6 +1442,8 @@ ist die Merkliste; erledigte Punkte hier abhaken, nicht löschen.
       heißen jetzt Malschutzkittel (nicht Lätzchen). Kasse 31 Buchungen (Nullzeilen „Einzahlung …“ bleiben so). Hinweis gegeben:
       RG 4000122 jetzt Kindernest Kopp, war früher an stornierter Reservierung #22. pruefe_uebergabe erlaubt F-Nummern mit 4 Ziffern.
       Import 13.11.: „47 neu, 832 aktualisiert“, keine neuen Fotos nötig (alle neuen sind verborgen).
+      **Korrektur 13.11.:** „prüfen“ nur für Status verfügbar – reservierte (NU03-11, -17, NU05-60) zurück auf ok (Nutzerin hat es bemerkt;
+      bei reservierten ist der Preis in der Reservierung eingefroren). Regel: Prüfmarken nie auf reservierte/verkaufte setzen.
 - [ ] **Ende November 2026: Höchstzahl Geschenke je Reservierung mit der Nutzerin neu besprechen**
       (Vorschlag: ab ca. 01.12. auf 20 oder frei, damit bis 10.12. alles abgeholt wird).
 - [x] Plugin 1.2.1 (06.10.): Einstellung „Fußzeile ausblenden“ (Standard an) – Body-Klasse

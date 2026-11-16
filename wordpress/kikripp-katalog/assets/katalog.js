@@ -19,6 +19,10 @@
       return '<option value="' + z + '">' + z + ' Uhr</option>'; }).join('');
   }
   var TERMIN_TAGE = [1, 2, 3, 4];                                                               // Mo–Do
+  var KEINE = [];                      // 1.16.0: [[von, bis], …] – an diesen Tagen keine Termine
+  function gesperrt(isoTag) {
+    return KEINE.some(function (z) { return isoTag >= z[0] && isoTag <= z[1]; });
+  }
   var formularSeit = 0;
   var merk = {};                       // ArtNr -> gewünschte Stückzahl
   var katWahl = '';                    // 1.15.1: gewählter Kategorie-Knopf ('' = alle, SALE, GUENSTIG oder Kategoriename)
@@ -77,7 +81,7 @@
     // 1.12.0: frühestens ab „Termine ab“ (Einstellung), sonst ab morgen
     if (TERMINE_AB && TERMINE_AB > HEUTE) { d = new Date(tag(TERMINE_AB).getTime() - 864e5); }
     for (d = new Date(d.getTime() + 864e5); d <= ende && aus.length < 60; d = new Date(d.getTime() + 864e5)) {
-      if (wochentage.indexOf(d.getUTCDay()) >= 0) { aus.push(iso(d)); }
+      if (wochentage.indexOf(d.getUTCDay()) >= 0 && !gesperrt(iso(d))) { aus.push(iso(d)); }
     }
     return aus;
   }
@@ -152,6 +156,7 @@
       SCHLUSS = a.daten.abholschluss || '';
       TERMINE_AB = a.daten.termine_ab || '';
       RUECK = a.daten.rueckmeldung_ab || '';
+      KEINE = a.daten.keine_termine || [];
       HEUTE = a.daten.heute || iso(new Date());
       HINWEIS = a.daten.hinweis || '';
       FRIST = a.daten.frist || 3;

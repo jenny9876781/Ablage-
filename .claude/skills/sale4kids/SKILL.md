@@ -204,7 +204,7 @@ Spalten und Konventionen:
 | `Raumcode` | Code aus `daten/raeume.csv`; bestimmt die Artikelnummer |
 | `Bezeichnung` | kurz und verkäuflich, ohne Marketingsprache |
 | `Beschreibung` | Material, Ausführung, Besonderheiten. Marke nur nennen, wenn im Bild belegt oder vom Nutzer bestätigt. |
-| `Kategorie` | Seit 05.11.2026 (`scripts/kategorien_neu.py`): Spielzeug · Bücher, Spiele & Puzzles · Tonies · Kindermöbel · Kinderfahrzeuge (worauf ein Kind fährt; Spielzeugautos = Spielzeug) · Turnen & Bewegung (drinnen) · Spielplatz & Außenspiel · Baby & Unterwegs (Kinderwagen, Bollerwagen, Hochstühle, Wickeln) · Bastel- & Malmaterial · Möbel · Garten (nur Erwachsene) · Pflanzen · Deko (inkl. Uhren) · Textilien · Leuchten · Haushalt & Geräte · Büro · Kunst · zu verschenken (immer eigene Kategorie) |
+| `Kategorie` | Seit 05.11.2026 (`scripts/kategorien_neu.py`): Spielzeug · Bücher, Spiele & Puzzles · Tonies · Kindermöbel · Kinderfahrzeuge (worauf ein Kind fährt; Spielzeugautos = Spielzeug) · Turnen & Bewegung (drinnen) · Spielplatz & Außenspiel · Baby & Unterwegs (Kinderwagen, Bollerwagen, Hochstühle, Wickeln) · Bastel- & Malmaterial · Möbel · Garten (nur Erwachsene) · Pflanzen · Deko (inkl. Uhren) · Textilien · Leuchten · Haushalt & Geräte (Großgeräte, Reinigung, Abfall) · Küche & Geschirr (seit 16.11.: Geschirr, Becher, Tabletts, Küchenkleingeräte) · Büro · Kunst · zu verschenken (immer eigene Kategorie) |
 | `Marke` | **nur wenn belegt** — Typenschild, Aufdruck oder Aussage der Nutzerin. Steuert das rote Markenschild am Bild im Katalog und den Filter „nur Markenware". Leer lassen, wo die Marke nur vermutet ist: das Schild ist eine Zusicherung. Bisher belegt: Vitra, USM Haller, Kartell, Biohort, Weber, LG, Miele, Candy, Mr Maria, IKEA. |
 | `Raum` | **nicht frei wählen** — der Raumname aus `daten/raeume.csv` zum jeweiligen `Raumcode` |
 | `Menge` | erkennbare Stückzahl |
@@ -1444,6 +1444,32 @@ ist die Merkliste; erledigte Punkte hier abhaken, nicht löschen.
       Import 13.11.: „47 neu, 832 aktualisiert“, keine neuen Fotos nötig (alle neuen sind verborgen).
       **Korrektur 13.11.:** „prüfen“ nur für Status verfügbar – reservierte (NU03-11, -17, NU05-60) zurück auf ok (Nutzerin hat es bemerkt;
       bei reservierten ist der Preis in der Reservierung eingefroren). Regel: Prüfmarken nie auf reservierte/verkaufte setzen.
+- [x] **16.11.2026: Excel 13.11. eingelesen + Plugin 1.16.0.** Excel: 55 Preise ok (NU01-59 Spieluhr 20 € ok nach Rückfrage),
+      NU01-60 7,50 €, NU01-61 10 €, entfällt NE05-16, NU05-55, NU05-66, NU01-74; NU01-81 **mit silberner Vase**; NU05-71 „Batterie nicht
+      enthalten“; Kasse 33. 46 neue Artikel online (F-975 bis F-1021). **Neue Kategorie „Küche & Geschirr“** (NE02-05/-06/-07/-09,
+      BU06-03, BU01-10, NU05-10, BA09-07/-08/-10, BU14-06); Großgeräte bleiben „Haushalt & Geräte“.
+      **Plugin 1.16.0:** (1) Einstellung **„Keine Termine an“** (`kikripp_keine_termine`, je Zeile Tag oder Zeitraum, TT.MM.JJJJ oder
+      JJJJ-MM-TT; `Kikripp_DB::sperrzeiten()/gesperrt()`): Formular bietet die Tage nicht an (JS `KEINE`), Server lehnt sie ab, sie zählen
+      **nicht als Werktag** für die Reservierungsfrist, und in einer Pause ≥ 3 Tage setzt `rueckmeldung_ab()` von selbst „Wir sind bis …
+      nicht im Haus“. Vorbelegt: 23.11.2026, 07.12.2026, 17.12.2026 - 12.01.2027. **Abholung bis 31.01.2027** (Umstellung nur, wenn
+      noch 10.12.2026 stand); Ablauftext/Kaufbedingungen: „10.12.2026“ → „31.01.2027 (keine Abholung vom 17.12.2026 bis 12.01.2027)“ –
+      nur wenn der Satz unverändert drinsteht, sonst muss die Nutzerin selbst ändern. Freitage sind ohnehin nie Abholtage (Mo–Do).
+      (2) **„Hinweisband anzeigen ab“** (`kikripp_hinweis_ab`). (3) **Sale-Zeitraum** `kikripp_sale_von/_bis` (vorbelegt 07.–11.12.2026):
+      Import speichert `daten.normal`/`daten.sale`; `Kikripp_DB::sale_umschalten()` läuft auf plugins_loaded und stellt nur beim
+      Wechsel um (Merker `kikripp_sale_stand`, den auch `einspielen()` setzt – ohne das stellte er am ersten Sale-Tag nicht um).
+      Reservierungen frieren den gerade gültigen Preis ein. Ohne Zeitraum gilt Sale sofort (wie 1.15.1). Tests: 590 Logik (Abschnitt 53),
+      Kette 0, 96 Browser, 15 mobil, 32 Geschenke, 29 Sale, Liste ok. Server.php: `KIK_TEST_KEINE`.
+      Import 16.11.: „0 neu, 879 aktualisiert … 46 NEU“, Nachtrag 46 Fotos (gegen 13.11.). build_fotopaket sortiert jetzt numerisch.
+- [ ] **Sale 07.–11.12.2026 vorbereiten:** bis ca. 01.12. Einzelpreise + Regel von der Nutzerin holen (`scripts/sale.py`),
+      **Weihnachtsdeko stärker reduzieren als den Rest** (nach dem 16.12. kauft sie keiner mehr – mit ihr abgesprochen), Import vor dem 07.12.
+      einspielen lassen (Sale-Preise gelten erst ab 07.12. von selbst). Hinweisband-Text vorschlagen, „anzeigen ab“ 01.12., „bis“ 11.12.
+      Nach dem Sale: `sale.py --beenden` beim nächsten regulären Import.
+- [ ] **WhatsApp-Status „Coming soon“** (Küche & Geschirr, Spielzeug, Deko): Nutzerin schickt Fotos + Datum, dann Bild 1080 × 1920 im
+      Stil von `scripts/build_social.py` bauen. **Nicht vergessen** (Wunsch 16.11.).
+- [ ] **Küche & Geschirr als nächster Schwerpunkt** (mit Spielzeug und Deko): Geschirr als Gedeck-Sets anlegen (z. B. 6 Teller + 6 Schüsseln
+      + 6 Becher), Restposten als Stückware 0,50–1 €; Kindergeschirr (Melamin) mit Kita-Hinweis; Marke nur, wenn am Boden fotografiert
+      (WMF, Villeroy & Boch, Fissler …); je Satz ein Gruppenfoto + Detail; Edelstahl = Spiegelungen prüfen; Gastro-Geräte mit Maßen
+      und „Besichtigung möglich“. Kategorie „Küche & Geschirr“.
 - [ ] **Ende November 2026: Höchstzahl Geschenke je Reservierung mit der Nutzerin neu besprechen**
       (Vorschlag: ab ca. 01.12. auf 20 oder frei, damit bis 10.12. alles abgeholt wird).
 - [x] Plugin 1.2.1 (06.10.): Einstellung „Fußzeile ausblenden“ (Standard an) – Body-Klasse

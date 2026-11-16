@@ -709,12 +709,80 @@ class Kikripp_DB {
      * Feiertage zählen mit; das sind im Verkaufszeitraum Oktober bis Dezember in
      * Baden-Württemberg nur Allerheiligen, und der fällt 2026 auf einen Sonntag.
      */
+    /**
+     * 1.16.0: „Keine Termine an“ – Einstellung kikripp_keine_termine, eine Angabe je Zeile oder durch Komma
+     * getrennt: ein Tag („23.11.2026“ oder „2026-11-23“) oder ein Zeitraum („17.12.2026 - 12.01.2027“).
+     * Gibt [[von, bis], …] als JJJJ-MM-TT zurück, ungültige Angaben fallen still heraus.
+     */
+    public static function sperrzeiten($text = null) {
+        $text = $text === null ? (string) get_option('kikripp_keine_termine', '') : (string) $text;
+        $aus = [];
+        foreach (preg_split('/[\r\n,;]+/', $text) as $teil) {
+            $daten = [];
+            if (preg_match_all('/(\d{4})-(\d{2})-(\d{2})|(\d{1,2})\.(\d{1,2})\.(\d{4})/', $teil, $m, PREG_SET_ORDER)) {
+                foreach ($m as $x) {
+                    $j = $x[1] !== '' ? (int) $x[1] : (int) $x[6];
+                    $mo = $x[1] !== '' ? (int) $x[2] : (int) $x[5];
+                    $tg = $x[1] !== '' ? (int) $x[3] : (int) $x[4];
+                    if (checkdate($mo, $tg, $j)) { $daten[] = sprintf('%04d-%02d-%02d', $j, $mo, $tg); }
+                }
+            }
+            if (!$daten) { continue; }
+            $von = $daten[0]; $bis = $daten[count($daten) > 1 ? 1 : 0];
+            if ($bis < $von) { list($von, $bis) = [$bis, $von]; }
+            $aus[] = [$von, $bis];
+        }
+        return $aus;
+    }
+
+    /** 1.16.0: Ist an diesem Tag (JJJJ-MM-TT) kein Termin möglich? */
+    public static function gesperrt($tag) {
+        foreach (self::sperrzeiten() as $z) { if ($tag >= $z[0] && $tag <= $z[1]) { return true; } }
+        return false;
+    }
+
+    /**
+     * 1.16.0: Sale-Zeitraum (kikripp_sale_von / _bis). Ohne Angaben gilt ein eingetragener Sale-Preis immer
+     * (wie 1.15.1). Mit Angaben nur in diesem Zeitraum – der Katalog stellt am ersten Tag selbst um und am
+     * Tag nach dem Ende wieder zurück, ohne Import.
+     */
+    public static function sale_aktiv($tag = null) {
+        $tag = $tag ?: substr(current_time('mysql'), 0, 10);
+        $von = (string) get_option('kikripp_sale_von', '');
+        $bis = (string) get_option('kikripp_sale_bis', '');
+        return ($von === '' || $tag >= $von) && ($bis === '' || $tag <= $bis);
+    }
+
+    /**
+     * 1.16.0: Preise der Artikel mit Sale-Preis auf den aktuellen Stand bringen. Läuft bei jedem Seitenaufruf,
+     * tut aber nur etwas, wenn der Sale gerade begonnen oder geendet hat (Merker kikripp_sale_stand) –
+     * oder mit $immer = true nach Import und Einstellungen.
+     */
+    public static function sale_umschalten($immer = false) {
+        $stand = self::sale_aktiv() ? '1' : '0';
+        if (!$immer && (string) get_option('kikripp_sale_stand', '') === $stand) { return 0; }
+        global $wpdb;
+        $n = 0;
+        foreach ((array) $wpdb->get_results('SELECT artnr, preis_netto, daten FROM ' . self::t_artikel()
+                 . " WHERE daten LIKE '%\"sale\"%'", ARRAY_A) as $z) {
+            $d = json_decode((string) $z['daten'], true);
+            if (!is_array($d) || empty($d['sale']) || empty($d['normal'])) { continue; }
+            $normal = (float) $d['normal']; $sale = (float) $d['sale'];
+            if ($stand === '1') { $preis = $sale; $d['vorher'] = $normal; } else { $preis = $normal; unset($d['vorher']); }
+            $wpdb->update(self::t_artikel(), ['preis_netto' => $preis, 'daten' => wp_json_encode($d)], ['artnr' => $z['artnr']]);
+            $n++;
+        }
+        update_option('kikripp_sale_stand', $stand);
+        return $n;
+    }
+
     public static function ablauf_nach_werktagen($start, $werktage) {
         $t = strtotime(substr((string) $start, 0, 10) . ' 12:00:00 UTC');
         $gezaehlt = 0;
         while ($gezaehlt < max(1, (int) $werktage)) {
             $t += DAY_IN_SECONDS;
-            if ((int) gmdate('N', $t) <= 5) { $gezaehlt++; }
+            // 1.16.0: Tage ohne Termine (z. B. Weihnachtspause) zählen nicht als Werktag
+            if ((int) gmdate('N', $t) <= 5 && !self::gesperrt(gmdate('Y-m-d', $t))) { $gezaehlt++; }
         }
         return gmdate('Y-m-d', $t) . ' 23:59:59';
     }

@@ -248,9 +248,13 @@ with sync_playwright() as p:
     abhol = [t.strip() for t in seite.locator("#k-abhol option").all_inner_texts()[1:]]
     pruefe("Abholtermine nur montags bis donnerstags (1.12.0)", abhol and all(t[:3] in ("Mo,", "Di,", "Mi,", "Do,") for t in abhol),
            f"({abhol[:4]})")
-    pruefe("letzter Abholtag ist der 10.12.2026 oder früher",
-           abhol and abhol[-1][-4:] == "2026" and tuple(map(int, abhol[-1][4:9].split(".")[::-1])) <= (12, 10),
-           f"({abhol[-1:] })")
+    def _iso(t): d, m, j = t[4:].split("."); return f"{j}-{m}-{d}"
+    abhol_iso = [_iso(t) for t in abhol]
+    pruefe("letzter Abholtag ist der 31.01.2027 oder früher (1.16.0)", abhol and abhol_iso[-1] <= "2027-01-31", f"({abhol[-1:]})")
+    pruefe("keine Abholung am 23.11. und 07.12. (1.16.0)", not ({"2026-11-23", "2026-12-07"} & set(abhol_iso)))
+    pruefe("Weihnachtspause 17.12.–12.01. ausgespart, 16.12. und 13.01. dabei (1.16.0)",
+           not [t for t in abhol_iso if "2026-12-17" <= t <= "2027-01-12"]
+           and "2026-12-16" in abhol_iso and "2027-01-13" in abhol_iso, f"({[t for t in abhol_iso if t >= '2026-12-14'][:6]})")
     pruefe("Adressfelder vorhanden", all(seite.locator(i).count() == 1
            for i in ("#k-firma", "#k-strasse", "#k-plz", "#k-ort")))
     pruefe("Demontage ankreuzbar", seite.locator("#k-demontage").count() == 1)

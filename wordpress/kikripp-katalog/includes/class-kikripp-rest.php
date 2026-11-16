@@ -80,6 +80,7 @@ class Kikripp_REST {
             'besichtigung_ab' => (float) get_option('kikripp_besichtigung_ab', 0),
             'abholschluss'    => (string) get_option('kikripp_abholschluss', ''),
             'termine_ab'      => self::termine_ab(),
+            'keine_termine'   => Kikripp_DB::sperrzeiten(),                     // 1.16.0
             'rueckmeldung_ab' => self::rueckmeldung_ab(),
             'heute'    => substr(current_time('mysql'), 0, 10),
             'admin'    => Kikripp_Zugang::ist_admin(),
@@ -130,14 +131,24 @@ class Kikripp_REST {
 
     /** 1.12.0: Bis zu diesem Tag (ausschließlich) melden wir uns erst später – '' wenn vorbei oder nicht gesetzt. */
     public static function rueckmeldung_ab() {
+        $heute = substr(current_time('mysql'), 0, 10);
         $ab = (string) get_option('kikripp_rueckmeldung_ab', '');
-        return ($ab !== '' && $ab > substr(current_time('mysql'), 0, 10)) ? $ab : '';
+        if ($ab !== '' && $ab > $heute) { return $ab; }
+        // 1.16.0: in einer Pause von mindestens drei Tagen (Keine Termine an) von selbst
+        foreach (Kikripp_DB::sperrzeiten() as $z) {
+            if ($heute >= $z[0] && $heute <= $z[1] && strtotime($z[1]) - strtotime($z[0]) >= 2 * DAY_IN_SECONDS) {
+                return gmdate('Y-m-d', strtotime($z[1] . ' 12:00:00 UTC') + DAY_IN_SECONDS);
+            }
+        }
+        return '';
     }
 
     /** 1.12.0: Hinweisband mit Enddatum – nach dem Tag „anzeigen bis“ bleibt es leer. */
     public static function hinweisband() {
         $bis = (string) get_option('kikripp_hinweis_bis', '');
-        if ($bis !== '' && $bis < substr(current_time('mysql'), 0, 10)) { return ''; }
+        $ab  = (string) get_option('kikripp_hinweis_ab', '');                       // 1.16.0
+        $heute = substr(current_time('mysql'), 0, 10);
+        if (($bis !== '' && $bis < $heute) || ($ab !== '' && $ab > $heute)) { return ''; }
         return (string) get_option('kikripp_hinweisband', '');
     }
 
@@ -257,6 +268,7 @@ class Kikripp_REST {
             $tag = self::datum((string) $anfrage->get_param('besichtigung_tag'));
             $zeit = (string) $anfrage->get_param('besichtigung_zeit');
             if (!$tag || !in_array((int) gmdate('N', $tag), self::TERMIN_TAGE, true) || $tag < $frueh || $tag > $schluss
+                || Kikripp_DB::gesperrt(gmdate('Y-m-d', $tag))
                 || !in_array($zeit, self::zeiten_am($tag), true)) {
                 return self::fehler('Bitte wählen Sie für die Besichtigung einen Tag von Montag bis Donnerstag'
                     . ($frueh > $heute ? ' ab dem ' . gmdate('d.m.Y', $frueh) : '')
@@ -270,8 +282,9 @@ class Kikripp_REST {
         $abhol = (string) $anfrage->get_param('abholwunsch');
         if ($abhol !== '') {
             $t = self::datum($abhol);
-            if (!$t || !in_array((int) gmdate('N', $t), self::TERMIN_TAGE, true) || $t < $frueh || $t > $schluss) {
-                return self::fehler('Abgeholt werden kann montags bis donnerstags'
+            if (!$t || !in_array((int) gmdate('N', $t), self::TERMIN_TAGE, true) || $t < $frueh || $t > $schluss
+                || Kikripp_DB::gesperrt(gmdate('Y-m-d', $t))) {
+                return self::fehler('An diesem Tag ist keine Abholung möglich. Abgeholt werden kann montags bis donnerstags'
                     . ($frueh > $heute ? ' ab dem ' . gmdate('d.m.Y', $frueh) : '') . ' bis zum '
                     . ($schluss < PHP_INT_MAX ? gmdate('d.m.Y', $schluss) : 'Ende des Verkaufs') . '.');
             }

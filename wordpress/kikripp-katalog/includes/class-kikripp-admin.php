@@ -985,8 +985,11 @@ class Kikripp_Admin {
             $preis = (float) ($a['preis'] ?? 0);
             $sale  = isset($a['sale']) && $a['sale'] !== '' && $a['sale'] !== null ? (float) $a['sale'] : 0.0;
             if ($sale > 0 && $preis > 0 && $sale < $preis) {
-                $daten['vorher'] = $preis;
-                $preis = $sale;
+                // 1.16.0: normaler und Sale-Preis bleiben gespeichert; welcher gilt, entscheidet der Sale-Zeitraum
+                // (Kikripp_DB::sale_aktiv / sale_umschalten stellen am ersten und am letzten Tag selbst um)
+                $daten['normal'] = $preis;
+                $daten['sale']   = $sale;
+                if (Kikripp_DB::sale_aktiv()) { $daten['vorher'] = $preis; $preis = $sale; }
             }
 
             $zeile = [
@@ -1016,6 +1019,10 @@ class Kikripp_Admin {
                 $reserviert_entfernt[] = $artnr;
             }
         }
+
+        // 1.16.0: Der Import hat die Preise für den heutigen Sale-Stand gesetzt – das merken, sonst stellt
+        // der Umschalter am ersten Sale-Tag nicht um (er reagiert nur auf einen Wechsel).
+        update_option('kikripp_sale_stand', Kikripp_DB::sale_aktiv() ? '1' : '0');
 
         // Artikel, die in der Importdatei gar nicht mehr vorkommen, werden aus dem Katalog
         // genommen – aber nicht gelöscht, denn an ihnen können Reservierungen und
@@ -1171,6 +1178,11 @@ class Kikripp_Admin {
              . '<p class="description">Nach diesem Tag verschwindet das Band von selbst. Leer = bis Sie es löschen.</p></td></tr>',
              esc_attr(get_option('kikripp_hinweis_bis', '')));
 
+        printf('<tr><th scope="row"><label for="k_band_ab">Hinweisband anzeigen ab</label></th><td>'
+             . '<input type="date" id="k_band_ab" name="hinweis_ab" value="%s">'
+             . '<p class="description">Vor diesem Tag bleibt das Band unsichtbar – so lässt sich eine Ankündigung schon vorher eintragen. Leer = sofort.</p></td></tr>',
+             esc_attr(get_option('kikripp_hinweis_ab', '')));
+
         printf('<tr><th scope="row"><label for="k_rueck">Rückmeldung erst ab</label></th><td>'
              . '<input type="date" id="k_rueck" name="rueckmeldung_ab" value="%s">'
              . '<p class="description">Bei Abwesenheit: Bis zu diesem Tag steht im Formular und in der Bestätigung '
@@ -1209,6 +1221,21 @@ class Kikripp_Admin {
              . '<input type="date" id="k_schluss" name="abholschluss" value="%s">'
              . '<p class="description">Letzter Abholtag. Das Formular bietet bis dahin Mo–Mi 8–12 Uhr und Do 8–15 Uhr an.</p></td></tr>',
              esc_attr(get_option('kikripp_abholschluss', '')));
+
+        printf('<tr><th scope="row"><label for="k_keine">Keine Termine an</label></th><td>'
+             . '<textarea id="k_keine" name="keine_termine" class="large-text" rows="4">%s</textarea>'
+             . '<p class="description">Diese Tage bietet das Formular weder für Abholung noch Besichtigung an. Eine Angabe je Zeile: '
+             . 'ein Tag (23.11.2026) oder ein Zeitraum (17.12.2026 - 12.01.2027). Sie zählen auch nicht als Werktag für die Reservierungsfrist, '
+             . 'und während einer Pause von mindestens drei Tagen steht im Formular „Wir sind bis … nicht im Haus“.</p></td></tr>',
+             esc_textarea(get_option('kikripp_keine_termine', '')));
+
+        printf('<tr><th scope="row"><label for="k_sale_von">Sale von – bis</label></th><td>'
+             . '<input type="date" id="k_sale_von" name="sale_von" value="%s"> bis '
+             . '<input type="date" id="k_sale_bis" name="sale_bis" value="%s">'
+             . '<p class="description">Die Sale-Preise aus der Importdatei gelten nur in diesem Zeitraum (beide Tage eingeschlossen). '
+             . 'Der Katalog stellt am ersten Tag selbst um und am Tag nach dem Ende wieder zurück. Bereits reservierte Artikel behalten ihren Preis. '
+             . 'Beide Felder leer = Sale-Preise gelten sofort.</p></td></tr>',
+             esc_attr(get_option('kikripp_sale_von', '')), esc_attr(get_option('kikripp_sale_bis', '')));
 
         printf('<tr><th scope="row"><label for="k_ablauf">So läuft es ab</label></th><td>'
              . '<textarea id="k_ablauf" name="ablauftext" class="large-text" rows="7">%s</textarea>'
@@ -1329,12 +1356,14 @@ class Kikripp_Admin {
         update_option('kikripp_mindestwert', max(0, (float) ($_POST['mindestwert'] ?? 0)));
         update_option('kikripp_geschenke_max', min(999, max(1, (int) ($_POST['geschenke_max'] ?? 5))));
         update_option('kikripp_besichtigung_ab', max(0, (float) ($_POST['besichtigung_ab'] ?? 0)));
-        foreach (['hinweis_bis', 'rueckmeldung_ab', 'termine_ab'] as $feld) {      // 1.12.0
+        foreach (['hinweis_bis', 'hinweis_ab', 'rueckmeldung_ab', 'termine_ab', 'sale_von', 'sale_bis'] as $feld) {      // 1.12.0 / 1.16.0
             $wert = sanitize_text_field(wp_unslash($_POST[$feld] ?? ''));
             update_option('kikripp_' . $feld, preg_match('/^\d{4}-\d{2}-\d{2}$/', $wert) ? $wert : '');
         }
         $schluss = sanitize_text_field(wp_unslash($_POST['abholschluss'] ?? ''));
         update_option('kikripp_abholschluss', preg_match('/^\d{4}-\d{2}-\d{2}$/', $schluss) ? $schluss : '');
+        update_option('kikripp_keine_termine', sanitize_textarea_field(wp_unslash($_POST['keine_termine'] ?? '')));   // 1.16.0
+        Kikripp_DB::sale_umschalten(true);                                                                        // 1.16.0
         update_option('kikripp_ablauftext', sanitize_textarea_field(wp_unslash($_POST['ablauftext'] ?? '')));
         update_option('kikripp_ust_prozent', (float) ($_POST['ust'] ?? 0));
         update_option('kikripp_steuerhinweis', sanitize_text_field(wp_unslash($_POST['steuerhinweis'] ?? '')));

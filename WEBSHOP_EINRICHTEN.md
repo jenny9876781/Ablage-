@@ -31,7 +31,7 @@ sonst mitten im Aufbau erwischen.
 
 **a) Speicherplatz der Website prüfen — der wichtigste Punkt.**
 In einem Multisite-Netzwerk hat jede Website ein Platzkonto, standardmäßig **100 MB**. Die
-Fotos brauchen **151 MB**, und auf kikripp.de liegen schon Bilder der bestehenden Seite. Reicht
+Fotos brauchen **162 MB**, und auf kikripp.de liegen schon Bilder der bestehenden Seite. Reicht
 das Konto nicht, bricht das Hochladen mittendrin ab mit einer Meldung über die
 Speicherplatzbegrenzung — und du weißt nicht, welche Bilder durch sind.
 
@@ -83,8 +83,8 @@ sich später nur wieder zentral abschalten.
 ## 2. Fotos in die Mediathek
 
 Du bekommst die Fotos in **vier Paketen** (`kikripp-fotos-1von4.zip` bis `-4von4.zip`),
-weil 151 MB auf einmal für den Versand zu viel sind. Entpacke sie auf deinem Rechner — alle
-vier in denselben Ordner `fotos`. Zusammen sind es genau **705 Bilder, 151 MB**. Geh in WordPress auf **Medien → Datei hinzufügen** und
+weil 162 MB auf einmal für den Versand zu viel sind. Entpacke sie auf deinem Rechner — alle
+vier in denselben Ordner `fotos`. Zusammen sind es genau **748 Bilder, 162 MB**. Geh in WordPress auf **Medien → Datei hinzufügen** und
 zieh die Bilder in das Feld — am besten in Paketen von hundert, nicht alle auf einmal. Das
 dauert; lass das Browserfenster offen, bis jedes Paket durch ist.
 
@@ -110,7 +110,7 @@ Danach steht oben eine Meldung. **So muss sie aussehen:**
     Import abgeschlossen: 879 neu, 0 aktualisiert.
 
 Kein weiterer Satz dahinter — das heißt: jeder Artikel hat sein Foto gefunden. Im Katalog
-sichtbar sind davon **708**; die übrigen stehen bewusst auf „nicht im Katalog".
+sichtbar sind davon **751**; die übrigen stehen bewusst auf „nicht im Katalog".
 
 Steht dahinter noch *„… Artikel ohne gefundenes Foto"*, nennt die Meldung die fehlenden
 Bilder beim Namen. Die lädst du in die Mediathek nach und importierst einfach noch einmal.
@@ -147,13 +147,16 @@ automatisch eingetragen; du prüfst sie nur.
 | Kontaktadresse für Interessenten | `saldi4kids@outlook.com` — diese Adresse **sehen die Käufer** im Anbieter-Block und in der Bestätigung |
 | Hinweisband | Text über dem Katalog, derzeit die Ankündigung zum Spielzeug im November |
 | Hinweisband anzeigen bis | letzter Tag, an dem das Band erscheint (leer = dauerhaft) |
+| Hinweisband anzeigen ab | erster Tag, an dem das Band erscheint – Ankündigungen vorab eintragen (leer = sofort) |
 | Rückmeldung erst ab | bei Abwesenheit: erster Tag, an dem wir uns wieder melden (leer = aus) |
 | Reservierung gilt | 3 Werktage (Montag bis Freitag) |
 | Mindestbestellwert | 50 € |
 | Höchstzahl Geschenke je Reservierung | 5 (im November ggf. erhöhen) |
 | Besichtigung ab | 100 € Stückpreis |
 | Termine frühestens ab | erster Tag für Besichtigung und Abholung (Mo–Do, 8–12 Uhr) |
-| Abholung bis | 10.12.2026 |
+| Abholung bis | 31.01.2027 |
+| Keine Termine an | 23.11.2026, 07.12.2026, 17.12.2026 - 12.01.2027 (je Zeile ein Tag oder Zeitraum) |
+| Sale von – bis | 07.12.2026 bis 11.12.2026 – Sale-Preise gelten nur dann, der Katalog stellt selbst um |
 | So läuft es ab | der Kasten über den Artikeln; jede Zeile ein Punkt |
 | Umsatzsteuer | 0 % — steuerfreie Lieferung |
 | Steuerhinweis | „Endpreise · umsatzsteuerfrei gemäß § 4 Nr. 28 UStG“ |

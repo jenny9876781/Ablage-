@@ -5393,7 +5393,7 @@
   "nr": "NE02-05",
   "titel": "IKEA Kinderbecher bunt",
   "beschr": "1 Set mit 74 Trinkbechern aus Kunststoff von IKEA in Rot, Blau, Pink, Gelb und Weiß. Stapelbar, spülmaschinenfest.",
-  "kat": "Haushalt & Geräte",
+  "kat": "Küche & Geschirr",
   "raum": "Küche",
   "zustand": "gebraucht",
   "masse": "",
@@ -5437,7 +5437,7 @@
   "nr": "NE02-09",
   "titel": "Tablett weiß mit Streifenmuster",
   "beschr": "Serviertablett aus Kunststoff, weiß mit Griffausschnitten, Boden mit Streifenmuster – eines in Blautönen, eines in Rottönen.",
-  "kat": "Haushalt & Geräte",
+  "kat": "Küche & Geschirr",
   "raum": "Küche",
   "zustand": "gut",
   "masse": "",
@@ -8378,7 +8378,7 @@
   "mengenhinweis": "",
   "foto": "F-484",
   "sortierung": 380,
-  "aktiv": true,
+  "aktiv": false,
   "im_katalog": true
  },
  {
@@ -9749,7 +9749,7 @@
   "nr": "NE02-06",
   "titel": "Kinderbecher mit facettiertem Fuß",
   "beschr": "1 Set mit 44 Trinkbecher aus Melamin mit facettiertem Fuß in Weiß, Salbei-, Grau- und Mintgrün, einige mit Motiv. Stapelbar, spülmaschinenfest.",
-  "kat": "Haushalt & Geräte",
+  "kat": "Küche & Geschirr",
   "raum": "Küche",
   "zustand": "gebraucht",
   "masse": "",
@@ -9771,7 +9771,7 @@
   "nr": "NE02-07",
   "titel": "Kinderteller bunt und mit Tiermotiv",
   "beschr": "1 Set mit 49 Flache Teller aus Kunststoff in kräftigen Farben in zwei Größen sowie Teller mit Tiermotiv. Stapelbar, spülmaschinenfest.",
-  "kat": "Haushalt & Geräte",
+  "kat": "Küche & Geschirr",
   "raum": "Küche",
   "zustand": "gebraucht",
   "masse": "",
@@ -9793,7 +9793,7 @@
   "nr": "BU06-03",
   "titel": "Kinderbecher rot",
   "beschr": "1 Set mit 23 Trinkbecher aus Kunststoff in Rot und Pink. Stapelbar, spülmaschinenfest.",
-  "kat": "Haushalt & Geräte",
+  "kat": "Küche & Geschirr",
   "raum": "Küche und Essbereich",
   "zustand": "gebraucht",
   "masse": "",
@@ -10695,7 +10695,7 @@
   "nr": "BU14-06",
   "titel": "HENDI Heißgetränkespender 27 l",
   "beschr": "Glühwein- und Heißgetränkespender HENDI, 27 Liter, mit Zapfhahn und Temperaturregler. Gebraucht, im Originalkarton.",
-  "kat": "Haushalt & Geräte",
+  "kat": "Küche & Geschirr",
   "raum": "Heizung",
   "zustand": "gebraucht",
   "masse": "",
@@ -11113,7 +11113,7 @@
   "nr": "BU01-10",
   "titel": "IKEA Holztabletts oval",
   "beschr": "Holztabletts Buche, oval: 7 große (ca. 36 cm) und 6 kleine (ca. 27 cm).",
-  "kat": "Haushalt & Geräte",
+  "kat": "Küche & Geschirr",
   "raum": "Flur",
   "zustand": "gut",
   "masse": "",
@@ -14105,7 +14105,7 @@
   "nr": "BA09-07",
   "titel": "Toshiba Mikrowelle schwarz",
   "beschr": "Mikrowelle von Toshiba in Schwarz mit Glastür und Griff.",
-  "kat": "Haushalt & Geräte",
+  "kat": "Küche & Geschirr",
   "raum": "Personalraum",
   "zustand": "gebraucht",
   "masse": "",
@@ -14127,7 +14127,7 @@
   "nr": "BA09-08",
   "titel": "Senseo Pad-Kaffeemaschine orange",
   "beschr": "Kaffeepadmaschine Senseo in Orange mit Padhalter.",
-  "kat": "Haushalt & Geräte",
+  "kat": "Küche & Geschirr",
   "raum": "Personalraum",
   "zustand": "gebraucht",
   "masse": "",
@@ -14171,7 +14171,7 @@
   "nr": "BA09-10",
   "titel": "Kapselmaschine silber mit Milchaufschäumer",
   "beschr": "Kapselmaschine in Silber mit integriertem Milchaufschäumer und Touch-Bedienfeld, für Nespresso-Kapseln (Bauart Lattissima Touch).",
-  "kat": "Haushalt & Geräte",
+  "kat": "Küche & Geschirr",
   "raum": "Personalraum",
   "zustand": "gebraucht",
   "masse": "",
@@ -14435,7 +14435,7 @@
   "nr": "NU05-10",
   "titel": "IKEA Tabletts schwarz",
   "beschr": "Tabletts aus Kunststoff in Schwarz, 26x35 cm.",
-  "kat": "Haushalt & Geräte",
+  "kat": "Küche & Geschirr",
   "raum": "Treppenaufgang",
   "zustand": "gut",
   "masse": "",
@@ -18014,7 +18014,7 @@
   "mengenhinweis": "",
   "foto": "F-961",
   "sortierung": 818,
-  "aktiv": true,
+  "aktiv": false,
   "im_katalog": true
  },
  {
@@ -18300,7 +18300,7 @@
   "mengenhinweis": "",
   "foto": "F-974",
   "sortierung": 831,
-  "aktiv": true,
+  "aktiv": false,
   "im_katalog": true
  },
  {
@@ -18323,7 +18323,7 @@
   "foto": "F-979",
   "sortierung": 832,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "NU01-58",
@@ -18345,7 +18345,7 @@
   "foto": "F-981",
   "sortierung": 833,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "NU01-59",
@@ -18357,7 +18357,7 @@
   "masse": "ca. 15,5 x 14 x 15,5 cm",
   "menge": 1,
   "einheit": "Stück",
-  "preis": 15.0,
+  "preis": 20.0,
   "sale": null,
   "basis": "Fix",
   "versand": "nur Abholung",
@@ -18367,7 +18367,7 @@
   "foto": "F-977",
   "sortierung": 834,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "NU01-60",
@@ -18379,7 +18379,7 @@
   "masse": "",
   "menge": 1,
   "einheit": "Set",
-  "preis": 15.0,
+  "preis": 7.5,
   "sale": null,
   "basis": "Fix",
   "versand": "nur Abholung",
@@ -18389,7 +18389,7 @@
   "foto": "F-978",
   "sortierung": 835,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "NU01-61",
@@ -18401,7 +18401,7 @@
   "masse": "",
   "menge": 1,
   "einheit": "Stück",
-  "preis": 12.0,
+  "preis": 10.0,
   "sale": null,
   "basis": "Fix",
   "versand": "nur Abholung",
@@ -18411,7 +18411,7 @@
   "foto": "F-980",
   "sortierung": 836,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "NU01-62",
@@ -18433,7 +18433,7 @@
   "foto": "F-983",
   "sortierung": 837,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "NU01-63",
@@ -18455,7 +18455,7 @@
   "foto": "F-984",
   "sortierung": 838,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "NU01-64",
@@ -18477,7 +18477,7 @@
   "foto": "F-986",
   "sortierung": 839,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "NU01-65",
@@ -18499,7 +18499,7 @@
   "foto": "F-985",
   "sortierung": 840,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "NU01-66",
@@ -18521,7 +18521,7 @@
   "foto": "F-988",
   "sortierung": 841,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "NU01-67",
@@ -18543,7 +18543,7 @@
   "foto": "F-990",
   "sortierung": 842,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "NU01-68",
@@ -18565,7 +18565,7 @@
   "foto": "F-982",
   "sortierung": 843,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "NU01-69",
@@ -18587,7 +18587,7 @@
   "foto": "F-987",
   "sortierung": 844,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "NU01-70",
@@ -18609,7 +18609,7 @@
   "foto": "F-989",
   "sortierung": 845,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "NU01-71",
@@ -18631,7 +18631,7 @@
   "foto": "F-993",
   "sortierung": 846,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "NU01-72",
@@ -18653,7 +18653,7 @@
   "foto": "F-991",
   "sortierung": 847,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "NU01-73",
@@ -18675,7 +18675,7 @@
   "foto": "F-992",
   "sortierung": 848,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "NU01-74",
@@ -18696,7 +18696,7 @@
   "mengenhinweis": "Nur als Set.",
   "foto": "F-994",
   "sortierung": 849,
-  "aktiv": true,
+  "aktiv": false,
   "im_katalog": false
  },
  {
@@ -18719,7 +18719,7 @@
   "foto": "F-995",
   "sortierung": 850,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "NU01-76",
@@ -18741,7 +18741,7 @@
   "foto": "F-998",
   "sortierung": 851,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "NU01-77",
@@ -18763,7 +18763,7 @@
   "foto": "F-997",
   "sortierung": 852,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "NU01-78",
@@ -18785,7 +18785,7 @@
   "foto": "F-999",
   "sortierung": 853,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "NU01-79",
@@ -18807,7 +18807,7 @@
   "foto": "F-975",
   "sortierung": 854,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "NU01-80",
@@ -18829,12 +18829,12 @@
   "foto": "F-996",
   "sortierung": 855,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "NU01-81",
-  "titel": "Rote Weihnachtskugeln am Stab und Kerzenhalter",
-  "beschr": "14 rote Kugeln an Stäben, 2 rote Beerenzweige und 2 Kerzenhalter.",
+  "titel": "Rote Weihnachtskugeln am Stab mit silberner Vase und Kerzenhaltern",
+  "beschr": "14 rote Kugeln an Stäben, 2 rote Beerenzweige, eine silberne Vase und 2 Kerzenhalter.",
   "kat": "Deko",
   "raum": "Eingang und Elternlounge",
   "zustand": "gebraucht",
@@ -18851,7 +18851,7 @@
   "foto": "F-1000",
   "sortierung": 856,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "NU01-82",
@@ -18873,7 +18873,7 @@
   "foto": "F-1001",
   "sortierung": 857,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "NU05-67",
@@ -18895,7 +18895,7 @@
   "foto": "F-1002",
   "sortierung": 858,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "NU05-68",
@@ -18917,7 +18917,7 @@
   "foto": "F-1003",
   "sortierung": 859,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "NU05-69",
@@ -18939,7 +18939,7 @@
   "foto": "F-1004",
   "sortierung": 860,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "NU05-70",
@@ -18961,12 +18961,12 @@
   "foto": "F-976",
   "sortierung": 861,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "NU05-71",
   "titel": "tiptoi-Stift",
-  "beschr": "Ravensburger tiptoi-Stift, funktioniert.",
+  "beschr": "Ravensburger tiptoi-Stift, funktioniert.; Batterie nicht enthalten",
   "kat": "Bücher, Spiele & Puzzles",
   "raum": "Treppenaufgang",
   "zustand": "gut",
@@ -18983,7 +18983,7 @@
   "foto": "F-1005",
   "sortierung": 862,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "NU05-72",
@@ -19005,7 +19005,7 @@
   "foto": "F-1006",
   "sortierung": 863,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "NU05-73",
@@ -19027,7 +19027,7 @@
   "foto": "F-1007",
   "sortierung": 864,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "NU05-74",
@@ -19049,7 +19049,7 @@
   "foto": "F-1008",
   "sortierung": 865,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "NU05-75",
@@ -19071,7 +19071,7 @@
   "foto": "F-1009",
   "sortierung": 866,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "NU05-76",
@@ -19093,7 +19093,7 @@
   "foto": "F-1010",
   "sortierung": 867,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "NU05-77",
@@ -19115,7 +19115,7 @@
   "foto": "F-1011",
   "sortierung": 868,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "NU05-78",
@@ -19137,7 +19137,7 @@
   "foto": "F-1012",
   "sortierung": 869,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "NU05-79",
@@ -19159,7 +19159,7 @@
   "foto": "F-1013",
   "sortierung": 870,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "NU05-80",
@@ -19181,7 +19181,7 @@
   "foto": "F-1014",
   "sortierung": 871,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "NU05-81",
@@ -19203,7 +19203,7 @@
   "foto": "F-1015",
   "sortierung": 872,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "NU05-82",
@@ -19225,7 +19225,7 @@
   "foto": "F-1016",
   "sortierung": 873,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "NU05-83",
@@ -19247,7 +19247,7 @@
   "foto": "F-1017",
   "sortierung": 874,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "NU05-84",
@@ -19269,7 +19269,7 @@
   "foto": "F-1018",
   "sortierung": 875,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "NU05-85",
@@ -19291,7 +19291,7 @@
   "foto": "F-1019",
   "sortierung": 876,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "NU05-86",
@@ -19313,7 +19313,7 @@
   "foto": "F-1020",
   "sortierung": 877,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "NU05-87",
@@ -19335,6 +19335,6 @@
   "foto": "F-1021",
   "sortierung": 878,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  }
 ]

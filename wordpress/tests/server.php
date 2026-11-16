@@ -64,6 +64,9 @@ if (empty($GLOBALS['optionen'])) {
         'kikripp_hinweisband' => 'Ein Großteil unseres Spielzeugs kommt im November dazu – schauen Sie gern wieder vorbei. Der Katalog wird wöchentlich aktualisiert.',
         'kikripp_vorschau' => 1,
         'kikripp_firma' => 'Kikripp GmbH',
+        // 1.16.0: KIK_TEST_KEINE="TT.MM.JJJJ - TT.MM.JJJJ" sperrt Termine wie die Einstellung „Keine Termine an“
+        'kikripp_keine_termine' => getenv('KIK_TEST_KEINE') !== false ? (string) getenv('KIK_TEST_KEINE')
+            : "23.11.2026\n07.12.2026\n17.12.2026 - 12.01.2027",
         'kikripp_telefon' => '07725 5179702',
         'kikripp_impressum_url' => 'https://www.kikripp.de/impressum/',
         'kikripp_datenschutz_url' => 'https://www.kikripp.de/datenschutz/',

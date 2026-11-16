@@ -28,7 +28,8 @@ def gebraucht():
             continue
         if a["Foto"]:
             namen.add(a["Foto"].strip())
-    return sorted(namen)
+    # nach der Zahl sortieren – als Text käme F-1000 vor F-999 (16.11.2026)
+    return sorted(namen, key=lambda n: (int(n.split("-")[1]) if n.split("-")[-1].isdigit() else 0, n))
 
 
 def teilpakete(namen, mb):

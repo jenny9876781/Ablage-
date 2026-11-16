@@ -14,7 +14,7 @@ function kikripp_vorgaben_120() {
         'kikripp_frist_werktage'   => 3,
         'kikripp_mindestwert'      => 50,
         'kikripp_besichtigung_ab'  => 100,
-        'kikripp_abholschluss'     => '2026-12-10',
+        'kikripp_abholschluss'     => '2027-01-31',     // 1.16.0 (vorher 10.12.2026)
         'kikripp_ablauftext'       => kikripp_ablauf_123(),
         'kikripp_rechtstext'       => kikripp_rechtstext_123(),
     ];
@@ -53,6 +53,12 @@ function kikripp_ablauf_123() {
         . 'von 8 bis 11 Uhr, Demontage nach Vereinbarung auch freitagnachmittags oder samstagvormittags (bitte '
         . 'Werkzeug mitbringen). Abholung spätestens bis 10.12.2026, danach geht nicht abgeholte Ware ohne '
         . 'Erstattung in unser Eigentum zurück.';
+}
+
+/** Ablauftext 1.16.0 (16.11.2026): Abholung bis 31.01.2027 mit Weihnachtspause – so, wie die Umstellung ihn aus 1.15.0 macht. */
+function kikripp_ablauf_1160() {
+    $paar = kikripp_texte_1160()['kikripp_ablauftext'];
+    return str_replace($paar[0], $paar[1], kikripp_ablauf_1150());
 }
 
 /** Ablauftext 1.15.0 (04.11.2026): Überweisung vorab oder bar bei Abholung. */

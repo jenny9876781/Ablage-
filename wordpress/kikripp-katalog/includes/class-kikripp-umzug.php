@@ -19,9 +19,9 @@ class Kikripp_Umzug {
     /** Einstellungen, die mitziehen. Versionen und Zähler bleiben Sache der jeweiligen Seite. */
     const OPTIONEN = [
         'abholadresse', 'abholschluss', 'ablauftext', 'besichtigung_ab', 'datenschutz_url', 'erinnerung_zeit',
-        'firma', 'frist_werktage', 'fusszeile_aus', 'geschenke_max', 'hinweis_bis', 'hinweisband', 'impressum_url',
+        'firma', 'frist_werktage', 'fusszeile_aus', 'geschenke_max', 'hinweis_ab', 'hinweis_bis', 'hinweisband', 'impressum_url', 'keine_termine',
         'kontakt_email', 'kopf_aus', 'mail_an', 'mail_name', 'mindestwert', 'passwort_hash', 'passwortschutz',
-        'rechtstext', 'rueckmeldung_ab', 'steuerhinweis', 'telefon', 'termin_zusatz', 'termine_ab', 'ust_prozent',
+        'rechtstext', 'rueckmeldung_ab', 'sale_bis', 'sale_von', 'steuerhinweis', 'telefon', 'termin_zusatz', 'termine_ab', 'ust_prozent',
         'vorschau', 'zahlung_tage', 'zufahrt',
     ];
 

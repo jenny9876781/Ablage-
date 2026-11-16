@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Kikripp Artikelkatalog
  * Description: Artikelkatalog mit Reservierung für die Betriebsauflösung der Kikripp GmbH. Artikel werden importiert, Reservierungen im Backend verwaltet.
- * Version:     1.15.2
+ * Version:     1.16.0
  * Author:      Kikripp GmbH
  * Text Domain: kikripp-katalog
  * Requires at least: 5.8
@@ -13,7 +13,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-define('KIKRIPP_VERSION', '1.15.2');
+define('KIKRIPP_VERSION', '1.16.0');
 define('KIKRIPP_PFAD', plugin_dir_path(__FILE__));
 define('KIKRIPP_URL', plugin_dir_url(__FILE__));
 
@@ -33,6 +33,7 @@ register_activation_hook(__FILE__, ['Kikripp_DB', 'tabellen_anlegen']);
 add_action('plugins_loaded', function () {
     Kikripp_DB::pruefe_version();
     kikripp_umstellen();
+    Kikripp_DB::sale_umschalten();      // 1.16.0: tut nur am ersten und am Tag nach dem letzten Sale-Tag etwas
     Kikripp_REST::start();
     Kikripp_Admin::start();
     Kikripp_Ablauf::start();
@@ -162,8 +163,37 @@ function kikripp_umstellen_1140($stand) {
 
 /** 1.15.0: Ablauftext mit „Überweisung vorab oder bar bei Abholung“ – nur wenn der Text von 1.14.0 unverändert ist. */
 function kikripp_umstellen_1150($stand) {
-    if (version_compare($stand, '1.15.0', '>=')) { return; }
+    if (version_compare($stand, '1.15.0', '>=')) { kikripp_umstellen_1160($stand); return; }
     $ablauf = trim(str_replace("\r", '', (string) get_option('kikripp_ablauftext', '')));
     if ($ablauf === trim(kikripp_ablauf_1140())) { update_option('kikripp_ablauftext', kikripp_ablauf_1150()); }
     update_option('kikripp_plugin_version', '1.15.0');
+    kikripp_umstellen_1160('1.15.0');
+}
+
+/**
+ * 1.16.0 (16.11.2026): Abholung bis 31.01.2027 mit Weihnachtspause, gesperrte Tage, Sale 07.–11.12.2026.
+ * Abholschluss und Texte werden nur umgestellt, wenn noch der alte Stand (10.12.2026) drinsteht.
+ */
+function kikripp_umstellen_1160($stand) {
+    if (version_compare($stand, '1.16.0', '>=')) { return; }
+    add_option('kikripp_keine_termine', "23.11.2026\n07.12.2026\n17.12.2026 - 12.01.2027");
+    add_option('kikripp_sale_von', '2026-12-07');
+    add_option('kikripp_sale_bis', '2026-12-11');
+    add_option('kikripp_hinweis_ab', '');
+    if ((string) get_option('kikripp_abholschluss', '') === '2026-12-10') { update_option('kikripp_abholschluss', '2027-01-31'); }
+    foreach (kikripp_texte_1160() as $name => $paar) {
+        $text = (string) get_option($name, '');
+        if (strpos($text, $paar[0]) !== false) { update_option($name, str_replace($paar[0], $paar[1], $text)); }
+    }
+    update_option('kikripp_plugin_version', '1.16.0');
+    Kikripp_DB::sale_umschalten(true);
+}
+
+/** 1.16.0: was in Ablauftext und Kaufbedingungen ersetzt wird (alt => neu). */
+function kikripp_texte_1160() {
+    return [
+        'kikripp_ablauftext' => ['Abholung spätestens bis 10.12.2026',
+            'Abholung spätestens bis 31.01.2027 (keine Abholung vom 17.12.2026 bis 12.01.2027)'],
+        'kikripp_rechtstext' => ['10.12.2026', '31.01.2027'],
+    ];
 }

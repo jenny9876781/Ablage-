@@ -529,7 +529,7 @@ pruefe('Passwortschutz aus', get_option('kikripp_passwortschutz'), 0);
 pruefe('3 Werktage', get_option('kikripp_frist_werktage'), 3);
 pruefe('Mindestbestellwert 50', get_option('kikripp_mindestwert'), 50);
 pruefe('Besichtigung ab 100', get_option('kikripp_besichtigung_ab'), 100);
-pruefe('Abholschluss 10.12.2026', get_option('kikripp_abholschluss'), '2026-12-10');
+pruefe('Abholschluss 31.01.2027 (seit 1.16.0)', get_option('kikripp_abholschluss'), '2027-01-31');
 pruefe('neuer Rechtstext mit § 4 Nr. 23', strpos(get_option('kikripp_rechtstext'), '§ 4 Nr. 23 UStG') !== false, true);
 pruefe('Ablauftext (1.14.0) nennt die Abholzeiten', strpos(get_option('kikripp_ablauftext'), 'donnerstags von 8 bis 15 Uhr') !== false, true);
 pruefe('Ablauftext sagt „melden wir uns“', strpos(get_option('kikripp_ablauftext'), 'melden wir uns') !== false, true);
@@ -571,8 +571,8 @@ titel('29. Umstellung 1.2.0 → 1.2.2: kürzerer Ablauftext');
 update_option('kikripp_plugin_version', '1.2.0');
 update_option('kikripp_ablauftext', str_replace("\n", "\r\n", kikripp_ablauf_120()));   // so speichert ein Formular
 kikripp_umstellen();
-pruefe('alter Text wird über 1.2.2 bis zum Text von 1.15.0 ersetzt', get_option('kikripp_ablauftext'), kikripp_ablauf_1150());
-pruefe('Stand steht auf 1.15.0', get_option('kikripp_plugin_version'), '1.15.0');
+pruefe('alter Text wird über 1.2.2 bis zum Text von 1.16.0 ersetzt', get_option('kikripp_ablauftext'), kikripp_ablauf_1160());
+pruefe('Stand steht auf 1.16.0', get_option('kikripp_plugin_version'), '1.16.0');
 update_option('kikripp_plugin_version', '1.2.0');
 update_option('kikripp_ablauftext', 'Eigener Text der Nutzerin');
 update_option('kikripp_ust_prozent', 7);
@@ -586,12 +586,12 @@ update_option('kikripp_ablauftext', kikripp_ablauf_122());
 update_option('kikripp_rechtstext', str_replace("\n", "\r\n", kikripp_rechtstext_120()));
 delete_option('kikripp_kopf_aus');
 kikripp_umstellen();
-pruefe('Ablauftext von 1.2.2 wird ersetzt', get_option('kikripp_ablauftext'), kikripp_ablauf_1150());
+pruefe('Ablauftext von 1.2.2 wird ersetzt', get_option('kikripp_ablauftext'), kikripp_ablauf_1160());
 pruefe('neuer Text: Überweisung vorab oder bar bei Abholung (1.15.0)',
        strpos(get_option('kikripp_ablauftext'), 'per Überweisung vorab (Rechnung per E-Mail) oder bar bei Abholung') !== false, true);
 pruefe('Kaufbedingungen bekommen den Widerrufshinweis', get_option('kikripp_rechtstext'), kikripp_rechtstext_123());
 pruefe('Menü ausblenden ist eingeschaltet', (int) get_option('kikripp_kopf_aus'), 1);
-pruefe('Stand steht auf 1.15.0', get_option('kikripp_plugin_version'), '1.15.0');
+pruefe('Stand steht auf 1.16.0', get_option('kikripp_plugin_version'), '1.16.0');
 update_option('kikripp_plugin_version', '1.2.2');
 update_option('kikripp_ablauftext', 'Eigener Text');
 update_option('kikripp_rechtstext', 'Eigene Bedingungen');
@@ -819,7 +819,7 @@ kikripp_umstellen();
 pruefe('Umstellung setzt die Zufahrt', strpos((string) get_option('kikripp_zufahrt'), 'Peterzeller') !== false, true);
 pruefe('Umstellung: 11:00 Uhr', get_option('kikripp_erinnerung_zeit'), '11:00');
 pruefe('Umstellung: Zusatz Barrierefrei', get_option('kikripp_termin_zusatz'), 'Barrierefrei');
-pruefe('Stand 1.15.0', get_option('kikripp_plugin_version'), '1.15.0');
+pruefe('Stand 1.16.0', get_option('kikripp_plugin_version'), '1.16.0');
 update_option('kikripp_erinnerung_zeit', '14:00');
 update_option('kikripp_plugin_version', '1.3.0');
 kikripp_umstellen();
@@ -1246,7 +1246,7 @@ pruefe('Donnerstag bis 14:30 (1.14.0)', end(Kikripp_REST::zeiten_am(strtotime('2
 pruefe('Mittwoch bis 11:30 (1.14.0)', end(Kikripp_REST::zeiten_am(strtotime('2026-11-11 12:00:00 UTC'))), '11:30');
 // 1.12.0 → 1.14.0: der unveränderte 1.12.0-Text wird ersetzt, ein eigener bleibt
 update_option('kikripp_ablauftext', kikripp_ablauf_1120()); kikripp_umstellen_1140('1.12.0');
-pruefe('Ablauftext 1.12.0 wird auf 1.15.0 umgestellt', get_option('kikripp_ablauftext'), kikripp_ablauf_1150());
+pruefe('Ablauftext 1.12.0 wird auf 1.16.0 umgestellt', get_option('kikripp_ablauftext'), kikripp_ablauf_1160());
 update_option('kikripp_ablauftext', 'Eigener Text'); kikripp_umstellen_1140('1.12.0');
 pruefe('eigener Ablauftext bleibt', get_option('kikripp_ablauftext'), 'Eigener Text');
 $GLOBALS['ist_admin'] = true; ob_start(); Kikripp_Admin::seite_einstellungen(); $eins = ob_get_clean(); $GLOBALS['ist_admin'] = false;
@@ -1353,6 +1353,78 @@ pruefe('nach Rechnungsnr. keine DATEV-Aufgabe mehr', strpos($tx, 'Rechnung in DA
 Kikripp_DB::vorgang_bearbeiten($vohne, ['zahlart' => 'bar']);
 pruefe('Zahlart in der Verwaltung änderbar', Kikripp_DB::vorgang($vohne)['zahlart'], 'bar');
 foreach ([$vbar, $vue, $vohne] as $x) { Kikripp_DB::vorgang_status($x, 'storniert'); }
+
+titel('53. Keine Termine, Weihnachtspause, Sale-Zeitraum, Hinweisband ab (1.16.0)');
+update_option('kikripp_keine_termine', "23.11.2026\n2026-12-07, 17.12.2026 - 12.01.2027\nQuatsch");
+$sz = Kikripp_DB::sperrzeiten();
+pruefe('drei Angaben gelesen, Unsinn übergangen', count($sz), 3);
+pruefe('Zeitraum richtig', $sz[2], ['2026-12-17', '2027-01-12']);
+pruefe('23.11. gesperrt', Kikripp_DB::gesperrt('2026-11-23'), true);
+pruefe('24.11. frei', Kikripp_DB::gesperrt('2026-11-24'), false);
+pruefe('Pause: 05.01.2027 gesperrt', Kikripp_DB::gesperrt('2027-01-05'), true);
+pruefe('13.01.2027 wieder frei', Kikripp_DB::gesperrt('2027-01-13'), false);
+pruefe('Frist: Fr 20.11. + 3 Werktage überspringt Mo 23.11. → Do 26.11.',
+    Kikripp_DB::ablauf_nach_werktagen('2026-11-20 10:00:00', 3), '2026-11-26 23:59:59');
+pruefe('Frist über die Pause: Mi 16.12. + 3 → Fr 15.01.2027',
+    Kikripp_DB::ablauf_nach_werktagen('2026-12-16 10:00:00', 3), '2027-01-15 23:59:59');
+// Rückmeldung in der Pause von selbst – Datum simulieren über eine Pause um heute herum
+$h53 = substr(current_time('mysql'), 0, 10);
+$von53 = gmdate('d.m.Y', strtotime($h53 . ' -2 day')); $bis53 = gmdate('d.m.Y', strtotime($h53 . ' +5 day'));
+update_option('kikripp_keine_termine', $von53 . ' - ' . $bis53);
+update_option('kikripp_rueckmeldung_ab', '');
+pruefe('in der Pause: „Rückmeldung ab“ = Tag nach der Pause', Kikripp_REST::rueckmeldung_ab(), gmdate('Y-m-d', strtotime($h53 . ' +6 day')));
+update_option('kikripp_keine_termine', gmdate('d.m.Y', strtotime($h53)));
+pruefe('einzelner gesperrter Tag: keine Abwesenheitsmeldung', Kikripp_REST::rueckmeldung_ab(), '');
+update_option('kikripp_keine_termine', '');
+// Hinweisband ab
+update_option('kikripp_hinweisband', 'Sale ab 07.12.');
+update_option('kikripp_hinweis_ab', gmdate('Y-m-d', strtotime($h53 . ' +1 day')));
+pruefe('Hinweisband vor „anzeigen ab“ leer', Kikripp_REST::hinweisband(), '');
+update_option('kikripp_hinweis_ab', $h53);
+pruefe('Hinweisband ab dem Tag sichtbar', Kikripp_REST::hinweisband(), 'Sale ab 07.12.');
+update_option('kikripp_hinweis_ab', ''); update_option('kikripp_hinweisband', '');
+// Sale-Zeitraum
+$liste53 = [['nr' => 'S-1', 'titel' => 'Sale-Teddy', 'menge' => 2, 'preis' => 20, 'sale' => 14, 'aktiv' => true, 'im_katalog' => true, 'foto' => ''],
+            ['nr' => 'S-2', 'titel' => 'Ohne Sale', 'menge' => 1, 'preis' => 30, 'sale' => null, 'aktiv' => true, 'im_katalog' => true, 'foto' => '']];
+$preis53 = function ($nr) { foreach (Kikripp_DB::katalog_artikel() as $a) { if ($a['nr'] === $nr) { return $a; } } return null; };
+update_option('kikripp_sale_von', gmdate('Y-m-d', strtotime($h53 . ' +2 day'))); update_option('kikripp_sale_bis', gmdate('Y-m-d', strtotime($h53 . ' +6 day')));
+Kikripp_Admin::einspielen($liste53);
+pruefe('vor dem Sale: normaler Preis', (float) $preis53('S-1')['preis'], 20.0);
+pruefe('vor dem Sale: kein „vorher“', array_key_exists('vorher', $preis53('S-1')), false);
+update_option('kikripp_sale_von', $h53);
+pruefe('Sale beginnt: Umschalter stellt um', Kikripp_DB::sale_umschalten(), 1);
+pruefe('im Sale: Sale-Preis', (float) $preis53('S-1')['preis'], 14.0);
+pruefe('im Sale: alter Preis als „vorher“', (float) $preis53('S-1')['vorher'], 20.0);
+pruefe('ohne Sale-Preis unverändert', (float) $preis53('S-2')['preis'], 30.0);
+pruefe('zweiter Aufruf am selben Tag tut nichts', Kikripp_DB::sale_umschalten(), 0);
+$v53 = Kikripp_DB::reservieren(kontakt('Sale Kunde'), ['S-1' => 1]);
+pruefe('Reservierung im Sale bekommt den Sale-Preis', (float) Kikripp_DB::vorgang($v53)['positionen'][0]['preis_netto'], 14.0);
+update_option('kikripp_sale_bis', gmdate('Y-m-d', strtotime($h53 . ' -1 day')));
+Kikripp_DB::sale_umschalten();
+pruefe('Sale vorbei: wieder normaler Preis', (float) $preis53('S-1')['preis'], 20.0);
+pruefe('Sale vorbei: kein „vorher“ mehr', array_key_exists('vorher', $preis53('S-1')), false);
+pruefe('… Reservierung behält den Sale-Preis', (float) Kikripp_DB::vorgang($v53)['positionen'][0]['preis_netto'], 14.0);
+update_option('kikripp_sale_von', ''); update_option('kikripp_sale_bis', '');
+Kikripp_Admin::einspielen($liste53);
+pruefe('ohne Zeitraum gilt der Sale-Preis sofort (wie 1.15.1)', (float) $preis53('S-1')['preis'], 14.0);
+Kikripp_DB::vorgang_status($v53, 'storniert');
+// Umstellung 1.16.0
+update_option('kikripp_abholschluss', '2026-12-10'); delete_option('kikripp_keine_termine');
+delete_option('kikripp_sale_von'); delete_option('kikripp_sale_bis');
+update_option('kikripp_ablauftext', kikripp_ablauf_1150());
+update_option('kikripp_rechtstext', 'Abholung bis spätestens 10.12.2026. Rest.');
+kikripp_umstellen_1160('1.15.0');
+pruefe('Umstellung: Abholung bis 31.01.2027', get_option('kikripp_abholschluss'), '2027-01-31');
+pruefe('Umstellung: Sperrtage vorbelegt', count(Kikripp_DB::sperrzeiten()), 3);
+pruefe('Umstellung: Sale 07.–11.12.2026', get_option('kikripp_sale_von') . '|' . get_option('kikripp_sale_bis'), '2026-12-07|2026-12-11');
+pruefe('Umstellung: Ablauftext mit Pause', strpos(get_option('kikripp_ablauftext'), 'bis 31.01.2027 (keine Abholung vom 17.12.2026 bis 12.01.2027)') !== false, true);
+pruefe('Umstellung: Kaufbedingungen 31.01.2027', get_option('kikripp_rechtstext'), 'Abholung bis spätestens 31.01.2027. Rest.');
+update_option('kikripp_abholschluss', '2026-12-20'); kikripp_umstellen_1160('1.15.0');
+pruefe('selbst gesetzter Abholschluss bleibt', get_option('kikripp_abholschluss'), '2026-12-20');
+$GLOBALS['ist_admin'] = true; ob_start(); Kikripp_Admin::seite_einstellungen(); $e53 = ob_get_clean(); $GLOBALS['ist_admin'] = false;
+pruefe('Einstellungen: Keine Termine, Sale von/bis, Hinweisband ab', strpos($e53, 'name="keine_termine"') !== false
+    && strpos($e53, 'name="sale_von"') !== false && strpos($e53, 'name="sale_bis"') !== false && strpos($e53, 'name="hinweis_ab"') !== false, true);
+update_option('kikripp_keine_termine', ''); update_option('kikripp_sale_von', ''); update_option('kikripp_sale_bis', '');
 
 printf("\n== Ergebnis: %d Prüfungen, %d Fehler ==\n", $geprueft, $fehler);
 exit($fehler > 0 ? 1 : 0);

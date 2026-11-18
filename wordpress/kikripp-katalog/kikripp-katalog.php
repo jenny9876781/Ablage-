@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Kikripp Artikelkatalog
  * Description: Artikelkatalog mit Reservierung für die Betriebsauflösung der Kikripp GmbH. Artikel werden importiert, Reservierungen im Backend verwaltet.
- * Version:     1.16.0
+ * Version:     1.16.1
  * Author:      Kikripp GmbH
  * Text Domain: kikripp-katalog
  * Requires at least: 5.8
@@ -13,7 +13,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-define('KIKRIPP_VERSION', '1.16.0');
+define('KIKRIPP_VERSION', '1.16.1');
 define('KIKRIPP_PFAD', plugin_dir_path(__FILE__));
 define('KIKRIPP_URL', plugin_dir_url(__FILE__));
 
@@ -175,7 +175,7 @@ function kikripp_umstellen_1150($stand) {
  * Abholschluss und Texte werden nur umgestellt, wenn noch der alte Stand (10.12.2026) drinsteht.
  */
 function kikripp_umstellen_1160($stand) {
-    if (version_compare($stand, '1.16.0', '>=')) { return; }
+    if (version_compare($stand, '1.16.0', '>=')) { kikripp_umstellen_1161($stand); return; }
     add_option('kikripp_keine_termine', "23.11.2026\n07.12.2026\n17.12.2026 - 12.01.2027");
     add_option('kikripp_sale_von', '2026-12-07');
     add_option('kikripp_sale_bis', '2026-12-11');
@@ -187,6 +187,22 @@ function kikripp_umstellen_1160($stand) {
     }
     update_option('kikripp_plugin_version', '1.16.0');
     Kikripp_DB::sale_umschalten(true);
+    kikripp_umstellen_1161('1.16.0');
+}
+
+/** 1.16.1 (18.11.2026): Termine Mo–Do einheitlich 8 bis 15 Uhr – im Ablauftext, wenn der alte Wortlaut noch drinsteht. */
+function kikripp_umstellen_1161($stand) {
+    if (version_compare($stand, '1.16.1', '>=')) { return; }
+    $text = (string) get_option('kikripp_ablauftext', '');
+    $neu = kikripp_zeiten_1161($text);
+    if ($neu !== $text) { update_option('kikripp_ablauftext', $neu); }
+    update_option('kikripp_plugin_version', '1.16.1');
+}
+
+/** 1.16.1: „montags bis mittwochs von 8 bis 12 Uhr und donnerstags von 8 bis 15 Uhr“ → „montags bis donnerstags von 8 bis 15 Uhr“. */
+function kikripp_zeiten_1161($text) {
+    return str_replace('montags bis mittwochs von 8 bis 12 Uhr und donnerstags von 8 bis 15 Uhr',
+        'montags bis donnerstags von 8 bis 15 Uhr', (string) $text);
 }
 
 /** 1.16.0: was in Ablauftext und Kaufbedingungen ersetzt wird (alt => neu). */

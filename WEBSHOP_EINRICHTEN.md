@@ -153,7 +153,7 @@ automatisch eingetragen; du prüfst sie nur.
 | Mindestbestellwert | 50 € |
 | Höchstzahl Geschenke je Reservierung | 5 (im November ggf. erhöhen) |
 | Besichtigung ab | 100 € Stückpreis |
-| Termine frühestens ab | erster Tag für Besichtigung und Abholung (Mo–Do, 8–12 Uhr) |
+| Termine frühestens ab | erster Tag für Besichtigung und Abholung (Mo–Do, 8–15 Uhr) |
 | Abholung bis | 31.01.2027 |
 | Keine Termine an | 23.11.2026, 07.12.2026, 17.12.2026 - 12.01.2027 (je Zeile ein Tag oder Zeitraum) |
 | Sale von – bis | 07.12.2026 bis 11.12.2026 – Sale-Preise gelten nur dann, der Katalog stellt selbst um |

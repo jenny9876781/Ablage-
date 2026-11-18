@@ -1460,6 +1460,13 @@ ist die Merkliste; erledigte Punkte hier abhaken, nicht löschen.
       Reservierungen frieren den gerade gültigen Preis ein. Ohne Zeitraum gilt Sale sofort (wie 1.15.1). Tests: 590 Logik (Abschnitt 53),
       Kette 0, 96 Browser, 15 mobil, 32 Geschenke, 29 Sale, Liste ok. Server.php: `KIK_TEST_KEINE`.
       Import 16.11.: „0 neu, 879 aktualisiert … 46 NEU“, Nachtrag 46 Fotos (gegen 13.11.). build_fotopaket sortiert jetzt numerisch.
+- [x] **18.11.2026: Plugin 1.16.1 – Termine Mo–Do einheitlich 08:00–14:30 Uhr** (Abholung und Besichtigung; `BESICHTIGUNG_ZEITEN`,
+      `zeiten_am()` ohne Donnerstag-Sonderfall, `Kikripp_Ablauf::ZEITEN` für die Verwaltung ebenso). **Uhrzeit der Abholung ist Pflicht**
+      (Server + Browser), für die angemeldete Verwaltung freiwillig. Kästchen „Termin am Nachmittag oder Demontage nötig“ entfernt –
+      Hinweis „Demontage oder anderer Termin? Bitte unten in die Nachricht schreiben.“ (Feld `demontage` bleibt in der DB für Altvorgänge).
+      Bestellung „montags bis donnerstags von 08:00 bis 15:00 Uhr“; Ablauftext per `kikripp_zeiten_1161()` umgestellt, wenn der alte
+      Wortlaut drinsteht. WhatsApp-Status `9_Story_Spielzeug_Weihnachten` (build_social.py, Format „hoch9“; Motive nur aus
+      verfügbaren Artikeln wählen – vorher Status prüfen). Tests: 591 Logik, Kette 0, 98 Browser, 15 mobil, 32 Geschenke, 29 Sale, Liste ok.
 - [ ] **Sale 07.–11.12.2026 vorbereiten:** bis ca. 01.12. Einzelpreise + Regel von der Nutzerin holen (`scripts/sale.py`),
       **Weihnachtsdeko stärker reduzieren als den Rest** (nach dem 16.12. kauft sie keiner mehr – mit ihr abgesprochen), Import vor dem 07.12.
       einspielen lassen (Sale-Preise gelten erst ab 07.12. von selbst). Hinweisband-Text vorschlagen, „anzeigen ab“ 01.12., „bis“ 11.12.

@@ -12,7 +12,7 @@ if (!defined('ABSPATH')) { exit; }
  */
 class Kikripp_Ablauf {
 
-    const ZEITEN = ['08:00', '08:30', '09:00', '09:30', '10:00', '10:30'];
+    const ZEITEN = ['08:00', '08:30', '09:00', '09:30', '10:00', '10:30', '11:00', '11:30', '12:00', '12:30', '13:00', '13:30', '14:00', '14:30'];   // 1.16.1: Mo–Do bis 14:30
     const WOCHENTAGE = ['', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag', 'Sonntag'];
 
     public static function start() {

@@ -61,6 +61,11 @@ function kikripp_ablauf_1160() {
     return str_replace($paar[0], $paar[1], kikripp_ablauf_1150());
 }
 
+/** Ablauftext 1.16.1 (18.11.2026): Mo–Do einheitlich 8 bis 15 Uhr. */
+function kikripp_ablauf_1161() {
+    return kikripp_zeiten_1161(kikripp_ablauf_1160());
+}
+
 /** Ablauftext 1.15.0 (04.11.2026): Überweisung vorab oder bar bei Abholung. */
 function kikripp_ablauf_1150() {
     return str_replace('Bezahlung: generell per Überweisung gegen Rechnung vor der Abholung.',

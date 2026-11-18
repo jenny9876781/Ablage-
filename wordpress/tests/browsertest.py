@@ -257,7 +257,8 @@ with sync_playwright() as p:
            and "2026-12-16" in abhol_iso and "2027-01-13" in abhol_iso, f"({[t for t in abhol_iso if t >= '2026-12-14'][:6]})")
     pruefe("Adressfelder vorhanden", all(seite.locator(i).count() == 1
            for i in ("#k-firma", "#k-strasse", "#k-plz", "#k-ort")))
-    pruefe("Demontage ankreuzbar", seite.locator("#k-demontage").count() == 1)
+    pruefe("kein Kästchen „nach Vereinbarung“ mehr (1.16.1)", seite.locator("#k-demontage").count() == 0)
+    pruefe("Hinweis: Demontage in die Nachricht (1.16.1)", "Demontage oder anderer Termin" in dlg, f"({dlg[:200]!r})")
     hp = seite.locator("#k-webseite").bounding_box()
     pruefe("unsichtbares Feld gegen Roboter liegt außerhalb des Bildes", hp is not None and hp["x"] < 0, f"({hp})")
     pruefe("Telefon ist als Pflichtfeld markiert",
@@ -295,7 +296,9 @@ with sync_playwright() as p:
            "Abholung" in seite.inner_text("#k-meldung"), f"({seite.inner_text('#k-meldung')!r})")
     seite.select_option("#k-abhol", index=1)
     zeiten = [t.strip() for t in seite.locator("#k-abhol-zeit option").all_inner_texts()[1:]]
-    pruefe("Abholung: Uhrzeiten ab 08:00, bis 11:30 bzw. Do 14:30 (1.14.0)", zeiten[:1] == ["08:00 Uhr"] and zeiten[-1:] in (["11:30 Uhr"], ["14:30 Uhr"]), f"({zeiten})")
+    pruefe("Abholung: Uhrzeiten Mo–Do 08:00 bis 14:30 (1.16.1)", zeiten[:1] == ["08:00 Uhr"] and zeiten[-1:] == ["14:30 Uhr"], f"({zeiten})")
+    seite.click("#k-senden"); seite.wait_for_timeout(500)
+    pruefe("ohne Uhrzeit wird nicht abgeschickt (1.16.1)", "Uhrzeit" in seite.inner_text("#k-meldung"), f"({seite.inner_text('#k-meldung')!r})")
     seite.select_option("#k-abhol-zeit", "09:30")
     if seite.locator("#k-bes").count():
         seite.check("#k-bes")

@@ -111,15 +111,15 @@ class Kikripp_REST {
         return $eigen !== '' ? $eigen : (string) get_option('kikripp_mail_an', '');
     }
 
-    /** 1.12.0: halbstündliche Zeiten für Besichtigung und Abholung, vormittags 8 bis 12 Uhr. */
-    const BESICHTIGUNG_ZEITEN = ['08:00', '08:30', '09:00', '09:30', '10:00', '10:30', '11:00', '11:30'];
+    /** 1.16.1: halbstündliche Zeiten für Besichtigung und Abholung, montags bis donnerstags 8 bis 15 Uhr (letzte 14:30). */
+    const BESICHTIGUNG_ZEITEN = ['08:00', '08:30', '09:00', '09:30', '10:00', '10:30', '11:00', '11:30', '12:00', '12:30', '13:00', '13:30', '14:00', '14:30'];
     /** 1.14.0: donnerstags durchgehend 8 bis 15 Uhr. */
     const ZEITEN_DONNERSTAG = ['08:00', '08:30', '09:00', '09:30', '10:00', '10:30', '11:00', '11:30',
                                '12:00', '12:30', '13:00', '13:30', '14:00', '14:30'];
 
     /** 1.14.0: wählbare Uhrzeiten an einem Tag (Zeitstempel 12:00 UTC). */
     public static function zeiten_am($tag) {
-        return (int) gmdate('N', $tag) === 4 ? self::ZEITEN_DONNERSTAG : self::BESICHTIGUNG_ZEITEN;
+        return self::BESICHTIGUNG_ZEITEN;              // 1.16.1: an allen Tagen gleich (vorher Do länger)
     }
     /** 1.12.0: Besichtigung und Abholung montags bis donnerstags (ISO-Wochentage). */
     const TERMIN_TAGE = [1, 2, 3, 4];
@@ -261,7 +261,7 @@ class Kikripp_REST {
         $schluss = self::datum((string) get_option('kikripp_abholschluss', '')) ?: PHP_INT_MAX;
         $frueh = max($heute, self::datum(self::termine_ab()) ?: 0);   // 1.12.0: Termine frühestens ab
 
-        // Besichtigung: nur bei Artikeln ab der Grenze, montags bis donnerstags, halbstündlich 8 bis 11:30 Uhr
+        // Besichtigung: nur bei Artikeln ab der Grenze, montags bis donnerstags, halbstündlich 8 bis 14:30 Uhr
         $kontakt['besichtigung'] = '';
         $ab = (float) get_option('kikripp_besichtigung_ab', 0);
         if (!empty($anfrage->get_param('besichtigung')) && $teuerster >= $ab) {
@@ -272,7 +272,7 @@ class Kikripp_REST {
                 || !in_array($zeit, self::zeiten_am($tag), true)) {
                 return self::fehler('Bitte wählen Sie für die Besichtigung einen Tag von Montag bis Donnerstag'
                     . ($frueh > $heute ? ' ab dem ' . gmdate('d.m.Y', $frueh) : '')
-                    . ' und eine Uhrzeit (Mo–Mi 08:00–11:30, Do 08:00–14:30 Uhr).');
+                    . ' und eine Uhrzeit (Mo–Do 08:00–14:30 Uhr).');
             }
             $kontakt['besichtigung'] = gmdate('Y-m-d', $tag) . ' ' . $zeit;
         }
@@ -289,17 +289,19 @@ class Kikripp_REST {
                     . ($schluss < PHP_INT_MAX ? gmdate('d.m.Y', $schluss) : 'Ende des Verkaufs') . '.');
             }
             $kontakt['abholwunsch'] = gmdate('Y-m-d', $t);
-            // Uhrzeit ist freiwillig – dieselben halben Stunden wie bei der Besichtigung (Mo–Mi bis 12, Do bis 15 Uhr)
+            // 1.16.1: Uhrzeit ist Pflicht (außer für die Verwaltung) – Mo–Do 08:00–14:30 Uhr
             $zeit = (string) $anfrage->get_param('abholwunsch_zeit');
+            if ($zeit === '' && !$admin) {
+                return self::fehler('Bitte wählen Sie für die Abholung eine Uhrzeit (Mo–Do 08:00–14:30 Uhr).');
+            }
             if ($zeit !== '') {
                 if (!in_array($zeit, self::zeiten_am($t), true)) {
-                    return self::fehler('Bitte wählen Sie für die Abholung eine Uhrzeit (Mo–Mi 08:00–11:30, Do 08:00–14:30 Uhr).');
+                    return self::fehler('Bitte wählen Sie für die Abholung eine Uhrzeit (Mo–Do 08:00–14:30 Uhr).');
                 }
                 $kontakt['abholwunsch'] .= ' ' . $zeit;
             }
-        } elseif (!$kontakt['demontage'] && !$admin) {
-            return self::fehler('Bitte wählen Sie einen Wunschtermin für die Abholung (montags bis donnerstags) '
-                . 'oder kreuzen Sie „Termin nach Vereinbarung“ an.');
+        } elseif (!$admin) {                                   // 1.16.1: kein „nach Vereinbarung“-Kästchen mehr
+            return self::fehler('Bitte wählen Sie einen Wunschtermin für die Abholung (montags bis donnerstags, 08:00–14:30 Uhr).');
         }
 
         $id = Kikripp_DB::reservieren($kontakt, $wunsch);

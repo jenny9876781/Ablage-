@@ -44,8 +44,16 @@ def post(koerper, admin=False):
     except urllib.error.HTTPError as e:
         return json.load(e)
 
+# 1.16.1: Abholtermin mit Uhrzeit ist Pflicht – erster freier Mo–Do ab morgen (ohne die gesperrten Tage des Testservers)
+import datetime as _dt
+def _gesperrt(t):
+    return t.isoformat() in ("2026-11-23", "2026-12-07") or _dt.date(2026, 12, 17) <= t <= _dt.date(2027, 1, 12)
+_t = _dt.date.today() + _dt.timedelta(days=1)
+while _t.isoweekday() > 4 or _gesperrt(_t):
+    _t += _dt.timedelta(days=1)
 kontakt = {"name": "Test Geschenk", "strasse": "Teststr. 1", "plz": "78048", "ort": "VS",
-           "email": "test@example.de", "telefon": "07721 123456", "demontage": True, "zahlart": "ueberweisung"}
+           "email": "test@example.de", "telefon": "07721 123456", "zahlart": "ueberweisung",
+           "abholwunsch": _t.isoformat(), "abholwunsch_zeit": "10:00"}
 
 with sync_playwright() as p:
     b = p.chromium.launch(executable_path=CHROME)

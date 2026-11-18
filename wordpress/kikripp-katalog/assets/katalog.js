@@ -10,8 +10,10 @@
   var ARTIKEL = [], UST = 0.19, HINWEIS = '', FRIST = 3, IST_ADMIN = false;
   var RECHT = '', ABHOLUNG = '', ANBIETER = {}, STEUER = '', ABLAUF = '';
   var MINDEST = 0, GESCHENKE_MAX = 5, BES_AB = 0, SCHLUSS = '', HEUTE = '', TERMINE_AB = '', RUECK = '';
-  var BES_ZEITEN = ['08:00', '08:30', '09:00', '09:30', '10:00', '10:30', '11:00', '11:30'];   // 1.12.0: Mo–Mi bis 12 Uhr
-  var ZEITEN_DO = BES_ZEITEN.concat(['12:00', '12:30', '13:00', '13:30', '14:00', '14:30']);  // 1.14.0: Do bis 15 Uhr
+  // 1.16.1: Mo–Do einheitlich 08:00–14:30 Uhr (vorher Mo–Mi bis 11:30, Do bis 14:30)
+  var BES_ZEITEN = ['08:00', '08:30', '09:00', '09:30', '10:00', '10:30', '11:00', '11:30',
+                    '12:00', '12:30', '13:00', '13:30', '14:00', '14:30'];
+  var ZEITEN_DO = BES_ZEITEN;
   /** 1.14.0: Uhrzeiten zum gewählten Tag (Donnerstag länger). */
   function zeitenAm(iso) { return iso && tag(iso).getUTCDay() === 4 ? ZEITEN_DO : BES_ZEITEN; }
   function zeitOptionen(iso, leer) {
@@ -664,19 +666,18 @@
       '<small class="hint">Wir melden uns nach der Reservierung – bitte unbedingt angeben.</small></div>' +
       (mitBesichtigung
         ? '<div class="feld"><label class="chk2"><input type="checkbox" id="k-bes"> Ich möchte die Artikel vorab besichtigen ' +
-          '(Mo–Mi 08:00–12:00 Uhr, Do 08:00–15:00 Uhr)</label>' +
+          '(Mo–Do 08:00–15:00 Uhr)</label>' +
           '<div class="zwei" id="k-bes-wahl" hidden><div>' + auswahlFeld('k-bes-tag', bestage, 'Tag wählen (Mo–Do)') + '</div>' +
           '<div>' + auswahlFeld('k-bes-zeit', BES_ZEITEN.map(function (z) { return [z, z + ' Uhr']; }), 'Uhrzeit wählen') + '</div></div></div>'
         : (BES_AB > 0 ? '<p class="hint-bes">Eine Besichtigung bieten wir für Artikel ab ' + eur(BES_AB) + ' an.</p>' : '')) +
       '<div class="feld"><label for="k-abhol">Gewünschter Abholtermin *</label>' +
         '<div class="zwei"><div>' + auswahlFeld('k-abhol', abholtage, 'Tag wählen (Mo–Do)') + '</div>' +
-        '<div>' + auswahlFeld('k-abhol-zeit', BES_ZEITEN.map(function (z) { return [z, z + ' Uhr']; }), 'Uhrzeit (optional)') +
+        '<div>' + auswahlFeld('k-abhol-zeit', BES_ZEITEN.map(function (z) { return [z, z + ' Uhr']; }), IST_ADMIN ? 'Uhrzeit (freiwillig)' : 'Uhrzeit wählen') +
         '</div></div>' +
-        '<small class="hint">Abholung Mo–Mi 08:00–12:00 Uhr, Do 08:00–15:00 Uhr' +
+        '<small class="hint">Abholung Mo–Do 08:00–15:00 Uhr' +
         (TERMINE_AB && TERMINE_AB > HEUTE ? ', frühestens ab ' + datumText(TERMINE_AB).slice(4) : '') +
-        (SCHLUSS ? ', spätestens ' + datumText(SCHLUSS).slice(4) : '') + '. Bei Überweisung wird nach Zahlungseingang abgeholt.</small>' +
-        '<label class="chk2"><input type="checkbox" id="k-demontage"> Termin am Nachmittag oder Demontage nötig – ' +
-        'nach Vereinbarung</label></div>' +
+        (SCHLUSS ? ', spätestens ' + datumText(SCHLUSS).slice(4) : '') + '. Bei Überweisung wird nach Zahlungseingang abgeholt. ' +
+        'Demontage oder anderer Termin? Bitte unten in die Nachricht schreiben.</small></div>' +
       // 1.15.0: Bezahlung
       '<div class="feld"><label>Bezahlung' + (IST_ADMIN ? ' (freiwillig)' : ' *') + '</label>' +
         '<label class="chk2"><input type="radio" name="k-zahl" value="ueberweisung"> Überweisung vorab – die Rechnung kommt per E-Mail</label>' +
@@ -702,7 +703,7 @@
       el('k-bes').addEventListener('change', function () { el('k-bes-wahl').hidden = !this.checked; });
     }
     // 1.14.0: Uhrzeiten passen sich dem gewählten Tag an (donnerstags bis 15 Uhr)
-    [['k-bes-tag', 'k-bes-zeit', 'Uhrzeit wählen'], ['k-abhol', 'k-abhol-zeit', 'Uhrzeit (optional)']].forEach(function (f) {
+    [['k-bes-tag', 'k-bes-zeit', 'Uhrzeit wählen'], ['k-abhol', 'k-abhol-zeit', IST_ADMIN ? 'Uhrzeit (freiwillig)' : 'Uhrzeit wählen']].forEach(function (f) {
       var tagFeld = el(f[0]), zeitFeld = el(f[1]);
       if (!tagFeld || !zeitFeld) { return; }
       tagFeld.addEventListener('change', function () {
@@ -773,8 +774,8 @@
     if (!nutzlast.zahlart && !IST_ADMIN) {
       fehler('Bitte wählen Sie, wie Sie bezahlen möchten: Überweisung vorab oder bar bei Abholung.'); return;
     }
-    if (!nutzlast.abholwunsch && !nutzlast.demontage && !IST_ADMIN) {
-      fehler('Bitte wählen Sie einen Wunschtermin für die Abholung oder kreuzen Sie „nach Vereinbarung“ an.');
+    if ((!nutzlast.abholwunsch || !nutzlast.abholwunsch_zeit) && !IST_ADMIN) {      // 1.16.1: Tag und Uhrzeit Pflicht
+      fehler('Bitte wählen Sie für die Abholung einen Tag (Montag bis Donnerstag) und eine Uhrzeit.');
       return;
     }
 

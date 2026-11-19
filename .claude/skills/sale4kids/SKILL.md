@@ -1467,6 +1467,21 @@ ist die Merkliste; erledigte Punkte hier abhaken, nicht löschen.
       Bestellung „montags bis donnerstags von 08:00 bis 15:00 Uhr“; Ablauftext per `kikripp_zeiten_1161()` umgestellt, wenn der alte
       Wortlaut drinsteht. WhatsApp-Status `9_Story_Spielzeug_Weihnachten` (build_social.py, Format „hoch9“; Motive nur aus
       verfügbaren Artikeln wählen – vorher Status prüfen). Tests: 591 Logik, Kette 0, 98 Browser, 15 mobil, 32 Geschenke, 29 Sale, Liste ok.
+- [ ] **19.11.2026: Word „neue_artikel“ + 140 Fotos + Reservierungen + Kasse – vorbereitet, geht MONTAG 23.11. online.**
+      87 neue Zeilen (966): BA06-13A bis -31 (Lauflern-/Puppenwagen, Sprossenwand-Zubehör, Wheely Bug …), NU04-63 bis -90
+      (CDs, Schleich-Sets, Becher), NU04-V04 bis -V16 (zu verschenken, inkl. Kerzen ohne Post-it), NU01-83 bis -88 mit
+      **NU01-85A** (Glühweinbecher), **-85B** (Holzbilder + Kugeln), **-86A** (weinrote Kerzen), **-86B** (Tannenbaum-Kugeln) –
+      Post-its doppelt vergeben, Nutzerin ergänzt A/B; **BA06-13A, NE02-08A, NE02-09A** (Nummern waren belegt), NE02-10 bis -26
+      (Küche & Geschirr; Post-it „NE03-19“ = NE02-19). Word-Nummern NE05-08/-09/-10 = Post-its NE02-08/-09/-10; NU04-74/-75 im Word
+      vertauscht, Post-it gilt. **Alle neuen: Preis geschätzt, `offen`, Im_Katalog nein** (Geschenke `ok`, nein). NU04-65 (Inhalt
+      unbekannt) und NU04-88 (Schleich 6 Teile) ohne Foto, folgen. Fotos F-1022 bis F-1106 nur die Katalogfotos – die ~50
+      Schleich-Bauchfotos haben **keine** F-Nummer (Arbeitsmaterial; nichts Seltenes, Serienware 1995–2017). IMG_3303 = Teil von
+      BA04-32 (reserviert). BU06-11, BA08-18/-19 → Büro. Reservierungsexport 19.11. eingelesen, „bar“/„Sammel RG“ aus Rechnungsnr.
+      entfernt (Hinweis stand schon in der Bemerkung). Kasse 41. Excel 16.11. hatte keine Artikeländerung (nur ArtNr BA04-02
+      versehentlich „BA04-0+B72“). **Fotos vorab ausgeliefert: `ausgabe/kikripp-fotos-vorab-19.11.zip` (F-1022 bis F-1106) –
+      die Nutzerin lädt sie schon in die Mediathek.** Montag: Excel mit geprüften Preisen → Ablauf B → ok + Im_Katalog ja,
+      ggf. entfällt (Vorgesetzter entscheidet) → Import. **Der Montags-Nachtrag darf F-1022 bis F-1106 NICHT enthalten**
+      (schon hochgeladen) – nur Fotos von NU04-65/-88 u. ä. Basis für den Import-Vergleich: `katalog_import.json` von 08801b2.
 - [ ] **Sale 07.–11.12.2026 vorbereiten:** bis ca. 01.12. Einzelpreise + Regel von der Nutzerin holen (`scripts/sale.py`),
       **Weihnachtsdeko stärker reduzieren als den Rest** (nach dem 16.12. kauft sie keiner mehr – mit ihr abgesprochen), Import vor dem 07.12.
       einspielen lassen (Sale-Preise gelten erst ab 07.12. von selbst). Hinweisband-Text vorschlagen, „anzeigen ab“ 01.12., „bis“ 11.12.

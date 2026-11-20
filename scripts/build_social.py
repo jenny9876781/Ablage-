@@ -54,7 +54,7 @@ MOTIVE = [
       ("F-1069", "50% 50%"), ("F-1074", "50% 50%")],
      "Pinolino · Wesco · HABA · Schleich"),
     # 20.11.2026: Auswahl der Nutzerin S1, H4, W5, G1 (Auswahl_Status_11*.jpg)
-    ("11_Story_Schleich_Holz_Weihnachten_Geschirr", "vier", "Jetzt neu im Katalog", "Schleich-Tiere, hochwertige<br>Holzspielzeuge,<br>Weihnachtsdeko &amp; Geschirr",
+    ("11_Story_Schleich_Holz_Weihnachten_Geschirr", "vier", "Jetzt neu im Katalog", "Hochwertige Holzspielzeuge,<br>Schleich-Tiere, Geschirr<br>&amp; Weihnachtsdeko",
      [("F-1069", "50% 50%"), ("F-1059", "50% 60%"),
       ("F-766", "50% 45%"), ("F-1096", "50% 40%")],
      "Schleich · Pinolino · Wichtel · IKEA-Geschirr"),
@@ -108,7 +108,8 @@ def html(fmt, klein, titel, fotos, stich):
                  archivo=schrift("ArchivoBlack.woff2"), inter=schrift("Inter.woff2"))
     if not story: masse["h1"] = 96
     if held: masse["h1"] = 100
-    if fmt in ("hoch9", "vier"): masse["h1"] = 88 if len(titel) < 60 else 72
+    if fmt in ("hoch9", "vier"): masse["h1"] = 88 if len(titel) < 60 else 60
+    if fmt == "vier": masse["oben"], masse["unten"] = 120, 150   # 20.11.: weniger Rand, größere Fotos
     kacheln = "".join(f'<div style="background-image:url({bild(nr)});background-position:{pos}"></div>'
                       for nr, pos in fotos)
     art = " vier" if fmt == "vier" else " hoch9" if fmt == "hoch9" else (" hoch" if hoch else (" held" if held else ""))

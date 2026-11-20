@@ -1467,7 +1467,16 @@ ist die Merkliste; erledigte Punkte hier abhaken, nicht löschen.
       Bestellung „montags bis donnerstags von 08:00 bis 15:00 Uhr“; Ablauftext per `kikripp_zeiten_1161()` umgestellt, wenn der alte
       Wortlaut drinsteht. WhatsApp-Status `9_Story_Spielzeug_Weihnachten` (build_social.py, Format „hoch9“; Motive nur aus
       verfügbaren Artikeln wählen – vorher Status prüfen). Tests: 591 Logik, Kette 0, 98 Browser, 15 mobil, 32 Geschenke, 29 Sale, Liste ok.
-- [ ] **19.11.2026: Word „neue_artikel“ + 140 Fotos + Reservierungen + Kasse – vorbereitet, geht MONTAG 23.11. online.**
+- [x] **20.11.2026 (Fr): Stapel vom 19.11. online.** Excel der Nutzerin per rueckeinlesen: 69 Preise ok, 16 Preise geändert
+      (u. a. NE02-05 60 €, NE02-07 50 €, BA06-14 30 € stark gebraucht, NU01-85A 0,50 €), entfällt BA06-15, NU04-80, NE02-08A,
+      -21, -22, -23. BA06-17 = 2 Stück à 35 €. NE02-10/-11 ok mit Schätzpreis. **K-037 Ringlicht wieder aktiv → neue Nummer
+      BE11-01** (K-037 bleibt entfällt mit Verweis), Namensschild im Foto F-023 direkt im JPG verpixelt (keine Quelldatei,
+      deshalb ohne Eintrag in fotos_beschnitt.csv). 80 Artikel neu sichtbar (inkl. Geschenke V04–V16), NU04-65/-88 bleiben
+      ohne Foto verborgen. Import-Basis war 08801b2 (Import vom 19.11. wurde nie eingespielt): „88 neu, 879 aktualisiert,
+      80 NEU“. Nachtrag nur F-023 (`kikripp-fotos-nachtrag-20.11.zip`), F-1022–F-1106 lagen schon in der Mediathek.
+      Kasse 42. WhatsApp-Status `10_Story_Holz_Schleich_Weihnachten` (neues Format „vier“ = 2 × 2). Nächster Nachtrag gegen
+      `ausgabe/katalog_import.json` dieses Stands.
+- [x] **19.11.2026: Word „neue_artikel“ + 140 Fotos + Reservierungen + Kasse – vorbereitet (am 20.11. online).**
       87 neue Zeilen (966): BA06-13A bis -31 (Lauflern-/Puppenwagen, Sprossenwand-Zubehör, Wheely Bug …), NU04-63 bis -90
       (CDs, Schleich-Sets, Becher), NU04-V04 bis -V16 (zu verschenken, inkl. Kerzen ohne Post-it), NU01-83 bis -88 mit
       **NU01-85A** (Glühweinbecher), **-85B** (Holzbilder + Kugeln), **-86A** (weinrote Kerzen), **-86B** (Tannenbaum-Kugeln) –

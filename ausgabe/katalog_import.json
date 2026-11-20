@@ -1256,14 +1256,14 @@
  {
   "nr": "K-037",
   "titel": "Ringlicht LED auf Stativ",
-  "beschr": "Fotolicht, Ringleuchte mit Stativ",
+  "beschr": "Fotolicht, Ringleuchte mit Stativ für Videos",
   "kat": "Haushalt & Geräte",
   "raum": "Büro",
   "zustand": "gut",
   "masse": "",
   "menge": 1,
   "einheit": "Stück",
-  "preis": 35.0,
+  "preis": 15.0,
   "sale": null,
   "basis": "Fix",
   "versand": "nur Abholung",
@@ -1273,7 +1273,7 @@
   "foto": "F-023",
   "sortierung": 57,
   "aktiv": false,
-  "im_katalog": true
+  "im_katalog": false
  },
  {
   "nr": "BE10-09",
@@ -5399,7 +5399,7 @@
   "masse": "",
   "menge": 1,
   "einheit": "Set",
-  "preis": 70.0,
+  "preis": 60.0,
   "sale": null,
   "basis": "Fix",
   "versand": "nur Abholung",
@@ -9777,7 +9777,7 @@
   "masse": "",
   "menge": 1,
   "einheit": "Set",
-  "preis": 75.0,
+  "preis": 50.0,
   "sale": null,
   "basis": "Fix",
   "versand": "nur Abholung",
@@ -19357,7 +19357,7 @@
   "foto": "F-1022",
   "sortierung": 879,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "BA06-14",
@@ -19369,7 +19369,7 @@
   "masse": "",
   "menge": 1,
   "einheit": "Stück",
-  "preis": 8.0,
+  "preis": 30.0,
   "sale": null,
   "basis": "Fix",
   "versand": "nur Abholung",
@@ -19379,7 +19379,7 @@
   "foto": "F-1023",
   "sortierung": 880,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "BA06-15",
@@ -19391,7 +19391,7 @@
   "masse": "ca. 250 × 100 cm",
   "menge": 1,
   "einheit": "Stück",
-  "preis": 40.0,
+  "preis": 75.0,
   "sale": null,
   "basis": "Fix",
   "versand": "nur Abholung",
@@ -19400,7 +19400,7 @@
   "mengenhinweis": "Nur das Kletternetz-Element, ohne Sprossenwand.",
   "foto": "F-1024",
   "sortierung": 881,
-  "aktiv": true,
+  "aktiv": false,
   "im_katalog": false
  },
  {
@@ -19413,7 +19413,7 @@
   "masse": "ca. 40 × 150 cm",
   "menge": 1,
   "einheit": "Stück",
-  "preis": 20.0,
+  "preis": 45.0,
   "sale": null,
   "basis": "Fix",
   "versand": "nur Abholung",
@@ -19423,29 +19423,29 @@
   "foto": "F-1025",
   "sortierung": 882,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "BA06-17",
-  "titel": "Zubehör für Sprossenwand, 2 Stück",
-  "beschr": "Zwei Einhängebretter mit Sprossen (Rutsch- bzw. Steigbrett) für die Sprossenwand.",
+  "titel": "Zubehör für Sprossenwand",
+  "beschr": "Einhängebrett mit Sprossen (Rutsch- bzw. Steigbrett) für die Sprossenwand.",
   "kat": "Turnen & Bewegung",
   "raum": "Materialraum",
   "zustand": "gebraucht",
   "masse": "je ca. 40 × 150 cm",
-  "menge": 1,
-  "einheit": "Set",
-  "preis": 25.0,
+  "menge": 2,
+  "einheit": "Stück",
+  "preis": 35.0,
   "sale": null,
   "basis": "Fix",
   "versand": "nur Abholung",
   "marke": "",
   "buendel": "",
-  "mengenhinweis": "2 Stück, nur als Set.",
+  "mengenhinweis": "2 Stück, Preis je Stück. Das Foto zeigt beide.",
   "foto": "F-1026",
   "sortierung": 883,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "BA06-18",
@@ -19457,7 +19457,7 @@
   "masse": "ca. 150 cm hoch, 40 und 60 cm breit",
   "menge": 1,
   "einheit": "Set",
-  "preis": 10.0,
+  "preis": 25.0,
   "sale": null,
   "basis": "Fix",
   "versand": "nur Abholung",
@@ -19467,7 +19467,7 @@
   "foto": "F-1027",
   "sortierung": 884,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "BA06-19",
@@ -19489,7 +19489,7 @@
   "foto": "F-1028",
   "sortierung": 885,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "BA06-20",
@@ -19511,7 +19511,7 @@
   "foto": "F-1029",
   "sortierung": 886,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "BA06-21",
@@ -19523,7 +19523,7 @@
   "masse": "",
   "menge": 1,
   "einheit": "Set",
-  "preis": 6.0,
+  "preis": 10.0,
   "sale": null,
   "basis": "Fix",
   "versand": "nur Abholung",
@@ -19533,7 +19533,7 @@
   "foto": "F-1031",
   "sortierung": 887,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "BA06-22",
@@ -19545,7 +19545,7 @@
   "masse": "",
   "menge": 1,
   "einheit": "Stück",
-  "preis": 20.0,
+  "preis": 25.0,
   "sale": null,
   "basis": "Fix",
   "versand": "nur Abholung",
@@ -19555,7 +19555,7 @@
   "foto": "F-1030",
   "sortierung": 888,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "BA06-23",
@@ -19577,7 +19577,7 @@
   "foto": "F-1032",
   "sortierung": 889,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "BA06-24",
@@ -19599,7 +19599,7 @@
   "foto": "F-1058",
   "sortierung": 890,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "BA06-25",
@@ -19611,7 +19611,7 @@
   "masse": "45 × 26 cm, Griffhöhe ca. 53 cm",
   "menge": 1,
   "einheit": "Set",
-  "preis": 20.0,
+  "preis": 25.0,
   "sale": null,
   "basis": "Fix",
   "versand": "nur Abholung",
@@ -19621,7 +19621,7 @@
   "foto": "F-1057",
   "sortierung": 891,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "BA06-26",
@@ -19643,7 +19643,7 @@
   "foto": "F-1061",
   "sortierung": 892,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "BA06-27",
@@ -19665,7 +19665,7 @@
   "foto": "F-1059",
   "sortierung": 893,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "BA06-28",
@@ -19687,7 +19687,7 @@
   "foto": "F-1060",
   "sortierung": 894,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "BA06-29",
@@ -19709,7 +19709,7 @@
   "foto": "F-1056",
   "sortierung": 895,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "BA06-30",
@@ -19721,7 +19721,7 @@
   "masse": "Kiste 58 × 28 × 40 cm",
   "menge": 1,
   "einheit": "Set",
-  "preis": 15.0,
+  "preis": 10.0,
   "sale": null,
   "basis": "Fix",
   "versand": "nur Abholung",
@@ -19731,7 +19731,7 @@
   "foto": "F-1063",
   "sortierung": 896,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "BA06-31",
@@ -19753,7 +19753,7 @@
   "foto": "F-1062",
   "sortierung": 897,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "NU04-63",
@@ -19775,7 +19775,7 @@
   "foto": "F-1105",
   "sortierung": 898,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "NU04-64",
@@ -19797,7 +19797,7 @@
   "foto": "F-1106",
   "sortierung": 899,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "NU04-65",
@@ -19841,7 +19841,7 @@
   "foto": "F-1033",
   "sortierung": 901,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "NU04-67",
@@ -19853,7 +19853,7 @@
   "masse": "",
   "menge": 1,
   "einheit": "Set",
-  "preis": 12.0,
+  "preis": 18.0,
   "sale": null,
   "basis": "Fix",
   "versand": "nur Abholung",
@@ -19863,7 +19863,7 @@
   "foto": "F-1034",
   "sortierung": 902,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "NU04-68",
@@ -19875,7 +19875,7 @@
   "masse": "",
   "menge": 1,
   "einheit": "Set",
-  "preis": 5.0,
+  "preis": 7.5,
   "sale": null,
   "basis": "Fix",
   "versand": "nur Abholung",
@@ -19885,7 +19885,7 @@
   "foto": "F-1035",
   "sortierung": 903,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "NU04-69",
@@ -19907,7 +19907,7 @@
   "foto": "F-1037",
   "sortierung": 904,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "NU04-70",
@@ -19929,7 +19929,7 @@
   "foto": "F-1036",
   "sortierung": 905,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "NU04-71",
@@ -19951,19 +19951,19 @@
   "foto": "F-1038",
   "sortierung": 906,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "NU04-72",
-  "titel": "Bunte Kugeln im Korb, 31 Stück",
-  "beschr": "31 bunte Kugeln, Ø 3 cm, im Korb.",
+  "titel": "Bunte Magnetkugeln im Korb, 31 Stück",
+  "beschr": "31 bunte Magnetkugeln, Ø 3 cm, im Korb.",
   "kat": "Spielzeug",
   "raum": "Schlafraum",
   "zustand": "gebraucht",
   "masse": "",
   "menge": 1,
   "einheit": "Set",
-  "preis": 5.0,
+  "preis": 10.0,
   "sale": null,
   "basis": "Fix",
   "versand": "nur Abholung",
@@ -19973,7 +19973,7 @@
   "foto": "F-1039",
   "sortierung": 907,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "NU04-73",
@@ -19995,7 +19995,7 @@
   "foto": "F-1045",
   "sortierung": 908,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "NU04-74",
@@ -20017,7 +20017,7 @@
   "foto": "F-1046",
   "sortierung": 909,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "NU04-75",
@@ -20039,7 +20039,7 @@
   "foto": "F-1047",
   "sortierung": 910,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "NU04-76",
@@ -20061,7 +20061,7 @@
   "foto": "F-1048",
   "sortierung": 911,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "NU04-77",
@@ -20083,7 +20083,7 @@
   "foto": "F-1050",
   "sortierung": 912,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "NU04-78",
@@ -20105,7 +20105,7 @@
   "foto": "F-1049",
   "sortierung": 913,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "NU04-79",
@@ -20127,7 +20127,7 @@
   "foto": "F-1051",
   "sortierung": 914,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "NU04-80",
@@ -20148,7 +20148,7 @@
   "mengenhinweis": "",
   "foto": "F-1055",
   "sortierung": 915,
-  "aktiv": true,
+  "aktiv": false,
   "im_katalog": false
  },
  {
@@ -20171,7 +20171,7 @@
   "foto": "F-1066",
   "sortierung": 916,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "NU04-82",
@@ -20193,7 +20193,7 @@
   "foto": "F-1064",
   "sortierung": 917,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "NU04-83",
@@ -20215,7 +20215,7 @@
   "foto": "F-1065",
   "sortierung": 918,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "NU04-84",
@@ -20237,7 +20237,7 @@
   "foto": "F-1067",
   "sortierung": 919,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "NU04-85",
@@ -20259,7 +20259,7 @@
   "foto": "F-1068",
   "sortierung": 920,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "NU04-86",
@@ -20281,7 +20281,7 @@
   "foto": "F-1069",
   "sortierung": 921,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "NU04-87",
@@ -20303,7 +20303,7 @@
   "foto": "F-1070",
   "sortierung": 922,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "NU04-88",
@@ -20347,7 +20347,7 @@
   "foto": "F-1071",
   "sortierung": 924,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "NU04-90",
@@ -20369,7 +20369,7 @@
   "foto": "F-1075",
   "sortierung": 925,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "NU01-83",
@@ -20391,7 +20391,7 @@
   "foto": "F-1072",
   "sortierung": 926,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "NU01-84",
@@ -20413,7 +20413,7 @@
   "foto": "F-1085",
   "sortierung": 927,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "NU01-85A",
@@ -20425,7 +20425,7 @@
   "masse": "",
   "menge": 58,
   "einheit": "Stück",
-  "preis": 1.0,
+  "preis": 0.5,
   "sale": null,
   "basis": "Fix",
   "versand": "nur Abholung",
@@ -20435,7 +20435,7 @@
   "foto": "F-1080",
   "sortierung": 928,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "NU01-85B",
@@ -20457,7 +20457,7 @@
   "foto": "F-1074",
   "sortierung": 929,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "NU01-86A",
@@ -20479,7 +20479,7 @@
   "foto": "F-1082",
   "sortierung": 930,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "NU01-86B",
@@ -20501,7 +20501,7 @@
   "foto": "F-1073",
   "sortierung": 931,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "NU01-87",
@@ -20523,7 +20523,7 @@
   "foto": "F-1081",
   "sortierung": 932,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "NU01-88",
@@ -20545,7 +20545,7 @@
   "foto": "F-1083",
   "sortierung": 933,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "NE02-08A",
@@ -20566,7 +20566,7 @@
   "mengenhinweis": "2 Stück, Preis je Gerät. Post-it NE02-08 (Nummer war vergeben, deshalb 08A).",
   "foto": "F-1086",
   "sortierung": 934,
-  "aktiv": true,
+  "aktiv": false,
   "im_katalog": false
  },
  {
@@ -20589,7 +20589,7 @@
   "foto": "F-1087",
   "sortierung": 935,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "NE02-10",
@@ -20611,12 +20611,12 @@
   "foto": "F-1088",
   "sortierung": 936,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "NE02-11",
-  "titel": "Küchenwaage rot, analog",
-  "beschr": "Mechanische Küchenwaage bis 5 kg mit Edelstahlschale.",
+  "titel": "Küchenwaage rot, analog, Deko; nicht funktionsfähig",
+  "beschr": "Mechanische Küchenwaage bis 5 kg mit Edelstahlschale. Nicht funktionsfähig; als Deko",
   "kat": "Küche & Geschirr",
   "raum": "Küche",
   "zustand": "gut",
@@ -20633,7 +20633,7 @@
   "foto": "F-1089",
   "sortierung": 937,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "NE02-12",
@@ -20655,7 +20655,7 @@
   "foto": "F-1091",
   "sortierung": 938,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "NE02-13",
@@ -20677,7 +20677,7 @@
   "foto": "F-1090",
   "sortierung": 939,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "NE02-14",
@@ -20699,7 +20699,7 @@
   "foto": "F-1092",
   "sortierung": 940,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "NE02-15",
@@ -20721,7 +20721,7 @@
   "foto": "F-1093",
   "sortierung": 941,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "NE02-16",
@@ -20743,7 +20743,7 @@
   "foto": "F-1094",
   "sortierung": 942,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "NE02-17",
@@ -20765,7 +20765,7 @@
   "foto": "F-1095",
   "sortierung": 943,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "NE02-18",
@@ -20787,7 +20787,7 @@
   "foto": "F-1096",
   "sortierung": 944,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "NE02-19",
@@ -20809,7 +20809,7 @@
   "foto": "F-1097",
   "sortierung": 945,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "NE02-20",
@@ -20831,11 +20831,11 @@
   "foto": "F-1098",
   "sortierung": 946,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "NE02-21",
-  "titel": "Tassen weiß mit Goldrauten",
+  "titel": "Espressotassen weiß mit Goldrauten",
   "beschr": "Weiße Tassen mit goldenen Rauten.",
   "kat": "Küche & Geschirr",
   "raum": "Küche",
@@ -20852,7 +20852,7 @@
   "mengenhinweis": "3 Stück, Preis je Tasse.",
   "foto": "F-1099",
   "sortierung": 947,
-  "aktiv": true,
+  "aktiv": false,
   "im_katalog": false
  },
  {
@@ -20874,7 +20874,7 @@
   "mengenhinweis": "5 Stück, Preis je Becher.",
   "foto": "F-1100",
   "sortierung": 948,
-  "aktiv": true,
+  "aktiv": false,
   "im_katalog": false
  },
  {
@@ -20896,7 +20896,7 @@
   "mengenhinweis": "4 Stück, Preis je Becher.",
   "foto": "F-1101",
   "sortierung": 949,
-  "aktiv": true,
+  "aktiv": false,
   "im_katalog": false
  },
  {
@@ -20919,7 +20919,7 @@
   "foto": "F-1102",
   "sortierung": 950,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "NE02-25",
@@ -20941,7 +20941,7 @@
   "foto": "F-1103",
   "sortierung": 951,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "NE02-26",
@@ -20963,7 +20963,7 @@
   "foto": "F-1104",
   "sortierung": 952,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "NU04-V04",
@@ -20985,7 +20985,7 @@
   "foto": "F-1040",
   "sortierung": 953,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "NU04-V05",
@@ -21007,7 +21007,7 @@
   "foto": "F-1043",
   "sortierung": 954,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "NU04-V06",
@@ -21029,7 +21029,7 @@
   "foto": "F-1042",
   "sortierung": 955,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "NU04-V07",
@@ -21051,7 +21051,7 @@
   "foto": "F-1041",
   "sortierung": 956,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "NU04-V08",
@@ -21073,7 +21073,7 @@
   "foto": "F-1044",
   "sortierung": 957,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "NU04-V09",
@@ -21095,7 +21095,7 @@
   "foto": "F-1052",
   "sortierung": 958,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "NU04-V10",
@@ -21117,7 +21117,7 @@
   "foto": "F-1054",
   "sortierung": 959,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "NU04-V11",
@@ -21139,7 +21139,7 @@
   "foto": "F-1053",
   "sortierung": 960,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "NU04-V12",
@@ -21161,7 +21161,7 @@
   "foto": "F-1076",
   "sortierung": 961,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "NU04-V13",
@@ -21183,7 +21183,7 @@
   "foto": "F-1077",
   "sortierung": 962,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "NU04-V14",
@@ -21205,7 +21205,7 @@
   "foto": "F-1078",
   "sortierung": 963,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "NU04-V15",
@@ -21227,7 +21227,7 @@
   "foto": "F-1079",
   "sortierung": 964,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
  },
  {
   "nr": "NU04-V16",
@@ -21249,6 +21249,28 @@
   "foto": "F-1084",
   "sortierung": 965,
   "aktiv": true,
-  "im_katalog": false
+  "im_katalog": true
+ },
+ {
+  "nr": "BE11-01",
+  "titel": "Ringlicht LED auf Stativ",
+  "beschr": "Fotolicht, Ringleuchte mit Stativ für Videos",
+  "kat": "Haushalt & Geräte",
+  "raum": "Büro",
+  "zustand": "gut",
+  "masse": "",
+  "menge": 1,
+  "einheit": "Stück",
+  "preis": 15.0,
+  "sale": null,
+  "basis": "Fix",
+  "versand": "nur Abholung",
+  "marke": "",
+  "buendel": "",
+  "mengenhinweis": "1 Stück im Bild",
+  "foto": "F-023",
+  "sortierung": 966,
+  "aktiv": true,
+  "im_katalog": true
  }
 ]

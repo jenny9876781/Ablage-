@@ -48,6 +48,11 @@ MOTIVE = [
       ("F-911", "50% 50%"), ("F-929", "50% 50%"), ("F-845", "50% 50%"),
       ("F-978", "50% 60%"), ("F-980", "50% 55%"), ("F-989", "50% 55%")],
      "Spielzeug · Bücher · Tonies · Weihnachtsdeko"),
+    # 20.11.2026: 2 × 2 Kacheln (Wunsch der Nutzerin: Collage mit 4 Fotos). Nur verfügbare Artikel.
+    ("10_Story_Holz_Schleich_Weihnachten", "vier", "Jetzt neu im Katalog", "Holzspielzeug,<br>Schleich &amp; Weihnachtsdeko",
+     [("F-1038", "50% 55%"), ("F-1060", "50% 50%"),
+      ("F-1069", "50% 50%"), ("F-1074", "50% 50%")],
+     "Pinolino · Wesco · HABA · Schleich"),
     ("7_Beitrag_Alles_muss_raus", "beitrag", "Inventarverkauf", "Alles muss raus!",
      [("F-019", "50% 60%"), ("F-176", "50% 60%"), ("F-102", "50% 40%"), ("F-017", "50% 72%")],
      "Möbel · Kita · Garten · Deko"),
@@ -70,6 +75,7 @@ h1 { font-family: 'Archivo Black', sans-serif; font-weight: 400; line-height: .9
         font-weight: 800; font-size: 46px; padding: 24px 20px; }
 .unter { margin-top: 14px; text-align: center; font-size: 30px; font-weight: 700; }
 .hoch { grid-template-columns: 1fr 1fr 1fr; grid-template-rows: 1fr 1fr; margin-top: 28px; gap: 14px; }
+.vier { grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; margin-top: 28px; gap: 16px; }
 .hoch9 { grid-template-columns: 1fr 1fr 1fr; grid-template-rows: 1fr 1fr 1fr; margin-top: 26px; gap: 12px; }
 .held { grid-template-rows: 1.25fr 1fr 1fr; margin-top: 28px; }
 .held div:first-child { grid-column: 1 / 3; }
@@ -88,8 +94,8 @@ def schrift(name):
 
 def html(fmt, klein, titel, fotos, stich):
     hoch = fmt == "hoch"
-    held = fmt in ("held", "hoch", "hoch9")
-    story = fmt in ("story", "held", "hoch", "hoch9")
+    held = fmt in ("held", "hoch", "hoch9", "vier")
+    story = fmt in ("story", "held", "hoch", "hoch9", "vier")
     masse = dict(w=1080, h=1920 if story else 1350,
                  # Story: oben und unten verdecken WhatsApp/Instagram ihre Bedienleisten
                  oben=(170 if held else 230) if story else 64, unten=(210 if held else 300) if story else 56,
@@ -97,10 +103,10 @@ def html(fmt, klein, titel, fotos, stich):
                  archivo=schrift("ArchivoBlack.woff2"), inter=schrift("Inter.woff2"))
     if not story: masse["h1"] = 96
     if held: masse["h1"] = 100
-    if fmt == "hoch9": masse["h1"] = 88
+    if fmt in ("hoch9", "vier"): masse["h1"] = 88
     kacheln = "".join(f'<div style="background-image:url({bild(nr)});background-position:{pos}"></div>'
                       for nr, pos in fotos)
-    art = " hoch9" if fmt == "hoch9" else (" hoch" if hoch else (" held" if held else ""))
+    art = " vier" if fmt == "vier" else " hoch9" if fmt == "hoch9" else (" hoch" if hoch else (" held" if held else ""))
     mitte = f'<div class="raster{art}">{kacheln}</div>' if fotos else '<div class="leer"><span>🧸</span></div>'
     unter = '<div class="unter">Jetzt online reservieren</div>' if story else ""
     return (f"<!doctype html><html><head><meta charset='utf-8'><style>{CSS % masse}</style></head><body>"
@@ -115,7 +121,7 @@ def main():
         for name, fmt, klein, titel, fotos, stich in MOTIVE:
             if len(__import__("sys").argv) > 1 and name not in __import__("sys").argv[1:]:
                 continue                      # nur die genannten Motive neu bauen
-            h = 1920 if fmt in ("story", "held", "hoch", "hoch9") else 1350
+            h = 1920 if fmt in ("story", "held", "hoch", "hoch9", "vier") else 1350
             s = b.new_page(viewport={"width": 1080, "height": h})
             s.set_content(html(fmt, klein, titel, fotos, stich), wait_until="networkidle")
             s.evaluate("document.fonts.ready.then(() => true)")

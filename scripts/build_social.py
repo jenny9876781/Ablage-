@@ -53,6 +53,11 @@ MOTIVE = [
      [("F-1038", "50% 55%"), ("F-1060", "50% 50%"),
       ("F-1069", "50% 50%"), ("F-1074", "50% 50%")],
      "Pinolino · Wesco · HABA · Schleich"),
+    # 20.11.2026: Auswahl der Nutzerin S1, H4, W5, G1 (Auswahl_Status_11*.jpg)
+    ("11_Story_Schleich_Holz_Weihnachten_Geschirr", "vier", "Jetzt neu im Katalog", "Schleich, Holzspielzeug,<br>Weihnachtsdeko &amp; Geschirr",
+     [("F-1069", "50% 50%"), ("F-1059", "50% 60%"),
+      ("F-766", "50% 45%"), ("F-1096", "50% 40%")],
+     "Schleich · Pinolino · Wichtel · IKEA-Geschirr"),
     ("7_Beitrag_Alles_muss_raus", "beitrag", "Inventarverkauf", "Alles muss raus!",
      [("F-019", "50% 60%"), ("F-176", "50% 60%"), ("F-102", "50% 40%"), ("F-017", "50% 72%")],
      "Möbel · Kita · Garten · Deko"),

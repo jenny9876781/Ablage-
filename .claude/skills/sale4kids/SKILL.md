@@ -1474,7 +1474,7 @@ ist die Merkliste; erledigte Punkte hier abhaken, nicht löschen.
       deshalb ohne Eintrag in fotos_beschnitt.csv). 80 Artikel neu sichtbar (inkl. Geschenke V04–V16), NU04-65/-88 bleiben
       ohne Foto verborgen. Import-Basis war 08801b2 (Import vom 19.11. wurde nie eingespielt): „88 neu, 879 aktualisiert,
       80 NEU“. Nachtrag nur F-023 (`kikripp-fotos-nachtrag-20.11.zip`), F-1022–F-1106 lagen schon in der Mediathek.
-      Kasse 42. WhatsApp-Status `10_Story_Holz_Schleich_Weihnachten` (neues Format „vier“ = 2 × 2). Nächster Nachtrag gegen
+      Nachträglich NU01-81 entfällt (Nutzerin dachte, es sei vermerkt – war es nie), zweiter Import `katalog_import-20.11-b.json` „0 neu, 967 aktualisiert“. Status 11 (S1/H4/W5/G1: Safari, Pinolino rot, Wichtel F-766, IKEA-Teller). Kasse 42. WhatsApp-Status `10_Story_Holz_Schleich_Weihnachten` (neues Format „vier“ = 2 × 2). Nächster Nachtrag gegen
       `ausgabe/katalog_import.json` dieses Stands.
 - [x] **19.11.2026: Word „neue_artikel“ + 140 Fotos + Reservierungen + Kasse – vorbereitet (am 20.11. online).**
       87 neue Zeilen (966): BA06-13A bis -31 (Lauflern-/Puppenwagen, Sprossenwand-Zubehör, Wheely Bug …), NU04-63 bis -90

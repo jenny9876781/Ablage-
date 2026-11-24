@@ -1476,6 +1476,9 @@ ist die Merkliste; erledigte Punkte hier abhaken, nicht löschen.
       80 NEU“. Nachtrag nur F-023 (`kikripp-fotos-nachtrag-20.11.zip`), F-1022–F-1106 lagen schon in der Mediathek.
       Nachträglich NU01-81 entfällt (Nutzerin dachte, es sei vermerkt – war es nie), zweiter Import `katalog_import-20.11-b.json` „0 neu, 967 aktualisiert“. Status 11 (S1/H4/W5/G1: Safari, Pinolino rot, Wichtel F-766, IKEA-Teller). Kasse 42. WhatsApp-Status `10_Story_Holz_Schleich_Weihnachten` (neues Format „vier“ = 2 × 2). Nächster Nachtrag gegen
       `ausgabe/katalog_import.json` dieses Stands.
+- [x] **24.11.2026 (2): Excel:** entfällt NU03-07, NU04-84, NU01-84; NE02-05 75 Becher, NE02-07 50 Teller, NE02-12 22 Stück
+      (Mengenhinweise nachgezogen). **NU04-88 ist laut Nutzerin ein Wasserkocher Russell Hobbs** (kein Schleich-Set) –
+      Küche & Geschirr, Preis 1,00 nur Platzhalter, offen, verborgen; Preis + Foto folgen. Import `katalog_import-24.11-b.json`.
 - [x] **24.11.2026: kleine Excel-Änderungen sofort live:** BA02-09 entfällt (Rest; 1 verkauft), BA06-07/-08 Texte
       (-08 jetzt Holzrahmen, ohne Rutschbrett), BA06-18 nur noch 1 Platte (Mengenhinweis weg, 25 € bleibt). Kasse 44.
       Import `katalog_import-24.11.json` „0 neu, 967 aktualisiert“.

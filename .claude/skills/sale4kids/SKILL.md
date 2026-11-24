@@ -1476,6 +1476,9 @@ ist die Merkliste; erledigte Punkte hier abhaken, nicht löschen.
       80 NEU“. Nachtrag nur F-023 (`kikripp-fotos-nachtrag-20.11.zip`), F-1022–F-1106 lagen schon in der Mediathek.
       Nachträglich NU01-81 entfällt (Nutzerin dachte, es sei vermerkt – war es nie), zweiter Import `katalog_import-20.11-b.json` „0 neu, 967 aktualisiert“. Status 11 (S1/H4/W5/G1: Safari, Pinolino rot, Wichtel F-766, IKEA-Teller). Kasse 42. WhatsApp-Status `10_Story_Holz_Schleich_Weihnachten` (neues Format „vier“ = 2 × 2). Nächster Nachtrag gegen
       `ausgabe/katalog_import.json` dieses Stands.
+- [x] **24.11.2026: kleine Excel-Änderungen sofort live:** BA02-09 entfällt (Rest; 1 verkauft), BA06-07/-08 Texte
+      (-08 jetzt Holzrahmen, ohne Rutschbrett), BA06-18 nur noch 1 Platte (Mengenhinweis weg, 25 € bleibt). Kasse 44.
+      Import `katalog_import-24.11.json` „0 neu, 967 aktualisiert“.
 - [x] **19.11.2026: Word „neue_artikel“ + 140 Fotos + Reservierungen + Kasse – vorbereitet (am 20.11. online).**
       87 neue Zeilen (966): BA06-13A bis -31 (Lauflern-/Puppenwagen, Sprossenwand-Zubehör, Wheely Bug …), NU04-63 bis -90
       (CDs, Schleich-Sets, Becher), NU04-V04 bis -V16 (zu verschenken, inkl. Kerzen ohne Post-it), NU01-83 bis -88 mit

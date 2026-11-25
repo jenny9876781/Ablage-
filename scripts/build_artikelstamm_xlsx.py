@@ -450,10 +450,16 @@ for _i, _b in enumerate(_buchungen):
     ka.cell(row=_r, column=3, value=_b["Vorgang_Kaeufer"] or None)
     ka.cell(row=_r, column=4, value=_zahl(_b["Einnahme"]))
     ka.cell(row=_r, column=7, value=_zahl(_b["Ausgabe"]))
+# Zeile „Konto Commerzbank“ (nach „Einzahlung TT.MM.“) bekommt KEINE Bestandsformel: die Zeile
+# darunter rechnet dann ab einer leeren Zelle, der Kassenbestand beginnt nach der Einzahlung bei 0
+# (so von der Nutzerin angelegt, 25.11.2026 – nicht wieder „vereinheitlichen“).
+_ohne_bestand = {6 + _i for _i, _b in enumerate(_buchungen)
+                 if _b["Vorgang_Kaeufer"].strip().lower().startswith("konto commerzbank")}
 for r in range(6, max(56, 6 + len(_buchungen) + 30)):
     ka.cell(row=r, column=5, value=f'=IF(D{r}="","",D{r}-D{r}/{1+USt_SATZ})').number_format = EUR
     ka.cell(row=r, column=6, value=f'=IF(D{r}="","",D{r}/{1+USt_SATZ})').number_format = EUR
-    ka.cell(row=r, column=8, value=f'=H{r-1}+IF(D{r}="",0,D{r})-IF(G{r}="",0,G{r})').number_format = EUR
+    if r not in _ohne_bestand:
+        ka.cell(row=r, column=8, value=f'=H{r-1}+IF(D{r}="",0,D{r})-IF(G{r}="",0,G{r})').number_format = EUR
     ka.cell(row=r, column=4).number_format = EUR
     ka.cell(row=r, column=7).number_format = EUR
     for col in range(1, 9):

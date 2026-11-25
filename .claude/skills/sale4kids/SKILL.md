@@ -1511,7 +1511,7 @@ ist die Merkliste; erledigte Punkte hier abhaken, nicht löschen.
       NU05-V08 jetzt Verkauf 1 € je Stück (29, Textilien). Kasse 48. **Kasse-Fix:** Zeile „Konto Commerzbank“ bekommt
       keine Bestandsformel mehr (Bestand startet nach Einzahlung bei 0) – Wunsch der Nutzerin, nicht zurückbauen.
       Import 25.11.: „84 neu, 967 aktualisiert“, kein Foto-Nachtrag. Basis nächster Nachtrag: `katalog_import-25.11.json`.
-      Offen zum Nachfragen: NU04-105/-112 laut Word „ohne Schiene“, Foto zeigt je ein Schienenstück.
+      NU04-105/-112: Schienenstück im Foto nur zur Anschauung, gehört nicht dazu (Mengenhinweis).
 - [ ] **Sale 07.–11.12.2026 vorbereiten:** bis ca. 01.12. Einzelpreise + Regel von der Nutzerin holen (`scripts/sale.py`),
       **Weihnachtsdeko stärker reduzieren als den Rest** (nach dem 16.12. kauft sie keiner mehr – mit ihr abgesprochen), Import vor dem 07.12.
       einspielen lassen (Sale-Preise gelten erst ab 07.12. von selbst). Hinweisband-Text vorschlagen, „anzeigen ab“ 01.12., „bis“ 11.12.

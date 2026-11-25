@@ -1497,6 +1497,21 @@ ist die Merkliste; erledigte Punkte hier abhaken, nicht löschen.
       die Nutzerin lädt sie schon in die Mediathek.** Montag: Excel mit geprüften Preisen → Ablauf B → ok + Im_Katalog ja,
       ggf. entfällt (Vorgesetzter entscheidet) → Import. **Der Montags-Nachtrag darf F-1022 bis F-1106 NICHT enthalten**
       (schon hochgeladen) – nur Fotos von NU04-65/-88 u. ä. Basis für den Import-Vergleich: `katalog_import.json` von 08801b2.
+- [ ] **25.11.2026: Word „neue_artikel“ + 92 Fotos (F-1107 bis F-1198) + Excel 24.11. + Reservierungen 25.11.**
+      84 neue Zeilen (1051): NE02-27 bis -56 (ohne 28, 29, 42 – gibt es nicht), NU04-91 bis -113, BA09-11 bis -27
+      (ohne -24), Geschenke NE02-V01 bis -V17 (Küche, ohne Post-it) und NU04-V17 (Avengers-Puzzle). **BA09-20 war doppelt
+      vergeben:** Waage Rosenstein & Söhne behält BA09-20, verwaschene Bärenschürzen = **BA09-27** (Post-it umschreiben,
+      Nutzerin ok). BA09-26 = Schürze gut (Post-it, im Word fälschlich -21). BA04-41/-42 wieder aktiv mit Foto, NU04-65 =
+      4 Schalen (Küche), NU04-88 Wasserkocher mit Foto. **Alle neuen: Preis geschätzt, `offen`, Im_Katalog nein**
+      (Geschenke `ok`, nein) – Nutzerin prüft in der Excel, dann ok + Im_Katalog ja + Nachtrag. Fotos vorab ausgeliefert:
+      `kikripp-fotos-vorab-25.11.zip` (F-1107 bis F-1198) → **der spätere Nachtrag darf sie nicht enthalten.**
+      Chat-Bilder über `/root/.claude/uploads/manuell/K25_NN.jpg` eingespielt (pillow-heif musste per pip nach);
+      Bild 70 (Doppel NU04-113) weggelassen, F-1198 = Standbild aus Video IMG_3406 (BA09-27). F-1186 DHL-Etikett maskiert.
+      NU03-07: am 24.11. entfällt, aber 25.11. an Mario Gass verkauft → **Verkauf geht vor**, Aktiv ja, Im_Katalog nein.
+      NU05-V08 jetzt Verkauf 1 € je Stück (29, Textilien). Kasse 48. **Kasse-Fix:** Zeile „Konto Commerzbank“ bekommt
+      keine Bestandsformel mehr (Bestand startet nach Einzahlung bei 0) – Wunsch der Nutzerin, nicht zurückbauen.
+      Import 25.11.: „84 neu, 967 aktualisiert“, kein Foto-Nachtrag. Basis nächster Nachtrag: `katalog_import-25.11.json`.
+      Offen zum Nachfragen: NU04-105/-112 laut Word „ohne Schiene“, Foto zeigt je ein Schienenstück.
 - [ ] **Sale 07.–11.12.2026 vorbereiten:** bis ca. 01.12. Einzelpreise + Regel von der Nutzerin holen (`scripts/sale.py`),
       **Weihnachtsdeko stärker reduzieren als den Rest** (nach dem 16.12. kauft sie keiner mehr – mit ihr abgesprochen), Import vor dem 07.12.
       einspielen lassen (Sale-Preise gelten erst ab 07.12. von selbst). Hinweisband-Text vorschlagen, „anzeigen ab“ 01.12., „bis“ 11.12.

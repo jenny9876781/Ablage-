@@ -107,7 +107,7 @@ auf Importieren. Der Import dauert **ein paar Sekunden**, nicht Minuten.
 
 Danach steht oben eine Meldung. **So muss sie aussehen:**
 
-    Import abgeschlossen: 967 neu, 0 aktualisiert.
+    Import abgeschlossen: 1051 neu, 0 aktualisiert.
 
 Kein weiterer Satz dahinter — das heißt: jeder Artikel hat sein Foto gefunden. Im Katalog
 sichtbar sind davon **826**; die übrigen stehen bewusst auf „nicht im Katalog".

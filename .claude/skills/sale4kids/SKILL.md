@@ -1512,6 +1512,15 @@ ist die Merkliste; erledigte Punkte hier abhaken, nicht löschen.
       keine Bestandsformel mehr (Bestand startet nach Einzahlung bei 0) – Wunsch der Nutzerin, nicht zurückbauen.
       Import 25.11.: „84 neu, 967 aktualisiert“, kein Foto-Nachtrag. Basis nächster Nachtrag: `katalog_import-25.11.json`.
       NU04-105/-112: Schienenstück im Foto nur zur Anschauung, gehört nicht dazu (Mengenhinweis).
+- [ ] **27.11.2026: Word „Artikel_NEU“ + 24 Fotos (F-1199 bis F-1222) + Excel 25.11.** 23 neue Zeilen (1074): NU05-88 bis -95,
+      BA08-46 bis -52, -54 bis -56, BA09-24 (fehlte am 25.11.), BU13-12 Sonnenschirm mit Ständer (Post-it laut Nutzerin -12),
+      BU13-13 Güde-Kompressor, Geschenke BA08-V01 (blassgelbes Papier) und BA08-V02 (Rasseln aus Kapseln). **BA08-52 = Montessori
+      Schütt-/Greifset** (Post-it; im Word -53), **BA08-53 bleibt für die Filzmatten** (Foto folgt). Weihnachtsbücher ohne Post-it
+      auf Wunsch NICHT angelegt. NU05-89 ohne Marke (Wunsch). Alle neuen `offen`, Im_Katalog nein; Geschenke `ok`, nein.
+      Excel 25.11.: NU05-16 8er-Set 6 €, NU01-75 entfällt, Kasse 59 (Konto-Commerzbank-Zeilen ohne Formel geprüft). Ihre Mappe
+      hatte den alten Mengenhinweis NU04-105/-112 → Schienensatz wieder gesetzt. **Fotos nur als Datei, wenn sie NACH meiner
+      Antwort geschickt werden** – während ich arbeite eingefügte Bilder kommen nur als Vorschau an (in Fünfergruppen anfordern).
+      Import 27.11.: „23 neu, 1051 aktualisiert“ (setzt Import 25.11. voraus). Fotos vorab `kikripp-fotos-vorab-27.11.zip`.
 - [ ] **Sale 07.–11.12.2026 vorbereiten:** bis ca. 01.12. Einzelpreise + Regel von der Nutzerin holen (`scripts/sale.py`),
       **Weihnachtsdeko stärker reduzieren als den Rest** (nach dem 16.12. kauft sie keiner mehr – mit ihr abgesprochen), Import vor dem 07.12.
       einspielen lassen (Sale-Preise gelten erst ab 07.12. von selbst). Hinweisband-Text vorschlagen, „anzeigen ab“ 01.12., „bis“ 11.12.
